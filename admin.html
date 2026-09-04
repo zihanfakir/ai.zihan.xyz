@@ -666,9 +666,11 @@
   </div>
 
   <script>
-    // Smart API Base: On GitHub Pages, route to Vercel backend. On custom domain or localhost, use current origin.
+    // Smart API Base: On GitHub Pages (ai.zihan.xyz), route to Vercel backend.
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const BACKEND_URL = isLocal ? window.location.origin : (window.location.origin.includes('zihan.xyz') || window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
     const API_BASE = BACKEND_URL + "/api";
     let token = localStorage.getItem("alokpoth_admin_token") || null;
     let currentModelsList = [];
