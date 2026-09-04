@@ -21,7 +21,9 @@ const protect = async (req, res, next) => {
     if (getIsMongoConnected()) {
       user = await User.findById(decoded.id);
     } else {
-      user = memoryStore.users.find(u => String(u._id) === String(decoded.id));
+      const { getPersistedUsers } = require('../../utils/getModelConfig');
+      const users = await getPersistedUsers();
+      user = users.find(u => String(u._id) === String(decoded.id));
     }
 
     if (!user && decoded && decoded.id) {
@@ -76,7 +78,9 @@ const optionalProtect = async (req, res, next) => {
     if (getIsMongoConnected()) {
       user = await User.findById(decoded.id);
     } else {
-      user = memoryStore.users.find(u => String(u._id) === String(decoded.id));
+      const { getPersistedUsers } = require('../../utils/getModelConfig');
+      const users = await getPersistedUsers();
+      user = users.find(u => String(u._id) === String(decoded.id));
     }
 
     if (!user && decoded && decoded.id) {

@@ -54,11 +54,15 @@ const registerUser = async (req, res) => {
         user: { _id: user._id, id: user._id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
       });
     } else {
-      const userExists = memoryStore.users.find(u => u.email === cleanEmail);
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+
+      const userExists = users.find(u => u.email === cleanEmail);
       if (userExists) {
         return res.status(400).json({ success: false, error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি আছে' });
       }
-      const role = (memoryStore.users.length === 0 || isAdminEmail) ? 'admin' : 'user';
+      const role = (users.length === 0 || isAdminEmail) ? 'admin' : 'user';
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = {
         _id: 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
@@ -70,7 +74,8 @@ const registerUser = async (req, res) => {
         subscription: { plan_name: isAdminEmail ? 'Max' : 'Free', starts_at: new Date(), expires_at: null, is_active: true },
         createdAt: new Date()
       };
-      memoryStore.users.push(user);
+      users.push(user);
+      await savePersistedUsers(users);
       debouncedSave();
       const token = generateToken(user);
       return res.status(201).json({
@@ -111,7 +116,9 @@ const loginUser = async (req, res) => {
         user: { _id: user._id, id: user._id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
       });
     } else {
-      const user = memoryStore.users.find(u => u.email === cleanEmail);
+      const { getPersistedUsers } = require('../../utils/getModelConfig');
+      const users = await getPersistedUsers();
+      const user = users.find(u => u.email === cleanEmail);
       if (!user) {
         return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
       }
@@ -217,9 +224,20 @@ const updateProfile = async (req, res) => {
       if (avatar !== undefined) user.avatar = avatar;
       await user.save();
     } else {
-      user = memoryStore.users.find(u => String(u._id) === String(req.user._id));
-      if (cleanName) user.name = cleanName;
-      if (avatar !== undefined) user.avatar = avatar;
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+      const uIdx = users.findIndex(u => String(u._id) === String(req.user._id));
+      if (uIdx !== -1) {
+        if (cleanName) users[uIdx].name = cleanName;
+        if (avatar !== undefined) users[uIdx].avatar = avatar;
+        user = users[uIdx];
+        await savePersistedUsers(users);
+      } else {
+        user = memoryStore.users.find(u => String(u._id) === String(req.user._id)) || req.user;
+        if (cleanName) user.name = cleanName;
+        if (avatar !== undefined) user.avatar = avatar;
+      }
       debouncedSave();
     }
     res.json({

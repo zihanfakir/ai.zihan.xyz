@@ -54,10 +54,11 @@ const getAdminStats = async (req, res) => {
       };
       return res.json({ success: true, stats });
     } else {
-      const totalUsers = memoryStore.users.length;
-      const proUsers = memoryStore.users.filter(u => u.subscription && u.subscription.plan_name === 'Pro').length;
-      const maxUsers = memoryStore.users.filter(u => u.subscription && u.subscription.plan_name === 'Max').length;
-      const { getPersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const { getPersistedUsers, getPersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const persistedUsers = await getPersistedUsers();
+      const totalUsers = persistedUsers.length;
+      const proUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Pro').length;
+      const maxUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Max').length;
       const persistedCodes = await getPersistedRedeemCodes();
       const totalRedeemCodes = persistedCodes.length;
       const usedRedeemCodes = persistedCodes.filter(c => c.is_used).length;
@@ -93,7 +94,9 @@ const getUsers = async (req, res) => {
       const users = await User.find().select('-password').sort({ createdAt: -1 });
       return res.json({ success: true, count: users.length, users });
     } else {
-      const users = memoryStore.users.map(({ password, ...u }) => u);
+      const { getPersistedUsers } = require('../../utils/getModelConfig');
+      const persistedUsers = await getPersistedUsers();
+      const users = persistedUsers.map(({ password, ...u }) => u);
       return res.json({ success: true, count: users.length, users });
     }
   } catch (error) {
@@ -133,7 +136,10 @@ const updateUserPlan = async (req, res) => {
         subscription: user.subscription
       });
     } else {
-      const user = memoryStore.users.find(u => String(u._id) === String(userId));
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+      const user = users.find(u => String(u._id) === String(userId));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -144,6 +150,7 @@ const updateUserPlan = async (req, res) => {
         expires_at: expiresAt,
         is_active: true
       };
+      await savePersistedUsers(users);
       debouncedSave();
 
       return res.json({
@@ -181,12 +188,16 @@ const toggleBlockUser = async (req, res) => {
         is_blocked: user.is_blocked
       });
     } else {
-      const user = memoryStore.users.find(u => String(u._id) === String(userId));
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+      const user = users.find(u => String(u._id) === String(userId));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
       user.is_blocked = is_blocked !== undefined ? is_blocked : !user.is_blocked;
+      await savePersistedUsers(users);
       debouncedSave();
 
       return res.json({
@@ -336,12 +347,13 @@ const getRedeemCodes = async (req, res) => {
       const codes = await RedeemCode.find().populate('used_by', 'name email').sort({ createdAt: -1 });
       return res.json({ success: true, count: codes.length, codes });
     } else {
-      const { getPersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const { getPersistedRedeemCodes, getPersistedUsers } = require('../../utils/getModelConfig');
       const persisted = await getPersistedRedeemCodes();
+      const users = await getPersistedUsers();
       const codes = persisted.map(c => {
         let used_by = c.used_by;
         if (typeof used_by === 'string') {
-          const u = memoryStore.users.find(usr => String(usr._id) === String(used_by));
+          const u = users.find(usr => String(usr._id) === String(used_by));
           if (u) used_by = { name: u.name, email: u.email };
         }
         return { ...c, used_by };

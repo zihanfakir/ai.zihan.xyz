@@ -95,6 +95,14 @@ const claimRedeemCode = async (req, res) => {
 
       if (user) {
         user.subscription = subscriptionData;
+        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users];
+        const uIdx = users.findIndex(u => String(u._id) === String(user._id || user.id));
+        if (uIdx !== -1) {
+          users[uIdx].subscription = subscriptionData;
+          await savePersistedUsers(users);
+        }
       }
       await savePersistedRedeemCodes(codes);
       debouncedSave();

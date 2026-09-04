@@ -218,6 +218,42 @@ async function savePersistedRedeemCodes(codes) {
   }
 }
 
+async function getPersistedUsers() {
+  if (!supabase) return memoryStore.users || [];
+  try {
+    const { data } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__users_metadata__')
+      .single();
+
+    if (data && data.api_key) {
+      const parsed = JSON.parse(data.api_key);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryStore.users = parsed;
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return memoryStore.users || [];
+}
+
+async function savePersistedUsers(users) {
+  memoryStore.users = users;
+  if (!supabase) return;
+  try {
+    await supabase
+      .from('api_keys')
+      .upsert({
+        model_id: '__users_metadata__',
+        api_key: JSON.stringify(users),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'model_id' });
+  } catch (e) {
+    console.error('[Supabase] Failed to persist users:', e.message);
+  }
+}
+
 module.exports = { 
   getModelConfig, 
   getApiKeyFromSupabase, 
@@ -227,5 +263,7 @@ module.exports = {
   getUserUsage,
   incrementUserUsage,
   getPersistedRedeemCodes,
-  savePersistedRedeemCodes
+  savePersistedRedeemCodes,
+  getPersistedUsers,
+  savePersistedUsers
 };
