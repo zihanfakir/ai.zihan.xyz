@@ -37,8 +37,7 @@ const registerUser = async (req, res) => {
       if (userExists) {
         return res.status(400).json({ success: false, error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি আছে' });
       }
-      const userCount = await User.countDocuments();
-      const role = (userCount === 0 || isAdminEmail) ? 'admin' : 'user';
+      const role = isAdminEmail ? 'admin' : 'user';
 
       const user = await User.create({
         name: cleanName,
@@ -62,7 +61,7 @@ const registerUser = async (req, res) => {
       if (userExists) {
         return res.status(400).json({ success: false, error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি আছে' });
       }
-      const role = (users.length === 0 || isAdminEmail) ? 'admin' : 'user';
+      const role = isAdminEmail ? 'admin' : 'user';
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = {
         _id: 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
@@ -167,24 +166,28 @@ const getMe = async (req, res) => {
         plan = { message_limit: def.limit, window_hours: def.window };
       }
       
+      const userId = user._id || user.id;
       const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
       let messageCount = 0;
       
       if (getIsMongoConnected()) {
-        messageCount = await UsageLog.countDocuments({ user_id: user._id, timestamp: { $gte: windowStart } });
+        messageCount = await UsageLog.countDocuments({ user_id: userId, timestamp: { $gte: windowStart } });
       } else {
-        messageCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart).length;
+        const { getUserUsage } = require('../../utils/getModelConfig');
+        const supabaseCount = await getUserUsage(userId, plan.window_hours);
+        const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart).length;
+        messageCount = Math.max(supabaseCount, memCount);
       }
       
       let resetTimeMinutes = Math.round(plan.window_hours * 60);
       if (getIsMongoConnected()) {
-        const oldestLog = await UsageLog.findOne({ user_id: user._id, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }
       } else {
         const logsInWindow = memoryStore.usageLogs
-          .filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart)
+          .filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart)
           .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         if (logsInWindow.length > 0) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(logsInWindow[0].timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
@@ -200,9 +203,10 @@ const getMe = async (req, res) => {
       };
     }
 
+    const finalId = user._id || user.id;
     res.json({
       success: true,
-      user: { _id: user._id, id: user._id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar, rateLimit }
+      user: { _id: finalId, id: finalId, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar, rateLimit }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -217,9 +221,10 @@ const updateProfile = async (req, res) => {
     if (avatar && avatar.length > 50000) return res.status(400).json({ success: false, error: 'ছবির সাইজ অতিরিক্ত বড় (সর্বোচ্চ 50KB)' });
     const cleanName = name ? name.trim().slice(0, 50) : undefined;
 
+    const targetUserId = req.user._id || req.user.id;
     let user;
     if (getIsMongoConnected()) {
-      user = await User.findById(req.user._id);
+      user = await User.findById(targetUserId);
       if (cleanName) user.name = cleanName;
       if (avatar !== undefined) user.avatar = avatar;
       await user.save();
@@ -227,14 +232,14 @@ const updateProfile = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const uIdx = users.findIndex(u => String(u._id) === String(req.user._id));
+      const uIdx = users.findIndex(u => String(u._id || u.id) === String(targetUserId));
       if (uIdx !== -1) {
         if (cleanName) users[uIdx].name = cleanName;
         if (avatar !== undefined) users[uIdx].avatar = avatar;
         user = users[uIdx];
         await savePersistedUsers(users);
       } else {
-        user = memoryStore.users.find(u => String(u._id) === String(req.user._id)) || req.user;
+        user = memoryStore.users.find(u => String(u._id || u.id) === String(targetUserId)) || req.user;
         if (cleanName) user.name = cleanName;
         if (avatar !== undefined) user.avatar = avatar;
       }

@@ -1904,6 +1904,7 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 </head>
 <body>
@@ -2278,6 +2279,26 @@
 
     let isWebSearchEnabled = false;
     let isImageGenEnabled = false;
+    let currentAbortController = null;
+
+    // Secure Markdown parser with DOMPurify sanitization
+    function safeMarkdown(md) {
+      try {
+        const raw = marked.parse(md || "");
+        return (typeof DOMPurify !== "undefined") ? DOMPurify.sanitize(raw) : raw;
+      } catch {
+        return String(md || "");
+      }
+    }
+
+    function stopGeneration() {
+      if (currentAbortController) {
+        try { currentAbortController.abort(); } catch {}
+        currentAbortController = null;
+      }
+      isGenerating = false;
+      updateSendAvailability();
+    }
 
     let customDialogCallback = null;
 
@@ -3381,10 +3402,22 @@
     const sendBtn = document.getElementById("sendBtn");
 
     function updateSendAvailability() {
+      if (isGenerating) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #ef4444; width: 18px; height: 18px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`;
+        sendBtn.setAttribute("aria-label", "থামুন");
+        sendBtn.setAttribute("title", "উত্তর তৈরি থামান");
+        return;
+      } else {
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>`;
+        sendBtn.setAttribute("aria-label", "পাঠান");
+        sendBtn.setAttribute("title", "পাঠান");
+      }
+
       const isOffline = !navigator.onLine;
       const outOfCredit = !hasCredit();
       const hasContent = !!userInput.value.trim() || (pendingImages && pendingImages.length > 0) || (pendingFiles && pendingFiles.length > 0);
-      sendBtn.disabled = isOffline || outOfCredit || !hasContent || isGenerating;
+      sendBtn.disabled = isOffline || outOfCredit || !hasContent;
       userInput.disabled = outOfCredit;
       userInput.placeholder = isOffline
         ? "📡 ইন্টারনেট সংযোগ নেই..."
@@ -3875,7 +3908,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           textDiv.classList.remove("streaming", "no-children");
           const rawText = typeof m.content === "string" ? m.content : "";
           try {
-            textDiv.innerHTML = marked.parse(rawText);
+            textDiv.innerHTML = safeMarkdown(rawText);
             enhanceCodeBlocks(textDiv);
           } catch {
             textDiv.textContent = rawText;
@@ -3905,7 +3938,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
               if (!hasCredit()) { openAccountModal(); return; }
               const row = regenBtn.closest(".message-row");
               if (row) row.remove();
-              messagesHistory.pop();
+              if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
+                messagesHistory.pop();
+              }
               isGenerating = true;
               updateSendAvailability();
               await generateAIReply();
@@ -4203,10 +4238,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
         return { role: m.role, content: m.content };
       });
 
+      currentAbortController = new AbortController();
       const response = await fetch(`${API_BASE}/chat/completions`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true })
+        body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true }),
+        signal: currentAbortController.signal
       });
 
       if (!response.ok) {
@@ -4513,7 +4550,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
             const now = performance.now();
             if (now - lastRenderTime > RENDER_THROTTLE) {
-              try { aiTextElement.innerHTML = marked.parse(renderedStream); } 
+              try { aiTextElement.innerHTML = safeMarkdown(renderedStream); } 
               catch { aiTextElement.textContent = renderedStream; }
 
               if (aiTextElement.children.length === 0) aiTextElement.classList.add("no-children");
@@ -4529,7 +4566,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             } else {
               aiTextElement.classList.remove("streaming", "no-children");
               try {
-                aiTextElement.innerHTML = marked.parse(renderedStream);
+                aiTextElement.innerHTML = safeMarkdown(renderedStream);
                 enhanceCodeBlocks(aiTextElement);
               } catch { aiTextElement.textContent = renderedStream; }
               
@@ -4570,7 +4607,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
           clearInterval(statusIntervalId);
           apiFinished = true;
           aiTextElement.classList.remove("streaming", "no-children");
-          aiTextElement.style.whiteSpace = ""; aiTextElement.textContent = `সমস্যা হয়েছে: ${err.message}`;
+          aiTextElement.style.whiteSpace = "";
+          if (err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"))) {
+            aiTextElement.textContent = renderedStream ? (renderedStream + "\n\n(উত্তর তৈরি থামানো হয়েছে)") : "উত্তর তৈরি থামানো হয়েছে।";
+          } else {
+            aiTextElement.textContent = `সমস্যা হয়েছে: ${err.message}`;
+          }
           finishUp();
         }
 
@@ -4595,7 +4637,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (!hasCredit()) { openAccountModal(); return; }
           const row = regenBtn.closest(".message-row");
           if (row) row.remove();
-          messagesHistory.pop();
+          if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
+            messagesHistory.pop();
+          }
           
           isGenerating = true;
           updateSendAvailability();
@@ -4624,7 +4668,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (isGenerating) return;
+      if (isGenerating) {
+        stopGeneration();
+        return;
+      }
       
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {

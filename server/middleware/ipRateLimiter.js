@@ -19,11 +19,21 @@ const createRateLimiter = ({
   message = 'অতিরিক্ত অনুরোধ করা হয়েছে, অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।'
 } = {}) => {
   return (req, res, next) => {
-    const rawIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || req.ip || '127.0.0.1';
+    const xff = req.headers['x-forwarded-for'];
+    const firstXff = Array.isArray(xff) ? xff[0] : (typeof xff === 'string' ? xff.split(',')[0].trim() : null);
+    const rawIp = firstXff || req.socket?.remoteAddress || req.ip || '127.0.0.1';
     const cleanIp = String(rawIp).replace(/^::ffff:/, '');
-    const prefix = req.baseUrl || req.path || 'rate';
+    const prefix = req.baseUrl || 'rate';
     const key = `${prefix}:${cleanIp}`;
     const now = Date.now();
+
+    // Prevent memory bloat under spoofed IP floods
+    if (rateLimits.size > 5000) {
+      for (const [k, r] of rateLimits.entries()) {
+        if (now > r.resetTime) rateLimits.delete(k);
+      }
+      if (rateLimits.size > 5000) rateLimits.clear();
+    }
 
     let record = rateLimits.get(key);
     if (!record || now > record.resetTime) {

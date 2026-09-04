@@ -110,41 +110,43 @@ const checkRateLimit = async (req, res, next) => {
       }
     } else {
       // Fallback check against allowed_models list
-      const isModelAllowed = plan.allowed_models.includes('*') || plan.allowed_models.includes(model_id);
-      if (!isModelAllowed) {
-        return res.status(403).json({
-          success: false,
-          error: `আপনার ${plan.displayName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
-        });
+      if (plan.allowed_models && Array.isArray(plan.allowed_models)) {
+        if (!plan.allowed_models.includes('*') && !plan.allowed_models.includes(model_id)) {
+          return res.status(403).json({
+            success: false,
+            error: `আপনার ${plan.displayName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
+          });
+        }
       }
     }
 
     // 4. Dynamic Window Rate Limit Check
+    const userId = user._id || user.id;
     const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
     let messageCount = 0;
 
     if (getIsMongoConnected()) {
       messageCount = await UsageLog.countDocuments({
-        user_id: user._id,
+        user_id: userId,
         timestamp: { $gte: windowStart }
       });
     } else {
       const { getUserUsage } = require('../../utils/getModelConfig');
-      const supabaseCount = await getUserUsage(user._id, plan.window_hours);
-      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart).length;
+      const supabaseCount = await getUserUsage(userId, plan.window_hours);
+      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart).length;
       messageCount = Math.max(supabaseCount, memCount);
     }
 
     if (messageCount >= plan.message_limit) {
       let resetTimeMinutes = Math.round(plan.window_hours * 60);
       if (getIsMongoConnected()) {
-        const oldestLog = await UsageLog.findOne({ user_id: user._id, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }
       } else {
         const logsInWindow = memoryStore.usageLogs
-          .filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart)
+          .filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart)
           .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         if (logsInWindow.length > 0) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(logsInWindow[0].timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));

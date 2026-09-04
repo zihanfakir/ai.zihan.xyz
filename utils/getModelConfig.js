@@ -92,10 +92,10 @@ async function getPersistedModels() {
         .from('api_keys')
         .select('api_key')
         .eq('model_id', '__models_metadata__')
-        .single();
+        .limit(1);
 
-      if (!error && data && data.api_key) {
-        const parsed = JSON.parse(data.api_key);
+      if (!error && data && data.length > 0 && data[0].api_key) {
+        const parsed = JSON.parse(data[0].api_key);
         if (Array.isArray(parsed) && parsed.length > 0) {
           modelsCache = parsed;
           modelsCacheTs = now;
@@ -121,14 +121,17 @@ async function savePersistedModels(models) {
   if (!supabase) return;
 
   try {
-    await supabase
+    const { error } = await supabase
       .from('api_keys')
       .upsert(
         { model_id: '__models_metadata__', api_key: JSON.stringify(models), updated_at: new Date().toISOString() },
         { onConflict: 'model_id' }
       );
+    if (error) {
+      console.error('[Supabase] Failed to persist models:', error.message);
+    }
   } catch (e) {
-    console.error('[Supabase] Failed to persist models:', e.message);
+    console.error('[Supabase] Failed to persist models exception:', e.message);
   }
 }
 
@@ -139,10 +142,10 @@ async function getUserUsage(userId, windowHours) {
       .from('api_keys')
       .select('api_key')
       .eq('model_id', '__usage_' + userId + '__')
-      .single();
+      .limit(1);
 
-    if (data && data.api_key) {
-      const usage = JSON.parse(data.api_key);
+    if (data && data.length > 0 && data[0].api_key) {
+      const usage = JSON.parse(data[0].api_key);
       const windowMs = (windowHours || 3) * 60 * 60 * 1000;
       const now = Date.now();
       if (now - usage.start < windowMs) {
@@ -165,11 +168,11 @@ async function incrementUserUsage(userId, windowHours) {
       .from('api_keys')
       .select('api_key')
       .eq('model_id', '__usage_' + userId + '__')
-      .single();
+      .limit(1);
 
-    if (data && data.api_key) {
+    if (data && data.length > 0 && data[0].api_key) {
       try {
-        const prev = JSON.parse(data.api_key);
+        const prev = JSON.parse(data[0].api_key);
         if (now - prev.start < windowMs) {
           count = (prev.count || 0) + 1;
           start = prev.start;
@@ -190,33 +193,71 @@ async function incrementUserUsage(userId, windowHours) {
 async function getPersistedRedeemCodes() {
   if (!supabase) return memoryStore.redeemCodes || [];
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('api_keys')
       .select('api_key')
       .eq('model_id', '__redeem_codes__')
-      .single();
+      .limit(1);
 
-    if (data && data.api_key) {
-      const parsed = JSON.parse(data.api_key);
-      if (Array.isArray(parsed)) return parsed;
+    if (!error && data && data.length > 0 && data[0].api_key) {
+      const parsed = JSON.parse(data[0].api_key);
+      if (Array.isArray(parsed)) {
+        const codeMap = new Map();
+        for (const c of (memoryStore.redeemCodes || [])) {
+          if (c && c.code) codeMap.set(c.code.toUpperCase(), c);
+        }
+        for (const c of parsed) {
+          if (c && c.code) codeMap.set(c.code.toUpperCase(), c);
+        }
+        const merged = Array.from(codeMap.values());
+        memoryStore.redeemCodes = merged;
+        return merged;
+      }
     }
   } catch (e) {}
   return memoryStore.redeemCodes || [];
 }
 
 async function savePersistedRedeemCodes(codes) {
-  memoryStore.redeemCodes = codes;
+  let combined = [...codes];
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__redeem_codes__')
+        .limit(1);
+      if (data && data.length > 0 && data[0].api_key) {
+        const existing = JSON.parse(data[0].api_key);
+        if (Array.isArray(existing)) {
+          const map = new Map();
+          for (const c of existing) {
+            if (c && c.code) map.set(c.code.toUpperCase(), c);
+          }
+          for (const c of codes) {
+            if (c && c.code) map.set(c.code.toUpperCase(), c);
+          }
+          combined = Array.from(map.values());
+        }
+      }
+    } catch (e) {}
+  }
+
+  memoryStore.redeemCodes = combined;
   if (!supabase) return;
   try {
-    await supabase
+    const { error } = await supabase
       .from('api_keys')
       .upsert({
         model_id: '__redeem_codes__',
-        api_key: JSON.stringify(codes),
+        api_key: JSON.stringify(combined),
         updated_at: new Date().toISOString()
       }, { onConflict: 'model_id' });
+    if (error) {
+      console.error('[Supabase] Failed to persist redeem codes:', error.message);
+    }
   } catch (e) {
-    console.error('[Supabase] Failed to persist redeem codes:', e.message);
+    console.error('[Supabase] Failed to persist redeem codes exception:', e.message);
   }
 }
 
@@ -226,25 +267,35 @@ let usersCacheTs = 0;
 
 async function getPersistedUsers() {
   const now = Date.now();
-  if (usersCache && (now - usersCacheTs) < 5000) { // 5s cache
+  if (usersCache && (now - usersCacheTs) < 3000) { // 3s cache
     return usersCache;
   }
 
   if (!supabase) return memoryStore.users || [];
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('api_keys')
       .select('api_key')
       .eq('model_id', '__users_metadata__')
-      .single();
+      .limit(1);
 
-    if (data && data.api_key) {
-      const parsed = JSON.parse(data.api_key);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        memoryStore.users = parsed;
-        usersCache = parsed;
+    if (!error && data && data.length > 0 && data[0].api_key) {
+      const parsed = JSON.parse(data[0].api_key);
+      if (Array.isArray(parsed)) {
+        const userMap = new Map();
+        for (const u of (memoryStore.users || [])) {
+          const key = String(u._id || u.id || u.email);
+          userMap.set(key, u);
+        }
+        for (const u of parsed) {
+          const key = String(u._id || u.id || u.email);
+          userMap.set(key, u);
+        }
+        const merged = Array.from(userMap.values());
+        memoryStore.users = merged;
+        usersCache = merged;
         usersCacheTs = now;
-        return parsed;
+        return merged;
       }
     }
   } catch (e) {}
@@ -252,20 +303,49 @@ async function getPersistedUsers() {
 }
 
 async function savePersistedUsers(users) {
-  memoryStore.users = users;
-  usersCache = users;
+  let combined = [...users];
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__users_metadata__')
+        .limit(1);
+      if (data && data.length > 0 && data[0].api_key) {
+        const existing = JSON.parse(data[0].api_key);
+        if (Array.isArray(existing)) {
+          const map = new Map();
+          for (const u of existing) {
+            const k = String(u._id || u.id || u.email);
+            map.set(k, u);
+          }
+          for (const u of users) {
+            const k = String(u._id || u.id || u.email);
+            map.set(k, u);
+          }
+          combined = Array.from(map.values());
+        }
+      }
+    } catch (e) {}
+  }
+
+  memoryStore.users = combined;
+  usersCache = combined;
   usersCacheTs = Date.now();
   if (!supabase) return;
   try {
-    await supabase
+    const { error } = await supabase
       .from('api_keys')
       .upsert({
         model_id: '__users_metadata__',
-        api_key: JSON.stringify(users),
+        api_key: JSON.stringify(combined),
         updated_at: new Date().toISOString()
       }, { onConflict: 'model_id' });
+    if (error) {
+      console.error('[Supabase] Failed to persist users:', error.message);
+    }
   } catch (e) {
-    console.error('[Supabase] Failed to persist users:', e.message);
+    console.error('[Supabase] Failed to persist users exception:', e.message);
   }
 }
 

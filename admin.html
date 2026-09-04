@@ -697,6 +697,17 @@
       }, 3000);
     }
 
+    /* HTML Escaping helper to prevent Stored XSS */
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     /* Custom Confirm Modal */
     function customConfirm(message, title = "নিশ্চিতকরণ") {
       return new Promise((resolve) => {
@@ -926,10 +937,10 @@
               <button type="button" class="btn-icon" title="নিচে নিন" onclick="moveModel('${mId}', 'down')" ${isLast ? 'disabled' : ''}>▼</button>
             </div>
           </td>
-          <td><div class="code-chip" style="font-size: 0.75rem;">${mId}</div></td>
-          <td><input type="text" id="model_name_${mId}" value="${m.name || ''}" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
-          <td><input type="text" id="model_url_${mId}" value="${m.base_url || ''}" placeholder="API Base URL" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
-          <td><input type="password" id="model_key_${mId}" value="${m.api_key || ''}" placeholder="API Key" style="width: 120px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><div class="code-chip" style="font-size: 0.75rem;">${escapeHtml(mId)}</div></td>
+          <td><input type="text" id="model_name_${mId}" value="${escapeHtml(m.name || '')}" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" id="model_url_${mId}" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="password" id="model_key_${mId}" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 120px; padding: 6px 8px; font-size: 0.82rem;"></td>
           <td>
             <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 3px;"><input type="checkbox" id="model_prem_${mId}" ${m.premium ? 'checked' : ''}> <span class="tag tag-pro" style="padding: 1px 5px; font-size: 0.65rem;">PRO</span></label><br>
             <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"><input type="checkbox" id="model_eff_${mId}" ${m.efficient ? 'checked' : ''}> <span class="tag tag-max" style="padding: 1px 5px; font-size: 0.65rem;">MAX</span></label>
@@ -1079,25 +1090,26 @@
       }
       tbody.innerHTML = "";
       users.forEach(u => {
+        const uId = u._id || u.id;
         const plan = u.subscription?.plan_name || 'Free';
         const planBadge = plan === "Max" ? '<span class="tag tag-max">Max</span>' : (plan === "Pro" ? '<span class="tag tag-pro">Pro</span>' : '<span class="tag tag-free">Free</span>');
         const exp = u.subscription?.expires_at ? new Date(u.subscription.expires_at).toLocaleDateString("bn-BD") : "সীমাহীন";
         
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><strong>${u.name}</strong> ${u.role === 'admin' ? '<span class="admin-badge" style="font-size:0.65rem;">ADMIN</span>' : ''}</td>
-          <td>${u.email}</td>
+          <td><strong>${escapeHtml(u.name)}</strong> ${u.role === 'admin' ? '<span class="admin-badge" style="font-size:0.65rem;">ADMIN</span>' : ''}</td>
+          <td>${escapeHtml(u.email)}</td>
           <td>${planBadge}</td>
           <td>${exp}</td>
           <td>${u.is_blocked ? '<span style="color:var(--danger)">ব্লকড</span>' : '<span style="color:var(--success)">সক্রিয়</span>'}</td>
           <td>
-            <select onchange="updateUserPlan('${u._id}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+            <select onchange="updateUserPlan('${escapeHtml(uId)}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
               <option value="">প্ল্যান সেট করুন</option>
               <option value="Free">Free (অনন্তকাল)</option>
               <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
               <option value="Max">Max (কাস্টম মেয়াদ)</option>
             </select>
-            <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${u._id}', ${!u.is_blocked})" style="margin-left: 8px;">
+            <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${escapeHtml(uId)}', ${!u.is_blocked})" style="margin-left: 8px;">
               ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
             </button>
           </td>
@@ -1286,19 +1298,21 @@
                 ? `${c.used_by.name} (${c.used_by.email || ''})`
                 : String(c.used_by))
             : '—';
+          const safeCode = escapeHtml(c.code);
+          const safeUsedBy = escapeHtml(usedBy);
           
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>
-              <span class="code-chip" style="cursor:pointer;" onclick="navigator.clipboard.writeText('${c.code}');showToast('কোড কপি হয়েছে: ${c.code}','success');" title="কপি করতে ক্লিক করুন">${c.code}</span>
-              <button type="button" class="btn" style="padding:2px 8px; font-size:11px; margin-left:4px;" onclick="navigator.clipboard.writeText('${c.code}');showToast('কোড কপি হয়েছে: ${c.code}','success');">📋 কপি</button>
+              <span class="code-chip" style="cursor:pointer;" onclick="navigator.clipboard.writeText('${safeCode}');showToast('কোড কপি হয়েছে: ${safeCode}','success');" title="কপি করতে ক্লিক করুন">${safeCode}</span>
+              <button type="button" class="btn" style="padding:2px 8px; font-size:11px; margin-left:4px;" onclick="navigator.clipboard.writeText('${safeCode}');showToast('কোড কপি হয়েছে: ${safeCode}','success');">📋 কপি</button>
             </td>
-            <td><strong>${c.plan_name}</strong></td>
+            <td><strong>${escapeHtml(c.plan_name)}</strong></td>
             <td>${c.duration_days} দিন</td>
             <td>${status}</td>
-            <td>${usedBy}</td>
+            <td>${safeUsedBy}</td>
             <td>
-              <button type="button" class="btn btn-danger" onclick="deleteCode('${c._id || c.code}')">মুছুন</button>
+              <button type="button" class="btn btn-danger" onclick="deleteCode('${safeCode}')">মুছুন</button>
             </td>
           `;
           tbody.appendChild(tr);

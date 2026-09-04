@@ -67,16 +67,16 @@ const streamChatCompletions = async (req, res) => {
 
     // 4. Fallback for down/zero-credit providers (Vyce AI 500 or B.AI 0 balance)
     // If target is VyceAI or B.AI, route to ultra-fast Groq or OpenRouter
+    // 4. Fallback for down/zero-credit providers (Vyce AI 500 or B.AI 0 balance)
+    // If target is VyceAI or B.AI, route to ultra-fast Groq llama-3.3-70b-versatile
     if (targetUrl.includes('b.ai')) {
-      // B.AI has 0 credit balance -> reroute to high-speed Groq/OpenRouter
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
       targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
-      actualModel = 'openai/gpt-oss-120b';
+      actualModel = 'llama-3.3-70b-versatile';
     } else if (targetUrl.includes('vyceai.com')) {
-      // VyceAI is experiencing 500 errors -> reroute to Groq / OpenRouter
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
       targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
-      actualModel = 'openai/gpt-oss-120b';
+      actualModel = 'llama-3.3-70b-versatile';
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -115,31 +115,38 @@ const streamChatCompletions = async (req, res) => {
       return res.end();
     }
 
-    // Record usage log only after confirmed success
-    if (user) {
-      if (getIsMongoConnected()) {
-        UsageLog.create({
-          user_id: user._id,
-          model_id: model || 'openrouter/free',
-          timestamp: new Date()
-        }).catch(err => console.error('[UsageLog Write Error]:', err.message));
-      } else {
-        memoryStore.usageLogs.push({
-          _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          user_id: user._id,
-          model_id: model || 'openrouter/free',
-          timestamp: new Date()
-        });
-        debouncedSave();
-        await incrementUserUsage(user._id, req.currentPlan ? req.currentPlan.window_hours : 3);
-      }
-    }
+    let hasStreamedData = false;
 
     response.body.on('data', (chunk) => {
+      hasStreamedData = true;
       res.write(chunk);
     });
 
-    response.body.on('end', () => {
+    response.body.on('end', async () => {
+      // Record usage log only after stream successfully completes
+      if (user && hasStreamedData) {
+        const userId = user._id || user.id;
+        if (getIsMongoConnected()) {
+          UsageLog.create({
+            user_id: userId,
+            model_id: model || 'openrouter/free',
+            timestamp: new Date()
+          }).catch(err => console.error('[UsageLog Write Error]:', err.message));
+        } else {
+          memoryStore.usageLogs.push({
+            _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            user_id: userId,
+            model_id: model || 'openrouter/free',
+            timestamp: new Date()
+          });
+          debouncedSave();
+          try {
+            await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+          } catch (e) {
+            console.error('[Increment User Usage Error]:', e.message);
+          }
+        }
+      }
       res.end();
     });
 

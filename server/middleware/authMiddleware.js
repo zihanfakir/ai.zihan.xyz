@@ -23,25 +23,28 @@ const protect = async (req, res, next) => {
     } else {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id) === String(decoded.id));
+      user = users.find(u => String(u._id || u.id) === String(decoded.id));
     }
 
     if (!user && decoded && decoded.id) {
+      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
       user = {
         _id: decoded.id,
         id: decoded.id,
         name: decoded.name || 'User',
         email: decoded.email || '',
-        role: decoded.role || 'user',
+        role: isVerifiedAdminEmail ? 'admin' : 'user', // Prevent synthetic admin role escalation
         is_blocked: false,
         subscription: {
-          plan_name: decoded.plan || 'Free',
+          plan_name: isVerifiedAdminEmail ? 'Max' : (decoded.plan || 'Free'),
           expires_at: decoded.expires_at || null,
           is_active: true
         }
       };
-      // Keep in memoryStore for current lifecycle
-      memoryStore.users.push(user);
+      // Prevent unbounded duplicate pushes into memoryStore
+      if (!memoryStore.users.some(u => String(u._id || u.id) === String(decoded.id))) {
+        memoryStore.users.push(user);
+      }
     }
 
     if (!user) {
@@ -80,31 +83,34 @@ const optionalProtect = async (req, res, next) => {
     } else {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id) === String(decoded.id));
+      user = users.find(u => String(u._id || u.id) === String(decoded.id));
     }
 
     if (!user && decoded && decoded.id) {
+      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
       user = {
         _id: decoded.id,
         id: decoded.id,
         name: decoded.name || 'User',
         email: decoded.email || '',
-        role: decoded.role || 'user',
+        role: isVerifiedAdminEmail ? 'admin' : 'user',
         is_blocked: false,
         subscription: {
-          plan_name: decoded.plan || 'Free',
+          plan_name: isVerifiedAdminEmail ? 'Max' : (decoded.plan || 'Free'),
           expires_at: decoded.expires_at || null,
           is_active: true
         }
       };
-      memoryStore.users.push(user);
+      if (!memoryStore.users.some(u => String(u._id || u.id) === String(decoded.id))) {
+        memoryStore.users.push(user);
+      }
     }
 
-    if (user && !user.is_blocked) {
-      req.user = user;
-    } else {
-      req.user = null;
+    if (user && user.is_blocked) {
+      return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি ব্লক করা হয়েছে!' });
     }
+
+    req.user = user || null;
   } catch (error) {
     req.user = null;
   }

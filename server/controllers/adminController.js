@@ -285,11 +285,11 @@ const generateRedeemCodes = async (req, res) => {
 
     const createdCodes = [];
     const numToCreate = Math.min(Math.max(Number(count) || 1, 1), 100);
+    const validDurationDays = Math.min(Math.max(Number(duration_days) || 30, 1), 3650);
 
-    for (let i = 0; i < numToCreate; i++) {
-      let codeStr = generateRandomCode(plan_name);
-      
-      if (getIsMongoConnected()) {
+    if (getIsMongoConnected()) {
+      for (let i = 0; i < numToCreate; i++) {
+        let codeStr = generateRandomCode(plan_name);
         let attempts = 0;
         while (await RedeemCode.exists({ code: codeStr })) {
           attempts++;
@@ -299,15 +299,18 @@ const generateRedeemCodes = async (req, res) => {
         const codeDoc = await RedeemCode.create({
           code: codeStr,
           plan_name,
-          duration_days,
-          created_by: req.user._id
+          duration_days: validDurationDays,
+          created_by: req.user._id || req.user.id
         });
         createdCodes.push(codeDoc);
-      } else {
-        const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
-        let currentCodes = await getPersistedRedeemCodes();
-        currentCodes = [...currentCodes];
+      }
+    } else {
+      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+      let currentCodes = await getPersistedRedeemCodes();
+      currentCodes = [...currentCodes];
 
+      for (let i = 0; i < numToCreate; i++) {
+        let codeStr = generateRandomCode(plan_name);
         let attempts = 0;
         while (currentCodes.some(c => c.code === codeStr)) {
           attempts++;
@@ -318,18 +321,19 @@ const generateRedeemCodes = async (req, res) => {
           _id: 'code_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
           code: codeStr,
           plan_name,
-          duration_days,
+          duration_days: validDurationDays,
           is_used: false,
           used_by: null,
           used_at: null,
           createdAt: new Date()
         };
         currentCodes.push(codeDoc);
-        await savePersistedRedeemCodes(currentCodes);
         createdCodes.push(codeDoc);
       }
+      // Save all generated codes once
+      await savePersistedRedeemCodes(currentCodes);
+      debouncedSave();
     }
-    if (!getIsMongoConnected()) debouncedSave();
 
     res.status(201).json({
       success: true,
