@@ -4519,6 +4519,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         regenBtn.addEventListener("click", async () => {
           if (isGenerating) return;
+          const token = localStorage.getItem("alokpoth_token");
+          if (!token) {
+            showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
+            openAuthModal("login");
+            return;
+          }
           if (!hasCredit()) { openAccountModal(); return; }
           const row = regenBtn.closest(".message-row");
           if (row) row.remove();
@@ -4552,6 +4558,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (isGenerating) return;
+      
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
+        openAuthModal("login");
+        return;
+      }
       
       if (!navigator.onLine) { updateOnlineStatus(); return; }
       if (!hasCredit()) {
