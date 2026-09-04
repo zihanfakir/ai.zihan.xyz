@@ -1,7 +1,4 @@
 ﻿// scripts/migrate_keys_to_supabase.js
-// বর্তমান memory_backup.json থেকে api_key গুলো Supabase এ এককালীন migrate করার script।
-// Run: node scripts/migrate_keys_to_supabase.js
-
 require('dotenv').config({ path: require('path').join(__dirname, '..', 'server', '.env') });
 
 const { createClient } = require('@supabase/supabase-js');
@@ -12,7 +9,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Error: SUPABASE_URL এবং SUPABASE_SERVICE_ROLE_KEY server/.env ফাইলে সেট করুন।');
+  console.error('Error: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required in server/.env');
   process.exit(1);
 }
 
@@ -21,17 +18,16 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 async function main() {
-  // memory_backup.json থেকে মডেল লোড করা
   const backupPath = path.join(__dirname, '..', 'server', 'data', 'memory_backup.json');
   if (!fs.existsSync(backupPath)) {
-    console.error('memory_backup.json পাওয়া যায়নি:', backupPath);
+    console.error('memory_backup.json not found:', backupPath);
     process.exit(1);
   }
 
   const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
   const models = backup.models || [];
 
-  console.log(মোট  টি মডেল পাওয়া গেছে।\n);
+  console.log('Total models in backup: ' + models.length);
 
   let successCount = 0;
   let skipCount = 0;
@@ -42,7 +38,7 @@ async function main() {
 
     if (!modelId) { skipCount++; continue; }
     if (!apiKey || apiKey.trim() === '') {
-      console.log(⏭️  Skip:  (api_key নেই));
+      console.log('Skip (no api_key): ' + modelId);
       skipCount++;
       continue;
     }
@@ -55,16 +51,16 @@ async function main() {
       );
 
     if (error) {
-      console.error(❌ Error:  →, error.message);
+      console.error('Error saving ' + modelId + ':', error.message);
     } else {
-      console.log(✅ Saved: );
+      console.log('Successfully saved to Supabase: ' + modelId);
       successCount++;
     }
   }
 
-  console.log(\n✅ সফলভাবে সেভ হয়েছে:  টি);
-  console.log(⏭️  Skip করা হয়েছে:  টি);
-  console.log('\nMigration সম্পন্ন! এখন memory_backup.json থেকে api_key গুলো মুছে ফেলা নিরাপদ।');
+  console.log('\nSummary:');
+  console.log('Successfully saved: ' + successCount);
+  console.log('Skipped: ' + skipCount);
 }
 
 main().catch(err => {
