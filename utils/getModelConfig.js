@@ -55,7 +55,7 @@ async function getModelConfig(rawId) {
   }
 
   if (model) {
-    return { ...model, api_key: apiKey || model.api_key || null };
+    return { ...model, api_key: model.api_key || apiKey || null };
   }
 
   if (apiKey) {
@@ -67,6 +67,8 @@ async function getModelConfig(rawId) {
 
 
 function invalidateModelKeyCache(modelId) {
+  modelsCache = null;
+  modelsCacheTs = 0;
   if (modelId) {
     keyCache.delete(modelId);
   } else {

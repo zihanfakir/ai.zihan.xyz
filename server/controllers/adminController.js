@@ -10,11 +10,11 @@ const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
 
 // Supabase তে api_key upsert করার helper
 async function upsertApiKeyToSupabase(modelId, apiKey) {
-  if (!supabase || !modelId || !apiKey) return;
+  if (!supabase || !modelId) return;
   try {
     const { error } = await supabase
       .from('api_keys')
-      .upsert({ model_id: modelId, api_key: apiKey, updated_at: new Date().toISOString() }, { onConflict: 'model_id' });
+      .upsert({ model_id: modelId, api_key: apiKey || '', updated_at: new Date().toISOString() }, { onConflict: 'model_id' });
     if (error) console.error('[Supabase] api_key upsert error:', error.message);
     else {
       invalidateModelKeyCache(modelId); // Cache clear করো
@@ -385,15 +385,27 @@ const deleteRedeemCode = async (req, res) => {
 
 const getModels = async (req, res) => {
   try {
+    const { getPersistedModels, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    let models = [];
     if (getIsMongoConnected()) {
-      const models = await AiModel.find().sort({ order: 1 });
-      return res.json({ success: true, models });
+      const mongoModels = await AiModel.find().sort({ order: 1 });
+      models = mongoModels.map(m => m.toObject());
     } else {
-      const { getPersistedModels } = require('../../utils/getModelConfig');
-      const models = await getPersistedModels();
-      const sorted = [...models].sort((a, b) => (a.order || 0) - (b.order || 0));
-      return res.json({ success: true, models: sorted });
+      models = await getPersistedModels();
     }
+    models = [...models];
+
+    // Ensure api_key is populated for all models
+    for (let m of models) {
+      const mId = m.id || m.model_id;
+      if (!m.api_key) {
+        const k = await getApiKeyFromSupabase(mId);
+        if (k) m.api_key = k;
+      }
+    }
+
+    const sorted = models.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return res.json({ success: true, models: sorted });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -404,36 +416,56 @@ const updateModel = async (req, res) => {
     const { modelId } = req.params;
     const { premium, efficient, name, base_url, api_key } = req.body;
 
-    // api_key পাঠানো হলে Supabase এ সেভ করো (MongoDB বা memoryStore নির্বিশেষে)
-    if (api_key !== undefined && api_key !== '') {
+    // 1. Save api_key in Supabase api_keys table
+    if (api_key !== undefined) {
       await upsertApiKeyToSupabase(modelId, api_key);
     }
-    
+
+    // 2. If Mongo connected, update Mongo document with ALL fields including api_key
     if (getIsMongoConnected()) {
-      const model = await AiModel.findOne({ model_id: modelId });
-      if (!model) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
-      if (premium !== undefined) model.premium = Boolean(premium);
-      if (efficient !== undefined) model.efficient = Boolean(efficient);
-      if (name !== undefined) model.name = name;
-      if (base_url !== undefined) model.base_url = base_url;
-      // api_key MongoDB তে সেভ করা বন্ধ (Supabase এ থাকবে)
-      await model.save();
-      return res.json({ success: true, message: 'মডেল আপডেট হয়েছে', model });
+      const mongoModel = await AiModel.findOne({ model_id: modelId });
+      if (mongoModel) {
+        if (premium !== undefined) mongoModel.premium = Boolean(premium);
+        if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
+        if (name !== undefined) mongoModel.name = name;
+        if (base_url !== undefined) mongoModel.base_url = base_url;
+        if (api_key !== undefined) mongoModel.api_key = api_key;
+        await mongoModel.save();
+      }
+    }
+
+    // 3. ALWAYS update Supabase __models_metadata__ and local memoryStore
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    let models = await getPersistedModels();
+    models = [...models];
+    let model = models.find(m => m.id === modelId || m.model_id === modelId);
+    if (!model) {
+      model = {
+        id: modelId,
+        model_id: modelId,
+        name: name || modelId,
+        base_url: base_url || '',
+        api_key: api_key || '',
+        premium: Boolean(premium),
+        efficient: Boolean(efficient),
+        provider: 'Alokpoth',
+        type: 'custom',
+        order: models.length + 1
+      };
+      models.push(model);
     } else {
-      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
-      let models = await getPersistedModels();
-      models = [...models];
-      const model = models.find(m => m.id === modelId || m.model_id === modelId);
-      if (!model) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
       if (base_url !== undefined) model.base_url = base_url;
       if (api_key !== undefined) model.api_key = api_key;
-      await savePersistedModels(models);
-      debouncedSave();
-      return res.json({ success: true, message: 'মডেল আপডেট হয়েছে', model });
     }
+
+    await savePersistedModels(models);
+    invalidateModelKeyCache(modelId);
+    debouncedSave();
+
+    return res.json({ success: true, message: 'মডেল ও API Key সফলভাবে আপডেট হয়েছে', model });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -446,56 +478,60 @@ const addModel = async (req, res) => {
       return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম আবশ্যক' });
     }
 
-    // api_key Supabase এ সেভ করো
+    // 1. Save api_key in Supabase api_keys table
     if (api_key) {
       await upsertApiKeyToSupabase(model_id, api_key);
     }
 
-    if (getIsMongoConnected()) {
-      const existing = await AiModel.findOne({ model_id });
-      if (existing) {
-        return res.status(400).json({ success: false, error: 'এই মডেল আইডি ইতিমধ্যে বিদ্যমান' });
-      }
-      const count = await AiModel.countDocuments();
-      const model = await AiModel.create({
-        model_id,
-        name,
-        base_url: base_url || '',
-        // api_key MongoDB তে সেভ হবে না
-        premium: Boolean(premium),
-        efficient: Boolean(efficient),
-        provider: provider || 'Alokpoth',
-        type: type || 'custom',
-        order: count + 1
-      });
-      return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model });
-    } else {
-      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
-      let models = await getPersistedModels();
-      models = [...models];
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    let models = await getPersistedModels();
+    models = [...models];
 
-      const existing = models.find(m => (m.id === model_id || m.model_id === model_id));
-      if (existing) {
-        return res.status(400).json({ success: false, error: 'এই মডেল আইডি ইতিমধ্যে বিদ্যমান' });
-      }
-      const maxOrder = models.reduce((max, m) => Math.max(max, m.order || 0), 0);
-      const newModel = {
-        id: model_id,
-        model_id,
-        name,
-        base_url: base_url || '',
-        api_key: api_key || '',
-        premium: Boolean(premium),
-        efficient: Boolean(efficient),
-        provider: provider || 'Alokpoth',
-        type: type || 'custom',
-        order: maxOrder + 1
-      };
-      models.push(newModel);
-      await savePersistedModels(models);
-      debouncedSave();
-      return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
+    const existing = models.find(m => (m.id === model_id || m.model_id === model_id));
+    if (existing) {
+      return res.status(400).json({ success: false, error: 'এই মডেল আইডি ইতিমধ্যে বিদ্যমান' });
     }
+
+    const maxOrder = models.reduce((max, m) => Math.max(max, m.order || 0), 0);
+    const newOrder = maxOrder + 1;
+
+    // 2. If Mongo connected, create in Mongo WITH api_key
+    if (getIsMongoConnected()) {
+      const existingMongo = await AiModel.findOne({ model_id });
+      if (!existingMongo) {
+        await AiModel.create({
+          model_id,
+          name,
+          base_url: base_url || '',
+          api_key: api_key || '',
+          premium: Boolean(premium),
+          efficient: Boolean(efficient),
+          provider: provider || 'Alokpoth',
+          type: type || 'custom',
+          order: newOrder
+        });
+      }
+    }
+
+    // 3. ALWAYS add to Supabase __models_metadata__ and local memoryStore
+    const newModel = {
+      id: model_id,
+      model_id,
+      name,
+      base_url: base_url || '',
+      api_key: api_key || '',
+      premium: Boolean(premium),
+      efficient: Boolean(efficient),
+      provider: provider || 'Alokpoth',
+      type: type || 'custom',
+      order: newOrder
+    };
+    models.push(newModel);
+    await savePersistedModels(models);
+    invalidateModelKeyCache(model_id);
+    debouncedSave();
+
+    return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -504,15 +540,25 @@ const addModel = async (req, res) => {
 const deleteModel = async (req, res) => {
   try {
     const { modelId } = req.params;
+
+    // 1. If Mongo connected, delete from Mongo
     if (getIsMongoConnected()) {
       await AiModel.findOneAndDelete({ model_id: modelId });
-    } else {
-      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
-      let models = await getPersistedModels();
-      models = models.filter(m => (m.id !== modelId && m.model_id !== modelId));
-      await savePersistedModels(models);
-      debouncedSave();
     }
+
+    // 2. Delete from Supabase individual api_keys row
+    if (supabase) {
+      await supabase.from('api_keys').delete().eq('model_id', modelId);
+    }
+
+    // 3. ALWAYS remove from Supabase __models_metadata__ and memoryStore
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    let models = await getPersistedModels();
+    models = models.filter(m => (m.id !== modelId && m.model_id !== modelId));
+    await savePersistedModels(models);
+    invalidateModelKeyCache(modelId);
+    debouncedSave();
+
     return res.json({ success: true, message: 'মডেল মুছে ফেলা হয়েছে' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -522,67 +568,52 @@ const deleteModel = async (req, res) => {
 const reorderModels = async (req, res) => {
   try {
     const { modelId, direction, modelIds } = req.body;
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+
+    let models = await getPersistedModels();
+    models = [...models];
 
     if (modelIds && Array.isArray(modelIds)) {
       if (getIsMongoConnected()) {
         for (let i = 0; i < modelIds.length; i++) {
           await AiModel.updateOne({ model_id: modelIds[i] }, { $set: { order: i + 1 } });
         }
-        const updated = await AiModel.find().sort({ order: 1, createdAt: 1 });
-        return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: updated });
-      } else {
-        const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
-        let models = await getPersistedModels();
-        models = [...models]; // clone
-
-        modelIds.forEach((id, idx) => {
-          const m = models.find(x => (x.id === id || x.model_id === id));
-          if (m) m.order = idx + 1;
-        });
-        models.sort((a, b) => (a.order || 0) - (b.order || 0));
-        await savePersistedModels(models);
-        debouncedSave();
-        return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models });
       }
+
+      modelIds.forEach((id, idx) => {
+        const m = models.find(x => (x.id === id || x.model_id === id));
+        if (m) m.order = idx + 1;
+      });
+      models.sort((a, b) => (a.order || 0) - (b.order || 0));
+      await savePersistedModels(models);
+      invalidateModelKeyCache();
+      debouncedSave();
+      return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models });
     }
 
     if (modelId && direction) {
-      if (getIsMongoConnected()) {
-        const models = await AiModel.find().sort({ order: 1, createdAt: 1 });
-        const idx = models.findIndex(m => m.model_id === modelId);
-        if (idx === -1) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
-        
-        const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (targetIdx >= 0 && targetIdx < models.length) {
-          const [movedModel] = models.splice(idx, 1);
-          models.splice(targetIdx, 0, movedModel);
+      models.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = models.findIndex(m => (m.id === modelId || m.model_id === modelId));
+      if (idx === -1) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
 
-          for (let i = 0; i < models.length; i++) {
-            await AiModel.updateOne({ _id: models[i]._id }, { $set: { order: i + 1 } });
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx >= 0 && targetIdx < models.length) {
+        const [movedModel] = models.splice(idx, 1);
+        models.splice(targetIdx, 0, movedModel);
+
+        for (let i = 0; i < models.length; i++) {
+          models[i].order = i + 1;
+          if (getIsMongoConnected()) {
+            await AiModel.updateOne({ model_id: models[i].model_id || models[i].id }, { $set: { order: i + 1 } });
           }
         }
-        const updated = await AiModel.find().sort({ order: 1, createdAt: 1 });
-        return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models: updated });
-      } else {
-        const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
-        let models = await getPersistedModels();
-        models = [...models]; // clone
-        models.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-        const idx = models.findIndex(m => (m.id === modelId || m.model_id === modelId));
-        if (idx === -1) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
-        
-        const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (targetIdx >= 0 && targetIdx < models.length) {
-          const [movedModel] = models.splice(idx, 1);
-          models.splice(targetIdx, 0, movedModel);
-          
-          models.forEach((m, i) => { m.order = i + 1; });
-          await savePersistedModels(models);
-          debouncedSave();
-        }
+        await savePersistedModels(models);
+        invalidateModelKeyCache();
+        debouncedSave();
         return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models });
       }
+      return res.json({ success: true, models });
     }
 
     return res.status(400).json({ success: false, error: 'সঠিক তথ্য দিন' });
