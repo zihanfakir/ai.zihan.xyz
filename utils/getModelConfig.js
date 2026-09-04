@@ -185,6 +185,39 @@ async function incrementUserUsage(userId, windowHours) {
   } catch (e) {}
 }
 
+async function getPersistedRedeemCodes() {
+  if (!supabase) return memoryStore.redeemCodes || [];
+  try {
+    const { data } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__redeem_codes__')
+      .single();
+
+    if (data && data.api_key) {
+      const parsed = JSON.parse(data.api_key);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {}
+  return memoryStore.redeemCodes || [];
+}
+
+async function savePersistedRedeemCodes(codes) {
+  memoryStore.redeemCodes = codes;
+  if (!supabase) return;
+  try {
+    await supabase
+      .from('api_keys')
+      .upsert({
+        model_id: '__redeem_codes__',
+        api_key: JSON.stringify(codes),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'model_id' });
+  } catch (e) {
+    console.error('[Supabase] Failed to persist redeem codes:', e.message);
+  }
+}
+
 module.exports = { 
   getModelConfig, 
   getApiKeyFromSupabase, 
@@ -192,5 +225,7 @@ module.exports = {
   getPersistedModels,
   savePersistedModels,
   getUserUsage,
-  incrementUserUsage
+  incrementUserUsage,
+  getPersistedRedeemCodes,
+  savePersistedRedeemCodes
 };

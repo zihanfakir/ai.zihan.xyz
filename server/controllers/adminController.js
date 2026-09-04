@@ -57,8 +57,10 @@ const getAdminStats = async (req, res) => {
       const totalUsers = memoryStore.users.length;
       const proUsers = memoryStore.users.filter(u => u.subscription && u.subscription.plan_name === 'Pro').length;
       const maxUsers = memoryStore.users.filter(u => u.subscription && u.subscription.plan_name === 'Max').length;
-      const totalRedeemCodes = memoryStore.redeemCodes.length;
-      const usedRedeemCodes = memoryStore.redeemCodes.filter(c => c.is_used).length;
+      const { getPersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const persistedCodes = await getPersistedRedeemCodes();
+      const totalRedeemCodes = persistedCodes.length;
+      const usedRedeemCodes = persistedCodes.filter(c => c.is_used).length;
       const totalMessages = memoryStore.usageLogs.length;
 
       const stats = {
@@ -291,8 +293,12 @@ const generateRedeemCodes = async (req, res) => {
         });
         createdCodes.push(codeDoc);
       } else {
+        const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+        let currentCodes = await getPersistedRedeemCodes();
+        currentCodes = [...currentCodes];
+
         let attempts = 0;
-        while (memoryStore.redeemCodes.some(c => c.code === codeStr)) {
+        while (currentCodes.some(c => c.code === codeStr)) {
           attempts++;
           if (attempts > 30) { codeStr += '-' + Date.now().toString(36); break; }
           codeStr = generateRandomCode(plan_name);
@@ -307,7 +313,8 @@ const generateRedeemCodes = async (req, res) => {
           used_at: null,
           createdAt: new Date()
         };
-        memoryStore.redeemCodes.push(codeDoc);
+        currentCodes.push(codeDoc);
+        await savePersistedRedeemCodes(currentCodes);
         createdCodes.push(codeDoc);
       }
     }
@@ -329,9 +336,11 @@ const getRedeemCodes = async (req, res) => {
       const codes = await RedeemCode.find().populate('used_by', 'name email').sort({ createdAt: -1 });
       return res.json({ success: true, count: codes.length, codes });
     } else {
-      const codes = memoryStore.redeemCodes.map(c => {
+      const { getPersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const persisted = await getPersistedRedeemCodes();
+      const codes = persisted.map(c => {
         let used_by = c.used_by;
-        if (typeof used_by === 'string' || used_by instanceof Object) {
+        if (typeof used_by === 'string') {
           const u = memoryStore.users.find(usr => String(usr._id) === String(used_by));
           if (u) used_by = { name: u.name, email: u.email };
         }
@@ -350,7 +359,10 @@ const deleteRedeemCode = async (req, res) => {
     if (getIsMongoConnected()) {
       await RedeemCode.findByIdAndDelete(codeId);
     } else {
-      memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId));
+      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+      let codes = await getPersistedRedeemCodes();
+      codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code) !== String(codeId));
+      await savePersistedRedeemCodes(codes);
       debouncedSave();
     }
     res.json({ success: true, message: 'রিডিম কোডটি মুছে ফেলা হয়েছে।' });

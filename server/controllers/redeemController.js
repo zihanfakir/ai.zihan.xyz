@@ -65,7 +65,11 @@ const claimRedeemCode = async (req, res) => {
         subscription: subscriptionData
       });
     } else {
-      const redeemCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
+      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+      let codes = await getPersistedRedeemCodes();
+      codes = [...codes];
+
+      const redeemCode = codes.find(c => c.code === cleanCode);
       if (!redeemCode) {
         return res.status(404).json({ success: false, error: 'অবৈধ বা অকার্যকর রিডিম কোড!' });
       }
@@ -91,6 +95,7 @@ const claimRedeemCode = async (req, res) => {
       if (user) {
         user.subscription = subscriptionData;
       }
+      await savePersistedRedeemCodes(codes);
       debouncedSave();
 
       const jwt = require('jsonwebtoken');
