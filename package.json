@@ -10,7 +10,7 @@
     "migrate:keys": "node scripts/migrate_keys_to_supabase.js"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
