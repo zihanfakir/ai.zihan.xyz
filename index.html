@@ -3507,7 +3507,6 @@
       renderUsage();
 
       addToDailyUsage({ inputTokens, outputTokens: billedOutputTokens, costUSD: callCost, isCodeGen });
-      deductCredit(callCost);
     }
 
     function addImageUsage(modelId) {
@@ -3518,7 +3517,6 @@
       renderUsage();
 
       addToDailyUsage({ costUSD: flat, images: 1 });
-      deductCredit(flat);
     }
 
     function renderUsage() {
@@ -3893,7 +3891,28 @@ Capabilities & Code Generation Instructions (CRITICAL):
               });
             });
           }
-          if (regenBtn) regenBtn.style.display = "inline-flex";
+          if (regenBtn) {
+            regenBtn.style.display = "inline-flex";
+            regenBtn.addEventListener("click", async () => {
+              if (isGenerating) return;
+              const token = localStorage.getItem("alokpoth_token");
+              if (!token) {
+                showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
+                openAuthModal("login");
+                return;
+              }
+              if (!hasCredit()) { openAccountModal(); return; }
+              const row = regenBtn.closest(".message-row");
+              if (row) row.remove();
+              messagesHistory.pop();
+              isGenerating = true;
+              updateSendAvailability();
+              await generateAIReply();
+              isGenerating = false;
+              updateSendAvailability();
+              scrollToBottom();
+            });
+          }
         }
       });
       scrollToBottom();
@@ -4062,7 +4081,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         imgRow.className = "bubble-image-row";
         images.forEach((img) => {
           const im = document.createElement("img");
-          im.src = img.previewUrl; im.className = "bubble-image-thumb";
+          im.src = img.previewUrl || (img.base64 ? `data:${img.mimeType || 'image/png'};base64,${img.base64}` : "");
+          im.className = "bubble-image-thumb";
           imgRow.appendChild(im);
         });
         col.appendChild(imgRow);
@@ -4408,6 +4428,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
             regenBtn.style.display = "inline-flex";
             regenBtn.onclick = async () => {
               if (isGenerating) return;
+              const token = localStorage.getItem("alokpoth_token");
+              if (!token) {
+                showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
+                openAuthModal("login");
+                return;
+              }
+              if (!hasCredit()) { openAccountModal(); return; }
               const row = regenBtn.closest(".message-row");
               if (row) row.remove();
               messagesHistory.pop();
