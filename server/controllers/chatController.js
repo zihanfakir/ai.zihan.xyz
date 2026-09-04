@@ -3,7 +3,7 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
-const { getModelConfig } = require('../../utils/getModelConfig');
+const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -51,7 +51,6 @@ const streamChatCompletions = async (req, res) => {
 
     // 2. Global Key Fallback from Supabase if not found
     if (!targetKey) {
-      const { getApiKeyFromSupabase } = require('../../utils/getModelConfig');
       targetKey = await getApiKeyFromSupabase(model);
       if (!targetKey && actualModel !== model) {
         targetKey = await getApiKeyFromSupabase(actualModel);
@@ -132,7 +131,6 @@ const streamChatCompletions = async (req, res) => {
           timestamp: new Date()
         });
         debouncedSave();
-        const { incrementUserUsage } = require('../../utils/getModelConfig');
         await incrementUserUsage(user._id, req.currentPlan ? req.currentPlan.window_hours : 3);
       }
     }

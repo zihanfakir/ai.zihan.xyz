@@ -218,7 +218,16 @@ async function savePersistedRedeemCodes(codes) {
   }
 }
 
+// Cache for users metadata
+let usersCache = null;
+let usersCacheTs = 0;
+
 async function getPersistedUsers() {
+  const now = Date.now();
+  if (usersCache && (now - usersCacheTs) < 5000) { // 5s cache
+    return usersCache;
+  }
+
   if (!supabase) return memoryStore.users || [];
   try {
     const { data } = await supabase
@@ -231,6 +240,8 @@ async function getPersistedUsers() {
       const parsed = JSON.parse(data.api_key);
       if (Array.isArray(parsed) && parsed.length > 0) {
         memoryStore.users = parsed;
+        usersCache = parsed;
+        usersCacheTs = now;
         return parsed;
       }
     }
@@ -240,6 +251,8 @@ async function getPersistedUsers() {
 
 async function savePersistedUsers(users) {
   memoryStore.users = users;
+  usersCache = users;
+  usersCacheTs = Date.now();
   if (!supabase) return;
   try {
     await supabase

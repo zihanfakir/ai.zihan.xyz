@@ -1,4 +1,6 @@
+const jwt = require('jsonwebtoken');
 const RedeemCode = require('../models/RedeemCode');
+const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 
@@ -18,7 +20,11 @@ const claimRedeemCode = async (req, res) => {
 
     const cleanCode = code.trim().toUpperCase();
     const now = new Date();
-    const userId = user._id;
+    const userId = user._id || user.id;
+
+    // Lifetime plan detection
+    const isLifetime = user.subscription && user.subscription.is_active && user.subscription.expires_at === null && user.subscription.plan_name !== 'Free';
+    const currentTier = (user.subscription && user.subscription.plan_name) ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
 
     if (getIsMongoConnected()) {
       const redeemCode = await RedeemCode.findOneAndUpdate(
@@ -31,24 +37,37 @@ const claimRedeemCode = async (req, res) => {
       }
 
       const durationDays = redeemCode.duration_days || 30;
-      const isCurrentActive = user && user.subscription && user.subscription.expires_at && new Date(user.subscription.expires_at) > now;
-      const baseDate = isCurrentActive ? new Date(user.subscription.expires_at) : now;
-      const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
-      const currentTier = isCurrentActive ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
       const newTier = PLAN_HIERARCHY[redeemCode.plan_name] || 1;
-      const finalPlanName = currentTier > newTier ? user.subscription.plan_name : redeemCode.plan_name;
 
-      const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
-
-      if (user) {
-        user.subscription = subscriptionData;
-        await user.save();
+      // Lifetime plan holders with >= tier: rollback and reject
+      if (isLifetime && currentTier >= newTier) {
+        await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        return res.status(400).json({ success: false, error: 'আপনার অ্যাকাউন্টে ইতিমধ্যে আজীবন সক্রিয় প্ল্যান রয়েছে। এই কোডটি ব্যবহার করা সম্ভব নয়।' });
       }
 
-      const jwt = require('jsonwebtoken');
+      // Lower-tier code on higher-tier active plan: reject
+      const isCurrentActive = !isLifetime && user.subscription && user.subscription.expires_at && new Date(user.subscription.expires_at) > now;
+      let baseDate, finalPlanName;
+      if (isCurrentActive && currentTier > newTier) {
+        await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        return res.status(400).json({ success: false, error: `আপনার অ্যাকাউন্টে ইতিমধ্যে উচ্চতর প্ল্যান (${user.subscription.plan_name}) সক্রিয় আছে। এই কোডটি ব্যবহার করা সম্ভব নয়।` });
+      } else if (isCurrentActive && currentTier <= newTier) {
+        baseDate = new Date(user.subscription.expires_at);
+        finalPlanName = redeemCode.plan_name;
+      } else {
+        baseDate = now;
+        finalPlanName = redeemCode.plan_name;
+      }
+
+      const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
+
+      // Use findByIdAndUpdate to prevent crash on plain objects
+      await User.findByIdAndUpdate(userId, { $set: { subscription: subscriptionData } });
+      user.subscription = subscriptionData;
+
       const newToken = jwt.sign({
-        id: String(user._id || user.id),
+        id: String(userId),
         role: user.role || 'user',
         plan: finalPlanName,
         expires_at: expiresAt.toISOString(),
@@ -66,50 +85,64 @@ const claimRedeemCode = async (req, res) => {
         subscription: subscriptionData
       });
     } else {
-      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+      const { getPersistedRedeemCodes, savePersistedRedeemCodes, getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let codes = await getPersistedRedeemCodes();
       codes = [...codes];
 
       const redeemCode = codes.find(c => c.code === cleanCode);
       if (!redeemCode) {
-        return res.status(404).json({ success: false, error: 'অবৈধ বা অকার্যকর রিডিম কোড!' });
+        return res.status(400).json({ success: false, error: 'অবৈধ বা অকার্যকর রিডিম কোড!' });
       }
       if (redeemCode.is_used) {
         return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
       }
 
+      const durationDays = redeemCode.duration_days || 30;
+      const newTier = PLAN_HIERARCHY[redeemCode.plan_name] || 1;
+
+      // Lifetime plan holders with >= tier: reject
+      if (isLifetime && currentTier >= newTier) {
+        return res.status(400).json({ success: false, error: 'আপনার অ্যাকাউন্টে ইতিমধ্যে আজীবন সক্রিয় প্ল্যান রয়েছে। এই কোডটি ব্যবহার করা সম্ভব নয়।' });
+      }
+
+      // Lower-tier code on higher-tier active plan: reject
+      const isCurrentActive = !isLifetime && user.subscription && user.subscription.expires_at && new Date(user.subscription.expires_at) > now;
+      let baseDate, finalPlanName;
+      if (isCurrentActive && currentTier > newTier) {
+        return res.status(400).json({ success: false, error: `আপনার অ্যাকাউন্টে ইতিমধ্যে উচ্চতর প্ল্যান (${user.subscription.plan_name}) সক্রিয় আছে। এই কোডটি ব্যবহার করা সম্ভব নয়।` });
+      } else if (isCurrentActive && currentTier <= newTier) {
+        baseDate = new Date(user.subscription.expires_at);
+        finalPlanName = redeemCode.plan_name;
+      } else {
+        baseDate = now;
+        finalPlanName = redeemCode.plan_name;
+      }
+
+      const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
+
+      // Mark code as used
       redeemCode.is_used = true;
       redeemCode.used_by = userId;
       redeemCode.used_at = now;
 
-      const durationDays = redeemCode.duration_days || 30;
-      const isCurrentActive = user && user.subscription && user.subscription.expires_at && new Date(user.subscription.expires_at) > now;
-      const baseDate = isCurrentActive ? new Date(user.subscription.expires_at) : now;
-      const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
-      const currentTier = isCurrentActive ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
-      const newTier = PLAN_HIERARCHY[redeemCode.plan_name] || 1;
-      const finalPlanName = currentTier > newTier ? user.subscription.plan_name : redeemCode.plan_name;
-
-      const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
-
-      if (user) {
-        user.subscription = subscriptionData;
-        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
-        let users = await getPersistedUsers();
-        users = [...users];
-        const uIdx = users.findIndex(u => String(u._id) === String(user._id || user.id));
-        if (uIdx !== -1) {
-          users[uIdx].subscription = subscriptionData;
-          await savePersistedUsers(users);
-        }
+      // Update user subscription in Supabase
+      let users = await getPersistedUsers();
+      users = [...users];
+      const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId));
+      if (uIdx !== -1) {
+        users[uIdx].subscription = subscriptionData;
+        await savePersistedUsers(users);
+      } else {
+        console.warn('[Redeem] User not found in persisted users array, userId:', userId);
       }
+      user.subscription = subscriptionData;
+
       await savePersistedRedeemCodes(codes);
       debouncedSave();
 
-      const jwt = require('jsonwebtoken');
       const newToken = jwt.sign({
-        id: String(user._id || user.id),
+        id: String(userId),
         role: user.role || 'user',
         plan: finalPlanName,
         expires_at: expiresAt.toISOString(),
@@ -128,7 +161,8 @@ const claimRedeemCode = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('[Redeem Error]:', error);
+    res.status(500).json({ success: false, error: 'সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।' });
   }
 };
 

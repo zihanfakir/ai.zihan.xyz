@@ -2,7 +2,7 @@ const Plan = require('../models/Plan');
 const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
-const { memoryStore } = require('../config/memoryStore');
+const { memoryStore, debouncedSave } = require('../config/memoryStore');
 
 const checkRateLimit = async (req, res, next) => {
   try {
@@ -38,6 +38,15 @@ const checkRateLimit = async (req, res, next) => {
         if (getIsMongoConnected() && typeof user.save === 'function') {
           await user.save();
         } else if (!getIsMongoConnected()) {
+          // Persist downgrade to Supabase
+          const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+          let users = await getPersistedUsers();
+          users = [...users];
+          const uIdx = users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+          if (uIdx !== -1) {
+            users[uIdx].subscription = user.subscription;
+            await savePersistedUsers(users);
+          }
           debouncedSave();
         }
       }
