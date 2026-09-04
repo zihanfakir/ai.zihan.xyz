@@ -77,7 +77,8 @@ const checkRateLimit = async (req, res, next) => {
     if (getIsMongoConnected()) {
       aiModel = await AiModel.findOne({ model_id });
     } else {
-      aiModel = memoryStore.models.find(m => (m.id === model_id || m.model_id === model_id));
+      const { getModelConfig } = require('../../utils/getModelConfig');
+      aiModel = await getModelConfig(model_id);
     }
 
     if (aiModel) {

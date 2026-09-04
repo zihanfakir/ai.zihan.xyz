@@ -4,8 +4,16 @@ const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', {
+const generateToken = (user) => {
+  const payload = (user && typeof user === 'object') ? {
+    id: String(user._id || user.id),
+    role: user.role || 'user',
+    plan: (user.subscription && user.subscription.plan_name) || 'Free',
+    name: user.name || '',
+    email: user.email || ''
+  } : { id: String(user) };
+
+  return jwt.sign(payload, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', {
     expiresIn: '30d'
   });
 };
@@ -38,7 +46,7 @@ const registerUser = async (req, res) => {
         role,
         subscription: { plan_name: isAdminEmail ? 'Max' : 'Free', starts_at: new Date(), expires_at: null, is_active: true }
       });
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       return res.status(201).json({
         success: true,
         token,
@@ -63,7 +71,7 @@ const registerUser = async (req, res) => {
       };
       memoryStore.users.push(user);
       debouncedSave();
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       return res.status(201).json({
         success: true,
         token,
@@ -95,7 +103,7 @@ const loginUser = async (req, res) => {
         user.role = 'admin';
         await user.save();
       }
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       return res.json({
         success: true,
         token,
@@ -116,7 +124,7 @@ const loginUser = async (req, res) => {
       if (cleanEmail === 'zihanfakir@gmail.com' && user.role !== 'admin') {
         user.role = 'admin';
       }
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       return res.json({
         success: true,
         token,

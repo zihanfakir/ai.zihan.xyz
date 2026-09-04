@@ -46,9 +46,19 @@ const claimRedeemCode = async (req, res) => {
         await user.save();
       }
 
+      const jwt = require('jsonwebtoken');
+      const newToken = jwt.sign({
+        id: String(user._id || user.id),
+        role: user.role || 'user',
+        plan: finalPlanName,
+        name: user.name || '',
+        email: user.email || ''
+      }, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', { expiresIn: '30d' });
+
       return res.json({
         success: true,
         message: `অভিনন্দন! আপনার অ্যাকাউন্টে ${durationDays} দিনের জন্য '${finalPlanName}' প্ল্যান সক্রিয় হয়েছে।`,
+        token: newToken,
         plan_name: finalPlanName,
         duration_days: durationDays,
         expires_at: expiresAt.toISOString(),
@@ -83,9 +93,19 @@ const claimRedeemCode = async (req, res) => {
       }
       debouncedSave();
 
+      const jwt = require('jsonwebtoken');
+      const newToken = jwt.sign({
+        id: String(user._id || user.id),
+        role: user.role || 'user',
+        plan: finalPlanName,
+        name: user.name || '',
+        email: user.email || ''
+      }, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', { expiresIn: '30d' });
+
       return res.json({
         success: true,
         message: `অভিনন্দন! আপনার অ্যাকাউন্টে ${durationDays} দিনের জন্য '${finalPlanName}' প্ল্যান সক্রিয় হয়েছে।`,
+        token: newToken,
         plan_name: finalPlanName,
         duration_days: durationDays,
         expires_at: expiresAt.toISOString(),

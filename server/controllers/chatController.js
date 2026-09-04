@@ -32,31 +32,52 @@ const streamChatCompletions = async (req, res) => {
 
     let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
     let targetKey = process.env.OPENROUTER_API_KEY;
+    let actualModel = model;
 
-    if (aiModelConfig && aiModelConfig.base_url) {
+    // 1. Model ID Normalization & Provider Resolution
+    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
+      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      actualModel = 'openai/gpt-oss-120b';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
+    } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite') {
+      targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      actualModel = 'google/gemini-3.5-flash-lite';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.OPENROUTER_API_KEY;
+    } else if (aiModelConfig && aiModelConfig.base_url) {
       targetUrl = aiModelConfig.base_url;
       if (aiModelConfig.api_key) targetKey = aiModelConfig.api_key;
-    } else {
-      if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite') {
-        targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-        targetKey = process.env.OPENROUTER_API_KEY;
-      } else if (model === 'llama-3.3-70b-versatile' || model === 'openai/gpt-oss-120b') {
-        targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-        targetKey = process.env.GROQ_API_KEY;
-      } else if (model === 'mimo-v2.5' || model === 'hy3' || model === 'deepseek-v4-flash' || model === 'deepseek-v4-flash-vision-exp') {
-        targetUrl = 'https://api.b.ai/v1/chat/completions';
-        targetKey = process.env.BAI_API_KEY;
-      } else if (model && (model.includes('claude') || model.includes('nemotron') || model.includes('gpt-5.6'))) {
-        targetUrl = 'https://vyceai.com/v1/chat/completions';
-        targetKey = process.env.VYCE_API_KEY;
+      actualModel = model;
+    }
+
+    // 2. Global Key Fallback from Supabase if not found
+    if (!targetKey) {
+      const { getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+      targetKey = await getApiKeyFromSupabase(model);
+      if (!targetKey && actualModel !== model) {
+        targetKey = await getApiKeyFromSupabase(actualModel);
       }
     }
 
+    // 3. Provider Default Key Fallback
     if (!targetKey) {
       if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
       else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
       else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
+    }
+
+    // 4. Fallback for down/zero-credit providers (Vyce AI 500 or B.AI 0 balance)
+    // If target is VyceAI or B.AI, route to ultra-fast Groq or OpenRouter
+    if (targetUrl.includes('b.ai')) {
+      // B.AI has 0 credit balance -> reroute to high-speed Groq/OpenRouter
+      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
+      actualModel = 'openai/gpt-oss-120b';
+    } else if (targetUrl.includes('vyceai.com')) {
+      // VyceAI is experiencing 500 errors -> reroute to Groq / OpenRouter
+      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
+      actualModel = 'openai/gpt-oss-120b';
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -66,8 +87,9 @@ const streamChatCompletions = async (req, res) => {
     if (res.flushHeaders) res.flushHeaders();
 
     let payload = {
-      model: model === 'openai/gpt-oss-120b' ? 'llama-3.3-70b-versatile' : (model === 'gemini-3.5-flash-lite' ? 'google/gemini-flash-1.5' : model),
+      model: actualModel,
       messages,
+      max_tokens: 4096, // Protects against OpenRouter 402 limit
       stream: true
     };
 

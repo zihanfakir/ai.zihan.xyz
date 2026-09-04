@@ -2957,6 +2957,9 @@
             const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
             const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
 
+            if (data.token) {
+              try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+            }
             currentPlan = newPlan;
             saveCurrentPlan(newPlan);
             if (expiresAt) {

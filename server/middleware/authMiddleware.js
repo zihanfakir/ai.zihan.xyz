@@ -24,6 +24,23 @@ const protect = async (req, res, next) => {
       user = memoryStore.users.find(u => String(u._id) === String(decoded.id));
     }
 
+    if (!user && decoded && decoded.id) {
+      user = {
+        _id: decoded.id,
+        id: decoded.id,
+        name: decoded.name || 'User',
+        email: decoded.email || '',
+        role: decoded.role || 'user',
+        is_blocked: false,
+        subscription: {
+          plan_name: decoded.plan || 'Free',
+          is_active: true
+        }
+      };
+      // Keep in memoryStore for current lifecycle
+      memoryStore.users.push(user);
+    }
+
     if (!user) {
       return res.status(401).json({ success: false, error: 'ব্যবহারকারী খুঁজে পাওয়া যায়নি!' });
     }
@@ -59,6 +76,22 @@ const optionalProtect = async (req, res, next) => {
       user = await User.findById(decoded.id);
     } else {
       user = memoryStore.users.find(u => String(u._id) === String(decoded.id));
+    }
+
+    if (!user && decoded && decoded.id) {
+      user = {
+        _id: decoded.id,
+        id: decoded.id,
+        name: decoded.name || 'User',
+        email: decoded.email || '',
+        role: decoded.role || 'user',
+        is_blocked: false,
+        subscription: {
+          plan_name: decoded.plan || 'Free',
+          is_active: true
+        }
+      };
+      memoryStore.users.push(user);
     }
 
     if (user && !user.is_blocked) {

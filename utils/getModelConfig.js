@@ -33,27 +33,38 @@ async function getApiKeyFromSupabase(modelId) {
   return null;
 }
 
-async function getModelConfig(modelId) {
-  // memoryStore থেকে বেস কনফিগ নেওয়া (api_key ছাড়া)
-  const model = memoryStore.models.find(
-    m => m.id === modelId || m.model_id === modelId
+const MODEL_ALIASES = {
+  'openai/gpt-oss-120b': 'llama-3.3-70b-versatile',
+  'gemini-3.5-flash-lite': 'gemini-1.5-flash',
+  'gemini-1.5-flash': 'gemini-3.5-flash-lite'
+};
+
+async function getModelConfig(rawId) {
+  const modelId = MODEL_ALIASES[rawId] || rawId;
+
+  // 1. Check persisted models (from Supabase)
+  const allModels = await getPersistedModels();
+  const model = allModels.find(
+    m => m.id === modelId || m.model_id === modelId || m.id === rawId || m.model_id === rawId
   );
 
-  // Supabase থেকে api_key লোড করা
-  const apiKey = await getApiKeyFromSupabase(modelId);
+  // 2. Load API key from Supabase
+  let apiKey = await getApiKeyFromSupabase(modelId);
+  if (!apiKey && rawId !== modelId) {
+    apiKey = await getApiKeyFromSupabase(rawId);
+  }
 
   if (model) {
-    // একটি নতুন অবজেক্ট রিটার্ন করি (মেমোরি মডিফাই না করে)
     return { ...model, api_key: apiKey || model.api_key || null };
   }
 
-  // মেমোরিতে মডেল না থাকলে শুধু api_key সহ বেসিক অবজেক্ট
   if (apiKey) {
-    return { id: modelId, model_id: modelId, api_key: apiKey };
+    return { id: rawId, model_id: rawId, api_key: apiKey };
   }
 
   return null;
 }
+
 
 function invalidateModelKeyCache(modelId) {
   if (modelId) {
