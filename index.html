@@ -3875,15 +3875,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
     });
 
     window.addEventListener("beforeunload", persistCurrentSession);
-    try {
-      const savedSessionId = localStorage.getItem(CURRENT_SESSION_KEY);
-      if (savedSessionId) {
-        const all = loadAllSessions();
-        if (all.some((s) => s.id === savedSessionId)) {
-          loadSession(savedSessionId);
-        }
-      }
-    } catch {}
+    // Automatically start a new chat on page reload
+    startNewChat();
 
     const scrollToBottom = () => { scrollContainer.scrollTop = scrollContainer.scrollHeight; };
     
