@@ -365,7 +365,9 @@ const getModels = async (req, res) => {
       const models = await AiModel.find().sort({ order: 1 });
       return res.json({ success: true, models });
     } else {
-      const sorted = [...memoryStore.models].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const { getPersistedModels } = require('../../utils/getModelConfig');
+      const models = await getPersistedModels();
+      const sorted = [...models].sort((a, b) => (a.order || 0) - (b.order || 0));
       return res.json({ success: true, models: sorted });
     }
   } catch (error) {
@@ -394,13 +396,17 @@ const updateModel = async (req, res) => {
       await model.save();
       return res.json({ success: true, message: 'মডেল আপডেট হয়েছে', model });
     } else {
-      const model = memoryStore.models.find(m => m.id === modelId || m.model_id === modelId);
+      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
+      let models = await getPersistedModels();
+      models = [...models];
+      const model = models.find(m => m.id === modelId || m.model_id === modelId);
       if (!model) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
       if (base_url !== undefined) model.base_url = base_url;
       if (api_key !== undefined) model.api_key = api_key;
+      await savePersistedModels(models);
       debouncedSave();
       return res.json({ success: true, message: 'মডেল আপডেট হয়েছে', model });
     }
@@ -440,11 +446,15 @@ const addModel = async (req, res) => {
       });
       return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model });
     } else {
-      const existing = memoryStore.models.find(m => (m.id === model_id || m.model_id === model_id));
+      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
+      let models = await getPersistedModels();
+      models = [...models];
+
+      const existing = models.find(m => (m.id === model_id || m.model_id === model_id));
       if (existing) {
         return res.status(400).json({ success: false, error: 'এই মডেল আইডি ইতিমধ্যে বিদ্যমান' });
       }
-      const maxOrder = memoryStore.models.reduce((max, m) => Math.max(max, m.order || 0), 0);
+      const maxOrder = models.reduce((max, m) => Math.max(max, m.order || 0), 0);
       const newModel = {
         id: model_id,
         model_id,
@@ -457,7 +467,8 @@ const addModel = async (req, res) => {
         type: type || 'custom',
         order: maxOrder + 1
       };
-      memoryStore.models.push(newModel);
+      models.push(newModel);
+      await savePersistedModels(models);
       debouncedSave();
       return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
     }
@@ -472,7 +483,10 @@ const deleteModel = async (req, res) => {
     if (getIsMongoConnected()) {
       await AiModel.findOneAndDelete({ model_id: modelId });
     } else {
-      memoryStore.models = memoryStore.models.filter(m => (m.id !== modelId && m.model_id !== modelId));
+      const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
+      let models = await getPersistedModels();
+      models = models.filter(m => (m.id !== modelId && m.model_id !== modelId));
+      await savePersistedModels(models);
       debouncedSave();
     }
     return res.json({ success: true, message: 'মডেল মুছে ফেলা হয়েছে' });
@@ -493,13 +507,18 @@ const reorderModels = async (req, res) => {
         const updated = await AiModel.find().sort({ order: 1, createdAt: 1 });
         return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: updated });
       } else {
+        const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
+        let models = await getPersistedModels();
+        models = [...models]; // clone
+
         modelIds.forEach((id, idx) => {
-          const m = memoryStore.models.find(x => (x.id === id || x.model_id === id));
+          const m = models.find(x => (x.id === id || x.model_id === id));
           if (m) m.order = idx + 1;
         });
-        memoryStore.models.sort((a, b) => (a.order || 0) - (b.order || 0));
+        models.sort((a, b) => (a.order || 0) - (b.order || 0));
+        await savePersistedModels(models);
         debouncedSave();
-        return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: memoryStore.models });
+        return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models });
       }
     }
 
@@ -521,19 +540,24 @@ const reorderModels = async (req, res) => {
         const updated = await AiModel.find().sort({ order: 1, createdAt: 1 });
         return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models: updated });
       } else {
-        memoryStore.models.sort((a, b) => (a.order || 0) - (b.order || 0));
-        const idx = memoryStore.models.findIndex(m => (m.id === modelId || m.model_id === modelId));
+        const { getPersistedModels, savePersistedModels } = require('../../utils/getModelConfig');
+        let models = await getPersistedModels();
+        models = [...models]; // clone
+        models.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const idx = models.findIndex(m => (m.id === modelId || m.model_id === modelId));
         if (idx === -1) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });
         
         const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (targetIdx >= 0 && targetIdx < memoryStore.models.length) {
-          const [movedModel] = memoryStore.models.splice(idx, 1);
-          memoryStore.models.splice(targetIdx, 0, movedModel);
+        if (targetIdx >= 0 && targetIdx < models.length) {
+          const [movedModel] = models.splice(idx, 1);
+          models.splice(targetIdx, 0, movedModel);
           
-          memoryStore.models.forEach((m, i) => { m.order = i + 1; });
+          models.forEach((m, i) => { m.order = i + 1; });
+          await savePersistedModels(models);
           debouncedSave();
         }
-        return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models: memoryStore.models });
+        return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models });
       }
     }
 

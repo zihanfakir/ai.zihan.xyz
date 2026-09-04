@@ -55,7 +55,6 @@ async function getModelConfig(modelId) {
   return null;
 }
 
-// Cache invalidate (admin আপডেটের পরে ব্যবহার করা হবে)
 function invalidateModelKeyCache(modelId) {
   if (modelId) {
     keyCache.delete(modelId);
@@ -64,4 +63,66 @@ function invalidateModelKeyCache(modelId) {
   }
 }
 
-module.exports = { getModelConfig, getApiKeyFromSupabase, invalidateModelKeyCache };
+// Cache for models metadata
+let modelsCache = null;
+let modelsCacheTs = 0;
+
+async function getPersistedModels() {
+  const now = Date.now();
+  if (modelsCache && (now - modelsCacheTs) < 10000) { // 10s cache
+    return modelsCache;
+  }
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__models_metadata__')
+        .single();
+
+      if (!error && data && data.api_key) {
+        const parsed = JSON.parse(data.api_key);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          modelsCache = parsed;
+          modelsCacheTs = now;
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('[Supabase] __models_metadata__ fetch failed:', e.message);
+    }
+  }
+
+  // Fallback to memoryStore.models
+  return memoryStore.models;
+}
+
+async function savePersistedModels(models) {
+  modelsCache = models;
+  modelsCacheTs = Date.now();
+
+  // Also update memoryStore so it's in sync locally
+  memoryStore.models = models;
+
+  if (!supabase) return;
+
+  try {
+    await supabase
+      .from('api_keys')
+      .upsert(
+        { model_id: '__models_metadata__', api_key: JSON.stringify(models), updated_at: new Date().toISOString() },
+        { onConflict: 'model_id' }
+      );
+  } catch (e) {
+    console.error('[Supabase] Failed to persist models:', e.message);
+  }
+}
+
+module.exports = { 
+  getModelConfig, 
+  getApiKeyFromSupabase, 
+  invalidateModelKeyCache,
+  getPersistedModels,
+  savePersistedModels
+};

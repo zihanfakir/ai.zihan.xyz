@@ -2600,6 +2600,8 @@
             };
           });
 
+          MODELS.sort((a, b) => (a.order || 0) - (b.order || 0));
+
           if (!MODELS.some(m => m.id === selectedModelId)) {
             selectedModelId = MODELS[0].id;
           }

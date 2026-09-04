@@ -29,7 +29,9 @@ router.get('/models', async (req, res) => {
         order: m.order
       }));
     } else {
-      const sorted = [...memoryStore.models].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const { getPersistedModels } = require('../../utils/getModelConfig');
+      const models = await getPersistedModels();
+      const sorted = [...models].sort((a, b) => (a.order || 0) - (b.order || 0));
       result = sorted.map(m => ({
         id: m.id || m.model_id,
         name: m.name,
