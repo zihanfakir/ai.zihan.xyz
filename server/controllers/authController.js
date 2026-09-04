@@ -9,6 +9,7 @@ const generateToken = (user) => {
     id: String(user._id || user.id),
     role: user.role || 'user',
     plan: (user.subscription && user.subscription.plan_name) || 'Free',
+    expires_at: (user.subscription && user.subscription.expires_at) || null,
     name: user.name || '',
     email: user.email || ''
   } : { id: String(user) };

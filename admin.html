@@ -1280,7 +1280,11 @@
         tbody.innerHTML = "";
         data.codes.forEach(c => {
           const status = c.is_used ? `<span style="color:var(--danger)">ব্যবহৃত</span>` : `<span style="color:var(--success)">উপলব্ধ</span>`;
-          const usedBy = c.used_by ? `${c.used_by.name} (${c.used_by.email})` : '—';
+          const usedBy = c.used_by
+            ? (typeof c.used_by === 'object' && c.used_by.name
+                ? `${c.used_by.name} (${c.used_by.email || ''})`
+                : String(c.used_by))
+            : '—';
           
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -1293,7 +1297,7 @@
             <td>${status}</td>
             <td>${usedBy}</td>
             <td>
-              <button type="button" class="btn btn-danger" onclick="deleteCode('${c._id}')">মুছুন</button>
+              <button type="button" class="btn btn-danger" onclick="deleteCode('${c._id || c.code}')">মুছুন</button>
             </td>
           `;
           tbody.appendChild(tr);

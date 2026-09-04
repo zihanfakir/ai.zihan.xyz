@@ -34,6 +34,7 @@ const protect = async (req, res, next) => {
         is_blocked: false,
         subscription: {
           plan_name: decoded.plan || 'Free',
+          expires_at: decoded.expires_at || null,
           is_active: true
         }
       };
@@ -88,6 +89,7 @@ const optionalProtect = async (req, res, next) => {
         is_blocked: false,
         subscription: {
           plan_name: decoded.plan || 'Free',
+          expires_at: decoded.expires_at || null,
           is_active: true
         }
       };
