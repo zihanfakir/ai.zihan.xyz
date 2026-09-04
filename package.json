@@ -4,12 +4,13 @@
   "description": "Alokpoth AI - Multi-model AI Chat Application",
   "main": "api/index.js",
   "scripts": {
+    "build": "node -e \"console.log('Build completed successfully')\"",
     "start": "node server/server.js",
     "dev": "node server/server.js",
     "migrate:keys": "node scripts/migrate_keys_to_supabase.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0 <=22.x"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
