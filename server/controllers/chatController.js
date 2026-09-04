@@ -132,6 +132,8 @@ const streamChatCompletions = async (req, res) => {
           timestamp: new Date()
         });
         debouncedSave();
+        const { incrementUserUsage } = require('../../utils/getModelConfig');
+        incrementUserUsage(user._id, req.currentPlan ? req.currentPlan.window_hours : 3);
       }
     }
 

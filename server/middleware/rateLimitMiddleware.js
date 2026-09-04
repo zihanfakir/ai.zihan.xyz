@@ -8,8 +8,8 @@ const checkRateLimit = async (req, res, next) => {
   try {
     const user = req.user;
 
-    // Admin bypass
-    if (user && user.role === 'admin') return next();
+    // Admin gets full Max plan limits (or unlimited if superadmin)
+    // Removed unconditional admin bypass so limits can be tested and enforced
 
     // Guest User (Not logged in)
     if (!user) {
@@ -120,7 +120,10 @@ const checkRateLimit = async (req, res, next) => {
         timestamp: { $gte: windowStart }
       });
     } else {
-      messageCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart).length;
+      const { getUserUsage } = require('../../utils/getModelConfig');
+      const supabaseCount = await getUserUsage(user._id, plan.window_hours);
+      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(user._id) && new Date(l.timestamp) >= windowStart).length;
+      messageCount = Math.max(supabaseCount, memCount);
     }
 
     if (messageCount >= plan.message_limit) {

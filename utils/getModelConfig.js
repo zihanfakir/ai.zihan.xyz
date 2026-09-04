@@ -130,10 +130,67 @@ async function savePersistedModels(models) {
   }
 }
 
+async function getUserUsage(userId, windowHours) {
+  if (!supabase) return 0;
+  try {
+    const { data } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__usage_' + userId + '__')
+      .single();
+
+    if (data && data.api_key) {
+      const usage = JSON.parse(data.api_key);
+      const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+      const now = Date.now();
+      if (now - usage.start < windowMs) {
+        return usage.count || 0;
+      }
+    }
+  } catch (e) {}
+  return 0;
+}
+
+async function incrementUserUsage(userId, windowHours) {
+  if (!supabase) return;
+  try {
+    const now = Date.now();
+    const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+    let count = 1;
+    let start = now;
+
+    const { data } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__usage_' + userId + '__')
+      .single();
+
+    if (data && data.api_key) {
+      try {
+        const prev = JSON.parse(data.api_key);
+        if (now - prev.start < windowMs) {
+          count = (prev.count || 0) + 1;
+          start = prev.start;
+        }
+      } catch (e) {}
+    }
+
+    await supabase
+      .from('api_keys')
+      .upsert({
+        model_id: '__usage_' + userId + '__',
+        api_key: JSON.stringify({ count, start }),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'model_id' });
+  } catch (e) {}
+}
+
 module.exports = { 
   getModelConfig, 
   getApiKeyFromSupabase, 
   invalidateModelKeyCache,
   getPersistedModels,
-  savePersistedModels
+  savePersistedModels,
+  getUserUsage,
+  incrementUserUsage
 };
