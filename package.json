@@ -4,7 +4,6 @@
   "description": "Alokpoth AI - Multi-model AI Chat Application",
   "main": "api/index.js",
   "scripts": {
-    "build": "echo \"Build completed\"",
     "start": "node server/server.js",
     "dev": "node server/server.js",
     "migrate:keys": "node scripts/migrate_keys_to_supabase.js"
