@@ -417,39 +417,46 @@ const getModels = async (req, res) => {
 
 const updateModel = async (req, res) => {
   try {
-    const { modelId } = req.params;
-    const { premium, efficient, name, base_url, api_key } = req.body;
+    let { modelId } = req.params;
+    try { modelId = decodeURIComponent(modelId); } catch {}
+    const { premium, efficient, name, base_url, api_key, clear_api_key } = req.body;
 
-    // 1. Save api_key in Supabase api_keys table
-    if (api_key !== undefined) {
-      await upsertApiKeyToSupabase(modelId, api_key);
+    const hasValidKey = typeof api_key === 'string' && api_key.trim().length > 0;
+
+    // 1. Save api_key in Supabase api_keys table only if non-empty or explicitly requested to clear
+    if (hasValidKey) {
+      await upsertApiKeyToSupabase(modelId, api_key.trim());
+    } else if (clear_api_key === true) {
+      await upsertApiKeyToSupabase(modelId, '');
     }
 
-    // 2. If Mongo connected, update Mongo document with ALL fields including api_key
+    // 2. If Mongo connected, update Mongo document with fields
     if (getIsMongoConnected()) {
-      const mongoModel = await AiModel.findOne({ model_id: modelId });
+      const mongoModel = await AiModel.findOne({ $or: [{ model_id: modelId }, { id: modelId }] });
       if (mongoModel) {
         if (premium !== undefined) mongoModel.premium = Boolean(premium);
         if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
         if (name !== undefined) mongoModel.name = name;
         if (base_url !== undefined) mongoModel.base_url = base_url;
-        if (api_key !== undefined) mongoModel.api_key = api_key;
+        if (hasValidKey) mongoModel.api_key = api_key.trim();
+        else if (clear_api_key === true) mongoModel.api_key = '';
         await mongoModel.save();
       }
     }
 
     // 3. ALWAYS update Supabase __models_metadata__ and local memoryStore
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
     models = [...models];
-    let model = models.find(m => m.id === modelId || m.model_id === modelId);
+    let model = models.find(m => m.id === modelId || m.model_id === modelId || (m.id && decodeURIComponent(m.id) === modelId));
     if (!model) {
+      const dbKey = await getApiKeyFromSupabase(modelId);
       model = {
         id: modelId,
         model_id: modelId,
         name: name || modelId,
         base_url: base_url || '',
-        api_key: api_key || '',
+        api_key: hasValidKey ? api_key.trim() : (dbKey || ''),
         premium: Boolean(premium),
         efficient: Boolean(efficient),
         provider: 'Alokpoth',
@@ -458,11 +465,21 @@ const updateModel = async (req, res) => {
       };
       models.push(model);
     } else {
+      model.id = modelId;
+      model.model_id = modelId;
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
       if (base_url !== undefined) model.base_url = base_url;
-      if (api_key !== undefined) model.api_key = api_key;
+      if (hasValidKey) {
+        model.api_key = api_key.trim();
+      } else if (clear_api_key === true) {
+        model.api_key = '';
+      } else if (!model.api_key) {
+        // preserve from db if missing
+        const dbKey = await getApiKeyFromSupabase(modelId);
+        if (dbKey) model.api_key = dbKey;
+      }
     }
 
     await savePersistedModels(models);
@@ -543,11 +560,12 @@ const addModel = async (req, res) => {
 
 const deleteModel = async (req, res) => {
   try {
-    const { modelId } = req.params;
+    let { modelId } = req.params;
+    try { modelId = decodeURIComponent(modelId); } catch {}
 
     // 1. If Mongo connected, delete from Mongo
     if (getIsMongoConnected()) {
-      await AiModel.findOneAndDelete({ model_id: modelId });
+      await AiModel.findOneAndDelete({ $or: [{ model_id: modelId }, { id: modelId }] });
     }
 
     // 2. Delete from Supabase individual api_keys row
@@ -559,6 +577,8 @@ const deleteModel = async (req, res) => {
     const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
     models = models.filter(m => (m.id !== modelId && m.model_id !== modelId));
+    // Re-normalize orders
+    models.forEach((m, idx) => { m.order = idx + 1; });
     await savePersistedModels(models);
     invalidateModelKeyCache(modelId);
     debouncedSave();
@@ -571,28 +591,60 @@ const deleteModel = async (req, res) => {
 
 const reorderModels = async (req, res) => {
   try {
-    const { modelId, direction, modelIds } = req.body;
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    let { modelId, direction, modelIds } = req.body;
+    if (modelId) {
+      try { modelId = decodeURIComponent(modelId); } catch {}
+    }
+    if (modelIds && Array.isArray(modelIds)) {
+      modelIds = modelIds.map(id => {
+        try { return decodeURIComponent(id); } catch { return id; }
+      });
+    }
+
+    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
 
     let models = await getPersistedModels();
     models = [...models];
 
-    if (modelIds && Array.isArray(modelIds)) {
-      if (getIsMongoConnected()) {
-        for (let i = 0; i < modelIds.length; i++) {
-          await AiModel.updateOne({ model_id: modelIds[i] }, { $set: { order: i + 1 } });
+    // CRITICAL: Ensure each model has its api_key populated from Supabase before any reordering or saving
+    for (let m of models) {
+      const mId = m.id || m.model_id;
+      m.id = mId;
+      m.model_id = mId;
+      if (!m.api_key) {
+        const k = await getApiKeyFromSupabase(mId);
+        if (k) m.api_key = k;
+      }
+    }
+
+    if (modelIds && Array.isArray(modelIds) && modelIds.length > 0) {
+      const reordered = [];
+      for (let i = 0; i < modelIds.length; i++) {
+        const id = modelIds[i];
+        const m = models.find(x => (x.id === id || x.model_id === id));
+        if (m) {
+          m.order = i + 1;
+          reordered.push(m);
+        }
+      }
+      for (const m of models) {
+        const mId = m.id || m.model_id;
+        if (!reordered.find(x => (x.id === mId || x.model_id === mId))) {
+          m.order = reordered.length + 1;
+          reordered.push(m);
         }
       }
 
-      modelIds.forEach((id, idx) => {
-        const m = models.find(x => (x.id === id || x.model_id === id));
-        if (m) m.order = idx + 1;
-      });
-      models.sort((a, b) => (a.order || 0) - (b.order || 0));
-      await savePersistedModels(models);
+      if (getIsMongoConnected()) {
+        for (const m of reordered) {
+          await AiModel.updateOne({ $or: [{ model_id: m.id }, { id: m.id }] }, { $set: { order: m.order } });
+        }
+      }
+
+      await savePersistedModels(reordered);
       invalidateModelKeyCache();
       debouncedSave();
-      return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models });
+      return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: reordered });
     }
 
     if (modelId && direction) {
@@ -608,7 +660,7 @@ const reorderModels = async (req, res) => {
         for (let i = 0; i < models.length; i++) {
           models[i].order = i + 1;
           if (getIsMongoConnected()) {
-            await AiModel.updateOne({ model_id: models[i].model_id || models[i].id }, { $set: { order: i + 1 } });
+            await AiModel.updateOne({ $or: [{ model_id: models[i].id }, { id: models[i].id }] }, { $set: { order: i + 1 } });
           }
         }
 
