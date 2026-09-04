@@ -296,11 +296,12 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: none;
-      align-items: flex-end;
+      align-items: center; /* Float in center instead of bottom */
       justify-content: center;
       z-index: 50;
       opacity: 0;
       transition: opacity 0.25s ease;
+      padding: 16px; /* Add padding to prevent touching edges */
     }
 
     .modal-overlay.open {
@@ -313,30 +314,24 @@
       max-width: 480px;
       max-height: 85vh;
       background-color: var(--bg-input);
-      border-radius: 36px 36px 0 0;
+      border-radius: 36px; /* Fully round on mobile too */
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       border: 1px solid var(--border-color);
-      border-bottom: none;
     }
 
     .modal-overlay.open .modal-sheet {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
 
     @media (min-width: 560px) {
-      .modal-overlay { align-items: center; }
       .modal-sheet {
-        border-radius: 36px;
-        border-bottom: 1px solid var(--border-color);
         max-height: 80vh;
-        transform: scale(0.95);
       }
-      .modal-overlay.open .modal-sheet { transform: scale(1); }
     }
 
     .modal-header {
