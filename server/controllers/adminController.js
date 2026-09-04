@@ -5,6 +5,25 @@ const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
+const supabase = require('../config/supabase');
+const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
+
+// Supabase তে api_key upsert করার helper
+async function upsertApiKeyToSupabase(modelId, apiKey) {
+  if (!supabase || !modelId || !apiKey) return;
+  try {
+    const { error } = await supabase
+      .from('api_keys')
+      .upsert({ model_id: modelId, api_key: apiKey, updated_at: new Date().toISOString() }, { onConflict: 'model_id' });
+    if (error) console.error('[Supabase] api_key upsert error:', error.message);
+    else {
+      invalidateModelKeyCache(modelId); // Cache clear করো
+      console.log(`[Supabase] api_key saved for model: ${modelId}`);
+    }
+  } catch (e) {
+    console.error('[Supabase] api_key upsert exception:', e.message);
+  }
+}
 
 const getAdminStats = async (req, res) => {
   try {
@@ -334,7 +353,7 @@ const deleteRedeemCode = async (req, res) => {
       memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId));
       debouncedSave();
     }
-    res.json({ success: true, message: 'রিডিম কোডটি মুছে ফেলা হয়েছে।' });
+    res.json({ success: true, message: 'রিডিম কোডটি মুছে ফেলা হয়েছে।' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -358,6 +377,11 @@ const updateModel = async (req, res) => {
   try {
     const { modelId } = req.params;
     const { premium, efficient, name, base_url, api_key } = req.body;
+
+    // api_key পাঠানো হলে Supabase এ সেভ করো (MongoDB বা memoryStore নির্বিশেষে)
+    if (api_key !== undefined && api_key !== '') {
+      await upsertApiKeyToSupabase(modelId, api_key);
+    }
     
     if (getIsMongoConnected()) {
       const model = await AiModel.findOne({ model_id: modelId });
@@ -366,7 +390,7 @@ const updateModel = async (req, res) => {
       if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
       if (base_url !== undefined) model.base_url = base_url;
-      if (api_key !== undefined) model.api_key = api_key;
+      // api_key MongoDB তে সেভ করা বন্ধ (Supabase এ থাকবে)
       await model.save();
       return res.json({ success: true, message: 'মডেল আপডেট হয়েছে', model });
     } else {
@@ -392,6 +416,11 @@ const addModel = async (req, res) => {
       return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম আবশ্যক' });
     }
 
+    // api_key Supabase এ সেভ করো
+    if (api_key) {
+      await upsertApiKeyToSupabase(model_id, api_key);
+    }
+
     if (getIsMongoConnected()) {
       const existing = await AiModel.findOne({ model_id });
       if (existing) {
@@ -402,7 +431,7 @@ const addModel = async (req, res) => {
         model_id,
         name,
         base_url: base_url || '',
-        api_key: api_key || '',
+        // api_key MongoDB তে সেভ হবে না
         premium: Boolean(premium),
         efficient: Boolean(efficient),
         provider: provider || 'Alokpoth',

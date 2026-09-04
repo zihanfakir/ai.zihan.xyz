@@ -2277,6 +2277,10 @@
   </div>
 
   <script>
+    // Smart API Base: On GitHub Pages, route to backend (Vercel or custom domain).
+    const BACKEND_URL = "https://ai.zihan.xyz"; // আপনার Vercel বা custom domain URL
+    const API_BASE = (window.location.hostname.endsWith("github.io") ? BACKEND_URL : window.location.origin) + "/api";
+
     let isWebSearchEnabled = false;
     let isImageGenEnabled = false;
 
@@ -2438,7 +2442,7 @@
 
     async function syncPlanLimitsFromServer() {
       try {
-        const res = await fetch("/api/plans");
+        const res = await fetch(`${API_BASE}/plans`);
         const data = await res.json();
         if (data.success && Array.isArray(data.plans)) {
           data.plans.forEach(p => {
@@ -2582,7 +2586,7 @@
 
     async function fetchModelsFromServer() {
       try {
-        const res = await fetch("/api/chat/models");
+        const res = await fetch(`${API_BASE}/chat/models`);
         const data = await res.json();
         if (data.success && Array.isArray(data.models) && data.models.length > 0) {
           const statusMap = new Map();
@@ -2637,7 +2641,7 @@
 
     async function pingModel(m) {
       try {
-        const srvRes = await fetchWithTimeout(`/api/chat/ping?model=${encodeURIComponent(m.id)}`, { method: "GET" }, PING_TIMEOUT_MS);
+        const srvRes = await fetchWithTimeout(`${API_BASE}/chat/ping?model=${encodeURIComponent(m.id)}`, { method: "GET" }, PING_TIMEOUT_MS);
         if (srvRes.ok) {
           const srvData = await srvRes.json();
           if (srvData.success) {
@@ -2829,7 +2833,7 @@
       const token = localStorage.getItem("alokpoth_token");
       if (!token) return;
       try {
-        const res = await fetch("/api/auth/me", {
+        const res = await fetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.status === 403) {
@@ -2946,7 +2950,7 @@
           }
 
           const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
-          const res = await fetch("/api/redeem/claim", {
+          const res = await fetch(`${API_BASE}/redeem/claim`, {
             method: "POST",
             headers,
             body: JSON.stringify({ code: rawCode })
@@ -3183,7 +3187,7 @@
         if (authErrorMsg) authErrorMsg.style.display = "none";
 
         try {
-          const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+          const endpoint = authMode === "login" ? `${API_BASE}/auth/login` : `${API_BASE}/auth/register`;
           const payload = authMode === "login" ? { email, password } : { name, email, password };
 
           const res = await fetch(endpoint, {
@@ -4139,7 +4143,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         return { role: m.role, content: m.content };
       });
 
-      const response = await fetch("/api/chat/completions", {
+      const response = await fetch(`${API_BASE}/chat/completions`, {
         method: "POST",
         headers,
         body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true })
@@ -4277,7 +4281,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetchWithTimeout("/api/chat/image", {
+      const res = await fetchWithTimeout(`${API_BASE}/chat/image`, {
         method: "POST",
         headers,
         body: JSON.stringify({ prompt })

@@ -3,6 +3,7 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
+const { getModelConfig } = require('../../utils/getModelConfig');
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -13,11 +14,20 @@ const streamChatCompletions = async (req, res) => {
       return res.status(400).json({ success: false, error: 'সঠিক মেসেজ অ্যারে প্রদান করুন' });
     }
 
-        let aiModelConfig = null;
+    // Supabase থেকে api_key সহ মডেল কনফিগ লোড করা (fallback: memoryStore)
+    let aiModelConfig = null;
     if (getIsMongoConnected()) {
       aiModelConfig = await AiModel.findOne({ model_id: model });
+      // MongoDB তে api_key না থাকলে Supabase থেকে নেওয়া
+      if (aiModelConfig && !aiModelConfig.api_key) {
+        const supabaseConfig = await getModelConfig(model);
+        if (supabaseConfig && supabaseConfig.api_key) {
+          aiModelConfig = { ...aiModelConfig.toObject(), api_key: supabaseConfig.api_key };
+        }
+      }
     } else {
-      aiModelConfig = memoryStore.models.find(m => (m.id === model || m.model_id === model));
+      // memoryStore + Supabase api_key
+      aiModelConfig = await getModelConfig(model);
     }
 
     let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';

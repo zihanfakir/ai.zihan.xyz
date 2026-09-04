@@ -1,11 +1,14 @@
-{
+﻿{
   "name": "alokpoth-ai",
   "version": "1.0.0",
-  "description": "Alokpoth AI - Web Application",
-  "main": "server/server.js",
+  "description": "Alokpoth AI - Multi-model AI Chat Application",
+  "main": "api/index.js",
   "scripts": {
     "start": "node server/server.js",
-    "install": "cd server && npm install"
+    "dev": "node server/server.js",
+    "build": "cd server && node ../node_modules/.bin/npm-cli.js install --production 2>/dev/null || true",
+    "migrate:keys": "node scripts/migrate_keys_to_supabase.js",
+    "vercel-install": "cd server && npm install"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -17,6 +20,8 @@
     "cors": "^2.8.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.0",
-    "cookie-parser": "^1.4.6"
+    "cookie-parser": "^1.4.6",
+    "@supabase/supabase-js": "^2.45.0",
+    "node-fetch": "^2.7.0"
   }
 }
