@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Alokpoth AI - অ্যাডমিন প্যানেল</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-main: #09090b;
+      --bg-card: #18181b;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(140, 140, 140, 0.3) !important;
+      border-radius: 999px !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(140, 140, 140, 0.5) !important;
+    }
+    body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border-color); background: rgba(24,24,27,0.7); backdrop-filter: blur(12px); }
+    .logo-area { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.2rem; }
+    .admin-badge { background: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    
+    .container { max-width: 1240px; margin: 0 auto; width: 100%; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .stat-val { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .stat-lbl { font-size: 0.85rem; color: var(--text-sub); }
+    
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; overflow-x: auto; }
+    .tab-btn { background: none; border: none; color: var(--text-sub); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: #fff; background: var(--accent); }
+    
+    .section { display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; }
+    .section.active { display: flex; flex-direction: column; gap: 20px; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+    th { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0; vertical-align: middle; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .btn { padding: 6px 14px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .btn-danger:hover { background: #ef4444; color: white; }
+    .btn-success { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .btn-success:hover { background: #10b981; color: white; }
+    
+    .btn-icon { width: 28px; height: 28px; padding: 0; border-radius: 6px; font-size: 0.75rem; background: rgba(255,255,255,0.06); color: var(--text-sub); border: 1px solid var(--border-color); }
+    .btn-icon:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    input, select { background: #27272a; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 8px; outline: none; }
+    input:focus, select:focus { border-color: var(--accent); }
+    
+    .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.8rem; color: var(--text-sub); }
+    
+    .code-chip { font-family: monospace; background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; color: #fbbf24; display: inline-block; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .tag-free { background: rgba(148,163,184,0.15); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.08); }
+    .tag-pro { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: #fff; box-shadow: 0 2px 6px rgba(59,130,246,0.35); border: 1px solid rgba(255,255,255,0.2); }
+    .tag-max { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #fff; box-shadow: 0 2px 6px rgba(245,158,11,0.35); border: 1px solid rgba(255,255,255,0.2); }
+    
+    /* Login Overlay */
+    .login-overlay { position: fixed; inset: 0; background: rgba(9,9,11,0.9); backdrop-filter: blur(16px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Toast Notification System */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      min-width: 280px;
+      max-width: 400px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(24, 24, 27, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.3s ease;
+    }
+    .toast.hide {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    .toast-success {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(6, 78, 59, 0.9);
+    }
+    .toast-error {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(127, 29, 29, 0.9);
+    }
+    .toast-info {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(30, 58, 138, 0.9);
+    }
+    .toast-icon {
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .toast-msg {
+      flex: 1;
+      line-height: 1.4;
+    }
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateY(-15px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Modal Dialogs (Confirm & Prompt) */
+    .custom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(14px);
+      z-index: 99990;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .custom-modal-overlay.open {
+      display: flex;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+    .custom-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
+      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .custom-modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .custom-modal-body {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .custom-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .preset-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       ADMIN DASHBOARD RESPONSIVE STYLES FOR ALL DEVICES (Mobile, Tablet, Desktop)
+       ========================================================================== */
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Tablets and Small Desktops (<= 900px) */
+    @media (max-width: 900px) {
+      .container {
+        padding: 16px 12px;
+        gap: 18px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .stat-card {
+        padding: 16px;
+      }
+      .stat-val {
+        font-size: 1.5rem;
+      }
+      .section {
+        padding: 18px;
+        border-radius: 14px;
+      }
+    }
+
+    /* Mobile Phones (<= 640px) */
+    @media (max-width: 640px) {
+      .navbar {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .logo-area {
+        font-size: 1.05rem;
+      }
+      .admin-badge {
+        font-size: 0.68rem;
+        padding: 2px 6px;
+      }
+      .container {
+        padding: 12px 10px;
+        gap: 14px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+      }
+      .stat-val {
+        font-size: 1.3rem;
+      }
+      .stat-lbl {
+        font-size: 0.76rem;
+      }
+      .tabs {
+        gap: 4px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tab-btn {
+        padding: 7px 12px;
+        font-size: 0.8rem;
+      }
+      .section {
+        padding: 14px 12px;
+        border-radius: 12px;
+        gap: 14px;
+      }
+      .section h3 {
+        font-size: 1.02rem;
+        line-height: 1.4;
+      }
+      .form-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .form-group input, .form-group select {
+        width: 100%;
+      }
+      #planCardsContainer {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+      }
+      table {
+        font-size: 0.82rem;
+      }
+      th, td {
+        padding: 9px 10px;
+      }
+      .btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+      .custom-modal-card {
+        padding: 20px 16px;
+        border-radius: 16px;
+      }
+      .login-box {
+        padding: 24px 18px;
+        margin: 0 12px;
+        border-radius: 16px;
+      }
+      .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+      }
+      .toast {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+      }
+    }
+
+    /* Extra Narrow Mobile (<= 380px) */
+    @media (max-width: 380px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .navbar {
+        padding: 10px 12px;
+      }
+      .logo-area span:first-child {
+        font-size: 0.95rem;
+      }
+      .tab-btn {
+        padding: 6px 9px;
+        font-size: 0.75rem;
+      }
+    }
+
+    /* Custom Scrollbar for touch & tables */
+    div[style*="overflow-x: auto"]::-webkit-scrollbar,
+    .tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb,
+    .tabs::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Custom Confirm Modal -->
+  <div class="custom-modal-overlay" id="confirmModalOverlay">
+    <div class="custom-modal-card">
+      <div class="custom-modal-header">
+        <h3 class="custom-modal-title" id="confirmModalTitle">নিশ্চিতকরণ</h3>
+      </div>
+      <div class="custom-modal-body" id="confirmModalBody">
+        আপনি কি নিশ্চিত?
+      </div>
+      <div class="custom-modal-footer">
+        <button type="button" class="btn" style="background: rgba(255,255,255,0.1); color: #fff;" id="confirmModalCancelBtn">বাতিল করুন</button>
+        <button type="button" class="btn btn-danger" id="confirmModalOkBtn">হ্যাঁ, মুছে ফেলুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Prompt Modal (Plan Duration Selection) -->
+  <div class="custom-modal-overlay" id="promptModalOverlay">
+    <div class="custom-modal-card">
+      <div class="custom-modal-header">
+        <h3 class="custom-modal-title" id="promptModalTitle">প্ল্যানের মেয়াদ নির্ধারণ</h3>
+      </div>
+      <div class="custom-modal-body">
+        <span id="promptModalDesc">মেয়াদ (দিন) নির্ধারণ করুন:</span>
+        <div class="preset-chips">
+          <button type="button" class="preset-chip" onclick="setPromptDuration(1)">১ দিন</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(3)">৩ দিন</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(7)">৭ দিন</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(30)">১ মাস (৩০ দিন)</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(90)">৩ মাস (৯০ দিন)</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(180)">৬ মাস (১৮০ দিন)</button>
+          <button type="button" class="preset-chip" onclick="setPromptDuration(365)">১ বছর (৩৬৫ দিন)</button>
+        </div>
+        <input type="number" id="promptModalInput" value="30" min="1" max="3650" style="width: 100%; padding: 10px 14px; font-size: 1rem;" placeholder="দিনের সংখ্যা লিখুন">
+      </div>
+      <div class="custom-modal-footer">
+        <button type="button" class="btn" style="background: rgba(255,255,255,0.1); color: #fff;" id="promptModalCancelBtn">বাতিল</button>
+        <button type="button" class="btn btn-primary" id="promptModalOkBtn">সেভ করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Overlay -->
+  <div class="login-overlay" id="loginOverlay">
+    <form class="login-box" id="adminLoginForm">
+      <h2 style="font-size: 1.4rem; text-align: center;">অ্যাডমিন লগইন</h2>
+      <div class="form-group">
+        <label for="adminEmail">ইমেইল</label>
+        <input type="email" id="adminEmail" required placeholder="admin@example.com">
+      </div>
+      <div class="form-group">
+        <label for="adminPassword">পাসওয়ার্ড</label>
+        <input type="password" id="adminPassword" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary" style="padding: 12px; font-size: 1rem;">প্রবেশ করুন</button>
+      <div id="loginError" style="color: var(--danger); font-size: 0.85rem; text-align: center;"></div>
+    </form>
+  </div>
+
+  <div class="navbar">
+    <div class="logo-area">
+      <span>Alokpoth AI</span>
+      <span class="admin-badge">Admin Dashboard</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span id="adminName" style="font-size: 0.9rem; color: var(--text-sub);"></span>
+      <button type="button" class="btn btn-danger" id="logoutBtn">লগআউট</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Top Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-val" id="statTotalUsers">0</span>
+        <span class="stat-lbl">মোট ইউজার</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statProUsers">0</span>
+        <span class="stat-lbl">Pro সাবস্ক্রাইবার</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statMaxUsers">0</span>
+        <span class="stat-lbl">Max সাবস্ক্রাইবার</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statRedeemCodes">0</span>
+        <span class="stat-lbl">রিডিম কোড (ব্যবহৃত / মোট)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statMessages">0</span>
+        <span class="stat-lbl">মোট মেসেজ হিস্ট্রি</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-target="secUsers">ইউজার ম্যানেজমেন্ট</button>
+      <button type="button" class="tab-btn" data-target="secPlans">ডাইনামিক প্ল্যান সেটিংস</button>
+      <button type="button" class="tab-btn" data-target="secRedeem">রিডিম কোড জেনারেটর</button>
+      <button type="button" class="tab-btn" data-target="secModels">মডেল সেটিংস</button>
+    </div>
+
+    <!-- Section 1: User Management -->
+    <div class="section active" id="secUsers">
+      <h3>ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ</h3>
+      <div style="margin-bottom: 14px; display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="userSearchInput" placeholder="ইউজার খুঁজুন (নাম, ইমেইল বা প্ল্যান)..." style="flex: 1; max-width: 340px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.85rem;">
+        <span id="userCountBadge" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>নাম</th>
+              <th>ইমেইল</th>
+              <th>বর্তমান প্ল্যান</th>
+              <th>সাবস্ক্রিপশন মেয়াদ</th>
+              <th>স্ট্যাটাস</th>
+              <th>অ্যাকশন (প্ল্যান পরিবর্তন ও ব্লক)</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="6" style="text-align: center;">লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: Dynamic Plan Editing -->
+    <div class="section" id="secPlans">
+      <h3>ডাইনামিক সাবস্ক্রিপশন লিমিট ও রেট-লিমিটিং পরিবর্তন</h3>
+      <div id="planCardsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- Section 3: Redeem Code Generator -->
+    <div class="section" id="secRedeem">
+      <h3>রিডিম কোড জেনারেটর (Single & Bulk)</h3>
+      <form id="generateCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 14px;">
+        <div class="form-group">
+          <label>প্ল্যান বেছে নিন</label>
+          <select id="codePlan">
+            <option value="Pro">Pro Plan</option>
+            <option value="Max">Max Plan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>মেয়াদ</label>
+          <select id="codeDuration">
+            <option value="1">1 দিন</option>
+            <option value="3">3 দিন</option>
+            <option value="7">7 দিন</option>
+            <option value="30" selected>1 মাস (30 দিন)</option>
+            <option value="90">3 মাস (90 দিন)</option>
+            <option value="180">6 মাস (180 দিন)</option>
+            <option value="365">1 বছর (365 দিন)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>সংখ্যা (কয়টি কোড বানাবেন)</label>
+          <input type="number" id="codeCount" value="1" min="1" max="100">
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 42px;">কোড জেনারেট করুন</button>
+      </form>
+
+      <h4 style="margin-top: 16px;">বিদ্যমান রিডিম কোডসমূহ</h4>
+      <div style="overflow-x: auto; max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>কোড</th>
+              <th>প্ল্যান</th>
+              <th>মেয়াদ</th>
+              <th>স্ট্যাটাস</th>
+              <th>ব্যবহারকারী</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="redeemTableBody">
+            <tr><td colspan="6" style="text-align: center;">লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 4: Model Settings -->
+    <div class="section" id="secModels">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h3>AI মডেল সেটিংস ও কনফিগারেশন</h3>
+      </div>
+
+      <!-- Add New Model Form -->
+      <form id="addModelForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 14px; display: flex; flex-direction: column; gap: 14px;">
+        <h4 style="color: var(--accent); font-size: 1rem;">+ নতুন AI মডেল যোগ করুন</h4>
+        <div class="form-row">
+          <div class="form-group" style="flex: 1; min-width: 180px;">
+            <label>মডেল আইডি (Model ID) *</label>
+            <input type="text" id="newModelId" required placeholder="e.g. gpt-4o-mini">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 180px;">
+            <label>প্রদর্শিত নাম (Display Name) *</label>
+            <input type="text" id="newModelName" required placeholder="e.g. Alo GPT-4o Mini">
+          </div>
+          <div class="form-group" style="flex: 1.5; min-width: 220px;">
+            <label>API Base URL</label>
+            <input type="text" id="newModelUrl" placeholder="https://api.openai.com/v1/chat/completions">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 160px;">
+            <label>API Key</label>
+            <input type="password" id="newModelKey" placeholder="sk-...">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="newModelPrem"> <span class="tag tag-pro">PRO</span> ব্যাজ
+            </label>
+            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="newModelEff"> <span class="tag tag-max">MAX</span> ব্যাজ
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding: 8px 20px;">+ মডেল যোগ করুন</button>
+        </div>
+      </form>
+
+      <div style="overflow-x: auto; margin-top: 8px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 70px; text-align: center;">ক্রম</th>
+              <th>মডেল আইডি</th>
+              <th>প্রদর্শিত নাম</th>
+              <th>API Base URL</th>
+              <th>API Key</th>
+              <th>ব্যাজ (Pro / Max)</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="modelTableBody">
+            <tr><td colspan="7" style="text-align: center;">লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin + "/api";
+    let token = localStorage.getItem("alokpoth_admin_token") || null;
+    let currentModelsList = [];
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const adminLoginForm = document.getElementById("adminLoginForm");
+    const loginError = document.getElementById("loginError");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    /* Toast Notification */
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      
+      const icon = type === "success" ? "✓" : (type === "error" ? "✕" : "ℹ");
+      toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-msg">${message}</div>
+      `;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add("hide");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    /* Custom Confirm Modal */
+    function customConfirm(message, title = "নিশ্চিতকরণ") {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById("confirmModalOverlay");
+        const titleEl = document.getElementById("confirmModalTitle");
+        const bodyEl = document.getElementById("confirmModalBody");
+        const okBtn = document.getElementById("confirmModalOkBtn");
+        const cancelBtn = document.getElementById("confirmModalCancelBtn");
+
+        titleEl.textContent = title;
+        bodyEl.textContent = message;
+        overlay.classList.add("open");
+
+        function onBackdrop(e) { if (e.target === overlay) { cleanup(); resolve(false); } }
+        function onKey(e) { if (e.key === "Escape") { cleanup(); resolve(false); } }
+
+        function cleanup() {
+          overlay.classList.remove("open");
+          okBtn.removeEventListener("click", onOk);
+          cancelBtn.removeEventListener("click", onCancel);
+          overlay.removeEventListener("click", onBackdrop);
+          document.removeEventListener("keydown", onKey);
+        }
+
+        function onOk() { cleanup(); resolve(true); }
+        function onCancel() { cleanup(); resolve(false); }
+
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+        overlay.addEventListener("click", onBackdrop);
+        document.addEventListener("keydown", onKey);
+      });
+    }
+
+    /* Custom Prompt Modal (Plan Duration Selection) */
+    function customPrompt(title, defaultValue = "30", description = "মেয়াদ (দিন) লিখুন:") {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById("promptModalOverlay");
+        const titleEl = document.getElementById("promptModalTitle");
+        const descEl = document.getElementById("promptModalDesc");
+        const inputEl = document.getElementById("promptModalInput");
+        const okBtn = document.getElementById("promptModalOkBtn");
+        const cancelBtn = document.getElementById("promptModalCancelBtn");
+
+        titleEl.textContent = title;
+        descEl.textContent = description;
+        inputEl.value = defaultValue;
+        overlay.classList.add("open");
+        setTimeout(() => inputEl.focus(), 50);
+
+        function onBackdrop(e) { if (e.target === overlay) { cleanup(); resolve(null); } }
+        function onKey(e) {
+          if (e.key === "Escape") { cleanup(); resolve(null); }
+          else if (e.key === "Enter") { e.preventDefault(); onOk(); }
+        }
+
+        function cleanup() {
+          overlay.classList.remove("open");
+          okBtn.removeEventListener("click", onOk);
+          cancelBtn.removeEventListener("click", onCancel);
+          overlay.removeEventListener("click", onBackdrop);
+          document.removeEventListener("keydown", onKey);
+        }
+
+        function onOk() {
+          const val = inputEl.value.trim();
+          cleanup();
+          resolve(val || null);
+        }
+        function onCancel() {
+          cleanup();
+          resolve(null);
+        }
+
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+        overlay.addEventListener("click", onBackdrop);
+        document.addEventListener("keydown", onKey);
+      });
+    }
+
+
+    function setPromptDuration(days) {
+      const inputEl = document.getElementById("promptModalInput");
+      if (inputEl) inputEl.value = days;
+    }
+
+    async function checkAuth() {
+      if (token) {
+        const storedName = localStorage.getItem("alokpoth_admin_name");
+        if (storedName) document.getElementById('adminName').textContent = storedName;
+
+        try {
+          const res = await fetch(`${API_BASE}/admin/stats`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (res.ok) {
+            loginOverlay.style.display = "none";
+            loadAllData();
+            return;
+          }
+        } catch (e) {}
+
+        token = null;
+        localStorage.removeItem("alokpoth_admin_token");
+        localStorage.removeItem("alokpoth_admin_name");
+        loginOverlay.style.display = "flex";
+      } else {
+        loginOverlay.style.display = "flex";
+      }
+    }
+    checkAuth();
+
+    adminLoginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.textContent = "";
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (data.user.role !== 'admin') {
+            loginError.textContent = "অ্যাডমিন এক্সেস অনুমতি নেই";
+            return;
+          }
+          token = data.token;
+          if (data.user && data.user.name) {
+            document.getElementById('adminName').textContent = data.user.name;
+            localStorage.setItem("alokpoth_admin_name", data.user.name);
+          }
+          localStorage.setItem("alokpoth_admin_token", token);
+          loginOverlay.style.display = "none";
+          showToast("সফলভাবে লগইন হয়েছে!", "success");
+          loadAllData();
+        } else {
+          loginError.textContent = data.error || "অ্যাডমিন এক্সেস অনুমতি নেই";
+        }
+      } catch (err) {
+        loginError.textContent = "সার্ভারে সংযোগ করা সম্ভব হয়নি";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      token = null;
+      localStorage.removeItem("alokpoth_admin_token");
+      loginOverlay.style.display = "flex";
+      showToast("লগআউট করা হয়েছে", "info");
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.target).classList.add("active");
+      });
+    });
+
+    async function authFetch(url, opts = {}) {
+      opts.headers = {
+        ...opts.headers,
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+      const res = await fetch(url, opts);
+      if (res.status === 401 || res.status === 403) {
+        token = null;
+        localStorage.removeItem("alokpoth_admin_token");
+        loginOverlay.style.display = "flex";
+      }
+      return res;
+    }
+
+    function loadAllData() {
+      loadStats();
+      loadUsers();
+      loadPlans();
+      loadRedeemCodes();
+      loadModels();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/stats`);
+        const data = await res.json();
+        if (data.success && data.stats) {
+          const s = data.stats;
+          const totalUsers = s.totalUsers ?? s.total_users ?? 0;
+          const proUsers = s.proUsers ?? s.pro_users ?? 0;
+          const maxUsers = s.maxUsers ?? s.max_users ?? 0;
+          const usedCodes = s.usedRedeemCodes ?? s.used_codes ?? s.used_redeem_codes ?? 0;
+          const totalCodes = s.totalRedeemCodes ?? s.total_codes ?? s.total_redeem_codes ?? 0;
+          const totalMessages = s.totalMessages ?? s.total_messages ?? 0;
+
+          document.getElementById("statTotalUsers").textContent = totalUsers;
+          document.getElementById("statProUsers").textContent = proUsers;
+          document.getElementById("statMaxUsers").textContent = maxUsers;
+          document.getElementById("statRedeemCodes").textContent = `${usedCodes} / ${totalCodes}`;
+          document.getElementById("statMessages").textContent = totalMessages;
+        }
+      } catch (err) {
+        console.error("Stats load error:", err);
+      }
+    }
+
+    function renderModelsTable(models) {
+      const tbody = document.getElementById("modelTableBody");
+      if (!tbody) return;
+      currentModelsList = models;
+      tbody.innerHTML = "";
+      models.forEach((m, idx) => {
+        const mId = m.id || m.model_id;
+        const isFirst = idx === 0;
+        const isLast = idx === models.length - 1;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="text-align: center;">
+            <div style="display: flex; gap: 4px; justify-content: center;">
+              <button type="button" class="btn-icon" title="উপরে নিন" onclick="moveModel('${mId}', 'up')" ${isFirst ? 'disabled' : ''}>▲</button>
+              <button type="button" class="btn-icon" title="নিচে নিন" onclick="moveModel('${mId}', 'down')" ${isLast ? 'disabled' : ''}>▼</button>
+            </div>
+          </td>
+          <td><div class="code-chip" style="font-size: 0.75rem;">${mId}</div></td>
+          <td><input type="text" id="model_name_${mId}" value="${m.name || ''}" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" id="model_url_${mId}" value="${m.base_url || ''}" placeholder="API Base URL" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="password" id="model_key_${mId}" value="${m.api_key || ''}" placeholder="API Key" style="width: 120px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td>
+            <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 3px;"><input type="checkbox" id="model_prem_${mId}" ${m.premium ? 'checked' : ''}> <span class="tag tag-pro" style="padding: 1px 5px; font-size: 0.65rem;">PRO</span></label><br>
+            <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"><input type="checkbox" id="model_eff_${mId}" ${m.efficient ? 'checked' : ''}> <span class="tag tag-max" style="padding: 1px 5px; font-size: 0.65rem;">MAX</span></label>
+          </td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-success" style="padding: 6px 12px; font-size: 0.78rem;" onclick="saveModelConfig('${mId}')">Save</button>
+              <button type="button" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.78rem;" onclick="deleteModel('${mId}')" title="মুছে ফেলুন">মুছুন</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadModels() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models`);
+        const data = await res.json();
+        if (data.success && data.models) {
+          renderModelsTable(data.models);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function moveModel(modelId, direction) {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models/reorder`, {
+          method: "PUT",
+          body: JSON.stringify({ modelId, direction })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "মডেলের ক্রম পরিবর্তন হয়েছে", "info");
+          if (data.models) {
+            renderModelsTable(data.models);
+          } else {
+            loadModels();
+          }
+        } else {
+          showToast(data.error || "ক্রম পরিবর্তন ব্যর্থ হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
+      }
+    }
+
+    async function saveModelConfig(modelId) {
+      const name = document.getElementById(`model_name_${modelId}`).value.trim();
+      const base_url = document.getElementById(`model_url_${modelId}`).value.trim();
+      const api_key = document.getElementById(`model_key_${modelId}`).value.trim();
+      const premium = document.getElementById(`model_prem_${modelId}`).checked;
+      const efficient = document.getElementById(`model_eff_${modelId}`).checked;
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
+          method: "PUT",
+          body: JSON.stringify({ name, base_url, api_key, premium, efficient })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("মডেল কনফিগারেশন আপডেট হয়েছে!", "success");
+          loadModels();
+        } else {
+          showToast(data.error || "আপডেট করতে সমস্যা হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("আপডেট করতে সমস্যা হয়েছে", "error");
+      }
+    }
+
+    async function deleteModel(modelId) {
+      const confirmed = await customConfirm(`আপনি কি নিশ্চিত '${modelId}' মডেলটি মুছে ফেলতে চান?`, "মডেল মুছে ফেলা");
+      if (!confirmed) return;
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
+          method: "DELETE"
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("মডেল মুছে ফেলা হয়েছে", "info");
+          loadModels();
+        } else {
+          showToast(data.error || "মডেল মুছতে সমস্যা হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      }
+    }
+
+    document.getElementById("addModelForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const model_id = document.getElementById("newModelId").value.trim();
+      const name = document.getElementById("newModelName").value.trim();
+      const base_url = document.getElementById("newModelUrl").value.trim();
+      const api_key = document.getElementById("newModelKey").value.trim();
+      const premium = document.getElementById("newModelPrem").checked;
+      const efficient = document.getElementById("newModelEff").checked;
+
+      if (!model_id || !name) {
+        showToast("মডেল আইডি এবং নাম অবশ্যই পূরণ করুন", "error");
+        return;
+      }
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models`, {
+          method: "POST",
+          body: JSON.stringify({ model_id, name, base_url, api_key, premium, efficient })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("নতুন মডেল সফলভাবে যোগ করা হয়েছে!", "success");
+          document.getElementById("addModelForm").reset();
+          loadModels();
+        } else {
+          showToast(data.error || "মডেল যোগ করতে সমস্যা হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
+      }
+    });
+
+    const newModelPrem = document.getElementById("newModelPrem");
+    const newModelEff = document.getElementById("newModelEff");
+    if (newModelPrem && newModelEff) {
+      newModelPrem.addEventListener("change", (e) => {
+        if (e.target.checked) newModelEff.checked = false;
+      });
+      newModelEff.addEventListener("change", (e) => {
+        if (e.target.checked) newModelPrem.checked = false;
+      });
+    }
+
+    let allLoadedUsers = [];
+
+    function renderUserTable(users) {
+      const tbody = document.getElementById("userTableBody");
+      const countBadge = document.getElementById("userCountBadge");
+      if (countBadge) countBadge.textContent = `মোট ${users.length} জন`;
+
+      if (!users || !users.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">কোনো ইউজার পাওয়া যায়নি</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = "";
+      users.forEach(u => {
+        const plan = u.subscription?.plan_name || 'Free';
+        const planBadge = plan === "Max" ? '<span class="tag tag-max">Max</span>' : (plan === "Pro" ? '<span class="tag tag-pro">Pro</span>' : '<span class="tag tag-free">Free</span>');
+        const exp = u.subscription?.expires_at ? new Date(u.subscription.expires_at).toLocaleDateString("bn-BD") : "সীমাহীন";
+        
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${u.name}</strong> ${u.role === 'admin' ? '<span class="admin-badge" style="font-size:0.65rem;">ADMIN</span>' : ''}</td>
+          <td>${u.email}</td>
+          <td>${planBadge}</td>
+          <td>${exp}</td>
+          <td>${u.is_blocked ? '<span style="color:var(--danger)">ব্লকড</span>' : '<span style="color:var(--success)">সক্রিয়</span>'}</td>
+          <td>
+            <select onchange="updateUserPlan('${u._id}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+              <option value="">প্ল্যান সেট করুন</option>
+              <option value="Free">Free (অনন্তকাল)</option>
+              <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
+              <option value="Max">Max (কাস্টম মেয়াদ)</option>
+            </select>
+            <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${u._id}', ${!u.is_blocked})" style="margin-left: 8px;">
+              ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/users`);
+        const data = await res.json();
+        if (!data.success || !data.users) {
+          renderUserTable([]);
+          return;
+        }
+        allLoadedUsers = data.users;
+        filterUsers();
+      } catch (err) {
+        renderUserTable([]);
+      }
+    }
+
+    function filterUsers() {
+      const q = (document.getElementById("userSearchInput")?.value || "").toLowerCase().trim();
+      if (!q) {
+        renderUserTable(allLoadedUsers);
+        return;
+      }
+      const filtered = allLoadedUsers.filter(u => 
+        (u.name && u.name.toLowerCase().includes(q)) || 
+        (u.email && u.email.toLowerCase().includes(q)) || 
+        (u.subscription?.plan_name && u.subscription.plan_name.toLowerCase().includes(q))
+      );
+      renderUserTable(filtered);
+    }
+
+    document.getElementById("userSearchInput")?.addEventListener("input", filterUsers);
+
+    async function updateUserPlan(userId, plan_name) {
+      if (!plan_name) return;
+      let duration = 30;
+      if (plan_name && plan_name !== "Free") {
+        const dStr = await customPrompt(`${plan_name} প্ল্যানের মেয়াদ নির্ধারণ`, "30", `${plan_name} প্ল্যানের জন্য মেয়াদ (দিন) সিলেক্ট বা টাইপ করুন:`);
+        if (!dStr) {
+          loadUsers();
+          return;
+        }
+        duration = parseInt(dStr, 10);
+        if (isNaN(duration) || duration <= 0) {
+          showToast("সঠিক দিনের সংখ্যা লিখুন", "error");
+          loadUsers();
+          return;
+        }
+      }
+      
+      const res = await authFetch(`${API_BASE}/admin/users/${userId}/plan`, {
+        method: "PUT",
+        body: JSON.stringify({ plan_name, duration_days: duration })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("ইউজারের প্ল্যান আপডেট হয়েছে!", "success");
+        loadUsers();
+        loadStats();
+      } else {
+        showToast(data.error || "প্ল্যান আপডেট ব্যর্থ হয়েছে", "error");
+        loadUsers();
+      }
+    }
+
+    async function toggleUserBlock(userId, is_blocked) {
+      const action = is_blocked ? "ব্লক" : "আনব্লক";
+      const confirmed = await customConfirm(`আপনি কি নিশ্চিত এই ইউজারকে ${action} করতে চান?`, `${action} নিশ্চিতকরণ`);
+      if (!confirmed) return;
+      try {
+        const res = await authFetch(`${API_BASE}/admin/users/${userId}/block`, {
+          method: "PUT",
+          body: JSON.stringify({ is_blocked })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(is_blocked ? "ইউজার ব্লক করা হয়েছে" : "ইউজার আনব্লক করা হয়েছে", "success");
+          loadUsers();
+        } else {
+          showToast(data.error || "অপারেশন ব্যর্থ হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভার ত্রুটি", "error");
+      }
+    }
+
+    async function loadPlans() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/plans`);
+        const data = await res.json();
+        const container = document.getElementById("planCardsContainer");
+        if (!data.success || !data.plans) return;
+        container.innerHTML = "";
+        data.plans.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "stat-card";
+          card.style.gap = "14px";
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h4 style="font-size: 1.1rem; color: var(--accent);">${p.displayName || p.name}</h4>
+              <span class="tag tag-${p.name.toLowerCase()}">${p.name}</span>
+            </div>
+            <div class="form-group">
+              <label>মেসেজ লিমিট (Message Limit)</label>
+              <input type="number" id="limit_${p.name}" value="${p.message_limit}">
+            </div>
+            <div class="form-group">
+              <label>সময়সীমা (Window Hours)</label>
+              <input type="number" id="window_${p.name}" value="${p.window_hours}">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="savePlanLimits('${p.name}')" style="margin-top: 10px;">সংরক্ষণ করুন</button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {}
+    }
+
+    async function savePlanLimits(planName) {
+      const message_limit = parseInt(document.getElementById(`limit_${planName}`).value, 10);
+      const window_hours = parseInt(document.getElementById(`window_${planName}`).value, 10);
+
+      if (isNaN(message_limit) || message_limit <= 0) {
+        return showToast("সঠিক মেসেজ লিমিট (ধনাত্মক সংখ্যা) লিখুন", "error");
+      }
+      if (isNaN(window_hours) || window_hours <= 0) {
+        return showToast("সঠিক সময়সীমা (ঘণ্টা) লিখুন", "error");
+      }
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/plans/${planName}`, {
+          method: "PUT",
+          body: JSON.stringify({ message_limit, window_hours })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "প্ল্যান আপডেট হয়েছে", "success");
+          loadPlans();
+        } else {
+          showToast(data.error || "প্ল্যান আপডেট ব্যর্থ হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভার ত্রুটি", "error");
+      }
+    }
+
+    document.getElementById("generateCodeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const plan_name = document.getElementById("codePlan").value;
+      const duration_days = document.getElementById("codeDuration").value;
+      const count = document.getElementById("codeCount").value;
+
+      const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {
+        method: "POST",
+        body: JSON.stringify({ plan_name, duration_days, count })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || "রিডিম কোড জেনারেট হয়েছে!", "success");
+        loadRedeemCodes();
+        loadStats();
+      } else {
+        showToast(data.error || "কোড জেনারেট করতে সমস্যা হয়েছে", "error");
+      }
+    });
+
+    async function loadRedeemCodes() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/redeem/list`);
+        const data = await res.json();
+        const tbody = document.getElementById("redeemTableBody");
+        if (!data.success || !data.codes || !data.codes.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">কোনো কোড নেই</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = "";
+        data.codes.forEach(c => {
+          const status = c.is_used ? `<span style="color:var(--danger)">ব্যবহৃত</span>` : `<span style="color:var(--success)">উপলব্ধ</span>`;
+          const usedBy = c.used_by ? `${c.used_by.name} (${c.used_by.email})` : '—';
+          
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <span class="code-chip" style="cursor:pointer;" onclick="navigator.clipboard.writeText('${c.code}');showToast('কোড কপি হয়েছে: ${c.code}','success');" title="কপি করতে ক্লিক করুন">${c.code}</span>
+              <button type="button" class="btn" style="padding:2px 8px; font-size:11px; margin-left:4px;" onclick="navigator.clipboard.writeText('${c.code}');showToast('কোড কপি হয়েছে: ${c.code}','success');">📋 কপি</button>
+            </td>
+            <td><strong>${c.plan_name}</strong></td>
+            <td>${c.duration_days} দিন</td>
+            <td>${status}</td>
+            <td>${usedBy}</td>
+            <td>
+              <button type="button" class="btn btn-danger" onclick="deleteCode('${c._id}')">মুছুন</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteCode(codeId) {
+      const confirmed = await customConfirm("আপনি কি নিশ্চিত এই কোডটি মুছে ফেলতে চান?", "রিডিম কোড মুছে ফেলা");
+      if (!confirmed) return;
+      const res = await authFetch(`${API_BASE}/admin/redeem/${codeId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        showToast("রিডিম কোড মুছে ফেলা হয়েছে", "info");
+        loadRedeemCodes();
+        loadStats();
+      } else {
+        showToast(data.error || "মুছতে সমস্যা হয়েছে", "error");
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".custom-modal-overlay.open").forEach(o => o.classList.remove("open"));
+      }
+    });
+  </script>
+</body>
+</html>

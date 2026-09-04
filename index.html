@@ -1,0 +1,4596 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#09090b">
+  <title>Alokpoth AI</title>
+  
+  <script>
+    (function() {
+      const saved = localStorage.getItem("alokpoth-theme");
+      if (saved) {
+        if (saved !== "dark") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      /* Premium Dark Theme (Default) */
+      --bg-main: #09090b;
+      --bg-input: #18181b;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --btn-send: #ffffff;
+      --btn-send-disabled: #334155;
+      --bubble-user-bg: linear-gradient(135deg, #27272a 0%, #18181b 100%);
+      --accent-color: #3b82f6;
+      --glass-bg: rgba(9, 9, 11, 0.8);
+      --download-btn-bg: rgba(255, 255, 255, 0.08);
+      --download-btn-bg-hover: rgba(255, 255, 255, 0.15);
+      --download-btn-text: #e2e8f0;
+      --download-btn-text-hover: #ffffff;
+      --border: var(--border-color);
+      --surface: var(--bg-input);
+      --text-muted: var(--text-sub);
+      --text-primary: var(--text-main);
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(140, 140, 140, 0.3) !important;
+      border-radius: 999px !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(140, 140, 140, 0.5) !important;
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent !important;
+    }
+
+    :root[data-theme="light"] {
+      /* Premium Light Theme */
+      --bg-main: #f9fafb;
+      --bg-input: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --btn-send: #111827;
+      --btn-send-disabled: #d1d5db;
+      --bubble-user-bg: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+      --accent-color: #2563eb;
+      --glass-bg: rgba(249, 250, 251, 0.85);
+      --download-btn-bg: rgba(0, 0, 0, 0.06);
+      --download-btn-bg-hover: rgba(0, 0, 0, 0.12);
+      --download-btn-text: #374151;
+      --download-btn-text-hover: #111827;
+    }
+
+    :root[data-theme="oled"] {
+      /* Pure Black / Power Saving Theme */
+      --bg-main: #000000;
+      --bg-input: #000000;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #e5e5e5;
+      --text-sub: #737373;
+      --btn-send: #ffffff;
+      --btn-send-disabled: #262626;
+      --bubble-user-bg: #0f0f0f;
+      --accent-color: #3b82f6;
+      --glass-bg: rgba(0, 0, 0, 0.95);
+      --download-btn-bg: rgba(255, 255, 255, 0.05);
+      --download-btn-bg-hover: rgba(255, 255, 255, 0.1);
+      --download-btn-text: #a3a3a3;
+      --download-btn-text-hover: #ffffff;
+      --sheen-base: rgba(255, 255, 255, 0.04);
+      --sheen-base-hover: rgba(255, 255, 255, 0.08);
+    }
+
+    :root[data-theme="eyecare"] {
+      /* Eye Care / Reading Theme */
+      --bg-main: #f5eedc;
+      --bg-input: #fbf7ef;
+      --border-color: rgba(107, 78, 51, 0.15);
+      --text-main: #4a3b2c;
+      --text-sub: #7a6b5c;
+      --btn-send: #4a3b2c;
+      --btn-send-disabled: #d5c8b5;
+      --bubble-user-bg: linear-gradient(135deg, #eaddc5 0%, #f5eedc 100%);
+      --accent-color: #d97706;
+      --glass-bg: rgba(245, 238, 220, 0.85);
+      --download-btn-bg: rgba(74, 59, 44, 0.08);
+      --download-btn-bg-hover: rgba(74, 59, 44, 0.15);
+      --download-btn-text: #5c4d3e;
+      --download-btn-text-hover: #291e12;
+      --sheen-base: rgba(107, 78, 51, 0.06);
+      --sheen-base-hover: rgba(107, 78, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      height: 100dvh;
+      height: calc(var(--app-height, 100vh));
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Navbar with Glassmorphism */
+    .navbar {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .brand-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.02em;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .brand-menu-btn {
+      border: none;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: background-color 0.2s;
+    }
+
+    .brand-menu-btn:hover {
+      background-color: rgba(128, 128, 128, 0.15);
+    }
+
+    .brand-menu-sheet {
+      max-width: 320px;
+    }
+
+    .brand-menu-list {
+      padding: 12px;
+    }
+
+    .brand-menu-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .brand-menu-info {
+      cursor: default;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      background-color: rgba(128, 128, 128, 0.05);
+    }
+
+    .brand-menu-info:hover {
+      background-color: rgba(128, 128, 128, 0.05);
+    }
+
+    .brand-menu-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-menu-item svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* 4-State Theme Icons */
+    .brand-menu-item .icon-sun, 
+    .brand-menu-item .icon-moon, 
+    .brand-menu-item .icon-oled, 
+    .brand-menu-item .icon-eyecare { display: none; }
+    
+    :root:not([data-theme="light"]):not([data-theme="oled"]):not([data-theme="eyecare"]) .brand-menu-item .icon-moon { display: block; }
+    :root[data-theme="light"] .brand-menu-item .icon-sun { display: block; }
+    :root[data-theme="oled"] .brand-menu-item .icon-oled { display: block; }
+    :root[data-theme="eyecare"] .brand-menu-item .icon-eyecare { display: block; }
+
+    .model-selector {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-color);
+      font-family: inherit;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 999px;
+      transition: all 0.2s;
+    }
+
+    .model-selector .chevron {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-sub);
+    }
+
+    /* ===== Liquid Glass ব্লার ইফেক্ট ===== */
+    .sheen-surface {
+      position: relative;
+      background: var(--sheen-base, rgba(128, 128, 128, 0.10));
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      isolation: isolate;
+    }
+    :root[data-theme="light"] .sheen-surface {
+      background: var(--sheen-base, rgba(0, 0, 0, 0.04));
+    }
+    .sheen-surface:hover {
+      background: var(--sheen-base-hover, rgba(128, 128, 128, 0.16));
+    }
+    :root[data-theme="light"] .sheen-surface:hover {
+      background: var(--sheen-base-hover, rgba(0, 0, 0, 0.07));
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      background-color: var(--bg-input);
+      border-radius: 32px 32px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+    }
+
+    .modal-overlay.open .modal-sheet {
+      transform: translateY(0);
+    }
+
+    @media (min-width: 560px) {
+      .modal-overlay { align-items: center; }
+      .modal-sheet {
+        border-radius: 32px;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 80vh;
+        transform: scale(0.95);
+      }
+      .modal-overlay.open .modal-sheet { transform: scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .modal-close {
+      background: rgba(128, 128, 128, 0.1);
+      border: none;
+      color: var(--text-sub);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(128, 128, 128, 0.2);
+      color: var(--text-main);
+    }
+
+    .model-list {
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 370px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+    }
+    .model-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .model-list::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .model-list::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    .model-list::-webkit-scrollbar-thumb {
+      background: rgba(140, 140, 140, 0.3) !important;
+      border-radius: 999px !important;
+    }
+    .model-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(140, 140, 140, 0.5) !important;
+    }
+
+    .model-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .model-card:hover {
+      background-color: rgba(128, 128, 128, 0.08);
+    }
+
+    .model-card.selected {
+      background-color: rgba(128, 128, 128, 0.12);
+      border-color: var(--border-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .model-card-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .model-card-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      line-height: 1.1;
+      flex-shrink: 0;
+      margin-left: 6px;
+      vertical-align: middle;
+      user-select: none;
+    }
+
+    .badge-pro {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .badge-max {
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .trigger-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .model-card-provider {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .model-card-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .model-latency {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      font-variant-numeric: tabular-nums;
+      background: rgba(128,128,128,0.1);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .status-dot.online { background-color: #10b981; color: #10b981; }
+    .status-dot.degraded { background-color: #f59e0b; color: #f59e0b; }
+    .status-dot.slow { background-color: #ef4444; color: #ef4444; }
+    .status-dot.offline { background-color: #6b7280; color: #6b7280; }
+    .status-dot.checking {
+      background-color: #3b82f6; color: #3b82f6;
+      animation: statusPulse 1s ease-in-out infinite;
+    }
+
+    .generated-image-wrap {
+      max-width: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .generated-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 24px;
+      display: block;
+    }
+    .image-download-btn {
+      display: flex; align-items: center; gap: 6px; align-self: center; justify-content: center;
+      --sheen-base: var(--download-btn-bg);
+      --sheen-base-hover: var(--download-btn-bg-hover);
+      border: none; color: var(--download-btn-text); font-size: 0.85rem; font-family: inherit; font-weight: 500;
+      padding: 10px 20px; border-radius: 999px; cursor: pointer; transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .image-download-btn:hover { color: var(--download-btn-text-hover); background-color: rgba(128, 128, 128, 0.2); }
+    .image-download-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
+    }
+
+    .trigger-status-dot {
+      margin-right: 4px;
+    }
+
+    .latency-spinner {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(128,128,128,0.3);
+      border-top-color: var(--accent-color);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chat-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-container::-webkit-scrollbar-thumb {
+      background-color: rgba(128, 128, 128, 0.2);
+      border-radius: 6px;
+    }
+
+    .chat-inner {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      flex: 1;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 280px;
+      color: var(--text-main);
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      gap: 16px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .empty-state span {
+      font-size: 0.95rem;
+      font-weight: 400;
+      color: var(--text-sub);
+    }
+
+    .quick-prompts-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 12px;
+      max-width: 650px;
+      padding: 0 10px;
+    }
+    .quick-prompt-chip {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .quick-prompt-chip:hover {
+      background-color: rgba(128, 128, 128, 0.15);
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+
+    .message-row {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .message-row.ai {
+      justify-content: flex-start;
+    }
+
+    .user-bubble {
+      background: var(--bubble-user-bg);
+      color: var(--text-main);
+      padding: 14px 22px;
+      border-radius: 32px 32px 6px 32px;
+      max-width: 85%;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-color);
+    }
+
+    .user-bubble-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      max-width: 85%;
+    }
+
+    @media (max-width: 600px) {
+      .user-bubble, .user-bubble-col { max-width: 92%; }
+    }
+
+    .bubble-image-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .bubble-image-thumb {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .user-bubble-col .user-bubble {
+      max-width: 100%;
+    }
+
+    .edit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 999px;
+      color: var(--text-sub);
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s;
+    }
+
+    .message-row.user:hover .edit-btn { opacity: 1; }
+    
+    @media (hover: none) {
+      .edit-btn { opacity: 1; }
+    }
+
+    .edit-btn:hover {
+      background-color: rgba(128, 128, 128, 0.15);
+      color: var(--text-main);
+    }
+
+    .edit-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .ai-bubble-container {
+      display: flex;
+      gap: 16px;
+      max-width: 100%;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .ai-bubble {
+      flex: 1;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .ai-bubble img { max-width: 100%; height: auto; border-radius: 24px; margin: 8px 0; }
+    .ai-bubble p { margin: 0 0 14px; }
+    .ai-bubble p:last-child { margin-bottom: 0; }
+    .ai-bubble ul, .ai-bubble ol { margin: 0 0 14px; padding-left: 24px; }
+    .ai-bubble li { margin-bottom: 8px; }
+    .ai-bubble strong { font-weight: 700; color: var(--text-main); }
+    .ai-bubble em { font-style: italic; }
+    .ai-bubble h1, .ai-bubble h2, .ai-bubble h3 {
+      margin: 20px 0 12px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+    .ai-bubble h1 { font-size: 1.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+    .ai-bubble h2 { font-size: 1.25rem; }
+    .ai-bubble h3 { font-size: 1.15rem; }
+    .ai-bubble code {
+      background-color: rgba(128, 128, 128, 0.15);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      color: var(--accent-color);
+    }
+
+    .code-block-wrapper { 
+      position: relative; 
+      margin: 12px 0 16px; 
+      max-width: 100%; 
+      min-width: 0; 
+      overflow: hidden; 
+      border-radius: 20px; 
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: #0f111a;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    }
+
+    .ai-bubble pre {
+      background-color: transparent;
+      padding: 18px;
+      padding-top: 60px; /* Increased to ensure button has space */
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 480px;
+      -webkit-overflow-scrolling: touch;
+      margin: 0;
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      border: none;
+      box-shadow: none;
+    }
+
+    .ai-bubble pre::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .ai-bubble pre::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+    }
+
+    .ai-bubble pre code {
+      background: none;
+      padding: 0;
+      white-space: pre;
+      overflow-wrap: normal;
+      word-break: normal;
+      display: inline-block;
+      min-width: 100%;
+      color: #e2e8f0;
+    }
+
+    /* CODE ACTIONS BAR (COPY & DOWNLOAD) */
+    .code-actions-bar {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-action-btn, .code-download-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(40, 40, 45, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      font-size: 0.8rem;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .code-action-btn:hover, .code-download-btn:hover {
+      background: rgba(60, 60, 68, 0.95);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+    .code-action-btn svg, .code-download-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .ai-bubble blockquote {
+      border-left: 4px solid var(--accent-color);
+      padding-left: 16px;
+      margin: 0 0 14px;
+      color: var(--text-sub);
+      background: rgba(128,128,128,0.05);
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-radius: 0 24px 24px 0;
+    }
+    .ai-bubble a { color: var(--accent-color); text-decoration: none; }
+    .ai-bubble a:hover { text-decoration: underline; }
+
+    .ai-bubble table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 18px 0;
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      background: var(--bg-input);
+    }
+    .ai-bubble th, .ai-bubble td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      text-align: left;
+      min-width: 120px;
+    }
+    .ai-bubble th:last-child, .ai-bubble td:last-child {
+      border-right: none;
+    }
+    .ai-bubble tr:last-child td {
+      border-bottom: none;
+    }
+    .ai-bubble th {
+      background: rgba(128, 128, 128, 0.08);
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+    .ai-bubble tr:nth-child(even) td {
+      background: rgba(128, 128, 128, 0.02);
+    }
+
+    .ai-content-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .msg-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-icon-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-icon-btn:hover {
+      background-color: rgba(128, 128, 128, 0.1);
+      color: var(--text-main);
+    }
+
+    .action-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 1.6em;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+
+    .status-indicator .status-label {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: linear-gradient(90deg, var(--text-sub) 0%, var(--text-main) 50%, var(--text-sub) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: premiumShine 1.6s linear infinite;
+    }
+
+    .status-indicator .status-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--accent-color);
+      display: inline-flex;
+    }
+
+    .status-indicator .status-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+      animation: statusIconPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes statusIconPulse {
+      0%, 100% { opacity: 0.55; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes premiumShine {
+      to { background-position: 200% center; }
+    }
+
+    .status-indicator.status-error {
+      color: #ef4444;
+    }
+
+    .ai-bubble.streaming > *:last-child::after,
+    .ai-bubble.streaming.no-children::after {
+      content: ' |';
+      display: inline-block;
+      font-weight: 700;
+      color: var(--accent-color);
+      text-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+      animation: cursorBlink 0.75s steps(2, start) infinite;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .input-wrapper {
+      padding: 0 16px 24px;
+      background: linear-gradient(0deg, var(--bg-main) 60%, transparent 100%);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .input-card {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--bg-input);
+      border-radius: 32px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .composer-tools {
+      display: flex;
+      align-items: center;
+      gap: 0px;
+      flex-shrink: 0;
+    }
+
+    .input-card:focus-within {
+      border-color: rgba(128,128,128,0.4);
+      box-shadow: 0 12px 50px rgba(0,0,0,0.25);
+      transform: translateY(-2px);
+    }
+
+    .attach-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+
+    .attach-btn:hover {
+      background-color: rgba(128, 128, 128, 0.1);
+      color: var(--text-main);
+    }
+
+    .attach-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .attach-btn.active-tool { color: var(--accent-color); }
+    .attach-btn.active-tool svg { stroke: var(--accent-color); }
+
+    .attach-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .attach-menu-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .attach-menu {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 16px);
+      left: 0;
+      min-width: 270px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 28px;
+      padding: 12px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+      z-index: 20;
+      flex-direction: column;
+      gap: 6px;
+      animation: popUp 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform-origin: bottom left;
+    }
+
+    @keyframes popUp {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .attach-menu.open { display: flex; }
+
+    .attach-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 14px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.2s;
+    }
+
+    .attach-menu-item:hover { background-color: rgba(128, 128, 128, 0.08); }
+    .attach-menu-item svg { width: 20px; height: 20px; fill: var(--text-sub); flex-shrink: 0; }
+    
+    .attach-menu-item svg.stroke-svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .attach-menu-divider { height: 1px; background: var(--border-color); margin: 6px 12px; }
+
+    .file-preview-row { max-width: 800px; margin: 0 auto 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .file-preview-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      max-width: 240px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .file-preview-chip svg { width: 18px; height: 18px; fill: var(--accent-color); flex-shrink: 0; }
+    .file-preview-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-preview-remove {
+      background: none; border: none; color: var(--text-sub); cursor: pointer;
+      font-size: 18px; line-height: 1; padding: 0 0 0 8px; flex-shrink: 0; transition: color 0.2s;
+    }
+    .file-preview-remove:hover { color: #ef4444; }
+
+    .file-bubble-chip {
+      display: flex; align-items: center; gap: 8px; background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 999px; padding: 10px 16px; font-size: 0.85rem; max-width: 240px;
+    }
+    .file-bubble-chip svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.8; }
+    .file-bubble-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bubble-file-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 8px; }
+
+    .account-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+    }
+    .account-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    .account-panel::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .account-panel::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    .account-panel::-webkit-scrollbar-thumb {
+      background: rgba(140, 140, 140, 0.3) !important;
+      border-radius: 999px !important;
+    }
+    .account-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(140, 140, 140, 0.5) !important;
+    }
+    .account-avatar-row { display: flex; align-items: center; gap: 16px; }
+    .account-avatar {
+      width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 600; flex-shrink: 0;
+    }
+    .account-name { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+    .account-sub { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+
+    .account-field { display: flex; flex-direction: column; gap: 8px; }
+    .account-field label { font-size: 0.85rem; color: var(--text-sub); }
+    .account-field input {
+      background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main);
+      padding: 12px 16px; border-radius: 999px; font-size: 1rem; font-family: inherit;
+    }
+    .account-field input:focus { outline: none; border-color: var(--accent-color); }
+
+    .account-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .account-stat {
+      background: var(--download-btn-bg); border-radius: 24px; padding: 16px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    }
+    .account-stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .account-stat-label { font-size: 0.75rem; color: var(--text-sub); }
+
+    .account-credit-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--download-btn-bg); border-radius: 20px; padding: 14px 18px;
+    }
+    .account-credit-info { display: flex; flex-direction: column; gap: 4px; }
+    .account-credit-label { font-size: 0.75rem; color: var(--text-sub); }
+    .account-plan-badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .account-plan-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 3px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.5px; transition: all 0.2s;
+    }
+    .account-plan-badge.plan-Free {
+      background: rgba(148, 163, 184, 0.15); color: var(--text-sub); border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .account-plan-badge.plan-Pro {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.25));
+      color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+    .account-plan-badge.plan-Max {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.25));
+      color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .account-plan-expiry-text {
+      font-size: 0.8rem; color: var(--text-sub); display: flex; align-items: center; gap: 4px;
+    }
+    .account-plan-expiry-text.expired {
+      color: #ef4444; font-weight: 600;
+    }
+    .account-plan-limit-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+      color: var(--accent-color); background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25); white-space: nowrap; flex-shrink: 0;
+    }
+    .account-plan-limit-badge svg { flex-shrink: 0; }
+    .account-credit-warning {
+      display: none; font-size: 0.8rem; color: #ef4444; background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 10px 14px; text-align: center;
+    }
+    .account-credit-warning.visible { display: block; }
+
+    .account-limits-card {
+      background: var(--download-btn-bg); border-radius: 20px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--border-color);
+    }
+    .account-limits-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .account-limits-title {
+      display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;
+      color: var(--text-main);
+    }
+    .account-limits-title svg { color: var(--accent-color); flex-shrink: 0; }
+    .account-limits-toggle-btn {
+      border: none; background: transparent; color: var(--accent-color); font-size: 0.78rem;
+      font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center;
+      gap: 4px; padding: 4px 8px; border-radius: 6px; transition: background 0.2s;
+    }
+    .account-limits-toggle-btn:hover { background: rgba(59, 130, 246, 0.1); }
+    .account-limits-toggle-btn svg { transition: transform 0.2s; }
+    .account-limits-toggle-btn.open svg { transform: rotate(180deg); }
+
+    .account-limits-summary {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .account-limit-item {
+      background: var(--bg-input, rgba(255,255,255,0.03)); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 3px; min-width: 0;
+    }
+    .account-limit-icon { font-size: 1.15rem; margin-bottom: 2px; }
+    .account-limit-detail { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .account-limit-label { font-size: 0.68rem; color: var(--text-sub); }
+    .account-limit-val {
+      font-size: 0.74rem; font-weight: 700; color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+
+    .account-all-plans-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px;
+      animation: fadeIn 0.25s ease;
+    }
+    .plan-compare-card {
+      background: var(--bg-input, rgba(255,255,255,0.03)); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 12px 10px; display: flex; flex-direction: column; gap: 8px;
+      transition: all 0.2s;
+    }
+    .plan-compare-card.active-plan {
+      border-color: var(--accent-color); box-shadow: 0 0 0 1px var(--accent-color);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .plan-compare-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    }
+    .plan-compare-name { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
+    .plan-compare-tag {
+      font-size: 0.68rem; font-weight: 600; padding: 2px 6px; border-radius: 999px;
+      background: rgba(148, 163, 184, 0.15); color: var(--text-sub);
+    }
+    .plan-compare-features {
+      list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;
+      font-size: 0.72rem; color: var(--text-sub);
+    }
+    .plan-compare-features li {
+      display: flex; align-items: flex-start; gap: 4px; line-height: 1.35;
+    }
+    .plan-compare-features li::before {
+      content: "✓"; color: #10b981; font-weight: 700; font-size: 0.75rem; flex-shrink: 0;
+    }
+
+    .account-redeem-card {
+      background: var(--download-btn-bg); border-radius: 20px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border-color);
+    }
+    .account-redeem-header {
+      display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;
+      color: var(--text-main);
+    }
+    .account-redeem-header svg { color: var(--accent-color); flex-shrink: 0; }
+    .account-redeem-body {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+    }
+    #accountRedeemInput {
+      flex: 1; min-width: 0; padding: 10px 14px; border-radius: 999px;
+      border: 1px solid var(--border-color); background: var(--bg-card, rgba(255,255,255,0.05));
+      color: var(--text-main); font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #accountRedeemInput:focus {
+      border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    .account-redeem-btn {
+      border: none; border-radius: 999px; padding: 10px 18px; font-size: 0.85rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; background: var(--accent-color); color: #fff; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .account-redeem-btn:hover { opacity: 0.9; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3); }
+    .account-redeem-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .account-redeem-msg {
+      font-size: 0.8rem; min-height: 0; display: none; line-height: 1.4;
+    }
+    .account-redeem-msg.show { display: block; }
+    .account-redeem-msg.success { color: #10b981; }
+    .account-redeem-msg.error { color: #ef4444; }
+
+    .account-action-btn {
+      border: none; border-radius: 999px; padding: 14px; font-size: 0.95rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .account-save-btn { background: var(--accent-color); color: #fff; }
+    .account-save-btn:hover { opacity: 0.9; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+    .account-logout-btn { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .account-logout-btn:hover { background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35); }
+    .account-reset-btn { background: transparent; color: var(--text-sub); border: 1px solid var(--border-color); font-size: 0.85rem; padding: 11px; }
+    .account-reset-btn:hover { background: rgba(128, 128, 128, 0.1); color: var(--text-main); }
+
+    .chat-history-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+    .chat-history-empty { padding: 40px 16px; text-align: center; color: var(--text-sub); font-size: 0.95rem; }
+    .chat-history-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--download-btn-bg); border-radius: 999px; padding: 14px 18px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chat-history-item:hover { background: var(--download-btn-bg-hover); }
+    .chat-history-item-main { flex: 1; min-width: 0; }
+    .chat-history-item-title {
+      font-size: 0.95rem; font-weight: 600; color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .chat-history-item-meta { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; }
+    .chat-history-delete-btn {
+      border: none; background: transparent; color: var(--text-sub); cursor: pointer;
+      padding: 8px; border-radius: 999px; flex-shrink: 0; display: flex;
+    }
+    .chat-history-delete-btn:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .chat-history-delete-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* AUTH MODAL STYLES */
+    .auth-sheet {
+      max-width: 440px;
+    }
+    .auth-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 12px 6px 20px;
+    }
+    .auth-tabs {
+      display: flex;
+      background: var(--download-btn-bg);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      gap: 4px;
+    }
+    .auth-tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-sub);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-tab-btn.active {
+      background: var(--accent-color);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .auth-field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+    .auth-field input {
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card, rgba(255,255,255,0.05));
+      color: var(--text-main);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .auth-field input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    .auth-error-msg {
+      font-size: 0.82rem;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      padding: 8px 12px;
+      line-height: 1.4;
+    }
+    .auth-submit-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--accent-color);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .auth-submit-btn:hover {
+      opacity: 0.92;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    .auth-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .offline-banner {
+      display: none; align-items: center; justify-content: center; gap: 10px;
+      background-color: #dc2626; color: #ffffff; font-size: 0.85rem; font-weight: 500;
+      padding: 12px 20px; text-align: center; flex-shrink: 0;
+    }
+    .offline-banner.show { display: flex; }
+
+    .image-preview-row { max-width: 800px; margin: 0 auto 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .image-preview-item { position: relative; width: 72px; height: 72px; border-radius: 24px; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .image-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .image-preview-remove {
+      position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 999px;
+      background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); color: #fff; border: none;
+      display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer;
+    }
+    .image-preview-remove:hover { background: #ef4444; }
+
+    .chat-textarea {
+      flex: 1; 
+      background: transparent; 
+      border: none; 
+      color: var(--text-main);
+      font-size: 1rem; 
+      outline: none; 
+      resize: none; 
+      max-height: 150px; 
+      min-height: 24px;
+      line-height: 1.5; 
+      padding: 10px 8px;
+      margin: 0;
+      margin-bottom: 2px;
+      overflow-y: auto;
+    }
+
+    .chat-textarea::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-textarea::-webkit-scrollbar-thumb {
+      background-color: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .chat-textarea::placeholder { 
+      color: var(--text-sub);
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+
+    .action-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: none;
+      background-color: var(--btn-send); color: #000; display: flex;
+      align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      margin-bottom: 0;
+    }
+    .action-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
+    .action-btn:disabled { background-color: var(--btn-send-disabled); cursor: not-allowed; opacity: 0.5; box-shadow: none; }
+    .action-btn svg { width: 20px; height: 20px; fill: var(--bg-main); }
+
+    .footer-note { text-align: center; font-size: 0.8rem; color: var(--text-sub); margin-top: 12px; }
+    
+    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .chat-textarea, .user-bubble, .ai-bubble { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+
+    /* ===== Custom UI Popup ===== */
+    .custom-dialog-box {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      width: 90%;
+      max-width: 340px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: auto;
+      align-self: center;
+      transform: scale(0.9);
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .modal-overlay.open .custom-dialog-box {
+      transform: scale(1);
+    }
+    .custom-dialog-text {
+      font-size: 1rem;
+      color: var(--text-main);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .custom-dialog-input {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      width: 100%;
+      text-align: center;
+      outline: none;
+    }
+    .custom-dialog-input:focus {
+      border-color: var(--accent-color);
+    }
+    .custom-dialog-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .custom-dialog-btn {
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: all 0.2s;
+      flex: 1;
+    }
+    .custom-dialog-btn.cancel {
+      background: transparent;
+      color: var(--text-sub);
+      border: 1px solid var(--border-color);
+    }
+    .custom-dialog-btn.cancel:hover {
+      background: rgba(128,128,128,0.1);
+      color: var(--text-main);
+    }
+    .custom-dialog-btn.ok {
+      background: var(--accent-color);
+      color: #fff;
+    }
+    .custom-dialog-btn.ok:hover {
+      opacity: 0.9;
+    }
+    .toast-container {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+      pointer-events: none; width: 100%; padding: 0 16px;
+    }
+    .toast {
+      background: var(--bg-input, #18181b); color: var(--text-main, #fff);
+      border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+      padding: 10px 18px; border-radius: 999px; font-size: 0.88rem; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 8px;
+      animation: toastIn 0.25s ease-out; max-width: 90%;
+    }
+    .toast.success { border-color: rgba(34,197,94,0.4); }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+    .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .toast.success svg { color: #22c55e; }
+    .toast.error svg { color: #ef4444; }
+    .toast.fade-out { animation: toastOut 0.25s ease-in forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+
+    /* ==========================================================================
+       ALL DEVICES RESPONSIVE & UI OPTIMIZATION (Mobile, Tablet, Foldable, Desktop)
+       ========================================================================== */
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+      height: 100vh;
+      height: 100dvh;
+      height: var(--app-height, 100dvh);
+    }
+
+    .chat-container {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Small Screen Phones (<= 480px) */
+    @media (max-width: 480px) {
+      .navbar {
+        height: 52px;
+        padding: 0 12px;
+      }
+      .brand-name {
+        font-size: 0.98rem;
+      }
+      .model-selector {
+        padding: 6px 10px;
+        font-size: 0.82rem;
+        gap: 4px;
+      }
+      .trigger-label {
+        max-width: 105px;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .badge-tag {
+        font-size: 0.55rem;
+        padding: 1px 5px;
+        margin-left: 3px;
+      }
+      .chat-inner {
+        padding: 12px 10px 24px;
+        gap: 18px;
+      }
+      .user-bubble, .user-bubble-col {
+        max-width: 95%;
+      }
+      .user-bubble {
+        padding: 10px 14px;
+        font-size: 0.92rem;
+        border-radius: 20px 20px 4px 20px;
+      }
+      .ai-bubble-container {
+        gap: 10px;
+      }
+      .ai-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+      }
+      .ai-bubble {
+        font-size: 0.92rem;
+        line-height: 1.55;
+      }
+      .quick-prompts-row {
+        gap: 6px;
+        margin-top: 8px;
+        padding: 0 4px;
+      }
+      .quick-prompt-chip {
+        padding: 7px 12px;
+        font-size: 0.8rem;
+      }
+      .input-wrapper {
+        padding: 0 8px max(12px, env(safe-area-inset-bottom, 12px));
+      }
+      .input-card {
+        padding: 8px 10px;
+        border-radius: 24px;
+        gap: 6px;
+      }
+      .attach-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .attach-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+      .chat-textarea {
+        font-size: 1rem;
+        padding: 6px 6px;
+      }
+      .action-btn {
+        width: 38px;
+        height: 38px;
+      }
+      .action-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .attach-menu {
+        min-width: 240px;
+        max-width: calc(100vw - 20px);
+        padding: 8px;
+        border-radius: 20px;
+      }
+      .attach-menu-item {
+        padding: 10px 14px;
+        font-size: 0.88rem;
+        gap: 10px;
+      }
+      .code-block-wrapper {
+        border-radius: 14px;
+        margin: 10px 0 12px;
+      }
+      .ai-bubble pre {
+        padding: 12px;
+        padding-top: 48px;
+        font-size: 0.82rem;
+      }
+      .code-actions-bar {
+        top: 8px;
+        right: 10px;
+        gap: 6px;
+      }
+      .code-action-btn, .code-download-btn {
+        padding: 4px 9px;
+        font-size: 0.72rem;
+      }
+      .modal-sheet {
+        border-radius: 24px 24px 0 0;
+        max-height: 88dvh;
+      }
+      .modal-header {
+        padding: 16px 20px;
+        font-size: 1rem;
+      }
+      .model-card {
+        padding: 12px 14px;
+        border-radius: 16px;
+      }
+      .model-card-name {
+        font-size: 0.92rem;
+      }
+      .model-card-provider {
+        font-size: 0.75rem;
+      }
+      .toast-container {
+        bottom: 78px;
+        width: 94%;
+      }
+      .toast {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+      }
+      .account-limits-summary {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .account-all-plans-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    /* Extra Narrow Devices (<= 360px) */
+    @media (max-width: 360px) {
+      .brand-name {
+        font-size: 0.88rem;
+      }
+      .trigger-label {
+        max-width: 75px;
+      }
+      .model-selector {
+        padding: 5px 8px;
+      }
+      .input-wrapper {
+        padding: 0 4px max(10px, env(safe-area-inset-bottom, 10px));
+      }
+    }
+
+    /* Tablets and Medium Screens (481px to 768px) */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .chat-inner {
+        max-width: 680px;
+        padding: 18px 14px 32px;
+      }
+      .input-card {
+        max-width: 680px;
+      }
+      .trigger-label {
+        max-width: 150px;
+      }
+    }
+
+    /* Desktops & Large Monitors (>= 1025px) */
+    @media (min-width: 1025px) {
+      .chat-inner {
+        max-width: 820px;
+      }
+      .input-card {
+        max-width: 820px;
+      }
+    }
+
+    /* Accessibility: Respect Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+  <nav class="navbar">
+    <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
+      <span class="brand-name">Alokpoth AI</span>
+    </button>
+    <div class="navbar-right">
+      <button class="model-selector sheen-surface" id="modelTrigger" type="button">
+        <span id="triggerStatusDot" class="trigger-status-dot status-dot checking"></span>
+        <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
+        <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="modal-overlay" id="brandMenuOverlay">
+    <div class="modal-sheet brand-menu-sheet">
+      <div class="modal-header">
+        <span>Alokpoth AI</span>
+        <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="brand-menu-list">
+        <button class="brand-menu-item sheen-surface" id="newChatBtn" type="button">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+            <span>নতুন চ্যাট</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="chatHistoryBtn" type="button">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7 6.9 6.9 0 0 1-4.9-2.03l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8z"/></svg>
+            <span>চ্যাট হিস্ট্রি</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="themeToggleBtn" type="button">
+          <span class="brand-menu-item-left">
+            <svg class="icon-sun" viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l1.41 1.42a1 1 0 1 1-1.41 1.41L4.22 5.64a1 1 0 0 1 0-1.42zm12.73 12.73a1 1 0 0 1 1.41 0l1.42 1.41a1 1 0 1 1-1.42 1.42l-1.41-1.42a1 1 0 0 1 0-1.41zM1 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H2a1 1 0 0 1-1-1zm18 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1zM4.22 19.78a1 1 0 0 1 0-1.42l1.41-1.41a1 1 0 1 1 1.41 1.41l-1.41 1.42a1 1 0 0 1-1.41 0zM16.95 4.22a1 1 0 0 1 1.42 0l1.41 1.42a1 1 0 1 1-1.41 1.41l-1.42-1.41a1 1 0 0 1 0-1.42z"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-oled" viewBox="0 0 24 24"><path d="M16 4h-2V2h-4v2H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H8V6h8v14z"/><path d="M11 18h2v-4h3l-4-5v4H9z"/></svg>
+            <svg class="icon-eyecare" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            <span class="theme-label-text">ডার্ক থিম</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="accountMenuBtn" type="button">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+            <span>একাউন্ট</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="brandMenuAuthBtn" type="button" style="color: var(--accent-color);">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24" style="fill: var(--accent-color);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            <span>লগইন / রেজিস্টার</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="brandMenuLogoutBtn" type="button" style="color: #ef4444;">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24" style="fill: #ef4444;"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            <span>লগআউট</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modelModalOverlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span>মডেল বেছে নিন</span>
+        <button class="modal-close" id="modelModalClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div style="padding: 12px 16px 4px 16px;">
+        <input type="text" id="modelSearchInput" placeholder="মডেল বা প্রোভাইডার খুঁজুন..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-main); font-size: 13px; outline: none;">
+      </div>
+      <div class="model-list" id="modelList"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="accountModalOverlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span>একাউন্ট</span>
+        <button class="modal-close" id="accountModalClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="account-panel">
+        <div class="account-avatar-row">
+          <div class="account-avatar" id="accountAvatar">অ</div>
+          <div>
+            <div class="account-name" id="accountNameDisplay">অতিথি ব্যবহারকারী</div>
+            <div class="account-sub">Alokpoth AI ব্যবহারকারী</div>
+          </div>
+        </div>
+
+        <div class="account-field">
+          <label for="accountNameInput">নাম</label>
+          <input type="text" id="accountNameInput" placeholder="আপনার নাম লিখুন" maxlength="40">
+        </div>
+
+        <div class="account-credit-row">
+          <div class="account-credit-info">
+            <div class="account-plan-badge-row">
+              <span class="account-credit-label">বর্তমান প্ল্যান</span>
+              <span class="account-plan-badge plan-Max" id="accountPlanDisplay">Max</span>
+            </div>
+            <div class="account-plan-expiry-text" id="accountPlanExpiryDisplay">মেয়াদ: আজীবন / মেয়াদহীন</div>
+          </div>
+          <div class="account-plan-limit-badge" id="accountPlanLimitBadge" title="প্ল্যানের বার্তা লিমিট">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="accountPlanLimitText">৫০ বার্তা / ১ ঘণ্টা</span>
+          </div>
+        </div>
+        <div class="account-credit-warning" id="accountPlanWarning">⚠️ আপনার মেসেজ লিমিট শেষ!</div>
+
+        <!-- Plan Limits View Card -->
+        <div class="account-limits-card">
+          <div class="account-limits-top">
+            <div class="account-limits-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <span>প্ল্যান লিমিট ও সুবিধাসমূহ</span>
+            </div>
+            <button type="button" class="account-limits-toggle-btn" id="accountLimitsToggleBtn">
+              <span id="accountLimitsToggleText">সব প্ল্যান দেখুন</span>
+              <svg id="accountLimitsToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Active Plan Limit Overview -->
+          <div class="account-limits-summary" id="accountLimitsSummary">
+            <div class="account-limit-item">
+              <div class="account-limit-icon">💬</div>
+              <div class="account-limit-detail">
+                <span class="account-limit-label">বার্তা লিমিট</span>
+                <span class="account-limit-val" id="limitValMessages">৫০ বার্তা / ১ ঘণ্টা</span>
+              </div>
+            </div>
+            <div class="account-limit-item">
+              <div class="account-limit-icon">⚡</div>
+              <div class="account-limit-detail">
+                <span class="account-limit-label">মডেল এক্সেস</span>
+                <span class="account-limit-val" id="limitValModels">সকল ফ্ল্যাগশিপ মডেল</span>
+              </div>
+            </div>
+            <div class="account-limit-item">
+              <div class="account-limit-icon">🚀</div>
+              <div class="account-limit-detail">
+                <span class="account-limit-label">অগ্রাধিকার</span>
+                <span class="account-limit-val" id="limitValSpeed">সর্বোচ্চ আল্ট্রা স্পিড</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- All Plans Comparison Grid -->
+          <div class="account-all-plans-grid" id="accountAllPlansGrid" style="display: none;">
+            <div class="plan-compare-card" id="compareCardFree">
+              <div class="plan-compare-header">
+                <span class="plan-compare-name">Free</span>
+                <span class="plan-compare-tag">বেসিক</span>
+              </div>
+              <ul class="plan-compare-features">
+                <li>১০ বার্তা প্রতি ৩ ঘণ্টায়</li>
+                <li>ফ্রি এআই মডেলসমূহ</li>
+                <li>সাধারণ রেসপন্স স্পিড</li>
+              </ul>
+            </div>
+            <div class="plan-compare-card" id="compareCardPro">
+              <div class="plan-compare-header">
+                <span class="plan-compare-name" style="color: #a855f7;">Pro</span>
+                <span class="plan-compare-tag" style="background: rgba(168,85,247,0.15); color: #a855f7;">উন্নত</span>
+              </div>
+              <ul class="plan-compare-features">
+                <li>৩০ বার্তা প্রতি ৩ ঘণ্টায়</li>
+                <li>সকল প্রো মডেল এক্সেস</li>
+                <li>টার্বো রেসপন্স স্পিড</li>
+              </ul>
+            </div>
+            <div class="plan-compare-card" id="compareCardMax">
+              <div class="plan-compare-header">
+                <span class="plan-compare-name" style="color: #f59e0b;">Max</span>
+                <span class="plan-compare-tag" style="background: rgba(245,158,11,0.15); color: #f59e0b;">সর্বোচ্চ</span>
+              </div>
+              <ul class="plan-compare-features">
+                <li>৫০ বার্তা প্রতি ১ ঘণ্টায়</li>
+                <li>সবচেয়ে শক্তিশালী মডেল</li>
+                <li>সর্বোচ্চ অগ্রাধিকার ও স্পিড</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Redeem Code Section -->
+        <div class="account-redeem-card">
+          <div class="account-redeem-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
+            <span>রিডিম কোড ব্যবহার করুন</span>
+          </div>
+          <div class="account-redeem-body">
+            <input type="text" id="accountRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX" maxlength="35" autocomplete="off" spellcheck="false">
+            <button type="button" id="accountRedeemBtn" class="account-redeem-btn">দাবি করুন</button>
+          </div>
+          <div class="account-redeem-msg" id="accountRedeemMsg"></div>
+        </div>
+
+        <div class="account-stats-grid">
+          <div class="account-stat">
+            <span class="account-stat-value" id="accountStatTokens">0</span>
+            <span class="account-stat-label">মোট টোকেন</span>
+          </div>
+          <div class="account-stat">
+            <span class="account-stat-value" id="accountStatCost">$0.0000</span>
+            <span class="account-stat-label">আনুমানিক খরচ</span>
+          </div>
+          <div class="account-stat">
+            <span class="account-stat-value" id="accountStatMessages">0</span>
+            <span class="account-stat-label">মোট বার্তা</span>
+          </div>
+          <div class="account-stat">
+            <span class="account-stat-value" id="accountStatImages">0</span>
+            <span class="account-stat-label">তৈরি হওয়া ছবি</span>
+          </div>
+          <div class="account-stat">
+            <span class="account-stat-value" id="accountStatDailyCost">$0.0000</span>
+            <span class="account-stat-label">আজকের খরচ</span>
+          </div>
+        </div>
+
+        <button class="account-action-btn account-auth-btn" id="accountAuthBtn" type="button" style="background: var(--accent-color); color: #fff;">লগইন / রেজিস্টার করুন</button>
+        <button class="account-action-btn account-save-btn" id="accountSaveBtn" type="button">সংরক্ষণ করুন</button>
+        <button class="account-action-btn account-logout-btn" id="accountLogoutBtn" type="button">লগআউট করুন</button>
+        <button class="account-action-btn account-reset-btn" id="accountResetBtn" type="button">চ্যাট ও ব্যবহারের হিসাব রিসেট করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="chatHistoryModalOverlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span>চ্যাট হিস্ট্রি</span>
+        <button class="modal-close" id="chatHistoryModalClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="chat-history-list" id="chatHistoryList"></div>
+    </div>
+  </div>
+
+  <!-- অথেন্টিকেশন (লগইন / রেজিস্টার) মডাল -->
+  <div class="modal-overlay" id="authModalOverlay">
+    <div class="modal-sheet auth-sheet">
+      <div class="modal-header">
+        <span id="authModalTitle">লগইন করুন</span>
+        <button class="modal-close" id="authModalClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="auth-panel">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="authTabLogin">লগইন</button>
+          <button type="button" class="auth-tab-btn" id="authTabRegister">নতুন অ্যাকাউন্ট</button>
+        </div>
+        
+        <form id="authForm" class="auth-form">
+          <div class="auth-field" id="authNameField" style="display: none;">
+            <label for="authNameInput">আপনার পুরো নাম</label>
+            <input type="text" id="authNameInput" placeholder="যেমন: রাহাত আহমেদ" maxlength="50" autocomplete="name">
+          </div>
+          <div class="auth-field">
+            <label for="authEmailInput">ইমেইল ঠিকানা</label>
+            <input type="email" id="authEmailInput" placeholder="example@mail.com" required autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label for="authPasswordInput">পাসওয়ার্ড</label>
+            <input type="password" id="authPasswordInput" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড" required autocomplete="current-password">
+          </div>
+          <div class="auth-error-msg" id="authErrorMsg" style="display: none;"></div>
+          <button type="submit" class="auth-submit-btn" id="authSubmitBtn">লগইন করুন</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- কাস্টম ব্রাউজার পপ-আপ -->
+  <div class="modal-overlay" id="customDialogOverlay" style="z-index: 100;">
+    <div class="custom-dialog-box">
+      <div class="custom-dialog-text" id="customDialogText"></div>
+      <input type="text" id="customDialogInput" class="custom-dialog-input" style="display:none;" autocomplete="off">
+      <div class="custom-dialog-actions">
+        <button class="custom-dialog-btn cancel" id="customDialogCancelBtn" style="display:none;">বাতিল</button>
+        <button class="custom-dialog-btn ok" id="customDialogOkBtn">ঠিক আছে</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="offline-banner" id="offlineBanner">📡 ইন্টারনেট সংযোগ নেই — বার্তা পাঠানো যাবে না</div>
+
+  <div class="chat-container" id="scrollContainer">
+    <div class="chat-inner" id="chatStream">
+      <div class="empty-state" id="emptyState">
+        আমি আপনাকে কীভাবে সাহায্য করতে পারি?
+        <span>যেকোনো প্রশ্ন লিখুন</span>
+        <div class="quick-prompts-row">
+          <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">💻 ফুল ওয়েবসাইট কোড</button>
+          <button type="button" class="quick-prompt-chip" data-prompt="এই লেখাটি বাংলায় অনুবাদ করুন: ">🌐 অনুবাদ করুন</button>
+          <button type="button" class="quick-prompt-chip" data-prompt="এই বিষয়টির একটি সংক্ষিপ্ত সারাংশ তৈরি করে দিন: ">📝 সারাংশ তৈরি</button>
+          <button type="button" class="quick-prompt-chip" data-prompt="একটি সৃজনশীল গল্প লিখে দিন">📖 গল্প লিখুন</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-wrapper">
+    <div class="image-preview-row" id="imagePreviewRow"></div>
+    <div class="file-preview-row" id="filePreviewRow"></div>
+    <form class="input-card" id="chatForm">
+      <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
+      <input type="file" id="docInput" accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.css,.js,.jsx,.ts,.tsx" style="display:none" multiple>
+      <div class="composer-tools">
+        <div class="attach-menu-wrap" id="attachMenuWrap">
+          <button type="button" class="attach-btn" id="attachBtn" aria-label="যুক্ত করুন" title="ছবি বা ফাইল যুক্ত করুন">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div class="attach-menu" id="attachMenu">
+            <button type="button" class="attach-menu-item" id="attachImageOption">
+              <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>ছবি যুক্ত করুন</span>
+            </button>
+            <button type="button" class="attach-menu-item" id="attachFileOption">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>ফাইল যুক্ত করুন (PDF/TXT/HTML/CSS/JS)</span>
+            </button>
+            
+            <div class="attach-menu-divider"></div>
+            
+            <!-- Web Search inside Menu -->
+            <button type="button" class="attach-menu-item" id="attachWebSearchOption">
+              <svg class="stroke-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              <span id="webSearchText" style="color: var(--text-sub);">ওয়েব সার্চ: বন্ধ</span>
+            </button>
+
+            <!-- Image Generation inside Menu -->
+            <button type="button" class="attach-menu-item" id="attachImageGenOption">
+              <svg class="stroke-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <span id="imageGenText" style="color: var(--text-sub);">ছবি তৈরি: বন্ধ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <textarea 
+        class="chat-textarea" 
+        id="userInput" 
+        placeholder="আলোকপথ AI-কে জিজ্ঞাসা করুন..." 
+        rows="1"
+      ></textarea>
+      <button type="submit" class="action-btn" id="sendBtn" aria-label="Send">
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>
+      </button>
+    </form>
+    <div class="footer-note">AI can make mistakes. Verify important info.</div>
+  </div>
+
+  <script>
+    let isWebSearchEnabled = false;
+    let isImageGenEnabled = false;
+
+    let customDialogCallback = null;
+
+    function showCustomUI(type, message, defaultValue, callback) {
+      const overlay = document.getElementById("customDialogOverlay");
+      const textEl = document.getElementById("customDialogText");
+      const inputEl = document.getElementById("customDialogInput");
+      const cancelBtn = document.getElementById("customDialogCancelBtn");
+      const okBtn = document.getElementById("customDialogOkBtn");
+
+      textEl.textContent = message;
+      customDialogCallback = callback;
+      inputEl.value = "";
+
+      if (type === 'alert') {
+        inputEl.style.display = 'none';
+        cancelBtn.style.display = 'none';
+      } else if (type === 'confirm') {
+        inputEl.style.display = 'none';
+        cancelBtn.style.display = 'block';
+      } else if (type === 'prompt') {
+        inputEl.style.display = 'block';
+        inputEl.value = defaultValue || "";
+        cancelBtn.style.display = 'block';
+      }
+
+      overlay.classList.add("open");
+      if (type === 'prompt') {
+        setTimeout(() => inputEl.focus(), 100);
+      }
+    }
+
+    function closeCustomUI(result) {
+      const overlay = document.getElementById("customDialogOverlay");
+      overlay.classList.remove("open");
+      if (customDialogCallback) {
+        customDialogCallback(result);
+        customDialogCallback = null;
+      }
+    }
+
+    document.getElementById("customDialogCancelBtn").addEventListener("click", () => closeCustomUI(false));
+    document.getElementById("customDialogOkBtn").addEventListener("click", () => {
+      const inputEl = document.getElementById("customDialogInput");
+      if (inputEl.style.display === 'block') {
+        closeCustomUI(inputEl.value);
+      } else {
+        closeCustomUI(true);
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      const chip = e.target.closest(".quick-prompt-chip");
+      if (chip) {
+        const promptText = chip.getAttribute("data-prompt");
+        if (promptText) {
+          userInput.value = promptText;
+          userInput.style.height = "auto";
+          userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
+          userInput.focus();
+          updateSendAvailability();
+        }
+      }
+    });
+
+    const PLAN_STORAGE_KEY = "alokpoth_current_plan";
+    const PLAN_EXPIRY_KEY = "alokpoth_plan_expires_at";
+    const DEFAULT_PLAN = "Free"; 
+
+    const BENGALI_MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+    const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+
+    function toBengaliDigits(num) {
+      return String(num).replace(/\d/g, d => BENGALI_DIGITS[d] !== undefined ? BENGALI_DIGITS[d] : d);
+    }
+
+    function formatBengaliDate(date) {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "";
+      const day = toBengaliDigits(d.getDate());
+      const month = BENGALI_MONTHS[d.getMonth()] || "";
+      const year = toBengaliDigits(d.getFullYear());
+      return `${day} ${month}, ${year}`;
+    }
+
+    function checkPlanExpiration(silent = false) {
+      let plan = "Free";
+      try {
+        plan = localStorage.getItem(PLAN_STORAGE_KEY) || DEFAULT_PLAN;
+      } catch { plan = DEFAULT_PLAN; }
+
+      if (plan === "Free") return false;
+
+      const expiryStr = localStorage.getItem(PLAN_EXPIRY_KEY);
+      if (!expiryStr) return false;
+
+      const expiryDate = new Date(expiryStr);
+      if (isNaN(expiryDate.getTime())) return false;
+
+      if (Date.now() >= expiryDate.getTime()) {
+        currentPlan = "Free";
+        saveCurrentPlan("Free");
+        try { localStorage.removeItem(PLAN_EXPIRY_KEY); } catch {}
+        if (!silent && typeof showToast === "function") {
+          showToast("আপনার প্ল্যানের মেয়াদ শেষ হয়ে গেছে! স্বয়ংক্রিয়ভাবে Free প্ল্যানে পরিবর্তন করা হয়েছে।", "warning");
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function loadCurrentPlan() {
+      try {
+        checkPlanExpiration(true);
+        const raw = localStorage.getItem(PLAN_STORAGE_KEY);
+        return raw ? raw : DEFAULT_PLAN;
+      } catch { return DEFAULT_PLAN; }
+    }
+
+    function saveCurrentPlan(val) {
+      try {
+        localStorage.setItem(PLAN_STORAGE_KEY, val);
+        localStorage.setItem("alokpoth_user_plan", val);
+      } catch {}
+    }
+
+    let currentPlan = loadCurrentPlan();
+
+    function hasCredit() {
+      return true; // Infinite messages for local app
+    }
+
+    function deductCredit(amount) {
+      // No credit deduction needed
+    }
+
+    const PLAN_LIMIT_DETAILS = {
+      Free: {
+        shortLimit: "১০ বার্তা / ৩ ঘণ্টা",
+        messages: "১০ বার্তা / ৩ ঘণ্টা",
+        models: "ফ্রি মডেলসমূহ",
+        speed: "সাধারণ স্পিড"
+      },
+      Pro: {
+        shortLimit: "৩০ বার্তা / ৩ ঘণ্টা",
+        messages: "৩০ বার্তা / ৩ ঘণ্টা",
+        models: "প্রো মডেলসমূহ",
+        speed: "টার্বো স্পিড"
+      },
+      Max: {
+        shortLimit: "৫০ বার্তা / ১ ঘণ্টা",
+        messages: "৫০ বার্তা / ১ ঘণ্টা",
+        models: "ফ্ল্যাগশিপ মডেল",
+        speed: "আল্ট্রা স্পিড"
+      }
+    };
+
+    async function syncPlanLimitsFromServer() {
+      try {
+        const res = await fetch("/api/plans");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.plans)) {
+          data.plans.forEach(p => {
+            if (PLAN_LIMIT_DETAILS[p.name]) {
+              const str = `${toBengaliDigits(p.message_limit)} বার্তা / ${toBengaliDigits(p.window_hours)} ঘণ্টা`;
+              PLAN_LIMIT_DETAILS[p.name].shortLimit = str;
+              PLAN_LIMIT_DETAILS[p.name].messages = str;
+            }
+          });
+          renderCreditBalance();
+        }
+      } catch (e) {}
+    }
+
+    let isGenerating = false;
+
+    function renderCreditBalance() {
+      checkPlanExpiration(false);
+
+      const valueEl = document.getElementById("accountPlanDisplay");
+      const expiryEl = document.getElementById("accountPlanExpiryDisplay");
+      const warningEl = document.getElementById("accountPlanWarning");
+
+      if (valueEl) {
+        valueEl.textContent = currentPlan;
+        valueEl.className = "account-plan-badge plan-" + currentPlan;
+      }
+
+      const limitBadgeEl = document.getElementById("accountPlanLimitText");
+      const limitMsgEl = document.getElementById("limitValMessages");
+      const limitModEl = document.getElementById("limitValModels");
+      const limitSpdEl = document.getElementById("limitValSpeed");
+
+      const planInfo = PLAN_LIMIT_DETAILS[currentPlan] || PLAN_LIMIT_DETAILS.Free;
+
+      if (limitBadgeEl) limitBadgeEl.textContent = planInfo.shortLimit;
+      if (limitMsgEl) limitMsgEl.textContent = planInfo.messages;
+      if (limitModEl) limitModEl.textContent = planInfo.models;
+      if (limitSpdEl) limitSpdEl.textContent = planInfo.speed;
+
+      ["Free", "Pro", "Max"].forEach((p) => {
+        const card = document.getElementById("compareCard" + p);
+        if (card) {
+          if (p === currentPlan) card.classList.add("active-plan");
+          else card.classList.remove("active-plan");
+        }
+      });
+
+      if (expiryEl) {
+        if (currentPlan === "Free") {
+          expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+          expiryEl.className = "account-plan-expiry-text";
+        } else {
+          const expiryStr = localStorage.getItem(PLAN_EXPIRY_KEY);
+          if (expiryStr) {
+            const expiryDate = new Date(expiryStr);
+            if (!isNaN(expiryDate.getTime())) {
+              const diffMs = expiryDate.getTime() - Date.now();
+              if (diffMs <= 0) {
+                expiryEl.textContent = "মেয়াদ: মেয়াদ উত্তীর্ণ";
+                expiryEl.className = "account-plan-expiry-text expired";
+              } else {
+                const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                expiryEl.textContent = `মেয়াদ: ${formatBengaliDate(expiryDate)} (বাকি ${toBengaliDigits(daysLeft)} দিন)`;
+                expiryEl.className = "account-plan-expiry-text";
+              }
+            } else {
+              expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+              expiryEl.className = "account-plan-expiry-text";
+            }
+          } else {
+            expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+            expiryEl.className = "account-plan-expiry-text";
+          }
+        }
+      }
+
+      if (warningEl) warningEl.classList.remove("visible");
+      if (typeof updateSendAvailability === "function") updateSendAvailability();
+    }
+
+    let appHeightRaf = null;
+    function setAppHeight() {
+      if (appHeightRaf) cancelAnimationFrame(appHeightRaf);
+      appHeightRaf = requestAnimationFrame(() => {
+        const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty("--app-height", `${h}px`);
+      });
+    }
+    setAppHeight();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => {
+        setAppHeight();
+        if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) {
+          setTimeout(() => {
+            try { document.activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch(e) {}
+          }, 120);
+        }
+      });
+    }
+    window.addEventListener("resize", setAppHeight);
+    window.addEventListener("orientationchange", setAppHeight);
+
+    const COPY_ALLOWED_SELECTOR = "input, textarea, .chat-textarea, .user-bubble, .ai-bubble, pre, code, [contenteditable='true']";
+
+    document.addEventListener("copy", (e) => {
+      if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener("contextmenu", (e) => {
+      if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
+        e.preventDefault();
+      }
+    });
+
+    function updateSelectedModelUI() {
+      const current = MODELS.find(m => m.id === selectedModelId);
+      if (current && modelTriggerLabel) {
+        let badgeHtml = "";
+        if (current.efficient) badgeHtml = ` <span class="tag tag-max" style="font-size: 0.65rem; padding: 1px 6px;">MAX</span>`;
+        else if (current.premium) badgeHtml = ` <span class="tag tag-pro" style="font-size: 0.65rem; padding: 1px 6px;">PRO</span>`;
+        modelTriggerLabel.innerHTML = current.name + badgeHtml;
+      }
+    }
+
+    let MODELS = [
+      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter" },
+      { id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", latency: null, status: "checking", type: "gemini" },
+      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq", premium: true },
+      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", latency: null, status: "checking", premium: true },
+      { id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", latency: null, status: "checking", premium: true },
+      { id: "nemotron-vision", name: "Alo Vision", provider: "Alokpoth", latency: null, status: "checking", premium: true },
+      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: true },
+      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
+      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
+      { id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
+      { id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: true }
+    ];
+
+    async function fetchModelsFromServer() {
+      try {
+        const res = await fetch("/api/chat/models");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.models) && data.models.length > 0) {
+          const statusMap = new Map();
+          MODELS.forEach(m => statusMap.set(m.id, { latency: m.latency, status: m.status }));
+
+          MODELS = data.models.map(m => {
+            const prev = statusMap.get(m.id) || {};
+            return {
+              id: m.id,
+              name: m.name,
+              provider: m.provider || "Alokpoth",
+              type: m.type || "openrouter",
+              premium: Boolean(m.premium),
+              efficient: Boolean(m.efficient),
+              order: m.order || 0,
+              latency: prev.latency !== undefined ? prev.latency : null,
+              status: prev.status || "checking"
+            };
+          });
+
+          if (!MODELS.some(m => m.id === selectedModelId)) {
+            selectedModelId = MODELS[0].id;
+          }
+
+          renderModelList();
+          updateSelectedModelUI();
+          updateTriggerStatusDot();
+        }
+      } catch (err) {
+        console.warn("Could not fetch models from server:", err);
+      }
+    }
+
+    let selectedModelId = "openrouter/free";
+
+    const PING_INTERVAL_MS = 60000;
+    const PING_TIMEOUT_MS = 8000;
+    let pingInFlight = false;
+
+    function fetchWithTimeout(url, opts, timeoutMs) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, { ...opts, signal: controller.signal }).finally(() => clearTimeout(id));
+    }
+
+    function classifyLatency(ms) {
+      if (ms == null) return "offline";
+      if (ms > 5000) return "slow";
+      if (ms > 3000) return "degraded";
+      return "online";
+    }
+
+    async function pingModel(m) {
+      try {
+        const srvRes = await fetchWithTimeout(`/api/chat/ping?model=${encodeURIComponent(m.id)}`, { method: "GET" }, PING_TIMEOUT_MS);
+        if (srvRes.ok) {
+          const srvData = await srvRes.json();
+          if (srvData.success) {
+            return { latency: srvData.latency, status: srvData.status || classifyLatency(srvData.latency) };
+          }
+        }
+      } catch (e) {}
+      return { latency: null, status: "offline" };
+    }
+
+    async function syncModelStatuses({ silent } = {}) {
+      if (pingInFlight) return;
+      pingInFlight = true;
+      if (!silent) renderModelList();
+
+      await Promise.all(MODELS.map(async (m) => {
+        const result = await pingModel(m);
+        m.latency = result.latency;
+        m.status = result.status;
+      }));
+
+      pingInFlight = false;
+      renderModelList();
+      updateTriggerStatusDot();
+    }
+
+    function updateTriggerStatusDot() {
+      const current = MODELS.find((m) => m.id === selectedModelId);
+      const dot = document.getElementById("triggerStatusDot");
+      if (dot) {
+        dot.className = `trigger-status-dot status-dot ${current ? current.status : "checking"}`;
+        dot.title = current ? statusLabel(current.status) : "";
+      }
+    }
+
+    const modelTrigger = document.getElementById("modelTrigger");
+    const modelTriggerLabel = document.getElementById("modelTriggerLabel");
+    const modelModalOverlay = document.getElementById("modelModalOverlay");
+    const modelModalClose = document.getElementById("modelModalClose");
+    const modelList = document.getElementById("modelList");
+
+    function statusLabel(status) {
+      if (status === "online") return "অনলাইন";
+      if (status === "degraded") return "ধীরগতি";
+      if (status === "slow") return "অতি ধীর";
+      if (status === "checking") return "যাচাই হচ্ছে...";
+      return "অফলাইন";
+    }
+
+    function latencyLabel(m) {
+      if (m.status === "checking") return `<span class="latency-spinner"></span>`;
+      if (m.latency == null) return "—";
+      return `${m.latency}ms`;
+    }
+
+    const modelSearchInput = document.getElementById("modelSearchInput");
+    if (modelSearchInput) {
+      modelSearchInput.addEventListener("input", () => {
+        renderModelList();
+      });
+    }
+
+    function renderModelList() {
+      modelList.innerHTML = "";
+      const q = (modelSearchInput?.value || "").toLowerCase().trim();
+      const filtered = q ? MODELS.filter(m => 
+        (m.name && m.name.toLowerCase().includes(q)) || 
+        (m.provider && m.provider.toLowerCase().includes(q)) ||
+        (m.id && m.id.toLowerCase().includes(q))
+      ) : MODELS;
+
+      if (!filtered.length) {
+        modelList.innerHTML = `<div style="text-align:center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;">কোনো মডেল পাওয়া যায়নি</div>`;
+        return;
+      }
+
+      filtered.forEach((m) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "model-card" + (m.id === selectedModelId ? " selected" : "");
+
+        let badgeHtml = "";
+        if (m.efficient) {
+          badgeHtml = `<span class="badge-tag badge-max">MAX</span>`;
+        } else if (m.premium) {
+          badgeHtml = `<span class="badge-tag badge-pro">PRO</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="model-card-left">
+            <div class="model-card-name">${m.name}${badgeHtml}</div>
+            <div class="model-card-provider">${m.provider}</div>
+          </div>
+          <div class="model-card-right">
+            <span class="model-latency">${latencyLabel(m)}</span>
+            <span class="status-dot ${m.status}" title="${statusLabel(m.status)}"></span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          selectedModelId = m.id;
+          modelTriggerLabel.innerHTML = m.name + badgeHtml;
+          if (messagesHistory[0] && messagesHistory[0].role === "system") {
+            messagesHistory[0].content = buildSystemPrompt(m.name, true, true);
+          }
+          updateAttachBtnActiveState();
+          updateTriggerStatusDot();
+          closeModal();
+          renderModelList();
+        });
+
+        modelList.appendChild(card);
+      });
+    }
+
+    async function openModal() {
+      if (modelSearchInput) modelSearchInput.value = "";
+      renderModelList();
+      modelModalOverlay.classList.add("open");
+      if (modelSearchInput) setTimeout(() => modelSearchInput.focus(), 150);
+      await fetchModelsFromServer();
+      syncModelStatuses({ silent: true });
+    }
+
+    function closeModal() {
+      modelModalOverlay.classList.remove("open");
+    }
+
+    modelTrigger.addEventListener("click", openModal);
+    modelModalClose.addEventListener("click", closeModal);
+    modelModalOverlay.addEventListener("click", (e) => {
+      if (e.target === modelModalOverlay) closeModal();
+    });
+
+    const brandMenuBtn = document.getElementById("brandMenuBtn");
+    const brandMenuOverlay = document.getElementById("brandMenuOverlay");
+    const brandMenuClose = document.getElementById("brandMenuClose");
+
+    function openBrandMenu() { brandMenuOverlay.classList.add("open"); }
+    function closeBrandMenu() { brandMenuOverlay.classList.remove("open"); }
+
+    brandMenuBtn.addEventListener("click", openBrandMenu);
+    brandMenuClose.addEventListener("click", closeBrandMenu);
+    brandMenuOverlay.addEventListener("click", (e) => {
+      if (e.target === brandMenuOverlay) closeBrandMenu();
+    });
+
+    const accountMenuBtn = document.getElementById("accountMenuBtn");
+    const accountModalOverlay = document.getElementById("accountModalOverlay");
+    const accountModalClose = document.getElementById("accountModalClose");
+    const accountNameInput = document.getElementById("accountNameInput");
+    const accountNameDisplay = document.getElementById("accountNameDisplay");
+    const accountAvatar = document.getElementById("accountAvatar");
+    const accountSaveBtn = document.getElementById("accountSaveBtn");
+    const accountResetBtn = document.getElementById("accountResetBtn");
+    const accountStatTokens = document.getElementById("accountStatTokens");
+    const accountStatCost = document.getElementById("accountStatCost");
+    const accountStatMessages = document.getElementById("accountStatMessages");
+    const accountStatImages = document.getElementById("accountStatImages");
+
+    let messageCount = 0;
+    try {
+      messageCount = parseInt(localStorage.getItem("alokpoth_message_count") || "0", 10) || 0;
+    } catch {}
+
+    function getAccountName() {
+      try { return localStorage.getItem("alokpoth_account_name") || ""; } catch { return ""; }
+    }
+
+    function applyAccountName(name) {
+      const displayName = name && name.trim() ? name.trim() : "অতিথি ব্যবহারকারী";
+      accountNameDisplay.textContent = displayName;
+      accountAvatar.textContent = displayName.trim().charAt(0).toUpperCase() || "অ";
+    }
+
+    function renderAccountStats() {
+      const totalTokens = usageTotals.inputTokens + usageTotals.outputTokens;
+      const costText = usageTotals.costUSD < 0.01 && usageTotals.costUSD > 0
+        ? `$${usageTotals.costUSD.toFixed(5)}`
+        : `$${usageTotals.costUSD.toFixed(4)}`;
+      accountStatTokens.textContent = totalTokens.toLocaleString("bn-BD");
+      accountStatCost.textContent = costText;
+      accountStatMessages.textContent = messageCount.toLocaleString("bn-BD");
+      accountStatImages.textContent = (usageTotals.images || 0).toLocaleString("bn-BD");
+      renderDailyUsage();
+    }
+
+    async function syncUserProfileFromServer() {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) return;
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.status === 403) {
+          showToast("আপনার অ্যাকাউন্টটি অ্যাডমিন দ্বারা ব্লক করা হয়েছে!", "error");
+          performAccountLogout(true);
+          return;
+        }
+        if (res.status === 401) {
+          try {
+            localStorage.removeItem("alokpoth_token");
+            localStorage.removeItem("alokpoth_user");
+          } catch (e) {}
+          if (typeof updateAuthUIState === "function") updateAuthUIState();
+          return;
+        }
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          const u = data.user;
+          if (u.name) {
+            applyAccountName(u.name);
+            if (accountNameInput) accountNameInput.value = u.name;
+            try { localStorage.setItem("alokpoth_account_name", u.name); } catch {}
+          }
+          if (u.subscription && u.subscription.plan_name) {
+            currentPlan = u.subscription.plan_name;
+            saveCurrentPlan(currentPlan);
+            if (u.subscription.expires_at) {
+              try { localStorage.setItem(PLAN_EXPIRY_KEY, u.subscription.expires_at); } catch {}
+            } else {
+              try { localStorage.removeItem(PLAN_EXPIRY_KEY); } catch {}
+            }
+            renderCreditBalance();
+          }
+          if (typeof updateAuthUIState === "function") updateAuthUIState();
+        }
+      } catch (e) {
+        console.warn("Could not sync user profile:", e);
+      }
+    }
+
+    function openAccountModal() {
+      const savedName = getAccountName();
+      accountNameInput.value = savedName;
+      applyAccountName(savedName);
+      renderAccountStats();
+      renderCreditBalance();
+      closeBrandMenu();
+      accountModalOverlay.classList.add("open");
+      syncUserProfileFromServer();
+      syncPlanLimitsFromServer();
+    }
+    function closeAccountModal() { accountModalOverlay.classList.remove("open"); }
+
+    accountMenuBtn.addEventListener("click", openAccountModal);
+    accountModalClose.addEventListener("click", closeAccountModal);
+    accountModalOverlay.addEventListener("click", (e) => {
+      if (e.target === accountModalOverlay) closeAccountModal();
+    });
+
+    const accountLimitsToggleBtn = document.getElementById("accountLimitsToggleBtn");
+    const accountAllPlansGrid = document.getElementById("accountAllPlansGrid");
+    const accountLimitsToggleText = document.getElementById("accountLimitsToggleText");
+
+    if (accountLimitsToggleBtn && accountAllPlansGrid) {
+      accountLimitsToggleBtn.addEventListener("click", () => {
+        const isHidden = accountAllPlansGrid.style.display === "none" || !accountAllPlansGrid.style.display;
+        accountAllPlansGrid.style.display = isHidden ? "grid" : "none";
+        accountLimitsToggleBtn.classList.toggle("open", isHidden);
+        if (accountLimitsToggleText) {
+          accountLimitsToggleText.textContent = isHidden ? "সংক্ষেপ করুন" : "সব প্ল্যান দেখুন";
+        }
+      });
+    }
+
+    if (typeof syncPlanLimitsFromServer === "function") {
+      syncPlanLimitsFromServer();
+    }
+
+    const accountRedeemInput = document.getElementById("accountRedeemInput");
+    const accountRedeemBtn = document.getElementById("accountRedeemBtn");
+    const accountRedeemMsg = document.getElementById("accountRedeemMsg");
+
+    if (accountRedeemBtn && accountRedeemInput) {
+      accountRedeemBtn.addEventListener("click", async () => {
+        const rawCode = accountRedeemInput.value.trim().toUpperCase();
+        if (!rawCode) {
+          if (accountRedeemMsg) {
+            accountRedeemMsg.textContent = "অনুগ্রহ করে রিডিম কোডটি প্রবেশ করান!";
+            accountRedeemMsg.className = "account-redeem-msg show error";
+          }
+          accountRedeemInput.focus();
+          return;
+        }
+
+        accountRedeemBtn.disabled = true;
+        accountRedeemBtn.textContent = "যাচাই হচ্ছে...";
+        if (accountRedeemMsg) {
+          accountRedeemMsg.textContent = "";
+          accountRedeemMsg.className = "account-redeem-msg";
+        }
+
+        try {
+          const token = localStorage.getItem("alokpoth_token");
+          if (!token) {
+            showToast("রিডিম কোড ব্যবহার করার জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
+            if (accountRedeemMsg) {
+              accountRedeemMsg.textContent = "রিডিম কোড ব্যবহারের জন্য আপনাকে লগইন করতে হবে।";
+              accountRedeemMsg.className = "account-redeem-msg show error";
+            }
+            accountRedeemBtn.disabled = false;
+            accountRedeemBtn.textContent = "দাবি করুন";
+            openAuthModal();
+            return;
+          }
+
+          const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+          const res = await fetch("/api/redeem/claim", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ code: rawCode })
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
+            const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
+
+            currentPlan = newPlan;
+            saveCurrentPlan(newPlan);
+            if (expiresAt) {
+              try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
+            }
+            renderCreditBalance();
+
+            accountRedeemInput.value = "";
+            if (accountRedeemMsg) {
+              accountRedeemMsg.textContent = data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`;
+              accountRedeemMsg.className = "account-redeem-msg show success";
+            }
+            showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+          } else {
+            const errMsg = data.error || "রিডিম করতে ব্যর্থ হয়েছে! কোডটি পুনরায় পরীক্ষা করুন।";
+            if (accountRedeemMsg) {
+              accountRedeemMsg.textContent = errMsg;
+              accountRedeemMsg.className = "account-redeem-msg show error";
+            }
+            showToast(errMsg, "error");
+          }
+        } catch (err) {
+          const errMsg = "সার্ভারের সাথে যোগাযোগ করা যায়নি। অনুগ্রহ করে ইন্টারনেট সংযোগ চেক করুন।";
+          if (accountRedeemMsg) {
+            accountRedeemMsg.textContent = errMsg;
+            accountRedeemMsg.className = "account-redeem-msg show error";
+          }
+          showToast(errMsg, "error");
+        } finally {
+          accountRedeemBtn.disabled = false;
+          accountRedeemBtn.textContent = "দাবি করুন";
+        }
+      });
+
+      accountRedeemInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          accountRedeemBtn.click();
+        }
+      });
+    }
+
+    accountSaveBtn.addEventListener("click", () => {
+      const name = accountNameInput.value.trim();
+      try { localStorage.setItem("alokpoth_account_name", name); } catch {}
+      applyAccountName(name);
+      closeAccountModal();
+      showToast("নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
+    });
+
+    function performAccountLogout(force = false) {
+      const doLogout = () => {
+        try {
+          localStorage.removeItem("alokpoth_account_name");
+          localStorage.removeItem("alokpoth_token");
+          localStorage.removeItem("alokpoth_user");
+          localStorage.removeItem(PLAN_EXPIRY_KEY);
+          localStorage.setItem("alokpoth_user_plan", "Free");
+          localStorage.setItem(PLAN_STORAGE_KEY, "Free");
+        } catch (e) {}
+
+        currentPlan = "Free";
+        saveCurrentPlan("Free");
+        applyAccountName("");
+        if (accountNameInput) accountNameInput.value = "";
+        if (accountRedeemInput) accountRedeemInput.value = "";
+        if (accountRedeemMsg) {
+          accountRedeemMsg.textContent = "";
+          accountRedeemMsg.className = "account-redeem-msg";
+        }
+        renderCreditBalance();
+
+        closeAccountModal();
+        closeBrandMenu();
+        updateAuthUIState();
+        if (!force) {
+          showToast("সফলভাবে লগআউট হয়েছে!", "info");
+        }
+      };
+
+      if (force) {
+        doLogout();
+      } else {
+        showCustomUI('confirm', "আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট থেকে লগআউট করতে চান?", null, (confirmed) => {
+          if (confirmed) doLogout();
+        });
+      }
+    }
+
+    const accountLogoutBtn = document.getElementById("accountLogoutBtn");
+    if (accountLogoutBtn) {
+      accountLogoutBtn.addEventListener("click", performAccountLogout);
+    }
+
+    const brandMenuLogoutBtn = document.getElementById("brandMenuLogoutBtn");
+    if (brandMenuLogoutBtn) {
+      brandMenuLogoutBtn.addEventListener("click", performAccountLogout);
+    }
+
+    // --- AUTH MODAL LOGIC & UI STATE ---
+    let authMode = "login"; // "login" | "register"
+    const authModalOverlay = document.getElementById("authModalOverlay");
+    const authModalClose = document.getElementById("authModalClose");
+    const authTabLogin = document.getElementById("authTabLogin");
+    const authTabRegister = document.getElementById("authTabRegister");
+    const authForm = document.getElementById("authForm");
+    const authNameField = document.getElementById("authNameField");
+    const authNameInput = document.getElementById("authNameInput");
+    const authEmailInput = document.getElementById("authEmailInput");
+    const authPasswordInput = document.getElementById("authPasswordInput");
+    const authErrorMsg = document.getElementById("authErrorMsg");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const authModalTitle = document.getElementById("authModalTitle");
+    const accountAuthBtn = document.getElementById("accountAuthBtn");
+    const brandMenuAuthBtn = document.getElementById("brandMenuAuthBtn");
+
+    function updateAuthUIState() {
+      const token = localStorage.getItem("alokpoth_token");
+      const currentAuthBtn = document.getElementById("accountAuthBtn");
+      const currentLogoutBtn = document.getElementById("accountLogoutBtn");
+      const currentBrandAuth = document.getElementById("brandMenuAuthBtn");
+      const currentBrandLogout = document.getElementById("brandMenuLogoutBtn");
+      const currentNameDisplay = document.getElementById("accountNameDisplay");
+
+      if (token) {
+        if (currentAuthBtn) currentAuthBtn.style.display = "none";
+        if (currentLogoutBtn) currentLogoutBtn.style.display = "block";
+        if (currentBrandAuth) currentBrandAuth.style.display = "none";
+        if (currentBrandLogout) currentBrandLogout.style.display = "flex";
+      } else {
+        if (currentAuthBtn) currentAuthBtn.style.display = "block";
+        if (currentLogoutBtn) currentLogoutBtn.style.display = "none";
+        if (currentBrandAuth) currentBrandAuth.style.display = "flex";
+        if (currentBrandLogout) currentBrandLogout.style.display = "none";
+        if (currentNameDisplay && !localStorage.getItem("alokpoth_account_name")) {
+          currentNameDisplay.textContent = "অতিথি ব্যবহারকারী";
+        }
+      }
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      if (authErrorMsg) {
+        authErrorMsg.style.display = "none";
+        authErrorMsg.textContent = "";
+      }
+      if (mode === "login") {
+        if (authTabLogin) authTabLogin.classList.add("active");
+        if (authTabRegister) authTabRegister.classList.remove("active");
+        if (authNameField) authNameField.style.display = "none";
+        if (authSubmitBtn) authSubmitBtn.textContent = "লগইন করুন";
+        if (authModalTitle) authModalTitle.textContent = "লগইন করুন";
+      } else {
+        if (authTabRegister) authTabRegister.classList.add("active");
+        if (authTabLogin) authTabLogin.classList.remove("active");
+        if (authNameField) authNameField.style.display = "flex";
+        if (authSubmitBtn) authSubmitBtn.textContent = "রেজিস্টার করুন";
+        if (authModalTitle) authModalTitle.textContent = "নতুন অ্যাকাউন্ট তৈরি";
+      }
+    }
+
+    function openAuthModal(mode = "login") {
+      setAuthMode(mode);
+      if (authModalOverlay) authModalOverlay.classList.add("open");
+      closeBrandMenu();
+    }
+
+    function closeAuthModal() {
+      if (authModalOverlay) authModalOverlay.classList.remove("open");
+      if (authErrorMsg) authErrorMsg.style.display = "none";
+    }
+
+    if (authModalClose) authModalClose.addEventListener("click", closeAuthModal);
+    if (authModalOverlay) {
+      authModalOverlay.addEventListener("click", (e) => {
+        if (e.target === authModalOverlay) closeAuthModal();
+      });
+    }
+
+    if (authTabLogin) authTabLogin.addEventListener("click", () => setAuthMode("login"));
+    if (authTabRegister) authTabRegister.addEventListener("click", () => setAuthMode("register"));
+
+    if (accountAuthBtn) {
+      accountAuthBtn.addEventListener("click", () => {
+        closeAccountModal();
+        openAuthModal("login");
+      });
+    }
+
+    if (brandMenuAuthBtn) {
+      brandMenuAuthBtn.addEventListener("click", () => {
+        closeBrandMenu();
+        openAuthModal("login");
+      });
+    }
+
+    if (authForm) {
+      authForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = (authEmailInput?.value || "").trim();
+        const password = authPasswordInput?.value || "";
+        const name = (authNameInput?.value || "").trim();
+
+        if (!email || !password) {
+          if (authErrorMsg) {
+            authErrorMsg.textContent = "ইমেইল এবং পাসওয়ার্ড প্রদান করুন।";
+            authErrorMsg.style.display = "block";
+          }
+          return;
+        }
+
+        if (authMode === "register" && !name) {
+          if (authErrorMsg) {
+            authErrorMsg.textContent = "আপনার নাম প্রদান করুন।";
+            authErrorMsg.style.display = "block";
+          }
+          return;
+        }
+
+        if (authSubmitBtn) {
+          authSubmitBtn.disabled = true;
+          authSubmitBtn.textContent = "অপেক্ষা করুন...";
+        }
+        if (authErrorMsg) authErrorMsg.style.display = "none";
+
+        try {
+          const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+          const payload = authMode === "login" ? { email, password } : { name, email, password };
+
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || "অথেন্টিকেশন ব্যর্থ হয়েছে!");
+          }
+
+          localStorage.setItem("alokpoth_token", data.token);
+          if (data.user) {
+            localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
+            if (data.user.name) {
+              localStorage.setItem("alokpoth_account_name", data.user.name);
+              applyAccountName(data.user.name);
+              if (accountNameInput) accountNameInput.value = data.user.name;
+            }
+            if (data.user.subscription && data.user.subscription.plan_name) {
+              currentPlan = data.user.subscription.plan_name;
+              saveCurrentPlan(currentPlan);
+              if (data.user.subscription.expires_at) {
+                localStorage.setItem(PLAN_EXPIRY_KEY, data.user.subscription.expires_at);
+              }
+              renderCreditBalance();
+            }
+          }
+
+          updateAuthUIState();
+          closeAuthModal();
+          showToast(authMode === "login" ? "সফলভাবে লগইন হয়েছে!" : "অ্যাকাউন্ট সফলভাবে তৈরি ও লগইন হয়েছে!", "success");
+          syncUserProfileFromServer();
+        } catch (err) {
+          if (authErrorMsg) {
+            authErrorMsg.textContent = err.message;
+            authErrorMsg.style.display = "block";
+          }
+        } finally {
+          if (authSubmitBtn) {
+            authSubmitBtn.disabled = false;
+            authSubmitBtn.textContent = authMode === "login" ? "লগইন করুন" : "রেজিস্টার করুন";
+          }
+        }
+      });
+    }
+
+    updateAuthUIState();
+
+    accountResetBtn.addEventListener("click", () => {
+      showCustomUI('confirm', "আপনি কি নিশ্চিত? এতে চ্যাট হিস্ট্রি ও ব্যবহারের সব হিসাব মুছে যাবে।", null, (confirmed) => {
+        if (!confirmed) return;
+        
+        usageTotals = { inputTokens: 0, outputTokens: 0, images: 0, costUSD: 0 };
+        messageCount = 0;
+        try {
+          localStorage.setItem("alokpoth_message_count", "0");
+          localStorage.removeItem("alokpoth_chat_sessions");
+          localStorage.removeItem("alokpoth_current_session_id");
+          localStorage.removeItem("alokpoth_daily_usage");
+        } catch {}
+        
+        renderUsage();
+        messagesHistory = [{ role: "system", content: messagesHistory[0].content }];
+        chatStream.innerHTML = "";
+        closeAccountModal();
+        location.reload();
+      });
+    });
+
+    applyAccountName(getAccountName());
+
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeLabelText = themeToggleBtn.querySelector(".theme-label-text");
+
+    function updateThemeLabel() {
+      const theme = document.documentElement.getAttribute("data-theme") || "dark";
+      let metaColor = "#0a0b0f";
+      if (theme === "light") {
+        themeLabelText.textContent = "লাইট থিম";
+        metaColor = "#f4f6f8";
+      } else if (theme === "oled") {
+        themeLabelText.textContent = "সেভিং থিম";
+        metaColor = "#000000";
+      } else if (theme === "eyecare") {
+        themeLabelText.textContent = "আই কেয়ার থিম";
+        metaColor = "#1a1c18";
+      } else {
+        themeLabelText.textContent = "ডার্ক থিম";
+        metaColor = "#0a0b0f";
+      }
+      let metaTag = document.querySelector('meta[name="theme-color"]');
+      if (!metaTag) {
+        metaTag = document.createElement("meta");
+        metaTag.name = "theme-color";
+        document.head.appendChild(metaTag);
+      }
+      metaTag.setAttribute("content", metaColor);
+    }
+    updateThemeLabel();
+
+    themeToggleBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      
+      if (current === "light") {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("alokpoth-theme", "dark");
+      } else if (current === "dark") {
+        document.documentElement.setAttribute("data-theme", "oled");
+        localStorage.setItem("alokpoth-theme", "oled");
+      } else if (current === "oled") {
+        document.documentElement.setAttribute("data-theme", "eyecare");
+        localStorage.setItem("alokpoth-theme", "eyecare");
+      } else if (current === "eyecare") {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("alokpoth-theme", "light");
+      }
+      
+      updateThemeLabel();
+    });
+
+    const chatStream = document.getElementById("chatStream");
+    const scrollContainer = document.getElementById("scrollContainer");
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      const icon = type === "success"
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add("fade-out");
+        setTimeout(() => toast.remove(), 250);
+      }, 2200);
+    }
+
+    const chatForm = document.getElementById("chatForm");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function updateSendAvailability() {
+      const isOffline = !navigator.onLine;
+      const outOfCredit = !hasCredit();
+      const hasContent = !!userInput.value.trim() || (pendingImages && pendingImages.length > 0) || (pendingFiles && pendingFiles.length > 0);
+      sendBtn.disabled = isOffline || outOfCredit || !hasContent || isGenerating;
+      userInput.disabled = outOfCredit;
+      userInput.placeholder = isOffline
+        ? "📡 ইন্টারনেট সংযোগ নেই..."
+        : (outOfCredit ? "প্ল্যান সীমা শেষ..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
+    }
+    const attachBtn = document.getElementById("attachBtn");
+    const imageInput = document.getElementById("imageInput");
+    const imagePreviewRow = document.getElementById("imagePreviewRow");
+    const docInput = document.getElementById("docInput");
+    const filePreviewRow = document.getElementById("filePreviewRow");
+    const offlineBanner = document.getElementById("offlineBanner");
+    let emptyState = document.getElementById("emptyState");
+    let pendingImages = [];
+    let pendingFiles = [];
+
+    function updateOnlineStatus() {
+      if (!navigator.onLine) {
+        offlineBanner.classList.add("show");
+        sendBtn.disabled = true;
+      } else {
+        offlineBanner.classList.remove("show");
+        updateSendAvailability();
+      }
+    }
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+    updateOnlineStatus();
+
+    function estimateTokens(text) {
+      if (!text) return 0;
+      return Math.ceil(text.length / 4);
+    }
+
+    const MODEL_PRICING = {
+      "openrouter/free": { in: 0.05, out: 0.20 },
+      "gemini-3.5-flash-lite": { in: 0.10, out: 0.40 },
+      "openai/gpt-oss-120b": { in: 0.15, out: 0.60 },
+      "claude-sonnet-4-6": { in: 3.00, out: 15.00 },
+      "nemotron-ultra-550b": { in: 1.00, out: 2.00 },
+      "gpt-5.6": { in: 0.20, out: 1.20 },
+      "nemotron-vision": { in: 0.50, out: 1.50, imageFlat: 0.99 },
+      "mimo-v2.5": { in: 0.10, out: 0.30 },
+      "hy3": { in: 0.15, out: 0.50 },
+      "deepseek-v4-flash": { in: 0.08, out: 0.25 },
+      "deepseek-v4-flash-vision-exp": { in: 0.20, out: 0.60 }
+    };
+
+    const CODE_GEN_MULTIPLIER = 1.35;
+
+    function countCodeBlocks(text) {
+      if (!text) return 0;
+      const matches = text.match(/```/g);
+      return matches ? Math.floor(matches.length / 2) : 0;
+    }
+
+    let usageTotals = {
+      inputTokens: 0,
+      outputTokens: 0,
+      images: 0,
+      costUSD: 0
+    };
+
+    const DAILY_USAGE_KEY = "alokpoth_daily_usage";
+
+    function todayKeyBD() {
+      const now = new Date();
+      const dhaka = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+      return `${dhaka.getFullYear()}-${String(dhaka.getMonth() + 1).padStart(2, "0")}-${String(dhaka.getDate()).padStart(2, "0")}`;
+    }
+
+    function loadDailyUsage() {
+      let stored = null;
+      try { stored = JSON.parse(localStorage.getItem(DAILY_USAGE_KEY) || "null"); } catch {}
+      const key = todayKeyBD();
+      if (!stored || stored.date !== key) {
+        stored = { date: key, costUSD: 0, inputTokens: 0, outputTokens: 0, images: 0, codeGens: 0 };
+      }
+      return stored;
+    }
+
+    function saveDailyUsage(daily) {
+      try { localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(daily)); } catch {}
+    }
+
+    let dailyUsage = loadDailyUsage();
+
+    function addToDailyUsage({ inputTokens = 0, outputTokens = 0, costUSD = 0, images = 0, isCodeGen = false }) {
+      const key = todayKeyBD();
+      if (dailyUsage.date !== key) {
+        dailyUsage = { date: key, costUSD: 0, inputTokens: 0, outputTokens: 0, images: 0, codeGens: 0 };
+      }
+      dailyUsage.inputTokens += inputTokens;
+      dailyUsage.outputTokens += outputTokens;
+      dailyUsage.costUSD += costUSD;
+      dailyUsage.images += images;
+      if (isCodeGen) dailyUsage.codeGens += 1;
+      saveDailyUsage(dailyUsage);
+      renderDailyUsage();
+    }
+
+    function renderDailyUsage() {
+      const el = document.getElementById("accountStatDailyCost");
+      if (!el) return;
+      const key = todayKeyBD();
+      if (dailyUsage.date !== key) dailyUsage = loadDailyUsage();
+      const costText = dailyUsage.costUSD < 0.01 && dailyUsage.costUSD > 0
+        ? `$${dailyUsage.costUSD.toFixed(5)}`
+        : `$${dailyUsage.costUSD.toFixed(4)}`;
+      el.textContent = costText;
+    }
+
+    function addUsage(modelId, inputTokens, outputTokens, options = {}) {
+      const isCodeGen = !!options.isCodeGen;
+      const rate = MODEL_PRICING[modelId] || { in: 0.50, out: 1.50 };
+      const billedOutputTokens = isCodeGen ? Math.ceil(outputTokens * CODE_GEN_MULTIPLIER) : outputTokens;
+      const callCost = (inputTokens / 1_000_000) * rate.in + (billedOutputTokens / 1_000_000) * rate.out;
+
+      usageTotals.inputTokens += inputTokens;
+      usageTotals.outputTokens += billedOutputTokens;
+      usageTotals.costUSD += callCost;
+      renderUsage();
+
+      addToDailyUsage({ inputTokens, outputTokens: billedOutputTokens, costUSD: callCost, isCodeGen });
+      deductCredit(callCost);
+    }
+
+    function addImageUsage(modelId) {
+      const rate = MODEL_PRICING[modelId] || {};
+      const flat = typeof rate.imageFlat === "number" ? rate.imageFlat : 1.00;
+      usageTotals.images += 1;
+      usageTotals.costUSD += flat;
+      renderUsage();
+
+      addToDailyUsage({ costUSD: flat, images: 1 });
+      deductCredit(flat);
+    }
+
+    function renderUsage() {
+      const totalTokens = usageTotals.inputTokens + usageTotals.outputTokens;
+      renderAccountStats();
+    }
+
+    function updateTokenCounter() {
+      renderUsage();
+    }
+    renderUsage();
+    renderCreditBalance();
+    fetchModelsFromServer();
+    syncUserProfileFromServer();
+    syncPlanLimitsFromServer();
+
+    window.addEventListener("focus", () => {
+      fetchModelsFromServer();
+      syncUserProfileFromServer();
+      syncPlanLimitsFromServer();
+    });
+
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
+    }
+
+    async function extractPdfText(file) {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let fullText = "";
+      const maxPages = Math.min(pdf.numPages, 40);
+      for (let i = 1; i <= maxPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map((it) => it.str).join(" ") + "\n\n";
+      }
+      return fullText.trim();
+    }
+
+    async function extractPlainText(file) { return await file.text(); }
+
+    function renderFilePreviews() {
+      filePreviewRow.innerHTML = "";
+      pendingFiles.forEach((f, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "file-preview-chip";
+        chip.innerHTML = `
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          <span class="file-preview-chip-name">${f.name}${f.loading ? " (পড়া হচ্ছে...)" : ""}</span>
+          <button type="button" class="file-preview-remove" data-idx="${idx}">×</button>
+        `;
+        filePreviewRow.appendChild(chip);
+      });
+      filePreviewRow.querySelectorAll(".file-preview-remove").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          pendingFiles.splice(Number(btn.dataset.idx), 1);
+          renderFilePreviews();
+        });
+      });
+    }
+
+    docInput.addEventListener("change", async () => {
+      const files = Array.from(docInput.files || []);
+      const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10MB
+      for (const file of files) {
+        if (file.size > MAX_DOC_SIZE) {
+          showToast(`"${file.name}" অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 10MB অনুমোদিত।`, "error");
+          continue;
+        }
+        const entry = { name: file.name, text: "", loading: true };
+        pendingFiles.push(entry);
+        renderFilePreviews();
+        try {
+          let text = "";
+          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+            text = await extractPdfText(file);
+          } else { text = await extractPlainText(file); }
+          entry.text = text.slice(0, 15000);
+          entry.loading = false;
+        } catch (err) {
+          entry.text = ""; entry.loading = false; entry.error = true;
+        }
+        renderFilePreviews();
+        updateTokenCounter();
+      }
+      docInput.value = "";
+    });
+
+    const attachMenuWrap = document.getElementById("attachMenuWrap");
+    const attachMenu = document.getElementById("attachMenu");
+    const attachImageOption = document.getElementById("attachImageOption");
+    const attachFileOption = document.getElementById("attachFileOption");
+    const attachWebSearchOption = document.getElementById("attachWebSearchOption");
+    const attachImageGenOption = document.getElementById("attachImageGenOption");
+    const webSearchText = document.getElementById("webSearchText");
+    const imageGenText = document.getElementById("imageGenText");
+
+    function updateAttachBtnActiveState() {
+      if (isWebSearchEnabled || isImageGenEnabled) {
+        attachBtn.classList.add("active-tool");
+      } else {
+        attachBtn.classList.remove("active-tool");
+      }
+    }
+
+    function closeAttachMenu() { attachMenu.classList.remove("open"); }
+    
+    attachBtn.addEventListener("click", (e) => { e.stopPropagation(); attachMenu.classList.toggle("open"); });
+    attachImageOption.addEventListener("click", () => { closeAttachMenu(); imageInput.click(); });
+    attachFileOption.addEventListener("click", () => { closeAttachMenu(); docInput.click(); });
+
+    attachWebSearchOption.addEventListener("click", () => {
+      isWebSearchEnabled = !isWebSearchEnabled;
+      if (isWebSearchEnabled) {
+        isImageGenEnabled = false; 
+        imageGenText.textContent = "ছবি তৈরি: বন্ধ"; 
+        attachImageGenOption.style.color = "var(--text-main)"; 
+        attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
+        attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
+      }
+      webSearchText.textContent = isWebSearchEnabled ? "ওয়েব সার্চ: চালু" : "ওয়েব সার্চ: বন্ধ";
+      attachWebSearchOption.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-main)";
+      webSearchText.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      attachWebSearchOption.querySelector('svg').style.stroke = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      updateAttachBtnActiveState(); closeAttachMenu();
+    });
+
+    attachImageGenOption.addEventListener("click", () => {
+      isImageGenEnabled = !isImageGenEnabled;
+      if (isImageGenEnabled) {
+        isWebSearchEnabled = false; 
+        webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
+        attachWebSearchOption.style.color = "var(--text-main)"; 
+        attachWebSearchOption.querySelector("span").style.color = "var(--text-sub)"; 
+        attachWebSearchOption.querySelector('svg').style.stroke = "var(--text-sub)";
+      }
+      imageGenText.textContent = isImageGenEnabled ? "ছবি তৈরি: চালু" : "ছবি তৈরি: বন্ধ";
+      attachImageGenOption.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-main)";
+      imageGenText.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      attachImageGenOption.querySelector('svg').style.stroke = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      updateAttachBtnActiveState(); closeAttachMenu();
+    });
+
+    document.addEventListener("click", (e) => { if (!attachMenuWrap.contains(e.target)) closeAttachMenu(); });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderImagePreviews() {
+      imagePreviewRow.innerHTML = "";
+      pendingImages.forEach((img, idx) => {
+        const item = document.createElement("div");
+        item.className = "image-preview-item";
+        item.innerHTML = `<img src="${img.previewUrl}" alt="attached image">
+                          <button type="button" class="image-preview-remove">×</button>`;
+        item.querySelector(".image-preview-remove").addEventListener("click", () => {
+          pendingImages.splice(idx, 1); renderImagePreviews();
+        });
+        imagePreviewRow.appendChild(item);
+      });
+    }
+
+    imageInput.addEventListener("change", async () => {
+      const files = Array.from(imageInput.files || []);
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        if (file.size > 15 * 1024 * 1024) {
+          showToast(`ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 15MB অনুমোদিত।`, "error");
+          continue;
+        }
+        const base64 = await fileToBase64(file);
+        pendingImages.push({ base64, mimeType: file.type, previewUrl: URL.createObjectURL(file) });
+      }
+      renderImagePreviews(); imageInput.value = "";
+      updateSendAvailability();
+    });
+
+    document.addEventListener("paste", async (e) => {
+      const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.indexOf("image") !== -1) {
+          const file = item.getAsFile();
+          if (file) {
+            if (file.size > 15 * 1024 * 1024) {
+              showToast("পেস্ট করা ছবিটি অতিরিক্ত বড় (সর্বোচ্চ 15MB)", "error");
+              continue;
+            }
+            const base64 = await fileToBase64(file);
+            pendingImages.push({ base64, mimeType: file.type, previewUrl: URL.createObjectURL(file) });
+            renderImagePreviews();
+            updateSendAvailability();
+            showToast("ক্লিপবোর্ড থেকে ছবি যুক্ত হয়েছে", "success");
+          }
+        }
+      }
+    });
+
+    function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
+      return `You are ${modelDisplayName}, an AI model built by Alokpoth.
+=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
+You must respond ENTIRELY in Bengali (Bangla script), unless the user explicitly asks you to switch to a different language for that reply. This means:
+- Do NOT mix English words, phrases, or sentences into your Bengali response.
+- Do NOT switch languages mid-response or partway through a conversation.
+- Technical terms, proper nouns, or code-like tokens may stay in their original form if there is no natural Bengali equivalent, but the surrounding sentences, explanations, and structure must be in Bengali.
+- Every single reply, from the first word to the last, must be in Bengali by default. Re-check this rule before finalizing every response, especially in long conversations.
+- SCRIPT PURITY (very important): write every Bengali word using actual Bengali (Bangla) script/letters (বাংলা বর্ণ) - never write a Bengali word using Latin/English letters (no "Banglish").
+- Exception: actual code inside code blocks should stay in its programming language as-is (comments can be in Bengali or English).
+
+Identity rules (follow these exactly):
+- Your one and only name is "${modelDisplayName}". Built by Alokpoth.
+- All models available in this app are Alokpoth's own in-house models.
+
+Capabilities & Code Generation Instructions (CRITICAL):
+- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
+- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
+- Use proper code blocks (triple backticks with language specifier) to format code clearly.
+- You ARE able to generate and create images when requested.`;
+    }
+
+    const SYSTEM_PROMPT = buildSystemPrompt("Alo Go", true, true);
+    let messagesHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+
+    const CHAT_SESSIONS_KEY = "alokpoth_chat_sessions";
+    const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
+    let currentSessionId = null;
+
+    function loadAllSessions() {
+      try {
+        const raw = localStorage.getItem(CHAT_SESSIONS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    }
+
+    function saveAllSessions(sessions) {
+      try { localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(sessions)); } catch {}
+    }
+
+    function makeSessionTitle(history) {
+      const firstUserMsg = history.find((m) => m.role === "user");
+      if (!firstUserMsg) return "নতুন চ্যাট";
+      const text = (typeof firstUserMsg.content === "string" ? firstUserMsg.content : "").trim();
+      return text ? (text.length > 40 ? text.slice(0, 40) + "…" : text) : "নতুন চ্যাট";
+    }
+
+    function persistCurrentSession() {
+      const hasUserMsg = messagesHistory.some((m) => m.role === "user");
+      if (!hasUserMsg) return;
+
+      const sessions = loadAllSessions();
+      const title = makeSessionTitle(messagesHistory);
+      const now = Date.now();
+
+      if (currentSessionId) {
+        const idx = sessions.findIndex((s) => s.id === currentSessionId);
+        if (idx !== -1) {
+          sessions[idx] = { ...sessions[idx], title, messagesHistory, updatedAt: now };
+        } else {
+          sessions.unshift({ id: currentSessionId, title, messagesHistory, updatedAt: now });
+        }
+      } else {
+        currentSessionId = `chat_${now}_${Math.random().toString(36).slice(2, 8)}`;
+        sessions.unshift({ id: currentSessionId, title, messagesHistory, updatedAt: now });
+        try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch {}
+      }
+      saveAllSessions(sessions);
+    }
+
+    function startNewChat() {
+      persistCurrentSession();
+      currentSessionId = null;
+      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch {}
+      messagesHistory = [{ role: "system", content: messagesHistory[0].content }];
+      chatStream.innerHTML = `
+        <div class="empty-state" id="emptyState">
+          আমি আপনাকে কীভাবে সাহায্য করতে পারি?
+          <span>যেকোনো প্রশ্ন লিখুন</span>
+          <div class="quick-prompts-row">
+            <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">💻 ফুল ওয়েবসাইট কোড</button>
+            <button type="button" class="quick-prompt-chip" data-prompt="এই লেখাটি বাংলায় অনুবাদ করুন: ">🌐 অনুবাদ করুন</button>
+            <button type="button" class="quick-prompt-chip" data-prompt="এই বিষয়টির একটি সংক্ষিপ্ত সারাংশ তৈরি করে দিন: ">📝 সারাংশ তৈরি</button>
+            <button type="button" class="quick-prompt-chip" data-prompt="একটি সৃজনশীল গল্প লিখে দিন">📖 গল্প লিখুন</button>
+          </div>
+        </div>
+      `;
+      emptyState = document.getElementById("emptyState");
+      closeBrandMenu();
+    }
+
+    function renderChatHistoryList() {
+      const listEl = document.getElementById("chatHistoryList");
+      const sessions = loadAllSessions().sort((a, b) => b.updatedAt - a.updatedAt);
+
+      if (!sessions.length) {
+        listEl.innerHTML = `<div class="chat-history-empty">এখনো কোনো সেভ করা চ্যাট নেই</div>`;
+        return;
+      }
+
+      listEl.innerHTML = "";
+      sessions.forEach((session) => {
+        const item = document.createElement("div");
+        item.className = "chat-history-item";
+        const dateStr = new Date(session.updatedAt).toLocaleString("bn-BD", {
+          day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+        });
+        item.innerHTML = `
+          <div class="chat-history-item-main">
+            <div class="chat-history-item-title"></div>
+            <div class="chat-history-item-meta">${dateStr}</div>
+          </div>
+          <button type="button" class="chat-history-delete-btn" aria-label="মুছুন">
+            <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></svg>
+          </button>
+        `;
+        item.querySelector(".chat-history-item-title").textContent = session.title;
+
+        item.querySelector(".chat-history-item-main").addEventListener("click", () => loadSession(session.id));
+
+        item.querySelector(".chat-history-delete-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          const remaining = loadAllSessions().filter((s) => s.id !== session.id);
+          saveAllSessions(remaining);
+          if (currentSessionId === session.id) currentSessionId = null;
+          renderChatHistoryList();
+        });
+
+        listEl.appendChild(item);
+      });
+    }
+
+    function loadSession(sessionId) {
+      persistCurrentSession();
+      const sessions = loadAllSessions();
+      const session = sessions.find((s) => s.id === sessionId);
+      if (!session) return;
+
+      currentSessionId = session.id;
+      try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch {}
+      messagesHistory = session.messagesHistory;
+
+      chatStream.innerHTML = "";
+      messagesHistory.forEach((m) => {
+        if (m.role === "user") {
+          let userText = typeof m.content === "string" ? m.content : "";
+          userText = userText.replace(/\n\n\[অনুস্মারক:[\s\S]*\]$/, "").replace(/\n\n\[সংযুক্ত ফাইলের বিষয়বস্তু\][\s\S]*$/, "");
+          createUserBubble(userText, m.images || [], m.files || []);
+        } else if (m.role === "assistant") {
+          const { textDiv, copyBtn, regenBtn } = createAIBubble();
+          textDiv.classList.remove("streaming", "no-children");
+          const rawText = typeof m.content === "string" ? m.content : "";
+          try {
+            textDiv.innerHTML = marked.parse(rawText);
+            enhanceCodeBlocks(textDiv);
+          } catch {
+            textDiv.textContent = rawText;
+          }
+          if (copyBtn) {
+            copyBtn.dataset.text = rawText;
+            copyBtn.style.display = "inline-flex";
+            copyBtn.addEventListener("click", () => {
+              copyTextToClipboard(rawText).then((ok) => {
+                const label = copyBtn.querySelector("span");
+                const original = label ? label.textContent : "কপি";
+                if (label) label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
+                setTimeout(() => { if (label) label.textContent = original; }, 1500);
+              });
+            });
+          }
+          if (regenBtn) regenBtn.style.display = "inline-flex";
+        }
+      });
+      scrollToBottom();
+      closeChatHistoryModal();
+      closeBrandMenu();
+    }
+
+    const newChatBtn = document.getElementById("newChatBtn");
+    const chatHistoryBtn = document.getElementById("chatHistoryBtn");
+    const chatHistoryModalOverlay = document.getElementById("chatHistoryModalOverlay");
+    const chatHistoryModalClose = document.getElementById("chatHistoryModalClose");
+
+    function openChatHistoryModal() {
+      renderChatHistoryList();
+      closeBrandMenu();
+      chatHistoryModalOverlay.classList.add("open");
+    }
+    function closeChatHistoryModal() { chatHistoryModalOverlay.classList.remove("open"); }
+
+    newChatBtn.addEventListener("click", startNewChat);
+    chatHistoryBtn.addEventListener("click", openChatHistoryModal);
+    chatHistoryModalClose.addEventListener("click", closeChatHistoryModal);
+    chatHistoryModalOverlay.addEventListener("click", (e) => {
+      if (e.target === chatHistoryModalOverlay) closeChatHistoryModal();
+    });
+
+    window.addEventListener("beforeunload", persistCurrentSession);
+    try {
+      const savedSessionId = localStorage.getItem(CURRENT_SESSION_KEY);
+      if (savedSessionId) {
+        const all = loadAllSessions();
+        if (all.some((s) => s.id === savedSessionId)) {
+          loadSession(savedSessionId);
+        }
+      }
+    } catch {}
+
+    const scrollToBottom = () => { scrollContainer.scrollTop = scrollContainer.scrollHeight; };
+    
+    userInput.addEventListener("input", () => {
+      userInput.style.height = "auto";
+      userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
+      updateSendAvailability();
+    });
+
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled && !isGenerating) {
+          sendBtn.click();
+        }
+      }
+    });
+
+    userInput.addEventListener("focus", () => {
+      setTimeout(scrollToBottom, 100); setTimeout(scrollToBottom, 300);
+    });
+
+    const STATUS_ICONS = {
+      thinking: `<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2zm-2 19h4v-1h-4v1z"/></svg>`,
+      working: `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A8 8 0 0 1 4.07 13H5a1 1 0 0 1 0-2h-.93A8 8 0 0 1 11 4.07V5a1 1 0 0 1 2 0v-.93A8 8 0 0 1 19.93 11H19a1 1 0 0 1 0 2h.93A8 8 0 0 1 13 16.93z"/></svg>`,
+      searching: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5L20.49 19l-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>`,
+      generating: `<svg viewBox="0 0 24 24"><path d="M12 2l1.6 5.1L19 9l-5.4 1.9L12 16l-1.6-5.1L5 9l5.4-1.9z"/></svg>`
+    };
+
+    function createAIBubble() {
+      const row = document.createElement("div");
+      row.className = "message-row ai";
+      const container = document.createElement("div");
+      container.className = "ai-bubble-container";
+      
+      const contentCol = document.createElement("div");
+      contentCol.className = "ai-content-col";
+      const textDiv = document.createElement("div");
+      textDiv.className = "ai-bubble";
+      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">চিন্তা করছি...</span></span>`;
+      
+      const actionRow = document.createElement("div");
+      actionRow.className = "msg-actions";
+      
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "action-icon-btn";
+      copyBtn.style.display = "none";
+      copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
+      
+      const regenBtn = document.createElement("button");
+      regenBtn.type = "button";
+      regenBtn.className = "action-icon-btn";
+      regenBtn.style.display = "none";
+      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
+      
+      actionRow.appendChild(copyBtn); actionRow.appendChild(regenBtn);
+      contentCol.appendChild(textDiv); contentCol.appendChild(actionRow);
+      container.appendChild(contentCol);
+      row.appendChild(container); chatStream.appendChild(row);
+      scrollToBottom();
+      return { textDiv, copyBtn, regenBtn };
+    }
+
+    const CODE_LANG_EXT = {
+      javascript: "js", js: "js", python: "py", py: "py", html: "html", css: "css",
+      json: "json", sql: "sql", bash: "sh", sh: "sh", shell: "sh", java: "java",
+      c: "c", cpp: "cpp", "c++": "cpp", csharp: "cs", cs: "cs", php: "php",
+      ruby: "rb", go: "go", rust: "rs", typescript: "ts", ts: "ts", yaml: "yml",
+      markdown: "md", xml: "xml", kotlin: "kt", swift: "swift"
+    };
+
+    function enhanceCodeBlocks(container) {
+      const blocks = container.querySelectorAll("pre");
+      blocks.forEach((pre) => {
+        if (pre.parentElement.classList.contains("code-block-wrapper")) return;
+        const codeEl = pre.querySelector("code");
+        const codeText = codeEl ? codeEl.textContent : pre.textContent;
+        let lang = "txt";
+        if (codeEl) {
+          const cls = Array.from(codeEl.classList).find((c) => c.startsWith("language-"));
+          if (cls) lang = cls.replace("language-", "");
+        }
+        const ext = CODE_LANG_EXT[lang.toLowerCase()] || "txt";
+        
+        const wrapper = document.createElement("div");
+        wrapper.className = "code-block-wrapper";
+        pre.parentNode.insertBefore(wrapper, pre);
+
+        const actionsBar = document.createElement("div");
+        actionsBar.className = "code-actions-bar";
+
+        // Copy button
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "code-action-btn code-copy-btn";
+        copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
+        copyBtn.addEventListener("click", () => {
+          copyTextToClipboard(codeText).then((ok) => {
+            const span = copyBtn.querySelector("span");
+            const old = span ? span.textContent : "কপি";
+            if (span) span.textContent = ok ? "কপি হয়েছে!" : "ব্যর্থ!";
+            setTimeout(() => { if (span) span.textContent = old; }, 1500);
+          });
+        });
+
+        // Download button
+        const dlBtn = document.createElement("button");
+        dlBtn.type = "button";
+        dlBtn.className = "code-action-btn code-download-btn";
+        dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ডাউনলোড</span>`;
+        dlBtn.addEventListener("click", () => {
+          const blob = new Blob([codeText], { type: "text/plain;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = `code.${ext}`;
+          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+          showToast(`code.${ext} ডাউনলোড হয়েছে`, "success");
+        });
+        
+        actionsBar.appendChild(copyBtn);
+        actionsBar.appendChild(dlBtn);
+        wrapper.appendChild(actionsBar);
+        wrapper.appendChild(pre);
+      });
+    }
+
+    function createUserBubble(text, images, files) {
+      if (emptyState) emptyState.remove();
+      const row = document.createElement("div");
+      row.className = "message-row user";
+      const col = document.createElement("div");
+      col.className = "user-bubble-col";
+      
+      if (images && images.length) {
+        const imgRow = document.createElement("div");
+        imgRow.className = "bubble-image-row";
+        images.forEach((img) => {
+          const im = document.createElement("img");
+          im.src = img.previewUrl; im.className = "bubble-image-thumb";
+          imgRow.appendChild(im);
+        });
+        col.appendChild(imgRow);
+      }
+      
+      if (files && files.length) {
+        const fileRow = document.createElement("div");
+        fileRow.className = "bubble-file-row";
+        files.forEach((f) => {
+          const chip = document.createElement("div");
+          chip.className = "file-bubble-chip";
+          chip.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span class="file-bubble-chip-name">${f.name}</span>`;
+          fileRow.appendChild(chip);
+        });
+        col.appendChild(fileRow);
+      }
+      
+      const bubble = document.createElement("div");
+      bubble.className = "user-bubble";
+      bubble.textContent = text;
+      
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "edit-btn";
+      editBtn.setAttribute("aria-label", "এডিট করুন");
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+      
+      editBtn.addEventListener("click", () => {
+        userInput.value = text;
+        userInput.style.height = "auto";
+        userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
+        userInput.focus();
+        updateSendAvailability();
+        
+        const userMsgIndex = messagesHistory.findIndex(
+          (m) => m.role === "user" && m.content.startsWith(text)
+        );
+        if (userMsgIndex !== -1) {
+          messagesHistory = messagesHistory.slice(0, userMsgIndex);
+        }
+        
+        let node = row;
+        while (node) {
+          const next = node.nextSibling; node.remove(); node = next;
+        }
+      });
+      
+      col.appendChild(bubble); col.appendChild(editBtn);
+      row.appendChild(col); chatStream.appendChild(row);
+      scrollToBottom();
+    }
+
+    async function searchDuckDuckGo(query) {
+      let combined = "";
+      try {
+        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+        const res = await fetchWithTimeout(url, { method: "GET" }, 6000);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.AbstractText) {
+            combined += `Abstract: ${data.AbstractText}\nSource: ${data.AbstractSource}\n`;
+          }
+          if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+            data.RelatedTopics.slice(0, 3).forEach((item) => {
+              if (item.Text) combined += `- ${item.Text}\n`;
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("DuckDuckGo search failed:", err);
+      }
+
+      try {
+        const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*&srlimit=3`;
+        const wikiRes = await fetchWithTimeout(wikiUrl, { method: "GET" }, 6000);
+        if (wikiRes.ok) {
+          const wikiData = await wikiRes.json();
+          const hits = wikiData?.query?.search || [];
+          if (hits.length > 0) {
+            combined += "\nWikipedia results:\n";
+            hits.forEach((h) => {
+              const cleanSnippet = (h.snippet || "")
+                .replace(/<[^>]+>/g, "")
+                .replace(/&quot;/g, '"')
+                .replace(/&#039;/g, "'")
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&nbsp;/g, ' ');
+              combined += `- ${h.title}: ${cleanSnippet}\n`;
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Wikipedia search failed:", err);
+      }
+
+      return combined.trim() || null;
+    }
+
+    async function streamServerCompletions(modelId, history, onToken) {
+      const token = localStorage.getItem("alokpoth_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const formattedHistory = history.map((m) => {
+        if (m.images && m.images.length) {
+          const content = [{ type: "text", text: m.content || "" }];
+          m.images.forEach((img) => {
+            content.push({
+              type: "image_url",
+              image_url: { url: `data:${img.mimeType};base64,${img.base64}` }
+            });
+          });
+          return { role: m.role, content };
+        }
+        return { role: m.role, content: m.content };
+      });
+
+      const response = await fetch("/api/chat/completions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true })
+      });
+
+      if (!response.ok) {
+        let errText = "";
+        try {
+          const json = await response.json();
+          errText = json.error || json.message;
+        } catch {
+          errText = await response.text().catch(() => "");
+        }
+        if (response.status === 401 || response.status === 403) {
+          throw new Error(errText || "এই মডেল ব্যবহারের জন্য লগইন অথবা প্ল্যান আপগ্রেড প্রয়োজন।");
+        }
+        if (response.status === 429) {
+          throw new Error(errText || "মেসেজ পাঠানোর সীমা শেষ হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।");
+        }
+        throw new Error(errText || `সার্ভার ত্রুটি (Status ${response.status})`);
+      }
+
+      if (!response.body) {
+        const data = await response.json();
+        const full = data.choices?.[0]?.message?.content || data.content || "";
+        onToken(full, full);
+        return full;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const json = JSON.parse(payload);
+            if (json.error) {
+              throw new Error(json.error);
+            }
+            const delta = json.choices?.[0]?.delta?.content || json.choices?.[0]?.text || json.text || "";
+            if (delta) {
+              fullText += delta;
+              onToken(delta, fullText);
+            }
+          } catch (e) {
+            if (e.message && !e.message.includes("JSON")) {
+              throw e;
+            }
+          }
+        }
+      }
+      return fullText;
+    }
+
+    async function copyTextToClipboard(text) {
+      if (!text) return false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (err) {
+        console.warn("Clipboard API failed, using fallback...");
+      }
+      
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "-9999px";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return successful;
+      } catch (err) {
+        return false;
+      }
+    }
+
+
+    function setBubbleStatus(element, kind, label) {
+      element.style.whiteSpace = "";
+      element.innerHTML = `<span class="status-indicator status-${kind}"><span class="status-icon">${STATUS_ICONS[kind] || STATUS_ICONS.thinking}</span><span class="status-label">${label}</span></span>`;
+    }
+
+    function startDynamicStatusSequence(element) {
+      const steps = [
+        { kind: "thinking", label: "চিন্তা করছি..." },
+        { kind: "searching", label: "ওয়েব সার্চ করা হচ্ছে..." },
+        { kind: "working", label: "কাজ করছি..." },
+        { kind: "generating", label: "প্রস্তুত করা হচ্ছে..." }
+      ];
+      let currentStep = 0;
+      setBubbleStatus(element, steps[currentStep].kind, steps[currentStep].label);
+      
+      const intervalId = setInterval(() => {
+        currentStep = (currentStep + 1) % steps.length;
+        setBubbleStatus(element, steps[currentStep].kind, steps[currentStep].label);
+      }, 1800);
+      
+      return intervalId;
+    }
+
+    function setBubbleGeneratingImage(element) {
+      setBubbleStatus(element, "generating", "ছবি তৈরি হচ্ছে...");
+    }
+
+    function detectImageGenRequest(text) {
+      if (!text) return null;
+      const patterns = [
+        /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র)/i,
+        /\b(draw|generate|create)\b.*\b(image|picture|art|logo|wallpaper|photo)\b/i,
+        /\bimage\s*of\b/i
+      ];
+      return patterns.some((p) => p.test(text));
+    }
+
+    async function generateImageViaServer(prompt) {
+      const token = localStorage.getItem("alokpoth_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetchWithTimeout("/api/chat/image", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ prompt })
+      }, 45000);
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `ছবি তৈরি করতে সমস্যা হয়েছে (Status ${res.status})`);
+      }
+      return data.url;
+    }
+
+    async function generateImageVyceai(prompt) {
+      return await generateImageViaServer(prompt);
+    }
+
+    async function generateImageForVyceaiModel(prompt) {
+      return await generateImageViaServer(prompt);
+    }
+
+    async function downloadGeneratedImage(imageUrl) {
+      try {
+        let blobUrl = imageUrl;
+        if (!imageUrl.startsWith("data:")) {
+          const res = await fetch(imageUrl);
+          const blob = await res.blob();
+          blobUrl = URL.createObjectURL(blob);
+        }
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `alokpoth-ai-image-${Date.now()}.png`;
+        document.body.appendChild(a); a.click(); a.remove();
+        if (blobUrl !== imageUrl) URL.revokeObjectURL(blobUrl);
+        showToast("ছবি ডাউনলোড হয়েছে", "success");
+      } catch (err) {
+        window.open(imageUrl, "_blank");
+        showToast("সরাসরি ডাউনলোড ব্যর্থ, নতুন ট্যাবে খোলা হয়েছে", "error");
+      }
+    }
+
+    function renderGeneratedImageBubble(aiTextElement, imageUrl, prompt) {
+      aiTextElement.classList.remove("streaming", "no-children");
+      aiTextElement.innerHTML = `
+        <div class="generated-image-wrap">
+          <img src="${imageUrl}" alt="${prompt.replace(/"/g, "'")}" class="generated-image">
+          <button type="button" class="image-download-btn sheen-surface">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ছবি ডাউনলোড</span>
+          </button>
+        </div>
+      `;
+      aiTextElement.querySelector(".image-download-btn").addEventListener("click", () => downloadGeneratedImage(imageUrl));
+    }
+
+    async function generateAIReply() {
+      return new Promise(async (resolve) => {
+        const { textDiv: aiTextElement, copyBtn, regenBtn } = createAIBubble();
+        const currentModel = MODELS.find((m) => m.id === selectedModelId);
+        const isGemini = currentModel?.type === "gemini";
+        const isGroq = currentModel?.type === "groq";
+        const isOpenRouter = currentModel?.type === "openrouter";
+        const isBai = currentModel?.type === "bai";
+        const isVyceaiModel = !currentModel?.type;
+        const isAloVision = selectedModelId === "nemotron-vision";
+
+        const lastUserMsg = [...messagesHistory].reverse().find((m) => m.role === "user");
+
+        // Image Generation Logic based on Button or Text
+        const wantImage = isImageGenEnabled || (isAloVision && lastUserMsg && detectImageGenRequest(lastUserMsg.content));
+        
+        if (wantImage && lastUserMsg) {
+          setBubbleGeneratingImage(aiTextElement);
+          
+          // Auto turn off toggle
+          isImageGenEnabled = false; 
+          updateAttachBtnActiveState();
+          imageGenText.textContent = "ছবি তৈরি: বন্ধ"; 
+          attachImageGenOption.style.color = "var(--text-main)"; 
+          attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
+          attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
+          
+          try {
+            const imageUrl = await generateImageForVyceaiModel(lastUserMsg.content);
+            renderGeneratedImageBubble(aiTextElement, imageUrl, lastUserMsg.content);
+            copyBtn.style.display = "none";
+            regenBtn.style.display = "inline-flex";
+            regenBtn.onclick = async () => {
+              if (isGenerating) return;
+              const row = regenBtn.closest(".message-row");
+              if (row) row.remove();
+              messagesHistory.pop();
+              isGenerating = true;
+              updateSendAvailability();
+              await generateAIReply();
+              isGenerating = false;
+              updateSendAvailability();
+              scrollToBottom();
+            };
+            messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });
+            addImageUsage(selectedModelId);
+            persistCurrentSession();
+            scrollToBottom(); resolve();
+          } catch (err) {
+            aiTextElement.classList.remove("streaming", "no-children");
+            aiTextElement.innerHTML = `<span class="status-indicator status-error">ছবি তৈরি করা যায়নি: ${(err.message || "অজানা সমস্যা")}</span>`;
+            scrollToBottom(); resolve();
+          }
+          return;
+        }
+
+        let searchContext = "";
+        // Web Search Logic based on Toggle
+        if (isWebSearchEnabled && lastUserMsg && lastUserMsg.content) {
+          setBubbleStatus(aiTextElement, "searching", "ওয়েব সার্চ করা হচ্ছে...");
+          const searchData = await searchDuckDuckGo(lastUserMsg.content);
+          if (searchData) {
+            searchContext = `\n\n[Web Search Results Live Data]:\n${searchData}\n(এই তথ্যের উপর ভিত্তি করে উত্তর দাও)`;
+          } else {
+             searchContext = `\n\n[Web Search]: সরাসরি কোনো তথ্য পাওয়া যায়নি, আপনার সাধারণ জ্ঞান ব্যবহার করুন।`;
+             showToast("সার্চে কোনো ফলাফল পাওয়া যায়নি", "error");
+          }
+          // Auto turn off toggle
+          isWebSearchEnabled = false; 
+          updateAttachBtnActiveState();
+          webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
+          attachWebSearchOption.style.color = "var(--text-main)"; 
+          attachWebSearchOption.querySelector("span").style.color = "var(--text-sub)"; 
+          attachWebSearchOption.querySelector('svg').style.stroke = "var(--text-sub)";
+        }
+
+        let activeHistory = messagesHistory;
+        if (searchContext) {
+          activeHistory = messagesHistory.map((m, idx) => {
+            if (idx === messagesHistory.length - 1 && m.role === "user") {
+              return { ...m, content: m.content + searchContext };
+            }
+            return m;
+          });
+        }
+
+        const inputTokensForThisCall = activeHistory.reduce((sum, m) => sum + estimateTokens(m.content || ""), 0);
+
+        const statusIntervalId = startDynamicStatusSequence(aiTextElement);
+
+        let started = false;
+        let streamQueue = "";
+        let renderedStream = "";
+        let apiFinished = false;
+        
+        let lastRenderTime = 0;
+        const RENDER_THROTTLE = 30;
+
+        const finishUp = () => { persistCurrentSession(); scrollToBottom(); resolve(); };
+
+        const processQueue = () => {
+          if (streamQueue.length > 0) {
+            let take = 3;
+            if (streamQueue.length > 20) take = 8;
+            if (streamQueue.length > 80) take = Math.ceil(streamQueue.length / 4);
+            
+            renderedStream += streamQueue.substring(0, take);
+            streamQueue = streamQueue.substring(take);
+
+            const now = performance.now();
+            if (now - lastRenderTime > RENDER_THROTTLE) {
+              try { aiTextElement.innerHTML = marked.parse(renderedStream); } 
+              catch { aiTextElement.textContent = renderedStream; }
+
+              if (aiTextElement.children.length === 0) aiTextElement.classList.add("no-children");
+              else aiTextElement.classList.remove("no-children");
+
+              scrollToBottom();
+              lastRenderTime = now;
+            }
+            requestAnimationFrame(processQueue);
+          } else {
+            if (!apiFinished) {
+              requestAnimationFrame(processQueue);
+            } else {
+              aiTextElement.classList.remove("streaming", "no-children");
+              try {
+                aiTextElement.innerHTML = marked.parse(renderedStream);
+                enhanceCodeBlocks(aiTextElement);
+              } catch { aiTextElement.textContent = renderedStream; }
+              
+              copyBtn.dataset.text = renderedStream;
+              
+              copyBtn.style.display = "inline-flex";
+              regenBtn.style.display = "inline-flex";
+              
+              messagesHistory.push({ role: "assistant", content: renderedStream });
+              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
+                isCodeGen: countCodeBlocks(renderedStream) > 0
+              });
+              scrollToBottom(); finishUp();
+            }
+          }
+        };
+
+        const handleToken = (delta) => {
+          if (!started) {
+            started = true; 
+            clearInterval(statusIntervalId);
+            aiTextElement.style.whiteSpace = ""; 
+            aiTextElement.innerHTML = "";
+            aiTextElement.classList.add("streaming");
+            requestAnimationFrame(processQueue);
+          }
+          streamQueue += delta;
+        };
+
+        try {
+          await streamServerCompletions(selectedModelId, activeHistory, handleToken);
+          apiFinished = true;
+          if (!started) {
+            clearInterval(statusIntervalId);
+            finishUp();
+          }
+        } catch (err) {
+          clearInterval(statusIntervalId);
+          apiFinished = true;
+          aiTextElement.classList.remove("streaming", "no-children");
+          aiTextElement.style.whiteSpace = ""; aiTextElement.textContent = `সমস্যা হয়েছে: ${err.message}`;
+          finishUp();
+        }
+
+        copyBtn.addEventListener("click", () => {
+          const textToCopy = copyBtn.dataset.text || "";
+          copyTextToClipboard(textToCopy).then((ok) => {
+            const label = copyBtn.querySelector("span");
+            const original = label.textContent;
+            label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
+            setTimeout(() => { label.textContent = original; }, 1500);
+          });
+        });
+
+        regenBtn.addEventListener("click", async () => {
+          if (isGenerating) return;
+          if (!hasCredit()) { openAccountModal(); return; }
+          const row = regenBtn.closest(".message-row");
+          if (row) row.remove();
+          messagesHistory.pop();
+          
+          isGenerating = true;
+          updateSendAvailability();
+          
+          await generateAIReply();
+          
+          isGenerating = false;
+          updateSendAvailability();
+          scrollToBottom();
+        });
+      });
+    }
+
+    updateTokenCounter();
+
+    syncModelStatuses();
+    setInterval(() => {
+      if (navigator.onLine) syncModelStatuses({ silent: true });
+    }, PING_INTERVAL_MS);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") syncModelStatuses({ silent: true });
+    });
+
+    window.addEventListener("online", () => syncModelStatuses({ silent: true }));
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (isGenerating) return;
+      
+      if (!navigator.onLine) { updateOnlineStatus(); return; }
+      if (!hasCredit()) {
+        openAccountModal();
+        return;
+      }
+      const text = userInput.value.trim();
+      const imagesForThisMessage = pendingImages.slice();
+      const filesForThisMessage = pendingFiles.filter((f) => !f.loading).slice();
+      if (!text && !imagesForThisMessage.length && !filesForThisMessage.length) return;
+
+      isGenerating = true;
+      updateSendAvailability();
+
+      createUserBubble(text || (imagesForThisMessage.length ? "ছবি সংযুক্ত করা হয়েছে" : "ফাইল সংযুক্ত করা হয়েছে"), imagesForThisMessage, filesForThisMessage);
+
+      messageCount++;
+      try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch {}
+
+      let fileContext = "";
+      if (filesForThisMessage.length) {
+        fileContext = "\n\n[সংযুক্ত ফাইলের বিষয়বস্তু]\n" + filesForThisMessage
+          .map((f) => `--- ${f.name} ---\n${f.text || "(ফাইলটি পড়া যায়নি)"}`).join("\n\n");
+      }
+
+      messagesHistory.push({
+        role: "user",
+        content: `${text}${fileContext}\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]`,
+        images: imagesForThisMessage.length ? imagesForThisMessage.map((img) => ({ base64: img.base64, mimeType: img.mimeType })) : undefined,
+        files: filesForThisMessage.length ? filesForThisMessage.map((f) => ({ name: f.name })) : undefined
+      });
+
+      pendingImages = []; pendingFiles = [];
+      renderImagePreviews(); renderFilePreviews();
+      userInput.value = ""; userInput.style.height = "auto";
+      updateTokenCounter();
+
+      await generateAIReply();
+      
+      isGenerating = false;
+      updateSendAvailability();
+      updateTokenCounter();
+    });
+  </script>
+</body>
+</html>
