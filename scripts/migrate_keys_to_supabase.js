@@ -1,4 +1,4 @@
-﻿// scripts/migrate_keys_to_supabase.js
+// scripts/migrate_keys_to_supabase.js
 require('dotenv').config({ path: require('path').join(__dirname, '..', 'server', '.env') });
 
 const { createClient } = require('@supabase/supabase-js');

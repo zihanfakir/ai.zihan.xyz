@@ -1,4 +1,4 @@
-﻿# Alokpoth AI — ai.zihan.xyz
+# Alokpoth AI — ai.zihan.xyz
 
 বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন। সকল API Key সার্ভার সাইডে সুরক্ষিত।
 

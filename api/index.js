@@ -1,4 +1,4 @@
-﻿// api/index.js — Vercel Serverless Entry Point
+// api/index.js — Vercel Serverless Entry Point
 const path = require('path');
 const express = require('express');
 const cors = require('cors');

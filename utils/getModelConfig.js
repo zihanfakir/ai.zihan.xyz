@@ -1,4 +1,4 @@
-﻿// utils/getModelConfig.js
+// utils/getModelConfig.js
 // Supabase থেকে api_key নিয়ে আসে। পাওয়া না গেলে memoryStore fallback।
 const supabase = require('../server/config/supabase');
 const { memoryStore } = require('../server/config/memoryStore');
