@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const mongoose = require('mongoose');
 const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
@@ -14,11 +15,16 @@ const streamChatCompletions = async (req, res) => {
       return res.status(400).json({ success: false, error: 'সঠিক মেসেজ অ্যারে প্রদান করুন' });
     }
 
-    // Supabase থেকে api_key সহ মডেল কনফিগ লোড করা (fallback: memoryStore)
+    // Sanitize and cap messages array to prevent memory exhaustion
+    const safeMessages = messages.slice(-100).filter(m => m && typeof m === 'object' && typeof m.content === 'string');
+    if (safeMessages.length === 0) {
+      return res.status(400).json({ success: false, error: 'মেসেজের বিবরণ সঠিক নয়' });
+    }
+
+    // Load model configuration with API key
     let aiModelConfig = null;
     if (getIsMongoConnected()) {
-      aiModelConfig = await AiModel.findOne({ model_id: model });
-      // MongoDB তে api_key না থাকলে Supabase থেকে নেওয়া
+      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: model }, { id: model }] });
       if (aiModelConfig && !aiModelConfig.api_key) {
         const supabaseConfig = await getModelConfig(model);
         if (supabaseConfig && supabaseConfig.api_key) {
@@ -26,18 +32,17 @@ const streamChatCompletions = async (req, res) => {
         }
       }
     } else {
-      // memoryStore + Supabase api_key
       aiModelConfig = await getModelConfig(model);
     }
 
     let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
     let targetKey = process.env.OPENROUTER_API_KEY;
-    let actualModel = model;
+    let actualModel = model || 'openrouter/free';
 
     // 1. Model ID Normalization & Provider Resolution
     if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      actualModel = 'openai/gpt-oss-120b';
+      actualModel = 'llama-3.3-70b-versatile';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
     } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite') {
       targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
@@ -65,15 +70,8 @@ const streamChatCompletions = async (req, res) => {
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
     }
 
-    // 4. Fallback for down/zero-credit providers (Vyce AI 500 or B.AI 0 balance)
-    // If target is VyceAI or B.AI, route to ultra-fast Groq or OpenRouter
-    // 4. Fallback for down/zero-credit providers (Vyce AI 500 or B.AI 0 balance)
-    // If target is VyceAI or B.AI, route to ultra-fast Groq llama-3.3-70b-versatile
-    if (targetUrl.includes('b.ai')) {
-      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
-      actualModel = 'llama-3.3-70b-versatile';
-    } else if (targetUrl.includes('vyceai.com')) {
+    // 4. Provider Fallback for down services
+    if (targetUrl.includes('b.ai') || targetUrl.includes('vyceai.com')) {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
       targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
       actualModel = 'llama-3.3-70b-versatile';
@@ -87,8 +85,8 @@ const streamChatCompletions = async (req, res) => {
 
     let payload = {
       model: actualModel,
-      messages,
-      max_tokens: 4096, // Protects against OpenRouter 402 limit
+      messages: safeMessages,
+      max_tokens: 4096,
       stream: true
     };
 
@@ -97,9 +95,11 @@ const streamChatCompletions = async (req, res) => {
       headers['Authorization'] = `Bearer ${targetKey}`;
     }
 
-    // Abort upstream if client disconnects
+    // Abort upstream immediately if client disconnects
     const abortController = new AbortController();
-    req.on('close', () => abortController.abort());
+    req.on('close', () => {
+      try { abortController.abort(); } catch (e) {}
+    });
 
     const response = await fetch(targetUrl, {
       method: 'POST',
@@ -110,7 +110,7 @@ const streamChatCompletions = async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      res.write(`data: ${JSON.stringify({ error: `[Server API Error] status ${response.status}: ${errText}` })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: `[Server API Error] (${response.status}): ${errText}` })}\n\n`);
       res.write('data: [DONE]\n\n');
       return res.end();
     }
@@ -123,43 +123,54 @@ const streamChatCompletions = async (req, res) => {
     });
 
     response.body.on('end', async () => {
-      // Record usage log only after stream successfully completes
-      if (user && hasStreamedData) {
-        const userId = user._id || user.id;
-        if (getIsMongoConnected()) {
-          UsageLog.create({
-            user_id: userId,
-            model_id: model || 'openrouter/free',
-            timestamp: new Date()
-          }).catch(err => console.error('[UsageLog Write Error]:', err.message));
-        } else {
-          memoryStore.usageLogs.push({
-            _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-            user_id: userId,
-            model_id: model || 'openrouter/free',
-            timestamp: new Date()
-          });
-          debouncedSave();
-          try {
-            await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-          } catch (e) {
-            console.error('[Increment User Usage Error]:', e.message);
+      // Record usage log only after stream successfully delivers tokens
+      if (hasStreamedData) {
+        const userId = user ? String(user._id || user.id) : req.guestId;
+        if (userId) {
+          if (user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
+            UsageLog.create({
+              user_id: userId,
+              model_id: model || 'openrouter/free',
+              timestamp: new Date()
+            }).catch(err => console.error('[UsageLog Write Error]:', err.message));
+          } else {
+            memoryStore.usageLogs.push({
+              _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              user_id: userId,
+              model_id: model || 'openrouter/free',
+              timestamp: new Date()
+            });
+            if (memoryStore.usageLogs.length > 5000) {
+              memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+            }
+            debouncedSave();
+            try {
+              await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+            } catch (e) {
+              console.error('[Increment User Usage Error]:', e.message);
+            }
           }
         }
       }
-      res.end();
+      if (!res.writableEnded) res.end();
     });
 
     response.body.on('error', (err) => {
-      console.error('[Stream Error]:', err);
-      res.end();
+      console.error('[Stream Error]:', err.message);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: 'স্ট্রিম সংযোগে সমস্যা হয়েছে।' })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+      }
     });
 
   } catch (error) {
-    console.error('[Chat Completion Error]:', error);
+    console.error('[Chat Completion Error]:', error.message);
     if (!res.headersSent) {
-      res.status(500).json({ success: false, error: error.message });
-    } else {
+      return res.status(500).json({ success: false, error: 'সার্ভারে চ্যাট সম্পন্ন করতে সমস্যা হয়েছে।' });
+    } else if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: 'সার্ভারে সমস্যা হয়েছে।' })}\n\n`);
+      res.write('data: [DONE]\n\n');
       res.end();
     }
   }

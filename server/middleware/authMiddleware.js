@@ -1,39 +1,56 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore } = require('../config/memoryStore');
 
-const protect = async (req, res, next) => {
-  let token;
+const JWT_SECRET = process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877';
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
+function extractToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || typeof authHeader !== 'string') return null;
+  const parts = authHeader.trim().split(/\s+/);
+  if (parts.length >= 2 && parts[0].toLowerCase() === 'bearer' && parts[1]) {
+    return parts[1];
   }
+  return null;
+}
+
+const protect = async (req, res, next) => {
+  const token = extractToken(req);
 
   if (!token) {
     return res.status(401).json({ success: false, error: 'অননুমোদিত এক্সেস! অনুগ্রহ করে লগইন করুন।' });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877');
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
-    let user;
+    let user = null;
+    const userId = decoded.id || decoded._id || decoded.userId;
+
     if (getIsMongoConnected()) {
-      user = await User.findById(decoded.id);
-    } else {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId);
+      } else {
+        user = await User.findOne({ $or: [{ _id: userId }, { email: decoded.email }] });
+      }
+    }
+    
+    if (!user) {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id || u.id) === String(decoded.id));
+      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email === decoded.email));
     }
 
-    if (!user && decoded && decoded.id) {
+    if (!user && decoded && userId) {
       const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
       user = {
-        _id: decoded.id,
-        id: decoded.id,
+        _id: String(userId),
+        id: String(userId),
         name: decoded.name || 'User',
         email: decoded.email || '',
-        role: isVerifiedAdminEmail ? 'admin' : 'user', // Prevent synthetic admin role escalation
+        role: isVerifiedAdminEmail ? 'admin' : 'user', // NEVER allow arbitrary admin escalation
         is_blocked: false,
         subscription: {
           plan_name: isVerifiedAdminEmail ? 'Max' : (decoded.plan || 'Free'),
@@ -41,8 +58,7 @@ const protect = async (req, res, next) => {
           is_active: true
         }
       };
-      // Prevent unbounded duplicate pushes into memoryStore
-      if (!memoryStore.users.some(u => String(u._id || u.id) === String(decoded.id))) {
+      if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
         memoryStore.users.push(user);
       }
     }
@@ -55,6 +71,8 @@ const protect = async (req, res, next) => {
       return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি ব্লক করা হয়েছে! অ্যাডমিনের সাথে যোগাযোগ করুন।' });
     }
 
+    user._id = user._id || user.id;
+    user.id = user.id || user._id;
     req.user = user;
     next();
   } catch (error) {
@@ -63,11 +81,7 @@ const protect = async (req, res, next) => {
 };
 
 const optionalProtect = async (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+  const token = extractToken(req);
 
   if (!token) {
     req.user = null;
@@ -75,22 +89,30 @@ const optionalProtect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877');
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
-    let user;
+    let user = null;
+    const userId = decoded.id || decoded._id || decoded.userId;
+
     if (getIsMongoConnected()) {
-      user = await User.findById(decoded.id);
-    } else {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId);
+      } else {
+        user = await User.findOne({ $or: [{ _id: userId }, { email: decoded.email }] });
+      }
+    }
+    
+    if (!user) {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id || u.id) === String(decoded.id));
+      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email === decoded.email));
     }
 
-    if (!user && decoded && decoded.id) {
+    if (!user && decoded && userId) {
       const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
       user = {
-        _id: decoded.id,
-        id: decoded.id,
+        _id: String(userId),
+        id: String(userId),
         name: decoded.name || 'User',
         email: decoded.email || '',
         role: isVerifiedAdminEmail ? 'admin' : 'user',
@@ -101,7 +123,7 @@ const optionalProtect = async (req, res, next) => {
           is_active: true
         }
       };
-      if (!memoryStore.users.some(u => String(u._id || u.id) === String(decoded.id))) {
+      if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
         memoryStore.users.push(user);
       }
     }
@@ -110,6 +132,10 @@ const optionalProtect = async (req, res, next) => {
       return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি ব্লক করা হয়েছে!' });
     }
 
+    if (user) {
+      user._id = user._id || user.id;
+      user.id = user.id || user._id;
+    }
     req.user = user || null;
   } catch (error) {
     req.user = null;

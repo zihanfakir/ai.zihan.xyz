@@ -1332,7 +1332,7 @@
       } catch (err) {}
     }
 
-    async function savePlanLimits(planName) {
+    async function savePlanLimits(planName, btn) {
       const message_limit = parseInt(document.getElementById(`limit_${planName}`).value, 10);
       const window_hours = parseInt(document.getElementById(`window_${planName}`).value, 10);
 
@@ -1341,6 +1341,11 @@
       }
       if (isNaN(window_hours) || window_hours <= 0) {
         return showToast("সঠিক সময়সীমা (ঘণ্টা) লিখুন", "error");
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "সংরক্ষণ হচ্ছে...";
       }
 
       try {
@@ -1357,28 +1362,57 @@
         }
       } catch (err) {
         showToast("সার্ভার ত্রুটি", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "সংরক্ষণ করুন";
+        }
       }
     }
 
     document.getElementById("generateCodeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const submitBtn = e.target.querySelector("button[type='submit']");
       const plan_name = document.getElementById("codePlan").value;
       const duration_days = document.getElementById("codeDuration").value;
       const count = document.getElementById("codeCount").value;
 
-      const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {
-        method: "POST",
-        body: JSON.stringify({ plan_name, duration_days, count })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(data.message || "রিডিম কোড জেনারেট হয়েছে!", "success");
-        loadRedeemCodes();
-        loadStats();
-      } else {
-        showToast(data.error || "কোড জেনারেট করতে সমস্যা হয়েছে", "error");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "কোড তৈরি হচ্ছে...";
+      }
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {
+          method: "POST",
+          body: JSON.stringify({ plan_name, duration_days, count })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "রিডিম কোড জেনারেট হয়েছে!", "success");
+          loadRedeemCodes();
+          loadStats();
+        } else {
+          showToast(data.error || "কোড জেনারেট করতে সমস্যা হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "কোড জেনারেট করুন";
+        }
       }
     });
+
+    async function copyToClipboard(text, msg) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(msg || `কপি হয়েছে: ${text}`, "success");
+      } catch (e) {
+        showToast("কপি করা যায়নি", "error");
+      }
+    }
 
     async function loadRedeemCodes() {
       try {
@@ -1403,8 +1437,8 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>
-              <span class="code-chip" style="cursor:pointer;" onclick="navigator.clipboard.writeText('${safeCode}');showToast('কোড কপি হয়েছে: ${safeCode}','success');" title="কপি করতে ক্লিক করুন">${safeCode}</span>
-              <button type="button" class="btn" style="padding:2px 8px; font-size:11px; margin-left:4px;" onclick="navigator.clipboard.writeText('${safeCode}');showToast('কোড কপি হয়েছে: ${safeCode}','success');">📋 কপি</button>
+              <span class="code-chip" style="cursor:pointer;" onclick="copyToClipboard('${safeCode}')" title="কপি করতে ক্লিক করুন">${safeCode}</span>
+              <button type="button" class="btn" style="padding:2px 8px; font-size:11px; margin-left:4px;" onclick="copyToClipboard('${safeCode}')">📋 কপি</button>
             </td>
             <td><strong>${escapeHtml(c.plan_name)}</strong></td>
             <td>${c.duration_days} দিন</td>
@@ -1424,14 +1458,18 @@
     async function deleteCode(codeId) {
       const confirmed = await customConfirm("আপনি কি নিশ্চিত এই কোডটি মুছে ফেলতে চান?", "রিডিম কোড মুছে ফেলা");
       if (!confirmed) return;
-      const res = await authFetch(`${API_BASE}/admin/redeem/${codeId}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) {
-        showToast("রিডিম কোড মুছে ফেলা হয়েছে", "info");
-        loadRedeemCodes();
-        loadStats();
-      } else {
-        showToast(data.error || "মুছতে সমস্যা হয়েছে", "error");
+      try {
+        const res = await authFetch(`${API_BASE}/admin/redeem/${encodeURIComponent(codeId)}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          showToast("রিডিম কোড মুছে ফেলা হয়েছে", "info");
+          loadRedeemCodes();
+          loadStats();
+        } else {
+          showToast(data.error || "মুছতে সমস্যা হয়েছে", "error");
+        }
+      } catch (e) {
+        showToast("সার্ভারে সমস্যা হয়েছে", "error");
       }
     }
 

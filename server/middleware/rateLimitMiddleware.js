@@ -3,22 +3,20 @@ const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
+const { getModelConfig, getUserUsageDetails } = require('../../utils/getModelConfig');
 
 const checkRateLimit = async (req, res, next) => {
   try {
     const user = req.user;
 
-    // Admin gets full Max plan limits (or unlimited if superadmin)
-    // Removed unconditional admin bypass so limits can be tested and enforced
-
-    // Guest User (Not logged in)
+    // 0. Guest User (Not logged in)
     if (!user) {
       const model_id = req.body.model || 'openrouter/free';
       let aiModel = null;
       if (getIsMongoConnected()) {
-        aiModel = await AiModel.findOne({ model_id });
+        aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] });
       } else {
-        aiModel = memoryStore.models.find(m => (m.id === model_id || m.model_id === model_id));
+        aiModel = await getModelConfig(model_id);
       }
       if (aiModel && (aiModel.premium || aiModel.efficient)) {
         return res.status(403).json({
@@ -26,6 +24,23 @@ const checkRateLimit = async (req, res, next) => {
           error: `এই প্রিমিয়াম মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং প্রো বা ম্যাক্স প্ল্যান সক্রিয় করুন।`
         });
       }
+
+      // Enforce IP-based Guest Rate Limit: 10 messages per 3 hours
+      const xff = req.headers['x-forwarded-for'];
+      const rawIp = Array.isArray(xff) ? xff[0] : (typeof xff === 'string' ? xff.split(',')[0].trim() : req.socket?.remoteAddress || '127.0.0.1');
+      const cleanIp = String(rawIp).replace(/^::ffff:/, '').replace(/[^a-zA-Z0-9]/g, '_');
+      const guestId = `guest_${cleanIp}`;
+
+      const usageDetails = await getUserUsageDetails(guestId, 3);
+      if (usageDetails.count >= 10) {
+        return res.status(429).json({
+          success: false,
+          error: `গেস্ট বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন।`
+        });
+      }
+
+      req.guestId = guestId;
+      req.currentPlan = { name: 'Free', displayName: 'গেস্ট প্ল্যান', message_limit: 10, window_hours: 3 };
       return next();
     }
 
@@ -84,9 +99,8 @@ const checkRateLimit = async (req, res, next) => {
     
     let aiModel = null;
     if (getIsMongoConnected()) {
-      aiModel = await AiModel.findOne({ model_id });
+      aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] });
     } else {
-      const { getModelConfig } = require('../../utils/getModelConfig');
       aiModel = await getModelConfig(model_id);
     }
 
@@ -110,49 +124,40 @@ const checkRateLimit = async (req, res, next) => {
       }
     } else {
       // Fallback check against allowed_models list
-      if (plan.allowed_models && Array.isArray(plan.allowed_models)) {
-        if (!plan.allowed_models.includes('*') && !plan.allowed_models.includes(model_id)) {
-          return res.status(403).json({
-            success: false,
-            error: `আপনার ${plan.displayName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
-          });
-        }
+      const allowed = Array.isArray(plan.allowed_models) ? plan.allowed_models : ['*'];
+      if (!allowed.includes('*') && !allowed.includes(model_id)) {
+        return res.status(403).json({
+          success: false,
+          error: `আপনার ${plan.displayName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
+        });
       }
     }
 
     // 4. Dynamic Window Rate Limit Check
-    const userId = user._id || user.id;
+    const userId = String(user._id || user.id);
     const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
     let messageCount = 0;
+    let resetTimeMinutes = Math.round(plan.window_hours * 60);
 
     if (getIsMongoConnected()) {
       messageCount = await UsageLog.countDocuments({
         user_id: userId,
         timestamp: { $gte: windowStart }
       });
-    } else {
-      const { getUserUsage } = require('../../utils/getModelConfig');
-      const supabaseCount = await getUserUsage(userId, plan.window_hours);
-      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart).length;
-      messageCount = Math.max(supabaseCount, memCount);
-    }
-
-    if (messageCount >= plan.message_limit) {
-      let resetTimeMinutes = Math.round(plan.window_hours * 60);
-      if (getIsMongoConnected()) {
+      if (messageCount >= plan.message_limit) {
         const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }
-      } else {
-        const logsInWindow = memoryStore.usageLogs
-          .filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart)
-          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        if (logsInWindow.length > 0) {
-          resetTimeMinutes = Math.max(1, Math.ceil((new Date(logsInWindow[0].timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
-        }
       }
+    } else {
+      const usageDetails = await getUserUsageDetails(userId, plan.window_hours);
+      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
+      messageCount = Math.max(usageDetails.count, memCount);
+      resetTimeMinutes = usageDetails.resetInMinutes;
+    }
 
+    if (messageCount >= plan.message_limit) {
       return res.status(429).json({
         success: false,
         error: `বার্তা সীমা শেষ! ${plan.displayName}-এ প্রতি ${plan.window_hours} ঘণ্টায় সর্বোচ্চ ${plan.message_limit}টি বার্তা পাঠানো যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।`

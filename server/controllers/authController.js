@@ -25,10 +25,18 @@ const registerUser = async (req, res) => {
     if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
       return res.status(400).json({ success: false, error: 'সঠিক নাম, ইমেইল এবং পাসওয়ার্ড প্রদান করুন' });
     }
-    if (password.length < 6) {
+    const cleanEmail = email.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ success: false, error: 'অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা দিন' });
+    }
+    const cleanPassword = password.trim();
+    if (cleanPassword.length < 6) {
       return res.status(400).json({ success: false, error: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে' });
     }
-    const cleanEmail = email.toLowerCase().trim();
+    if (password.length > 72) {
+      return res.status(400).json({ success: false, error: 'পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে' });
+    }
     const cleanName = name.trim().slice(0, 50);
     const isAdminEmail = cleanEmail === 'zihanfakir@gmail.com';
 
@@ -166,32 +174,23 @@ const getMe = async (req, res) => {
         plan = { message_limit: def.limit, window_hours: def.window };
       }
       
-      const userId = user._id || user.id;
+      const userId = String(user._id || user.id);
       const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
       let messageCount = 0;
+      let resetTimeMinutes = Math.round(plan.window_hours * 60);
       
       if (getIsMongoConnected()) {
         messageCount = await UsageLog.countDocuments({ user_id: userId, timestamp: { $gte: windowStart } });
-      } else {
-        const { getUserUsage } = require('../../utils/getModelConfig');
-        const supabaseCount = await getUserUsage(userId, plan.window_hours);
-        const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart).length;
-        messageCount = Math.max(supabaseCount, memCount);
-      }
-      
-      let resetTimeMinutes = Math.round(plan.window_hours * 60);
-      if (getIsMongoConnected()) {
         const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }
       } else {
-        const logsInWindow = memoryStore.usageLogs
-          .filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp) >= windowStart)
-          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        if (logsInWindow.length > 0) {
-          resetTimeMinutes = Math.max(1, Math.ceil((new Date(logsInWindow[0].timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
-        }
+        const { getUserUsageDetails } = require('../../utils/getModelConfig');
+        const usageDetails = await getUserUsageDetails(userId, plan.window_hours);
+        const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
+        messageCount = Math.max(usageDetails.count, memCount);
+        resetTimeMinutes = usageDetails.resetInMinutes;
       }
       
       rateLimit = {

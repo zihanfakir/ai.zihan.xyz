@@ -35,8 +35,7 @@ async function getApiKeyFromSupabase(modelId) {
 
 const MODEL_ALIASES = {
   'openai/gpt-oss-120b': 'llama-3.3-70b-versatile',
-  'gemini-3.5-flash-lite': 'gemini-1.5-flash',
-  'gemini-1.5-flash': 'gemini-3.5-flash-lite'
+  'gemini-3.5-flash-lite': 'gemini-1.5-flash'
 };
 
 async function getModelConfig(rawId) {
@@ -135,8 +134,10 @@ async function savePersistedModels(models) {
   }
 }
 
-async function getUserUsage(userId, windowHours) {
-  if (!supabase) return 0;
+async function getUserUsageDetails(userId, windowHours) {
+  const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+  const def = { count: 0, resetInMinutes: Math.round((windowHours || 3) * 60) };
+  if (!supabase) return def;
   try {
     const { data } = await supabase
       .from('api_keys')
@@ -146,14 +147,22 @@ async function getUserUsage(userId, windowHours) {
 
     if (data && data.length > 0 && data[0].api_key) {
       const usage = JSON.parse(data[0].api_key);
-      const windowMs = (windowHours || 3) * 60 * 60 * 1000;
       const now = Date.now();
       if (now - usage.start < windowMs) {
-        return usage.count || 0;
+        const remainingMs = Math.max(0, (usage.start + windowMs) - now);
+        return {
+          count: usage.count || 0,
+          resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000))
+        };
       }
     }
   } catch (e) {}
-  return 0;
+  return def;
+}
+
+async function getUserUsage(userId, windowHours) {
+  const details = await getUserUsageDetails(userId, windowHours);
+  return details.count;
 }
 
 async function incrementUserUsage(userId, windowHours) {
@@ -356,6 +365,7 @@ module.exports = {
   getPersistedModels,
   savePersistedModels,
   getUserUsage,
+  getUserUsageDetails,
   incrementUserUsage,
   getPersistedRedeemCodes,
   savePersistedRedeemCodes,

@@ -108,6 +108,9 @@ const updateUserPlan = async (req, res) => {
   try {
     const { userId } = req.params;
     const { plan_name, duration_days = 30 } = req.body;
+    if (plan_name && !['Free', 'Pro', 'Max'].includes(plan_name)) {
+      return res.status(400).json({ success: false, error: 'প্ল্যান অবশ্যই Free, Pro অথবা Max হতে হবে' });
+    }
 
     const days = Math.min(Math.max(Number(duration_days) || 30, 1), 3650);
     const now = new Date();
@@ -117,7 +120,10 @@ const updateUserPlan = async (req, res) => {
     }
 
     if (getIsMongoConnected()) {
-      const user = await User.findById(userId);
+      const mongoose = require('mongoose');
+      const user = mongoose.Types.ObjectId.isValid(userId)
+        ? await User.findById(userId)
+        : await User.findOne({ _id: userId });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -139,7 +145,7 @@ const updateUserPlan = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -169,12 +175,15 @@ const toggleBlockUser = async (req, res) => {
     const { userId } = req.params;
     const { is_blocked } = req.body;
 
-    if (req.user && String(userId) === String(req.user._id)) {
+    if (req.user && String(userId) === String(req.user._id || req.user.id)) {
       return res.status(400).json({ success: false, error: 'অ্যাডমিন নিজের অ্যাকাউন্ট ব্লক করতে পারবেন না।' });
     }
 
     if (getIsMongoConnected()) {
-      const user = await User.findById(userId);
+      const mongoose = require('mongoose');
+      const user = mongoose.Types.ObjectId.isValid(userId)
+        ? await User.findById(userId)
+        : await User.findOne({ _id: userId });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -191,7 +200,7 @@ const toggleBlockUser = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -229,14 +238,28 @@ const updatePlanLimits = async (req, res) => {
     const { planName } = req.params;
     const { message_limit, window_hours, is_active } = req.body;
 
+    let validLimit = undefined;
+    if (message_limit !== undefined) {
+      const n = parseInt(message_limit, 10);
+      if (isNaN(n) || n < 1) return res.status(400).json({ success: false, error: 'বার্তা সীমা কমপক্ষে ১ হতে হবে।' });
+      validLimit = n;
+    }
+
+    let validWindow = undefined;
+    if (window_hours !== undefined) {
+      const n = parseInt(window_hours, 10);
+      if (isNaN(n) || n < 1 || n > 168) return res.status(400).json({ success: false, error: 'উইন্ডো সময় ১ থেকে ১৬৮ ঘণ্টার মধ্যে হতে হবে।' });
+      validWindow = n;
+    }
+
     if (getIsMongoConnected()) {
       const plan = await Plan.findOne({ name: planName });
       if (!plan) {
         return res.status(404).json({ success: false, error: 'প্ল্যান পাওয়া যায়নি।' });
       }
 
-      if (message_limit !== undefined) plan.message_limit = Number(message_limit);
-      if (window_hours !== undefined) plan.window_hours = Number(window_hours);
+      if (validLimit !== undefined) plan.message_limit = validLimit;
+      if (validWindow !== undefined) plan.window_hours = validWindow;
       if (is_active !== undefined) plan.is_active = Boolean(is_active);
 
       await plan.save();
@@ -251,8 +274,8 @@ const updatePlanLimits = async (req, res) => {
         return res.status(404).json({ success: false, error: 'প্ল্যান পাওয়া যায়নি।' });
       }
 
-      if (message_limit !== undefined) plan.message_limit = Number(message_limit);
-      if (window_hours !== undefined) plan.window_hours = Number(window_hours);
+      if (validLimit !== undefined) plan.message_limit = validLimit;
+      if (validWindow !== undefined) plan.window_hours = validWindow;
       if (is_active !== undefined) plan.is_active = Boolean(is_active);
       debouncedSave();
 
@@ -373,7 +396,12 @@ const deleteRedeemCode = async (req, res) => {
   try {
     const { codeId } = req.params;
     if (getIsMongoConnected()) {
-      await RedeemCode.findByIdAndDelete(codeId);
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(codeId)) {
+        await RedeemCode.findByIdAndDelete(codeId);
+      } else {
+        await RedeemCode.findOneAndDelete({ $or: [{ _id: codeId }, { code: codeId }] });
+      }
     } else {
       const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
       let codes = await getPersistedRedeemCodes();

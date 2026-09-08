@@ -5,7 +5,7 @@ const { protect, optionalProtect } = require('../middleware/authMiddleware');
 const { checkRateLimit } = require('../middleware/rateLimitMiddleware');
 
 router.post('/completions', optionalProtect, checkRateLimit, streamChatCompletions);
-router.post('/image', optionalProtect, generateImage);
+router.post('/image', optionalProtect, checkRateLimit, generateImage);
 router.post('/sessions', protect, saveChatSession);
 router.get('/sessions', protect, getChatSessions);
 router.delete('/sessions/:session_id', protect, deleteChatSession);

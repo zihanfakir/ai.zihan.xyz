@@ -38,6 +38,9 @@ if (!fs.existsSync(BACKUP_DIR)) {
 
 const saveBackup = () => {
   try {
+    if (memoryStore.usageLogs && memoryStore.usageLogs.length > 5000) {
+      memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+    }
     const backupData = {
       users: memoryStore.users,
       plans: memoryStore.plans,
@@ -46,7 +49,9 @@ const saveBackup = () => {
       models: memoryStore.models,
       chatSessions: memoryStore.chatSessions || []
     };
-    fs.writeFileSync(BACKUP_FILE, JSON.stringify(backupData, null, 2), 'utf8');
+    const tmpFile = BACKUP_FILE + '.tmp';
+    fs.writeFileSync(tmpFile, JSON.stringify(backupData, null, 2), 'utf8');
+    fs.renameSync(tmpFile, BACKUP_FILE);
   } catch (err) {
     console.error('[MemoryStore Backup Error]:', err.message);
   }

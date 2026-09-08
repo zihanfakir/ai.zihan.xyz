@@ -820,7 +820,6 @@
     .ai-bubble pre {
       background-color: transparent;
       padding: 18px;
-      padding-top: 60px; /* Increased to ensure button has space */
       overflow-x: auto;
       overflow-y: auto;
       max-height: 480px;
@@ -831,6 +830,10 @@
       box-sizing: border-box;
       border: none;
       box-shadow: none;
+    }
+
+    .code-block-wrapper pre {
+      padding-top: 52px;
     }
 
     .ai-bubble pre::-webkit-scrollbar {
@@ -2299,6 +2302,15 @@
     let isImageGenEnabled = false;
     let currentAbortController = null;
 
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     // Secure Markdown parser with DOMPurify sanitization
     if (typeof DOMPurify !== "undefined") {
       try {
@@ -2594,7 +2606,30 @@
       const used = usage.count || 0;
       const remaining = Math.max(0, limit - used);
 
-      if (limitBadgeEl) limitBadgeEl.textContent = `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
+      const windowMs = hours * 60 * 60 * 1000;
+      let msRemainingInWindow = 0;
+      if (usage.resetAt) {
+        msRemainingInWindow = Math.max(0, new Date(usage.resetAt).getTime() - Date.now());
+      } else if (usage.start) {
+        msRemainingInWindow = Math.max(0, (usage.start + windowMs) - Date.now());
+      }
+      const minsLeft = Math.max(1, Math.ceil(msRemainingInWindow / (60 * 1000)));
+      const hoursLeft = Math.floor(minsLeft / 60);
+      const remainingMinsInHour = minsLeft % 60;
+      let timeLeftStr = "";
+      if (hoursLeft > 0) {
+        timeLeftStr = `${toBengaliDigits(hoursLeft)} ঘণ্টা ${toBengaliDigits(remainingMinsInHour)} মিনিট`;
+      } else {
+        timeLeftStr = `${toBengaliDigits(minsLeft)} মিনিট`;
+      }
+
+      if (limitBadgeEl) {
+        if (remaining <= 0) {
+          limitBadgeEl.textContent = `বাকি: ০/${toBengaliDigits(limit)} বার্তা (রিসেট: ${timeLeftStr})`;
+        } else {
+          limitBadgeEl.textContent = `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
+        }
+      }
       if (limitMsgEl) limitMsgEl.textContent = `${toBengaliDigits(limit)} বার্তা / ${toBengaliDigits(hours)} ঘণ্টা`;
       if (limitModEl) limitModEl.textContent = planInfo.models;
       if (limitSpdEl) limitSpdEl.textContent = planInfo.speed;
@@ -2638,7 +2673,7 @@
 
       if (warningEl) {
         if (remaining <= 0) {
-          warningEl.textContent = `⚠️ আপনার বার্তা সীমা শেষ! (${toBengaliDigits(hours)} ঘণ্টার জন্য)`;
+          warningEl.textContent = `⚠️ আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ${timeLeftStr} পর)`;
           warningEl.classList.add("visible");
         } else {
           warningEl.classList.remove("visible");
@@ -2689,7 +2724,7 @@
         let badgeHtml = "";
         if (current.efficient) badgeHtml = ` <span class="tag tag-max" style="font-size: 0.65rem; padding: 1px 6px;">MAX</span>`;
         else if (current.premium) badgeHtml = ` <span class="tag tag-pro" style="font-size: 0.65rem; padding: 1px 6px;">PRO</span>`;
-        modelTriggerLabel.innerHTML = current.name + badgeHtml;
+        modelTriggerLabel.innerHTML = escapeHtml(current.name) + badgeHtml;
       }
     }
 
@@ -2860,8 +2895,8 @@
 
         card.innerHTML = `
           <div class="model-card-left">
-            <div class="model-card-name">${m.name}${badgeHtml}</div>
-            <div class="model-card-provider">${m.provider}</div>
+            <div class="model-card-name">${escapeHtml(m.name)}${badgeHtml}</div>
+            <div class="model-card-provider">${escapeHtml(m.provider)}</div>
           </div>
           <div class="model-card-right">
             <span class="model-latency">${latencyLabel(m)}</span>
@@ -2872,7 +2907,7 @@
         card.addEventListener("click", () => {
           selectedModelId = m.id;
           try { localStorage.setItem("alokpoth_selected_model", m.id); } catch {}
-          modelTriggerLabel.innerHTML = m.name + badgeHtml;
+          modelTriggerLabel.innerHTML = escapeHtml(m.name) + badgeHtml;
           if (messagesHistory[0] && messagesHistory[0].role === "system") {
             messagesHistory[0].content = buildSystemPrompt(m.name, true, true);
           }
@@ -2994,14 +3029,26 @@
             } else {
               try { localStorage.removeItem(PLAN_EXPIRY_KEY); } catch {}
             }
-            renderCreditBalance();
           }
+          if (u.usage) {
+            try {
+              const startTimestamp = u.usage.resetAt ? (new Date(u.usage.resetAt).getTime() - (u.usage.windowHours * 60 * 60 * 1000)) : Date.now();
+              localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify({
+                count: u.usage.count || 0,
+                start: startTimestamp,
+                resetAt: u.usage.resetAt
+              }));
+            } catch {}
+          }
+          renderCreditBalance();
           if (typeof updateAuthUIState === "function") updateAuthUIState();
         }
       } catch (e) {
         console.warn("Could not sync user profile:", e);
       }
     }
+
+    let accountCountdownInterval = null;
 
     function openAccountModal() {
       const savedName = getAccountName();
@@ -3013,8 +3060,25 @@
       accountModalOverlay.classList.add("open");
       syncUserProfileFromServer();
       syncPlanLimitsFromServer();
+
+      if (accountCountdownInterval) clearInterval(accountCountdownInterval);
+      accountCountdownInterval = setInterval(() => {
+        if (!accountModalOverlay.classList.contains("open")) {
+          clearInterval(accountCountdownInterval);
+          accountCountdownInterval = null;
+          return;
+        }
+        renderCreditBalance();
+      }, 1000);
     }
-    function closeAccountModal() { accountModalOverlay.classList.remove("open"); }
+
+    function closeAccountModal() {
+      accountModalOverlay.classList.remove("open");
+      if (accountCountdownInterval) {
+        clearInterval(accountCountdownInterval);
+        accountCountdownInterval = null;
+      }
+    }
 
     accountMenuBtn.addEventListener("click", openAccountModal);
     accountModalClose.addEventListener("click", closeAccountModal);
@@ -3164,6 +3228,10 @@
           accountRedeemMsg.className = "account-redeem-msg";
         }
         renderCreditBalance();
+
+        if (typeof startNewChat === "function") {
+          startNewChat();
+        }
 
         closeAccountModal();
         closeBrandMenu();
@@ -3984,6 +4052,49 @@ Capabilities & Code Generation Instructions (CRITICAL):
       });
     }
 
+    async function handleRegenerateFromBtn(regenBtn) {
+      if (isGenerating) return;
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
+        openAuthModal("login");
+        return;
+      }
+      if (!hasCredit()) {
+        openAccountModal();
+        return;
+      }
+      const targetRow = regenBtn.closest(".message-row");
+      if (!targetRow) return;
+
+      const allMessageRows = Array.from(chatStream.querySelectorAll(".message-row"));
+      const rowIndex = allMessageRows.indexOf(targetRow);
+      if (rowIndex !== -1) {
+        messagesHistory = messagesHistory.slice(0, rowIndex + 1);
+      } else {
+        if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
+          messagesHistory.pop();
+        }
+      }
+
+      let node = targetRow;
+      while (node) {
+        const next = node.nextSibling;
+        node.remove();
+        node = next;
+      }
+
+      isGenerating = true;
+      updateSendAvailability();
+      try {
+        await generateAIReply();
+      } finally {
+        isGenerating = false;
+        updateSendAvailability();
+        scrollToBottom();
+      }
+    }
+
     function loadSession(sessionId) {
       persistCurrentSession();
       const sessions = loadAllSessions();
@@ -4013,38 +4124,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (copyBtn) {
             copyBtn.dataset.text = rawText;
             copyBtn.style.display = "inline-flex";
-            copyBtn.addEventListener("click", () => {
-              copyTextToClipboard(rawText).then((ok) => {
-                const label = copyBtn.querySelector("span");
-                const original = label ? label.textContent : "কপি";
-                if (label) label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
-                setTimeout(() => { if (label) label.textContent = original; }, 1500);
-              });
-            });
           }
           if (regenBtn) {
             regenBtn.style.display = "inline-flex";
-            regenBtn.addEventListener("click", async () => {
-              if (isGenerating) return;
-              const token = localStorage.getItem("alokpoth_token");
-              if (!token) {
-                showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
-                openAuthModal("login");
-                return;
-              }
-              if (!hasCredit()) { openAccountModal(); return; }
-              const row = regenBtn.closest(".message-row");
-              if (row) row.remove();
-              if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
-                messagesHistory.pop();
-              }
-              isGenerating = true;
-              updateSendAvailability();
-              await generateAIReply();
-              isGenerating = false;
-              updateSendAvailability();
-              scrollToBottom();
-            });
           }
         }
       });
@@ -4145,12 +4227,22 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.className = "action-icon-btn";
       copyBtn.style.display = "none";
       copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
+      copyBtn.addEventListener("click", () => {
+        const textToCopy = copyBtn.dataset.text || "";
+        copyTextToClipboard(textToCopy).then((ok) => {
+          const label = copyBtn.querySelector("span");
+          const original = label ? label.textContent : "কপি";
+          if (label) label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
+          setTimeout(() => { if (label) label.textContent = original; }, 1500);
+        });
+      });
       
       const regenBtn = document.createElement("button");
       regenBtn.type = "button";
       regenBtn.className = "action-icon-btn";
       regenBtn.style.display = "none";
       regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
+      regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
       
       actionRow.appendChild(copyBtn); actionRow.appendChild(regenBtn);
       contentCol.appendChild(textDiv); contentCol.appendChild(actionRow);
@@ -4271,17 +4363,26 @@ Capabilities & Code Generation Instructions (CRITICAL):
         userInput.focus();
         updateSendAvailability();
         
-        const userMsgIndex = messagesHistory.findIndex(
-          (m) => m.role === "user" && m.content.startsWith(text)
-        );
-        if (userMsgIndex !== -1) {
-          messagesHistory = messagesHistory.slice(0, userMsgIndex);
+        const allMessageRows = Array.from(chatStream.querySelectorAll(".message-row"));
+        const rowIndex = allMessageRows.indexOf(row);
+        if (rowIndex !== -1) {
+          messagesHistory = messagesHistory.slice(0, rowIndex + 1);
+        } else {
+          const userMsgIndex = messagesHistory.map((m, idx) => ({ m, idx }))
+            .reverse()
+            .find(item => item.m.role === "user" && item.m.content && item.m.content.includes(text));
+          if (userMsgIndex) {
+            messagesHistory = messagesHistory.slice(0, userMsgIndex.idx);
+          }
         }
         
         let node = row;
         while (node) {
-          const next = node.nextSibling; node.remove(); node = next;
+          const next = node.nextSibling;
+          node.remove();
+          node = next;
         }
+        persistCurrentSession();
       });
       
       col.appendChild(bubble); col.appendChild(editBtn);
@@ -4368,7 +4469,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let errText = "";
         try {
           const json = await response.json();
-          errText = json.error || json.message;
+          errText = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : (json.error || json.message);
         } catch {
           errText = await response.text().catch(() => "");
         }
@@ -4408,7 +4509,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
           try {
             const json = JSON.parse(payload);
             if (json.error) {
-              throw new Error(json.error);
+              const errMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
+              throw new Error(errMsg);
             }
             const delta = json.choices?.[0]?.delta?.content || json.choices?.[0]?.text || json.text || "";
             if (delta) {
@@ -4539,15 +4641,25 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function renderGeneratedImageBubble(aiTextElement, imageUrl, prompt) {
       aiTextElement.classList.remove("streaming", "no-children");
-      aiTextElement.innerHTML = `
-        <div class="generated-image-wrap">
-          <img src="${imageUrl}" alt="${prompt.replace(/"/g, "'")}" class="generated-image">
-          <button type="button" class="image-download-btn sheen-surface">
-            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ছবি ডাউনলোড</span>
-          </button>
-        </div>
-      `;
-      aiTextElement.querySelector(".image-download-btn").addEventListener("click", () => downloadGeneratedImage(imageUrl));
+      aiTextElement.innerHTML = "";
+
+      const wrap = document.createElement("div");
+      wrap.className = "generated-image-wrap";
+
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = prompt || "ছবি";
+      img.className = "generated-image";
+
+      const dlBtn = document.createElement("button");
+      dlBtn.type = "button";
+      dlBtn.className = "image-download-btn sheen-surface";
+      dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ছবি ডাউনলোড</span>`;
+      dlBtn.addEventListener("click", () => downloadGeneratedImage(imageUrl));
+
+      wrap.appendChild(img);
+      wrap.appendChild(dlBtn);
+      aiTextElement.appendChild(wrap);
     }
 
     async function generateAIReply() {
@@ -4582,25 +4694,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
             renderGeneratedImageBubble(aiTextElement, imageUrl, lastUserMsg.content);
             copyBtn.style.display = "none";
             regenBtn.style.display = "inline-flex";
-            regenBtn.onclick = async () => {
-              if (isGenerating) return;
-              const token = localStorage.getItem("alokpoth_token");
-              if (!token) {
-                showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
-                openAuthModal("login");
-                return;
-              }
-              if (!hasCredit()) { openAccountModal(); return; }
-              const row = regenBtn.closest(".message-row");
-              if (row) row.remove();
-              messagesHistory.pop();
-              isGenerating = true;
-              updateSendAvailability();
-              await generateAIReply();
-              isGenerating = false;
-              updateSendAvailability();
-              scrollToBottom();
-            };
             messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });
             addImageUsage(selectedModelId);
             persistCurrentSession();
@@ -4608,6 +4701,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           } catch (err) {
             aiTextElement.classList.remove("streaming", "no-children");
             aiTextElement.innerHTML = `<span class="status-indicator status-error">ছবি তৈরি করা যায়নি: ${(err.message || "অজানা সমস্যা")}</span>`;
+            regenBtn.style.display = "inline-flex";
             scrollToBottom(); resolve();
           }
           return;
@@ -4651,13 +4745,30 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let streamQueue = "";
         let renderedStream = "";
         let apiFinished = false;
+        let errOccurred = false;
+        let queueRafId = null;
+        let isQueueActive = false;
         
         let lastRenderTime = 0;
         const RENDER_THROTTLE = 30;
 
-        const finishUp = () => { persistCurrentSession(); scrollToBottom(); resolve(); };
+        const finishUp = () => {
+          if (queueRafId) {
+            cancelAnimationFrame(queueRafId);
+            queueRafId = null;
+          }
+          persistCurrentSession();
+          scrollToBottom();
+          resolve();
+        };
 
         const processQueue = () => {
+          queueRafId = null;
+          if (errOccurred) {
+            isQueueActive = false;
+            return;
+          }
+
           if (streamQueue.length > 0) {
             let take = 3;
             if (streamQueue.length > 20) take = 8;
@@ -4677,11 +4788,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
               scrollToBottom();
               lastRenderTime = now;
             }
-            requestAnimationFrame(processQueue);
+            queueRafId = requestAnimationFrame(processQueue);
           } else {
             if (!apiFinished) {
-              requestAnimationFrame(processQueue);
+              isQueueActive = false;
             } else {
+              isQueueActive = false;
               aiTextElement.classList.remove("streaming", "no-children");
               try {
                 aiTextElement.innerHTML = safeMarkdown(renderedStream);
@@ -4689,7 +4801,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
               } catch { aiTextElement.textContent = renderedStream; }
               
               copyBtn.dataset.text = renderedStream;
-              
               copyBtn.style.display = "inline-flex";
               regenBtn.style.display = "inline-flex";
               
@@ -4697,7 +4808,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
               addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
                 isCodeGen: countCodeBlocks(renderedStream) > 0
               });
-              scrollToBottom(); finishUp();
+              scrollToBottom();
+              finishUp();
             }
           }
         };
@@ -4709,9 +4821,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
             aiTextElement.style.whiteSpace = ""; 
             aiTextElement.innerHTML = "";
             aiTextElement.classList.add("streaming");
-            requestAnimationFrame(processQueue);
           }
           streamQueue += delta;
+          if (!isQueueActive) {
+            isQueueActive = true;
+            if (!queueRafId) {
+              queueRafId = requestAnimationFrame(processQueue);
+            }
+          }
         };
 
         try {
@@ -4719,11 +4836,22 @@ Capabilities & Code Generation Instructions (CRITICAL):
           apiFinished = true;
           if (!started) {
             clearInterval(statusIntervalId);
+            aiTextElement.classList.remove("streaming", "no-children");
+            aiTextElement.innerHTML = `<span class="status-indicator status-error">কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>`;
+            regenBtn.style.display = "inline-flex";
+            copyBtn.style.display = "none";
             finishUp();
+          } else if (!isQueueActive && streamQueue.length === 0) {
+            processQueue();
           }
         } catch (err) {
-          clearInterval(statusIntervalId);
+          errOccurred = true;
           apiFinished = true;
+          if (queueRafId) {
+            cancelAnimationFrame(queueRafId);
+            queueRafId = null;
+          }
+          clearInterval(statusIntervalId);
           aiTextElement.classList.remove("streaming", "no-children");
           aiTextElement.style.whiteSpace = "";
           if (err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"))) {
@@ -4731,43 +4859,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
           } else {
             aiTextElement.textContent = `সমস্যা হয়েছে: ${err.message}`;
           }
+          regenBtn.style.display = "inline-flex";
           finishUp();
         }
-
-        copyBtn.addEventListener("click", () => {
-          const textToCopy = copyBtn.dataset.text || "";
-          copyTextToClipboard(textToCopy).then((ok) => {
-            const label = copyBtn.querySelector("span");
-            const original = label.textContent;
-            label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
-            setTimeout(() => { label.textContent = original; }, 1500);
-          });
-        });
-
-        regenBtn.addEventListener("click", async () => {
-          if (isGenerating) return;
-          const token = localStorage.getItem("alokpoth_token");
-          if (!token) {
-            showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
-            openAuthModal("login");
-            return;
-          }
-          if (!hasCredit()) { openAccountModal(); return; }
-          const row = regenBtn.closest(".message-row");
-          if (row) row.remove();
-          if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
-            messagesHistory.pop();
-          }
-          
-          isGenerating = true;
-          updateSendAvailability();
-          
-          await generateAIReply();
-          
-          isGenerating = false;
-          updateSendAvailability();
-          scrollToBottom();
-        });
       });
     }
 
