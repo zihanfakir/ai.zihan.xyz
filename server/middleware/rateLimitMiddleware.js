@@ -9,6 +9,12 @@ const checkRateLimit = async (req, res, next) => {
   try {
     const user = req.user;
 
+    // Admin users are never rate-limited
+    if (user && user.role === 'admin') {
+      req.currentPlan = { name: 'Admin', displayName: 'অ্যাডমিন', message_limit: 999999, window_hours: 1, allowed_models: ['*'] };
+      return next();
+    }
+
     // 0. Guest User (Not logged in)
     if (!user) {
       const model_id = req.body.model || 'openrouter/free';
@@ -74,7 +80,9 @@ const checkRateLimit = async (req, res, next) => {
     if (getIsMongoConnected()) {
       plan = await Plan.findOne({ name: currentPlanName });
     } else {
-      plan = memoryStore.plans.find(p => p.name === currentPlanName);
+      const { getPersistedPlans } = require('../../utils/getModelConfig');
+      const plans = await getPersistedPlans();
+      plan = plans.find(p => p.name === currentPlanName);
     }
 
     if (!plan) {

@@ -65,7 +65,7 @@ const registerUser = async (req, res) => {
       let users = await getPersistedUsers();
       users = [...users];
 
-      const userExists = users.find(u => u.email === cleanEmail);
+      const userExists = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
       if (userExists) {
         return res.status(400).json({ success: false, error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি আছে' });
       }
@@ -165,7 +165,9 @@ const getMe = async (req, res) => {
       if (getIsMongoConnected()) {
         plan = await Plan.findOne({ name: currentPlanName });
       } else {
-        plan = memoryStore.plans.find(p => p.name === currentPlanName);
+        const { getPersistedPlans } = require('../../utils/getModelConfig');
+        const plans = await getPersistedPlans();
+        plan = plans.find(p => p.name === currentPlanName);
       }
       
       if (!plan) {

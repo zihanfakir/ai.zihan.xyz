@@ -2722,8 +2722,8 @@
       const current = MODELS.find(m => m.id === selectedModelId);
       if (current && modelTriggerLabel) {
         let badgeHtml = "";
-        if (current.efficient) badgeHtml = ` <span class="tag tag-max" style="font-size: 0.65rem; padding: 1px 6px;">MAX</span>`;
-        else if (current.premium) badgeHtml = ` <span class="tag tag-pro" style="font-size: 0.65rem; padding: 1px 6px;">PRO</span>`;
+        if (current.efficient) badgeHtml = ` <span class="badge-tag badge-max" style="font-size: 0.65rem; padding: 1px 6px;">MAX</span>`;
+        else if (current.premium) badgeHtml = ` <span class="badge-tag badge-pro" style="font-size: 0.65rem; padding: 1px 6px;">PRO</span>`;
         modelTriggerLabel.innerHTML = escapeHtml(current.name) + badgeHtml;
       }
     }
@@ -2777,6 +2777,7 @@
           renderModelList();
           updateSelectedModelUI();
           updateTriggerStatusDot();
+          syncModelStatuses({ silent: true });
         }
       } catch (err) {
         console.warn("Could not fetch models from server:", err);
@@ -2808,7 +2809,11 @@
         if (srvRes.ok) {
           const srvData = await srvRes.json();
           if (srvData.success) {
-            return { latency: srvData.latency, status: srvData.status || classifyLatency(srvData.latency) };
+            const isOffline = srvData.status === 'offline' || srvData.latency == null;
+            return {
+              latency: isOffline ? null : srvData.latency,
+              status: isOffline ? 'offline' : (srvData.status || classifyLatency(srvData.latency))
+            };
           }
         }
       } catch (e) {}
@@ -3199,10 +3204,29 @@
       });
     }
 
-    accountSaveBtn.addEventListener("click", () => {
+    accountSaveBtn.addEventListener("click", async () => {
       const name = accountNameInput.value.trim();
       try { localStorage.setItem("alokpoth_account_name", name); } catch {}
       applyAccountName(name);
+
+      const token = localStorage.getItem("alokpoth_token");
+      if (token && name) {
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ name })
+          });
+          const data = await res.json();
+          if (data.success && data.user) {
+            localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
+          }
+        } catch (e) {}
+      }
+
       closeAccountModal();
       showToast("নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
     });

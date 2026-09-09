@@ -10,6 +10,9 @@
       --bg-main: #09090b;
       --bg-card: #18181b;
       --border-color: rgba(255, 255, 255, 0.1);
+      --border: var(--border-color);
+      --surface: var(--bg-card);
+      --bg-surface: var(--bg-card);
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
       --accent: #3b82f6;
@@ -1202,15 +1205,20 @@
           <td>${exp}</td>
           <td>${u.is_blocked ? '<span style="color:var(--danger)">ব্লকড</span>' : '<span style="color:var(--success)">সক্রিয়</span>'}</td>
           <td>
-            <select onchange="updateUserPlan('${escapeHtml(uId)}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
-              <option value="">প্ল্যান সেট করুন</option>
-              <option value="Free">Free (অনন্তকাল)</option>
-              <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
-              <option value="Max">Max (কাস্টম মেয়াদ)</option>
-            </select>
-            <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${escapeHtml(uId)}', ${!u.is_blocked})" style="margin-left: 8px;">
-              ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
-            </button>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <select onchange="updateUserPlan('${escapeHtml(uId)}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+                <option value="">প্ল্যান সেট করুন</option>
+                <option value="Free">Free (অনন্তকাল)</option>
+                <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
+                <option value="Max">Max (কাস্টম মেয়াদ)</option>
+              </select>
+              <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${escapeHtml(uId)}', ${!u.is_blocked})">
+                ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
+              </button>
+              <button type="button" class="btn btn-danger" onclick="deleteUserAccount('${escapeHtml(uId)}', '${escapeHtml(u.name || u.email)}')" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); padding: 4px 10px; font-size: 0.8rem;">
+                মুছুন
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
@@ -1301,6 +1309,26 @@
       }
     }
 
+    async function deleteUserAccount(userId, userName) {
+      const confirmed = await customConfirm(`আপনি কি নিশ্চিত '${userName || 'এই ইউজার'}' অ্যাকাউন্টটি সম্পূর্ণ মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।`, "ইউজার অ্যাকাউন্ট মুছে ফেলা");
+      if (!confirmed) return;
+      try {
+        const res = await authFetch(`${API_BASE}/admin/users/${encodeURIComponent(userId)}`, {
+          method: "DELETE"
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "ইউজার অ্যাকাউন্ট মুছে ফেলা হয়েছে", "info");
+          loadUsers();
+          loadStats();
+        } else {
+          showToast(data.error || "ইউজার মুছতে ব্যর্থ হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভার ত্রুটি", "error");
+      }
+    }
+
     async function loadPlans() {
       try {
         const res = await authFetch(`${API_BASE}/admin/plans`);
@@ -1325,7 +1353,7 @@
               <label>সময়সীমা (Window Hours)</label>
               <input type="number" id="window_${p.name}" value="${p.window_hours}">
             </div>
-            <button type="button" class="btn btn-primary" onclick="savePlanLimits('${p.name}')" style="margin-top: 10px;">সংরক্ষণ করুন</button>
+            <button type="button" class="btn btn-primary" onclick="savePlanLimits('${p.name}', this)" style="margin-top: 10px;">সংরক্ষণ করুন</button>
           `;
           container.appendChild(card);
         });

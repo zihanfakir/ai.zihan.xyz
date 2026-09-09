@@ -123,7 +123,7 @@ const updateUserPlan = async (req, res) => {
       const mongoose = require('mongoose');
       const user = mongoose.Types.ObjectId.isValid(userId)
         ? await User.findById(userId)
-        : await User.findOne({ _id: userId });
+        : await User.findOne({ email: userId });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -145,7 +145,7 @@ const updateUserPlan = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === String(userId).toLowerCase().trim()));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -183,7 +183,7 @@ const toggleBlockUser = async (req, res) => {
       const mongoose = require('mongoose');
       const user = mongoose.Types.ObjectId.isValid(userId)
         ? await User.findById(userId)
-        : await User.findOne({ _id: userId });
+        : await User.findOne({ email: userId });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -200,7 +200,7 @@ const toggleBlockUser = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === String(userId).toLowerCase().trim()));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
@@ -220,13 +220,44 @@ const toggleBlockUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (req.user && String(userId) === String(req.user._id || req.user.id || req.user.email)) {
+      return res.status(400).json({ success: false, error: 'অ্যাডমিন নিজের অ্যাকাউন্ট মুছতে পারবেন না।' });
+    }
+
+    if (getIsMongoConnected()) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        await User.findByIdAndDelete(userId);
+      } else {
+        await User.findOneAndDelete({ email: String(userId).toLowerCase().trim() });
+      }
+    } else {
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      const cleanTarget = String(userId).toLowerCase().trim();
+      users = users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
+      await savePersistedUsers(users);
+      debouncedSave();
+    }
+
+    return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে।' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 const getPlans = async (req, res) => {
   try {
     if (getIsMongoConnected()) {
       const plans = await Plan.find();
       return res.json({ success: true, count: plans.length, plans });
     } else {
-      return res.json({ success: true, count: memoryStore.plans.length, plans: memoryStore.plans });
+      const { getPersistedPlans } = require('../../utils/getModelConfig');
+      const plans = await getPersistedPlans();
+      return res.json({ success: true, count: plans.length, plans });
     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -269,7 +300,10 @@ const updatePlanLimits = async (req, res) => {
         plan
       });
     } else {
-      const plan = memoryStore.plans.find(p => p.name === planName);
+      const { getPersistedPlans, savePersistedPlans } = require('../../utils/getModelConfig');
+      let plans = await getPersistedPlans();
+      plans = JSON.parse(JSON.stringify(plans));
+      const plan = plans.find(p => p.name === planName);
       if (!plan) {
         return res.status(404).json({ success: false, error: 'প্ল্যান পাওয়া যায়নি।' });
       }
@@ -277,6 +311,8 @@ const updatePlanLimits = async (req, res) => {
       if (validLimit !== undefined) plan.message_limit = validLimit;
       if (validWindow !== undefined) plan.window_hours = validWindow;
       if (is_active !== undefined) plan.is_active = Boolean(is_active);
+
+      await savePersistedPlans(plans);
       debouncedSave();
 
       return res.json({
@@ -395,17 +431,18 @@ const getRedeemCodes = async (req, res) => {
 const deleteRedeemCode = async (req, res) => {
   try {
     const { codeId } = req.params;
+    const cleanId = String(codeId).trim().toUpperCase();
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(codeId)) {
         await RedeemCode.findByIdAndDelete(codeId);
       } else {
-        await RedeemCode.findOneAndDelete({ $or: [{ _id: codeId }, { code: codeId }] });
+        await RedeemCode.findOneAndDelete({ code: cleanId });
       }
     } else {
       const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
       let codes = await getPersistedRedeemCodes();
-      codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code) !== String(codeId));
+      codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
       await savePersistedRedeemCodes(codes);
       debouncedSave();
     }
@@ -714,6 +751,7 @@ module.exports = {
   reorderModels,
   getAdminStats,
   getUsers,
+  deleteUser,
   updateUserPlan,
   toggleBlockUser,
   getPlans,

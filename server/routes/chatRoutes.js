@@ -52,33 +52,53 @@ router.get('/models', async (req, res) => {
 router.get('/ping', async (req, res) => {
   try {
     const { model } = req.query;
+    if (!model) {
+      return res.status(400).json({ success: false, error: 'মডেলের নাম প্রয়োজন' });
+    }
+
+    const { getPersistedModels, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
     let aiModelConfig = null;
     if (getIsMongoConnected()) {
-      aiModelConfig = await AiModel.findOne({ model_id: model });
+      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: model }, { id: model }] });
     } else {
-      aiModelConfig = memoryStore.models.find(m => (m.id === model || m.model_id === model));
+      const allModels = await getPersistedModels();
+      aiModelConfig = allModels.find(m => (m.id === model || m.model_id === model));
     }
     
-    if (!aiModelConfig) return res.status(404).json({ success: false });
+    if (!aiModelConfig) {
+      return res.json({ success: true, latency: null, status: 'offline', error: 'Model not found' });
+    }
 
-    let targetUrl = aiModelConfig.base_url || 'https://openrouter.ai/api/v1/chat/completions';
+    let targetUrl = (aiModelConfig.base_url || 'https://openrouter.ai/api/v1/chat/completions').trim();
     let targetKey = aiModelConfig.api_key;
+    if (!targetKey) {
+      targetKey = await getApiKeyFromSupabase(model);
+    }
     if (!targetKey) {
       if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
       else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
       else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
-      else targetKey = process.env.OPENROUTER_API_KEY;
+      else if (targetUrl.includes('googleapis.com')) targetKey = process.env.GEMINI_API_KEY;
     }
 
-    let pingUrl = targetUrl.replace('/chat/completions', '/models');
+    let pingUrl = targetUrl;
+    if (pingUrl.includes('/chat/completions')) {
+      pingUrl = pingUrl.replace('/chat/completions', '/models');
+    } else if (pingUrl.includes('/completions')) {
+      pingUrl = pingUrl.replace('/completions', '/models');
+    } else {
+      pingUrl = pingUrl.replace(/\/+$/, '') + '/models';
+    }
+
     let method = 'GET';
-    let headers = {
-      'Authorization': 'Bearer ' + targetKey
-    };
+    let headers = {};
+    if (targetKey) {
+      headers['Authorization'] = 'Bearer ' + targetKey;
+    }
     
     // Gemini specific logic (GET models list)
-    if (aiModelConfig.type === 'gemini') {
+    if (aiModelConfig.type === 'gemini' || targetUrl.includes('generativelanguage.googleapis.com')) {
       const gKey = targetKey || process.env.GEMINI_API_KEY;
       pingUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + gKey;
       delete headers['Authorization'];
@@ -102,17 +122,15 @@ router.get('/ping', async (req, res) => {
       if (pingRes.ok) {
          return res.json({ success: true, latency: ms, status: 'online' }); 
       } else {
-         const errorText = await pingRes.text();
-         console.log(`[Ping] Model ${model} returned error: ${pingRes.status} ${errorText}`);
-         return res.json({ success: true, latency: ms, status: 'offline' }); 
+         return res.json({ success: true, latency: null, status: 'offline' }); 
       }
     } catch(err) {
       clearTimeout(timeoutId);
-      return res.json({ success: false, error: err.message });
+      return res.json({ success: true, latency: null, status: 'offline', error: err.message });
     }
 
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, latency: null, status: 'offline', error: err.message });
   }
 });
 module.exports = router;

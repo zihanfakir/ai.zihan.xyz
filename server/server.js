@@ -81,8 +81,9 @@ app.get('/api/plans', async (req, res) => {
       const plans = await Plan.find({ is_active: true });
       return res.json({ success: true, plans });
     } else {
-      const { memoryStore } = require('./config/memoryStore');
-      return res.json({ success: true, plans: memoryStore.plans });
+      const { getPersistedPlans } = require('../utils/getModelConfig');
+      const plans = await getPersistedPlans();
+      return res.json({ success: true, plans: plans.filter(p => p.is_active !== false) });
     }
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });

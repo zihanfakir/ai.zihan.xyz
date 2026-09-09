@@ -199,6 +199,68 @@ async function incrementUserUsage(userId, windowHours) {
   } catch (e) {}
 }
 
+let plansCache = null;
+let plansCacheTs = 0;
+
+async function getPersistedPlans() {
+  const now = Date.now();
+  if (plansCache && (now - plansCacheTs) < 10000) {
+    return plansCache;
+  }
+
+  const defaultPlans = [
+    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['openrouter/free', 'gemini-1.5-flash'], is_active: true },
+    { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, allowed_models: ['*'], is_active: true },
+    { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, allowed_models: ['*'], is_active: true }
+  ];
+
+  if (!supabase) return memoryStore.plans || defaultPlans;
+
+  try {
+    const { data, error } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__plans_metadata__')
+      .limit(1);
+
+    if (!error && data && data.length > 0 && data[0].api_key) {
+      const parsed = JSON.parse(data[0].api_key);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        plansCache = parsed;
+        plansCacheTs = now;
+        memoryStore.plans = parsed;
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('[Supabase] __plans_metadata__ fetch failed:', e.message);
+  }
+
+  return memoryStore.plans && memoryStore.plans.length > 0 ? memoryStore.plans : defaultPlans;
+}
+
+async function savePersistedPlans(plans) {
+  plansCache = plans;
+  plansCacheTs = Date.now();
+  memoryStore.plans = plans;
+
+  if (!supabase) return;
+
+  try {
+    const { error } = await supabase
+      .from('api_keys')
+      .upsert(
+        { model_id: '__plans_metadata__', api_key: JSON.stringify(plans), updated_at: new Date().toISOString() },
+        { onConflict: 'model_id' }
+      );
+    if (error) {
+      console.error('[Supabase] Failed to persist plans:', error.message);
+    }
+  } catch (e) {
+    console.error('[Supabase] Failed to persist plans exception:', e.message);
+  }
+}
+
 async function getPersistedRedeemCodes() {
   if (!supabase) return memoryStore.redeemCodes || [];
   try {
@@ -212,15 +274,12 @@ async function getPersistedRedeemCodes() {
       const parsed = JSON.parse(data[0].api_key);
       if (Array.isArray(parsed)) {
         const codeMap = new Map();
-        for (const c of (memoryStore.redeemCodes || [])) {
-          if (c && c.code) codeMap.set(c.code.toUpperCase(), c);
-        }
         for (const c of parsed) {
-          if (c && c.code) codeMap.set(c.code.toUpperCase(), c);
+          if (c && c.code) codeMap.set(String(c.code).trim().toUpperCase(), c);
         }
-        const merged = Array.from(codeMap.values());
-        memoryStore.redeemCodes = merged;
-        return merged;
+        const cleanCodes = Array.from(codeMap.values());
+        memoryStore.redeemCodes = cleanCodes;
+        return cleanCodes;
       }
     }
   } catch (e) {}
@@ -228,38 +287,22 @@ async function getPersistedRedeemCodes() {
 }
 
 async function savePersistedRedeemCodes(codes) {
-  let combined = [...codes];
-  if (supabase) {
-    try {
-      const { data } = await supabase
-        .from('api_keys')
-        .select('api_key')
-        .eq('model_id', '__redeem_codes__')
-        .limit(1);
-      if (data && data.length > 0 && data[0].api_key) {
-        const existing = JSON.parse(data[0].api_key);
-        if (Array.isArray(existing)) {
-          const map = new Map();
-          for (const c of existing) {
-            if (c && c.code) map.set(c.code.toUpperCase(), c);
-          }
-          for (const c of codes) {
-            if (c && c.code) map.set(c.code.toUpperCase(), c);
-          }
-          combined = Array.from(map.values());
-        }
-      }
-    } catch (e) {}
+  const codeMap = new Map();
+  for (const c of (codes || [])) {
+    if (c && c.code) {
+      codeMap.set(String(c.code).trim().toUpperCase(), c);
+    }
   }
+  const cleanCodes = Array.from(codeMap.values());
+  memoryStore.redeemCodes = cleanCodes;
 
-  memoryStore.redeemCodes = combined;
   if (!supabase) return;
   try {
     const { error } = await supabase
       .from('api_keys')
       .upsert({
         model_id: '__redeem_codes__',
-        api_key: JSON.stringify(combined),
+        api_key: JSON.stringify(cleanCodes),
         updated_at: new Date().toISOString()
       }, { onConflict: 'model_id' });
     if (error) {
@@ -292,19 +335,15 @@ async function getPersistedUsers() {
       const parsed = JSON.parse(data[0].api_key);
       if (Array.isArray(parsed)) {
         const userMap = new Map();
-        for (const u of (memoryStore.users || [])) {
-          const key = String(u._id || u.id || u.email);
-          userMap.set(key, u);
-        }
         for (const u of parsed) {
-          const key = String(u._id || u.id || u.email);
+          const key = u.email ? u.email.toLowerCase().trim() : String(u._id || u.id);
           userMap.set(key, u);
         }
-        const merged = Array.from(userMap.values());
-        memoryStore.users = merged;
-        usersCache = merged;
+        const cleanUsers = Array.from(userMap.values());
+        memoryStore.users = cleanUsers;
+        usersCache = cleanUsers;
         usersCacheTs = now;
-        return merged;
+        return cleanUsers;
       }
     }
   } catch (e) {}
@@ -312,42 +351,26 @@ async function getPersistedUsers() {
 }
 
 async function savePersistedUsers(users) {
-  let combined = [...users];
-  if (supabase) {
-    try {
-      const { data } = await supabase
-        .from('api_keys')
-        .select('api_key')
-        .eq('model_id', '__users_metadata__')
-        .limit(1);
-      if (data && data.length > 0 && data[0].api_key) {
-        const existing = JSON.parse(data[0].api_key);
-        if (Array.isArray(existing)) {
-          const map = new Map();
-          for (const u of existing) {
-            const k = String(u._id || u.id || u.email);
-            map.set(k, u);
-          }
-          for (const u of users) {
-            const k = String(u._id || u.id || u.email);
-            map.set(k, u);
-          }
-          combined = Array.from(map.values());
-        }
-      }
-    } catch (e) {}
+  const userMap = new Map();
+  for (const u of (users || [])) {
+    if (u) {
+      const key = u.email ? u.email.toLowerCase().trim() : String(u._id || u.id);
+      userMap.set(key, u);
+    }
   }
+  const cleanUsers = Array.from(userMap.values());
 
-  memoryStore.users = combined;
-  usersCache = combined;
+  memoryStore.users = cleanUsers;
+  usersCache = cleanUsers;
   usersCacheTs = Date.now();
+
   if (!supabase) return;
   try {
     const { error } = await supabase
       .from('api_keys')
       .upsert({
         model_id: '__users_metadata__',
-        api_key: JSON.stringify(combined),
+        api_key: JSON.stringify(cleanUsers),
         updated_at: new Date().toISOString()
       }, { onConflict: 'model_id' });
     if (error) {
@@ -364,6 +387,8 @@ module.exports = {
   invalidateModelKeyCache,
   getPersistedModels,
   savePersistedModels,
+  getPersistedPlans,
+  savePersistedPlans,
   getUserUsage,
   getUserUsageDetails,
   incrementUserUsage,

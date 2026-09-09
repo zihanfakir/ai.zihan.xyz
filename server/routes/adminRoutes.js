@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAdminStats,
   getUsers,
+  deleteUser,
   updateUserPlan,
   toggleBlockUser,
   getPlans,
@@ -25,6 +26,7 @@ router.use(adminOnly);
 
 router.get('/stats', getAdminStats);
 router.get('/users', getUsers);
+router.delete('/users/:userId', deleteUser);
 router.put('/users/:userId/plan', updateUserPlan);
 router.put('/users/:userId/block', toggleBlockUser);
 

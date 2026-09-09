@@ -49,7 +49,11 @@ const streamChatCompletions = async (req, res) => {
       actualModel = 'google/gemini-3.5-flash-lite';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.OPENROUTER_API_KEY;
     } else if (aiModelConfig && aiModelConfig.base_url) {
-      targetUrl = aiModelConfig.base_url;
+      let bUrl = aiModelConfig.base_url.trim();
+      if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions')) {
+        bUrl = bUrl.replace(/\/+$/, '') + '/chat/completions';
+      }
+      targetUrl = bUrl;
       if (aiModelConfig.api_key) targetKey = aiModelConfig.api_key;
       actualModel = model;
     }
@@ -123,36 +127,41 @@ const streamChatCompletions = async (req, res) => {
     });
 
     response.body.on('end', async () => {
-      // Record usage log only after stream successfully delivers tokens
-      if (hasStreamedData) {
-        const userId = user ? String(user._id || user.id) : req.guestId;
-        if (userId) {
-          if (user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
-            UsageLog.create({
-              user_id: userId,
-              model_id: model || 'openrouter/free',
-              timestamp: new Date()
-            }).catch(err => console.error('[UsageLog Write Error]:', err.message));
-          } else {
-            memoryStore.usageLogs.push({
-              _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-              user_id: userId,
-              model_id: model || 'openrouter/free',
-              timestamp: new Date()
-            });
-            if (memoryStore.usageLogs.length > 5000) {
-              memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
-            }
-            debouncedSave();
-            try {
-              await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-            } catch (e) {
-              console.error('[Increment User Usage Error]:', e.message);
+      try {
+        // Record usage log only after stream successfully delivers tokens
+        if (hasStreamedData) {
+          const userId = user ? String(user._id || user.id) : req.guestId;
+          if (userId) {
+            if (user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
+              UsageLog.create({
+                user_id: userId,
+                model_id: model || 'openrouter/free',
+                timestamp: new Date()
+              }).catch(err => console.error('[UsageLog Write Error]:', err.message));
+            } else {
+              memoryStore.usageLogs.push({
+                _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                user_id: userId,
+                model_id: model || 'openrouter/free',
+                timestamp: new Date()
+              });
+              if (memoryStore.usageLogs.length > 5000) {
+                memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+              }
+              debouncedSave();
+              try {
+                await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+              } catch (e) {
+                console.error('[Increment User Usage Error]:', e.message);
+              }
             }
           }
         }
+      } catch (streamErr) {
+        console.error('[Stream End Callback Error]:', streamErr.message);
+      } finally {
+        if (!res.writableEnded) res.end();
       }
-      if (!res.writableEnded) res.end();
     });
 
     response.body.on('error', (err) => {
@@ -274,10 +283,38 @@ const generateImage = async (req, res) => {
 
     const data = await response.json();
     const item = data?.data?.[0];
-    if (item?.url) {
-      return res.json({ success: true, url: item.url });
-    } else if (item?.b64_json) {
-      return res.json({ success: true, url: `data:image/png;base64,${item.b64_json}` });
+    if (item?.url || item?.b64_json) {
+      // Record usage log for image generation
+      const userId = req.user ? String(req.user._id || req.user.id) : req.guestId;
+      if (userId) {
+        if (req.user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
+          UsageLog.create({
+            user_id: userId,
+            model_id: 'image-generation',
+            timestamp: new Date()
+          }).catch(() => {});
+        } else {
+          memoryStore.usageLogs.push({
+            _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            user_id: userId,
+            model_id: 'image-generation',
+            timestamp: new Date()
+          });
+          if (memoryStore.usageLogs.length > 5000) {
+            memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+          }
+          debouncedSave();
+          try {
+            await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+          } catch (e) {}
+        }
+      }
+
+      if (item?.url) {
+        return res.json({ success: true, url: item.url });
+      } else {
+        return res.json({ success: true, url: `data:image/png;base64,${item.b64_json}` });
+      }
     }
     return res.status(500).json({ success: false, error: 'রেসপন্সে কোনো ছবি পাওয়া যায়নি।' });
   } catch (error) {
