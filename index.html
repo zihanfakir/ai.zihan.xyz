@@ -3181,6 +3181,30 @@
       <div class="splash-brand-title">Alokpoth AI</div>
     </div>
   </div>
+
+  <script>
+    (function() {
+      function dismissSplash() {
+        var loader = document.getElementById("appSplashLoader");
+        if (loader && !loader.classList.contains("fade-out")) {
+          loader.classList.add("fade-out");
+          setTimeout(function() {
+            try { if (loader && loader.parentNode) loader.parentNode.removeChild(loader); } catch(e) {}
+          }, 450);
+        }
+      }
+      // Failsafe: splash will ALWAYS dismiss within 800ms to 1200ms MAX under ANY circumstances
+      setTimeout(dismissSplash, 900);
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(dismissSplash, 300);
+      } else {
+        document.addEventListener("DOMContentLoaded", function() { setTimeout(dismissSplash, 350); });
+        window.addEventListener("load", function() { setTimeout(dismissSplash, 250); });
+      }
+      window.dismissSplashLoader = dismissSplash;
+    })();
+  </script>
+
 <div class="toast-container" id="toastContainer"></div>
 
   <!-- Sliding Sidebar Navigation Drawer & Backdrop -->
@@ -3840,6 +3864,48 @@
       ? window.location.origin 
       : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
     const API_BASE = BACKEND_URL + "/api";
+
+    // Core Chat Elements (Initialized early to prevent Temporal Dead Zone ReferenceErrors)
+    const chatForm = document.getElementById("chatForm");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const attachBtn = document.getElementById("attachBtn");
+    const imageInput = document.getElementById("imageInput");
+    const imagePreviewRow = document.getElementById("imagePreviewRow");
+    const docInput = document.getElementById("docInput");
+    const filePreviewRow = document.getElementById("filePreviewRow");
+    const offlineBanner = document.getElementById("offlineBanner");
+    let emptyState = document.getElementById("emptyState");
+    let pendingImages = [];
+    let pendingFiles = [];
+
+    function updateSendAvailability() {
+      if (!sendBtn) return;
+      if (typeof isGenerating !== "undefined" && isGenerating) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #ef4444; width: 18px; height: 18px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`;
+        sendBtn.setAttribute("aria-label", "থামুন");
+        sendBtn.setAttribute("title", "উত্তর তৈরি থামান");
+        return;
+      } else {
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>`;
+        sendBtn.setAttribute("aria-label", "পাঠান");
+        sendBtn.setAttribute("title", "পাঠান");
+      }
+
+      const isOffline = !navigator.onLine;
+      const outOfCredit = (typeof hasCredit === "function") ? !hasCredit() : false;
+      const hasImages = (Array.isArray(pendingImages) && pendingImages.length > 0);
+      const hasFiles = (Array.isArray(pendingFiles) && pendingFiles.length > 0);
+      const hasContent = userInput ? (!!userInput.value.trim() || hasImages || hasFiles) : false;
+      sendBtn.disabled = isOffline || outOfCredit || !hasContent;
+      if (userInput) {
+        userInput.disabled = outOfCredit;
+        userInput.placeholder = isOffline
+          ? "ইন্টারনেট সংযোগ নেই..."
+          : (outOfCredit ? "প্ল্যান সীমা শেষ..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
+      }
+    }
 
     let isWebSearchEnabled = false;
     let isImageGenEnabled = false;
@@ -6421,42 +6487,6 @@
     // Initial theme sync
     const initialTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     setTheme(initialTheme, false);
-
-    const chatForm = document.getElementById("chatForm");
-    const userInput = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-
-    function updateSendAvailability() {
-      if (isGenerating) {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #ef4444; width: 18px; height: 18px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`;
-        sendBtn.setAttribute("aria-label", "থামুন");
-        sendBtn.setAttribute("title", "উত্তর তৈরি থামান");
-        return;
-      } else {
-        sendBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>`;
-        sendBtn.setAttribute("aria-label", "পাঠান");
-        sendBtn.setAttribute("title", "পাঠান");
-      }
-
-      const isOffline = !navigator.onLine;
-      const outOfCredit = !hasCredit();
-      const hasContent = !!userInput.value.trim() || (pendingImages && pendingImages.length > 0) || (pendingFiles && pendingFiles.length > 0);
-      sendBtn.disabled = isOffline || outOfCredit || !hasContent;
-      userInput.disabled = outOfCredit;
-      userInput.placeholder = isOffline
-        ? "ইন্টারনেট সংযোগ নেই..."
-        : (outOfCredit ? "প্ল্যান সীমা শেষ..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
-    }
-    const attachBtn = document.getElementById("attachBtn");
-    const imageInput = document.getElementById("imageInput");
-    const imagePreviewRow = document.getElementById("imagePreviewRow");
-    const docInput = document.getElementById("docInput");
-    const filePreviewRow = document.getElementById("filePreviewRow");
-    const offlineBanner = document.getElementById("offlineBanner");
-    let emptyState = document.getElementById("emptyState");
-    let pendingImages = [];
-    let pendingFiles = [];
 
     function updateOnlineStatus() {
       if (!navigator.onLine) {
