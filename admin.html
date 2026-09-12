@@ -1113,6 +1113,14 @@
         `;
         const saveBtn = tr.querySelector(".model-save-btn");
         const delBtn = tr.querySelector(".model-del-btn");
+        const premCb = tr.querySelector(".model-input-prem");
+        const effCb = tr.querySelector(".model-input-eff");
+
+        if (premCb && effCb) {
+          premCb.addEventListener("change", () => { if (premCb.checked) effCb.checked = false; });
+          effCb.addEventListener("change", () => { if (effCb.checked) premCb.checked = false; });
+        }
+
         if (saveBtn) saveBtn.addEventListener("click", () => saveModelConfig(mId, saveBtn));
         if (delBtn) delBtn.addEventListener("click", () => deleteModel(mId, delBtn));
         tbody.appendChild(tr);
