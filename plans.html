@@ -550,7 +550,10 @@
 
   <main class="plans-container">
     <div class="hero-section">
-      <div class="hero-badge">⚡ Alokpoth AI Plans</div>
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;margin-right:4px;vertical-align:-2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Alokpoth AI Plans</span>
+      </div>
       <h1 class="hero-title">আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন</h1>
       <p class="hero-subtitle">দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা</p>
     </div>
@@ -649,7 +652,9 @@
     <!-- Redeem Section -->
     <div class="redeem-section-card" id="redeemSection">
       <div class="redeem-header">
-        <div class="redeem-icon">🎟️</div>
+        <div class="redeem-icon">
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+        </div>
         <div>
           <h2 class="redeem-title">রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!</h2>
         </div>
@@ -685,7 +690,7 @@
 
   <script>
     // Theme sync
-    const savedTheme = localStorage.getItem("alokpoth_theme") || "dark";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
@@ -695,6 +700,7 @@
       const next = themes[(themes.indexOf(cur) + 1) % themes.length];
       document.documentElement.setAttribute("data-theme", next);
       localStorage.setItem("alokpoth_theme", next);
+      localStorage.setItem("alokpoth-theme", next);
     });
 
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';

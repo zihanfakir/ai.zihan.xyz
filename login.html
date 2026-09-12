@@ -576,7 +576,7 @@
 
   <script>
     // Theme sync
-    const savedTheme = localStorage.getItem("alokpoth_theme") || "dark";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
@@ -586,6 +586,7 @@
       const next = themes[(themes.indexOf(cur) + 1) % themes.length];
       document.documentElement.setAttribute("data-theme", next);
       localStorage.setItem("alokpoth_theme", next);
+      localStorage.setItem("alokpoth-theme", next);
     });
 
     // Smart API Base

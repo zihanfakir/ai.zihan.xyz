@@ -276,6 +276,11 @@ async function savePersistedPlans(plans) {
 let redeemCodesCache = null;
 let redeemCodesCacheTs = 0;
 
+function invalidateRedeemCodesCache() {
+  redeemCodesCache = null;
+  redeemCodesCacheTs = 0;
+}
+
 async function getPersistedRedeemCodes() {
   const now = Date.now();
   if (redeemCodesCache && (now - redeemCodesCacheTs) < 5000) { // 5s cache
@@ -340,6 +345,11 @@ async function savePersistedRedeemCodes(codes) {
 // Cache for users metadata
 let usersCache = null;
 let usersCacheTs = 0;
+
+function invalidateUsersCache() {
+  usersCache = null;
+  usersCacheTs = 0;
+}
 
 async function getPersistedUsers() {
   const now = Date.now();
@@ -486,8 +496,10 @@ module.exports = {
   incrementUserUsage,
   getPersistedRedeemCodes,
   savePersistedRedeemCodes,
+  invalidateRedeemCodesCache,
   getPersistedUsers,
   savePersistedUsers,
+  invalidateUsersCache,
   getSystemSettings,
   saveSystemSettings
 };

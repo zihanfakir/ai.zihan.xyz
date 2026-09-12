@@ -277,100 +277,37 @@ const streamChatCompletions = async (req, res) => {
 
 const ChatSession = require('../models/ChatSession');
 
+// Chat privacy: Chat history is NOT saved to the database (remains local to client browser)
 const saveChatSession = async (req, res) => {
   try {
-    const { session_id, title, messagesHistory, updatedAt } = req.body;
-    const user = req.user;
-
-    if (!session_id || typeof session_id !== 'string' || !session_id.trim()) {
-      return res.status(400).json({ success: false, error: 'সঠিক Session ID প্রদান করুন' });
-    }
-
-    const cleanTitle = (typeof title === 'string' ? title.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 100) : 'নতুন চ্যাট') || 'নতুন চ্যাট';
-    const cleanHistory = Array.isArray(messagesHistory) ? messagesHistory.slice(-100).map(m => {
-      if (m && typeof m === 'object') {
-        let cleanContent = '';
-        if (typeof m.content === 'string') {
-          cleanContent = m.content;
-        } else if (Array.isArray(m.content)) {
-          cleanContent = JSON.stringify(m.content);
-        }
-        const item = { role: m.role || 'user', content: cleanContent };
-        if (m.images && Array.isArray(m.images)) {
-          item.images = m.images.map(img => ({
-            mimeType: img.mimeType || 'image/png',
-            base64: (img.base64 && img.base64.length > 5000) ? '' : (img.base64 || '')
-          }));
-        }
-        if (m.files && Array.isArray(m.files)) {
-          item.files = m.files.map(f => ({ name: f.name || 'file' }));
-        }
-        return item;
-      }
-      return null;
-    }).filter(Boolean) : [];
-
-    const validUpdatedAt = (updatedAt && !isNaN(new Date(updatedAt).getTime())) ? new Date(updatedAt).getTime() : Date.now();
-    const userId = String(user._id || user.id);
-
-    if (getIsMongoConnected()) {
-      await ChatSession.findOneAndUpdate(
-        { user_id: userId, session_id: session_id.trim() },
-        { title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt },
-        { upsert: true, new: true }
-      );
-    } else {
-      if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
-      const trimmedSid = session_id.trim();
-      const idx = memoryStore.chatSessions.findIndex(s => s.session_id === trimmedSid && String(s.user_id) === userId);
-      const sessionDoc = { user_id: userId, session_id: trimmedSid, title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt };
-      if (idx !== -1) {
-        memoryStore.chatSessions[idx] = sessionDoc;
-      } else {
-        memoryStore.chatSessions.push(sessionDoc);
-      }
-      debouncedSave();
-    }
-    res.json({ success: true });
+    // Purposefully disabled database persistence per user privacy preference
+    return res.json({ success: true, message: 'চ্যাট হিস্ট্রি সম্পূর্ণ লোকাল ব্রাউজারে সংরক্ষিত (ডাটাবেস সংরক্ষণ নিষ্ক্রিয়)' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'চ্যাট সেশন সেভ করতে সমস্যা হয়েছে।' });
+    res.status(500).json({ success: false, error: 'ত্রুটি ঘটেছে' });
   }
 };
 
 const getChatSessions = async (req, res) => {
   try {
-    const user = req.user;
-    const userId = String(user._id || user.id);
-    let sessions = [];
-    if (getIsMongoConnected()) {
-      sessions = await ChatSession.find({ user_id: userId }).sort({ updatedAt: -1 }).lean();
-    } else {
-      if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
-      sessions = memoryStore.chatSessions
-        .filter(s => String(s.user_id) === userId)
-        .sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
-    }
-    res.json({ success: true, sessions });
+    // Chat history is maintained strictly locally in the browser
+    return res.json({ success: true, sessions: [] });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'চ্যাট সেশন লোড করতে সমস্যা হয়েছে।' });
+    res.status(500).json({ success: false, error: 'ত্রুটি ঘটেছে' });
   }
 };
 
 const deleteChatSession = async (req, res) => {
   try {
     const { session_id } = req.params;
-    if (!session_id || typeof session_id !== 'string' || !session_id.trim()) {
-      return res.status(400).json({ success: false, error: 'সঠিক Session ID প্রদান করুন' });
-    }
-    const cleanSessionId = session_id.trim();
-    const user = req.user;
-    const userId = String(user._id || user.id);
-    if (getIsMongoConnected()) {
-      await ChatSession.findOneAndDelete({ user_id: userId, session_id: cleanSessionId });
-    } else {
+    if (session_id) {
+      const cleanSessionId = String(session_id).trim();
+      const user = req.user;
+      const userId = String(user._id || user.id);
+      if (getIsMongoConnected()) {
+        await ChatSession.deleteMany({ user_id: userId, session_id: cleanSessionId }).catch(() => {});
+      }
       if (memoryStore.chatSessions) {
         memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === cleanSessionId && String(s.user_id) === userId));
-        debouncedSave();
       }
     }
     res.json({ success: true });

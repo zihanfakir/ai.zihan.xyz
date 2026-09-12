@@ -286,13 +286,16 @@ const toggleBlockUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    if (!userId || typeof userId !== 'string' || !userId.trim()) {
+      return res.status(400).json({ success: false, error: 'সঠিক ইউজার আইডি প্রদান করুন' });
+    }
     const cleanTarget = String(userId).toLowerCase().trim();
 
     if (cleanTarget === 'zihanfakir@gmail.com' || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || cleanTarget === String(req.user.email).toLowerCase().trim()))) {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
     }
 
-    let targetId = userId;
+    let targetId = String(userId);
     let targetEmail = '';
 
     // 1. If Mongo connected, purge user, sessions, and usage logs
@@ -301,24 +304,26 @@ const deleteUser = async (req, res) => {
       const ChatSession = require('../models/ChatSession');
       const UsageLog = require('../models/UsageLog');
 
-      const existingUser = mongoose.Types.ObjectId.isValid(userId)
-        ? await User.findById(userId)
-        : await User.findOne({ email: cleanTarget });
+      const queryOr = [{ email: cleanTarget }];
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        queryOr.push({ _id: userId });
+      }
+      queryOr.push({ id: userId });
+
+      const existingUser = await User.findOne({ $or: queryOr });
 
       if (existingUser && existingUser.email && existingUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
       }
 
-      let userDoc = null;
-      if (mongoose.Types.ObjectId.isValid(userId)) {
-        userDoc = await User.findByIdAndDelete(userId);
-      } else {
-        userDoc = await User.findOneAndDelete({ email: cleanTarget });
+      if (existingUser) {
+        targetId = String(existingUser._id);
+        if (existingUser.email) targetEmail = existingUser.email.toLowerCase().trim();
       }
 
-      if (userDoc) {
-        targetId = String(userDoc._id);
-        if (userDoc.email) targetEmail = userDoc.email.toLowerCase().trim();
+      await User.deleteMany({ $or: queryOr }).catch(() => {});
+      if (targetEmail) {
+        await User.deleteMany({ email: targetEmail }).catch(() => {});
       }
       await ChatSession.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
       await UsageLog.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
@@ -337,7 +342,7 @@ const deleteUser = async (req, res) => {
     };
 
     // 2. ALWAYS purge from Supabase __users_metadata__
-    const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+    const { getPersistedUsers, savePersistedUsers, invalidateUsersCache } = require('../../utils/getModelConfig');
     let users = await getPersistedUsers();
     const targetUser = users.find(matchesTarget);
     if (targetUser && targetUser.email && targetUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
@@ -345,6 +350,7 @@ const deleteUser = async (req, res) => {
     }
     users = users.filter(u => !matchesTarget(u));
     await savePersistedUsers(users);
+    invalidateUsersCache();
 
     // 3. Purge user usage quota row from Supabase api_keys table
     if (supabase) {
@@ -358,7 +364,7 @@ const deleteUser = async (req, res) => {
       }
     }
 
-    // 4. ALWAYS purge from memoryStore
+    // 4. ALWAYS purge from memoryStore and write synchronously to disk
     if (memoryStore.users) {
       memoryStore.users = memoryStore.users.filter(u => !matchesTarget(u));
     }
@@ -368,7 +374,7 @@ const deleteUser = async (req, res) => {
     if (memoryStore.usageLogs) {
       memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId) && String(l.user_id) !== String(targetId));
     }
-    debouncedSave();
+    saveBackup();
 
     return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
@@ -613,28 +619,30 @@ const deleteRedeemCode = async (req, res) => {
     // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
+      const queryList = [{ code: cleanId }];
       if (mongoose.Types.ObjectId.isValid(codeId)) {
         const found = await RedeemCode.findById(codeId);
         if (found && found.code) {
           codeStrToFilter = String(found.code).trim().toUpperCase();
+          queryList.push({ code: codeStrToFilter });
         }
-        await RedeemCode.findByIdAndDelete(codeId);
-      } else {
-        await RedeemCode.findOneAndDelete({ code: cleanId });
+        queryList.push({ _id: codeId });
       }
+      await RedeemCode.deleteMany({ $or: queryList }).catch(() => {});
     }
 
     // 2. ALWAYS purge from Supabase __redeem_codes__
-    const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+    const { getPersistedRedeemCodes, savePersistedRedeemCodes, invalidateRedeemCodesCache } = require('../../utils/getModelConfig');
     let codes = await getPersistedRedeemCodes();
     codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId && String(c.code).trim().toUpperCase() !== codeStrToFilter);
     await savePersistedRedeemCodes(codes);
+    invalidateRedeemCodesCache();
 
-    // 3. ALWAYS purge from memoryStore
+    // 3. ALWAYS purge from memoryStore and persist synchronously to backup disk
     if (memoryStore.redeemCodes) {
       memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId && String(c.code).trim().toUpperCase() !== codeStrToFilter);
     }
-    debouncedSave();
+    saveBackup();
 
     res.json({ success: true, message: 'রিডিম কোডটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
@@ -981,7 +989,7 @@ const deleteModel = async (req, res) => {
     }
     invalidateModelKeyCache(modelId);
     invalidateModelKeyCache(decoded);
-    debouncedSave();
+    saveBackup();
 
     return res.json({ success: true, message: 'মডেলটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে' });
   } catch (error) {

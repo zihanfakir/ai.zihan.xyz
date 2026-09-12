@@ -43,13 +43,13 @@ const saveBackup = () => {
       memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
     }
     const backupData = {
-      users: memoryStore.users,
-      plans: memoryStore.plans,
-      redeemCodes: memoryStore.redeemCodes,
-      usageLogs: memoryStore.usageLogs,
-      models: memoryStore.models,
-      settings: memoryStore.settings || {},
-      chatSessions: memoryStore.chatSessions || []
+      users: memoryStore.users || [],
+      plans: memoryStore.plans || [],
+      redeemCodes: memoryStore.redeemCodes || [],
+      usageLogs: memoryStore.usageLogs || [],
+      models: memoryStore.models || [],
+      settings: memoryStore.settings || {}
+      // chatSessions purposefully excluded: chat privacy is client-side only
     };
     const tmpFile = BACKUP_FILE + '.tmp';
     fs.writeFileSync(tmpFile, JSON.stringify(backupData, null, 2), 'utf8');
@@ -76,7 +76,7 @@ const seedDefaultAdmin = async () => {
       if (data.redeemCodes && data.redeemCodes.length) memoryStore.redeemCodes = data.redeemCodes;
       if (data.models && data.models.length) memoryStore.models = data.models;
       if (data.settings) memoryStore.settings = data.settings;
-      if (data.chatSessions && data.chatSessions.length) memoryStore.chatSessions = data.chatSessions;
+      memoryStore.chatSessions = []; // Always keep chatSessions empty in memory store
       console.log('[Memory DB] Restored data from local backup file.');
     } catch (e) {
       console.error('[Memory DB] Backup file read error:', e.message);
