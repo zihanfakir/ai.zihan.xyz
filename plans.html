@@ -561,27 +561,7 @@
   <canvas id="confettiCanvas"></canvas>
   <div id="toastEl" class="toast"></div>
 
-  <header class="top-bar">
-    <a href="index.html" class="brand-link">
-      <span>Alokpoth AI</span>
-    </a>
-    <div class="top-actions">
-      <a href="AloAI.apk" download="AloAI.apk" class="back-btn" style="background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.38); color:#60a5fa; display:inline-flex; align-items:center; gap:6px;">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>অ্যাপ ডাউনলোড</span>
-      </a>
-      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-      </button>
-      <a href="account.html" class="back-btn">
-        <span>আমার অ্যাকাউন্ট</span>
-      </a>
-      <a href="index.html" class="back-btn" style="background:var(--accent-gradient); color:#fff; border:none; display:inline-flex; align-items:center; gap:6px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span>চ্যাটে ফিরে যান</span>
-      </a>
-    </div>
-  </header>
+
 
   <main class="plans-container">
     <div class="hero-section">
@@ -748,17 +728,19 @@
     updateThemeMetaColor(savedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
-    themeToggleBtn.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("alokpoth_theme", next);
-      localStorage.setItem("alokpoth-theme", next);
-      updateThemeMetaColor(next);
-      const labels = { dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম" };
-      showToast(`${labels[next] || next} সক্রিয় করা হয়েছে`);
-    });
+    if (themeToggleBtn) {
+      const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
+      themeToggleBtn.addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("alokpoth_theme", next);
+        localStorage.setItem("alokpoth-theme", next);
+        updateThemeMetaColor(next);
+        const labels = { dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম" };
+        showToast(`${labels[next] || next} সক্রিয় করা হয়েছে`);
+      });
+    }
 
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const BACKEND_URL = (isLocal && window.location.port === '5000') 
