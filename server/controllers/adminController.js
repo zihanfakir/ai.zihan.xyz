@@ -4,7 +4,7 @@ const RedeemCode = require('../models/RedeemCode');
 const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
-const { memoryStore, debouncedSave } = require('../config/memoryStore');
+const { memoryStore, debouncedSave, saveBackup } = require('../config/memoryStore');
 const supabase = require('../config/supabase');
 const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
 
