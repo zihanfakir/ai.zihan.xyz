@@ -48,3 +48,9 @@ index_recovered.html
 *.jpg
 *.jpeg
 account_limits_view_*.png
+
+# Android build outputs & caches
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties

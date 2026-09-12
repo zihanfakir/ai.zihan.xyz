@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Alo AI</string>
+    <string name="error_offline_title">ইন্টারনেট সংযোগ নেই</string>
+    <string name="error_offline_desc">অনুগ্রহ করে আপনার ইন্টারনেট বা Wi-Fi কানেকশন চেক করে আবার চেষ্টা করুন।</string>
+    <string name="retry_button">আবার চেষ্টা করুন</string>
+    <string name="exit_prompt">অ্যাপ থেকে বের হতে আবার ব্যাক চাপুন</string>
+    <string name="download_started">ডাউনলোড শুরু হয়েছে…</string>
+    <string name="download_complete">ডাউনলোড সম্পন্ন হয়েছে</string>
+    <string name="file_chooser_title">ফাইল বা ছবি নির্বাচন করুন</string>
+    <string name="permission_camera_mic">ক্যামেরা ও মাইক্রোফোন ব্যবহারের অনুমতি দিন</string>
+</resources>

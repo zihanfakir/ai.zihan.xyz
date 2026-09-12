@@ -2,6 +2,14 @@
 
 বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন। সকল API Key সার্ভার সাইডে সুরক্ষিত।
 
+## 📱 Android App (অ্যান্ড্রয়েড অ্যাপ ডাউনলোড)
+
+Alo AI এখন অ্যান্ড্রয়েডে সরাসরি নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
+
+- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.0/AloAI.apk)
+- 🏷️ **GitHub Releases:** [Releases v1.0.0](https://github.com/zihanfakir/ai.zihan.xyz/releases/tag/v1.0.0)
+- ⚡ **ফিচারসমূহ:** ক্যামেরা ও ফাইল আপলোড, ভয়েস চ্যাট ও মাইক্রোফোন সাপোর্ট, ডার্ক মোড, অফলাইন নোটিফিকেশন, ব্যাক বোতাম সুরক্ষা এবং দ্রুতগতির পারফরম্যান্স।
+
 ## Features
 
 - 🤖 **১১টি AI মডেল** — Gemini, Groq, OpenRouter, VyceAI, B.AI সহ বিভিন্ন সেবা
