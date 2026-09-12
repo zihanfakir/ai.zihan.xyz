@@ -18,13 +18,16 @@ const checkRateLimit = async (req, res, next) => {
     // 0. Guest User (Not logged in)
     if (!user) {
       const model_id = req.body.model || 'openrouter/free';
+      const freeModels = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
+      const isKnownFree = freeModels.includes(model_id);
+
       let aiModel = null;
       if (getIsMongoConnected()) {
         aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] });
       } else {
         aiModel = await getModelConfig(model_id);
       }
-      if (aiModel && (aiModel.premium || aiModel.efficient)) {
+      if (!isKnownFree && aiModel && (aiModel.premium || aiModel.efficient)) {
         return res.status(403).json({
           success: false,
           error: `এই প্রিমিয়াম মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং প্রো বা ম্যাক্স প্ল্যান সক্রিয় করুন।`
@@ -120,7 +123,10 @@ const checkRateLimit = async (req, res, next) => {
       aiModel = await getModelConfig(model_id);
     }
 
-    if (aiModel) {
+    const isKnownFree = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'].includes(model_id);
+    const isExplicitlyAllowed = Array.isArray(plan.allowed_models) && (plan.allowed_models.includes('*') || plan.allowed_models.includes(model_id));
+
+    if (aiModel && !isKnownFree && !isExplicitlyAllowed) {
       if (aiModel.efficient) {
         // Max Badge Model -> Only Max Plan users allowed
         if (currentPlanName !== 'Max') {
@@ -138,7 +144,7 @@ const checkRateLimit = async (req, res, next) => {
           });
         }
       }
-    } else {
+    } else if (!aiModel) {
       // Fallback check against allowed_models list
       const allowed = Array.isArray(plan.allowed_models) ? plan.allowed_models : ['*'];
       if (!allowed.includes('*') && !allowed.includes(model_id)) {

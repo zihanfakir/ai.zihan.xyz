@@ -48,7 +48,7 @@ const streamChatCompletions = async (req, res) => {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
       actualModel = 'openai/gpt-oss-120b';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
-    } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite') {
+    } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite' || model === 'openrouter/free' || !model) {
       targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
       actualModel = 'google/gemini-2.5-flash';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.OPENROUTER_API_KEY;
@@ -86,14 +86,22 @@ const streamChatCompletions = async (req, res) => {
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
     }
 
+    // Flush SSE headers early with keep-alive comment so Vercel does not time out or drop the connection
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (res.flushHeaders) res.flushHeaders();
+    res.write(': keepalive\n\n');
+
     // Abort upstream immediately if client disconnects
     const abortController = new AbortController();
     req.on('close', () => {
       try { abortController.abort(); } catch (e) {}
     });
 
-    // Helper to attempt completion fetch with timeout
-    const tryFetchCompletion = async (url, key, modName, timeoutMs = 12000) => {
+    // Helper to attempt completion fetch with timeout (6s max to fit within Vercel serverless window)
+    const tryFetchCompletion = async (url, key, modName, timeoutMs = 6000) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
@@ -128,10 +136,10 @@ const streamChatCompletions = async (req, res) => {
       }
     };
 
-    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel);
+    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 6000);
 
     // 4. Intelligent Pre-Stream Fallback: Check if Auto Fallback is enabled
-    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'openrouter/free'] }));
+    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'gemini-3.5-flash-lite'] }));
     const isAutoFallback = sysSettings ? sysSettings.auto_fallback !== false : true;
 
     if ((!response || !response.ok) && isAutoFallback) {
@@ -149,7 +157,7 @@ const streamChatCompletions = async (req, res) => {
 
       const fallbackCandidates = (Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0)
         ? sysSettings.fallback_models
-        : ['openai/gpt-oss-120b', 'openrouter/free'];
+        : ['openai/gpt-oss-120b', 'gemini-3.5-flash-lite'];
 
       const triedFallbackModels = new Set();
 
@@ -207,7 +215,7 @@ const streamChatCompletions = async (req, res) => {
           }
         }
 
-        response = await tryFetchCompletion(fbUrl, fbKey, fbActualModel, 10000);
+        response = await tryFetchCompletion(fbUrl, fbKey, fbActualModel, 4000);
       }
     } else if (!response || !response.ok) {
       console.log(`[Chat Fallback] Auto Fallback is disabled by Admin. Returning upstream error directly for ${model}.`);
@@ -218,11 +226,13 @@ const streamChatCompletions = async (req, res) => {
       return;
     }
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    if (res.flushHeaders) res.flushHeaders();
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      if (res.flushHeaders) res.flushHeaders();
+    }
 
     if (!response || !response.ok) {
       const status = response ? response.status : 500;
