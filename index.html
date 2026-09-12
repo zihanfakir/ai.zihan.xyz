@@ -257,7 +257,75 @@
     .navbar-right {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+    }
+
+    .nav-download-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(37, 99, 235, 0.22));
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: var(--radius-md);
+      color: #60a5fa;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .nav-download-app-btn:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(37, 99, 235, 0.38));
+      border-color: rgba(59, 130, 246, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+    }
+
+    .nav-download-app-btn:active {
+      transform: translateY(0);
+    }
+
+    .nav-download-text-short {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .nav-download-app-btn {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+      }
+      .nav-download-text-full {
+        display: none;
+      }
+      .nav-download-text-short {
+        display: inline;
+        font-weight: 700;
+      }
+    }
+
+    .hero-app-banner {
+      margin: 12px 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px 8px 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.08));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 9999px;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-app-banner:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.16));
+      border-color: rgba(59, 130, 246, 0.55);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
     }
 
     .brand-menu-btn {
@@ -398,7 +466,7 @@
       display: none;
       align-items: center; /* Float in center instead of bottom */
       justify-content: center;
-      z-index: 50;
+      z-index: 200;
       opacity: 0;
       transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       padding: 16px; /* Add padding to prevent touching edges */
@@ -1425,6 +1493,9 @@
       overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+    }
+    @media (max-width: 480px) {
+      .account-panel { padding: 16px 12px; }
     }
     .account-panel::-webkit-scrollbar {
       width: 6px;
@@ -2788,47 +2859,7 @@
       .nav-credit-badge { padding: 4px 8px; font-size: 0.72rem; }
     }
 
-    /* ===== Floating Scroll-To-Bottom FAB ===== */
-    .scroll-to-bottom-btn {
-      position: absolute;
-      bottom: 20px;
-      right: 24px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-md);
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(10px) scale(0.9);
-      pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 25;
-    }
-    .scroll-to-bottom-btn.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
-    }
-    .scroll-to-bottom-btn:hover {
-      background: var(--bubble-user-bg);
-      border-color: var(--accent-color);
-      transform: translateY(-2px) scale(1.05);
-    }
-    .scroll-to-bottom-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
+
 
     /* ===== Streaming Pulse Cursor ===== */
     .streaming-cursor {
@@ -3071,6 +3102,7 @@
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .account-tab-pill:hover {
       background: rgba(128, 128, 128, 0.1);
@@ -3277,6 +3309,11 @@
       </button>
     </div>
     <div class="navbar-right">
+      <button type="button" class="nav-download-app-btn sheen-surface" id="navDownloadAppBtn" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন (APK)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="nav-download-text-full">অ্যাপ ডাউনলোড</span>
+        <span class="nav-download-text-short">APK</span>
+      </button>
       <button class="model-selector sheen-surface" id="modelTrigger" type="button">
         <span id="triggerStatusDot" class="trigger-status-dot status-dot checking"></span>
         <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
@@ -3358,17 +3395,21 @@
       <div style="padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 16px;">
         <div style="text-align: center; padding: 6px 4px 10px;">
           <div style="font-size: 18px; font-weight: 700; color: var(--text-color); margin-bottom: 4px;">Alokpoth AI for Android</div>
-          <div style="font-size: 12px; color: var(--text-muted);">ভার্সন ১.০.৬ • সাইজ ~৬ MB • নিরাপদ ও দ্রুতগতির অভিজ্ঞতা</div>
+          <div style="font-size: 12px; color: var(--text-muted);">ভার্সন ১.০.৬ • সাইজ ~১৬ MB • পিওর নেটিভ ও দ্রুতগতির অভিজ্ঞতা</div>
         </div>
 
         <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5;">
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 16px;">🚀</span>
+            <span><strong>পিওর নেটিভ আর্কিটেকচার:</strong> নতুন Jetpack Compose ইন্টারফেস ও আল্ট্রা ফাস্ট রেসপন্স।</span>
+          </div>
           <div style="display: flex; align-items: flex-start; gap: 10px;">
             <span style="font-size: 16px;">⚡</span>
             <span><strong>অফলাইনেও কার্যকর:</strong> নেট না থাকলেও সরাসরি অ্যাপ ওপেন ও পূর্ববর্তী চ্যাট দেখা যাবে।</span>
           </div>
           <div style="display: flex; align-items: flex-start; gap: 10px;">
             <span style="font-size: 16px;">🔒</span>
-            <span><strong>নিরাপদ ও হালকা:</strong> কোনো বাড়তি পারমিশন ছাড়া দ্রুত কাজ করে।</span>
+            <span><strong>নিরাপদ ও হালকা:</strong> কোনো বাড়তি পারমিশন ছাড়া সরাসরি লগইন ও চ্যাট সুবিধা।</span>
           </div>
         </div>
 
@@ -3723,8 +3764,8 @@
     </div>
   </div>
 
-  <!-- কাস্টম ব্রাউজার পপ-আপ -->
-  <div class="modal-overlay" id="customDialogOverlay" style="z-index: 100;">
+  <!-- কাস্টম কনফার্ম ইউ-আই -->
+  <div class="modal-overlay" id="customDialogOverlay">
     <div class="custom-dialog-box">
       <div class="custom-dialog-text" id="customDialogText"></div>
       <input type="text" id="customDialogInput" class="custom-dialog-input" style="display:none;" autocomplete="off">
@@ -3754,7 +3795,12 @@
         <div id="heroGreetingText" style="font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.01em;">আজ কীভাবে সাহায্য করতে পারি?</div>
         <span style="font-size: 0.94rem; color: var(--text-sub);">যেকোনো প্রশ্ন, কোডিং বা সৃজনশীল লেখার জন্য আলোকপথ প্রস্তুত</span>
         
-        <div class="quick-prompts-grid">
+        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন">
+          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </span>
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">অ্যান্ড্রয়েড অ্যাপ ব্যবহার করুন — <strong style="color: #60a5fa; text-decoration: underline;">APK ডাউনলোড করুন</strong></span>
+        </div>
           <div class="quick-prompt-card" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, Tailwind CSS ও JS সহ) লিখে দিন">
             <div class="prompt-card-header">
               <span class="prompt-card-icon">
@@ -3797,10 +3843,6 @@
         </div>
       </div>
     </div>
-
-    <button type="button" class="scroll-to-bottom-btn" id="scrollToBottomBtn" aria-label="নিচে স্ক্রোল করুন" title="নতুন বার্তায় যান">
-      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
-    </button>
   </div>
 
   <div class="input-wrapper">
@@ -6263,18 +6305,14 @@
       if (navigator.userAgent && navigator.userAgent.includes("AloAI-Android")) {
         return true;
       }
-      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) {
-        return true;
-      }
-      if (window.navigator.standalone === true) {
-        return true;
-      }
       return false;
     }
 
     const drawerDownloadAppWrap = document.getElementById("drawerDownloadAppWrap");
     const drawerDownloadAppBtn = document.getElementById("drawerDownloadAppBtn");
     const brandMenuDownloadAppBtn = document.getElementById("brandMenuDownloadAppBtn");
+    const navDownloadAppBtn = document.getElementById("navDownloadAppBtn");
+    const heroAppDownloadBanner = document.getElementById("heroAppDownloadBanner");
     const appDownloadModalOverlay = document.getElementById("appDownloadModalOverlay");
     const appDownloadModalClose = document.getElementById("appDownloadModalClose");
 
@@ -6302,13 +6340,31 @@
         // Running inside installed Android App - strictly hide all download prompts
         if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "none";
         if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "none";
+        if (navDownloadAppBtn) navDownloadAppBtn.style.display = "none";
+        if (heroAppDownloadBanner) heroAppDownloadBanner.style.display = "none";
         if (appDownloadModalOverlay) appDownloadModalOverlay.style.display = "none";
         return;
       }
 
-      // On website: show app download options
+      // On website: show app download options everywhere
       if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "block";
       if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "flex";
+      if (navDownloadAppBtn) navDownloadAppBtn.style.display = "inline-flex";
+      if (heroAppDownloadBanner) heroAppDownloadBanner.style.display = "inline-flex";
+
+      if (navDownloadAppBtn) {
+        navDownloadAppBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          openAppDownloadModal();
+        });
+      }
+
+      if (heroAppDownloadBanner) {
+        heroAppDownloadBanner.addEventListener("click", (e) => {
+          e.preventDefault();
+          openAppDownloadModal();
+        });
+      }
 
       if (drawerDownloadAppBtn) {
         drawerDownloadAppBtn.addEventListener("click", () => {

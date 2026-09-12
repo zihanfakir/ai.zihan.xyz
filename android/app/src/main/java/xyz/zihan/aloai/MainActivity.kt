@@ -262,6 +262,14 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
+                
+                // Inject Native Auth Token
+                val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+                val token = prefs.getString("auth_token", null)
+                if (token != null) {
+                    view.evaluateJavascript("localStorage.setItem('alokpoth_token', '$token');", null)
+                }
+
                 if (url != null && url != "about:blank" && !url.startsWith("data:")) {
                     hasLoadedPageSuccessfully = true
                     showOfflineView(false)
