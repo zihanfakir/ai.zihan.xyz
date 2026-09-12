@@ -75,6 +75,19 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      letter-spacing: -0.011em;
+    }
+
+    button, input, select, textarea, .btn, .btn-primary, .plan-card, .plan-btn {
+      touch-action: manipulation;
+    }
+
+    button:active, .btn:active, .btn-primary:active, .plan-btn:active {
+      transform: scale(0.968) !important;
+      transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     body {

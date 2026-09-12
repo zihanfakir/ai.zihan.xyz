@@ -488,6 +488,125 @@ async function saveSystemSettings(settings) {
   return updated;
 }
 
+/**
+ * Automatically purges all orphaned caches, dangling references, and ghost keys
+ * across MongoDB, Supabase, memoryStore, and disk backup whenever any admin delete occurs.
+ */
+async function autoPurgeOrphanedDatabaseCaches() {
+  const { saveBackup } = require('../server/config/memoryStore');
+
+  // 1. Invalidate all memory caches immediately
+  modelsCache = null;
+  modelsCacheTs = 0;
+  usersCache = null;
+  usersCacheTs = 0;
+  redeemCodesCache = null;
+  redeemCodesCacheTs = 0;
+  plansCache = null;
+  plansCacheTs = 0;
+  settingsCache = null;
+  settingsCacheTs = 0;
+  keyCache.clear();
+
+  // 2. Clean fallback models & plans referencing non-existent models
+  try {
+    const currentModels = await getPersistedModels();
+    const validModelIds = new Set(currentModels.map(m => String(m.id || m.model_id || '').toLowerCase().trim()));
+
+    // Clean fallback_models
+    const sysSettings = await getSystemSettings();
+    if (sysSettings && Array.isArray(sysSettings.fallback_models)) {
+      const cleanedFallbacks = sysSettings.fallback_models.filter(fId => {
+        return validModelIds.has(String(fId || '').toLowerCase().trim());
+      });
+      if (cleanedFallbacks.length !== sysSettings.fallback_models.length) {
+        sysSettings.fallback_models = cleanedFallbacks;
+        await saveSystemSettings(sysSettings);
+      }
+    }
+
+    // Clean plans allowed_models
+    const plans = await getPersistedPlans();
+    let plansChanged = false;
+    plans.forEach(p => {
+      if (Array.isArray(p.allowed_models)) {
+        const origLen = p.allowed_models.length;
+        p.allowed_models = p.allowed_models.filter(m => {
+          if (m === '*') return true;
+          return validModelIds.has(String(m || '').toLowerCase().trim());
+        });
+        if (p.allowed_models.length !== origLen) plansChanged = true;
+      }
+    });
+    if (plansChanged) {
+      await savePersistedPlans(plans);
+    }
+  } catch (e) {
+    console.warn('[AutoPurge] Model reference cleanup warning:', e.message);
+  }
+
+  // 3. Clean orphaned redeem code references for deleted users
+  try {
+    const currentUsers = await getPersistedUsers();
+    const validUserIds = new Set(currentUsers.map(u => String(u._id || u.id)));
+    const validEmails = new Set(currentUsers.filter(u => u.email).map(u => u.email.toLowerCase().trim()));
+
+    const codes = await getPersistedRedeemCodes();
+    let codesChanged = false;
+    codes.forEach(c => {
+      if (c.used_by && !validUserIds.has(String(c.used_by)) && !validEmails.has(String(c.used_by).toLowerCase().trim())) {
+        c.used_by = null;
+        c.is_used = false;
+        c.used_at = null;
+        codesChanged = true;
+      }
+      if (Array.isArray(c.used_by_list)) {
+        const origLen = c.used_by_list.length;
+        c.used_by_list = c.used_by_list.filter(item => {
+          const uId = String(item.user_id || '');
+          const email = item.email ? item.email.toLowerCase().trim() : '';
+          return validUserIds.has(uId) || (email && validEmails.has(email));
+        });
+        if (c.used_by_list.length !== origLen) {
+          c.use_count = c.used_by_list.length;
+          c.is_used = c.use_count >= (c.max_uses || 1);
+          codesChanged = true;
+        }
+      }
+    });
+    if (codesChanged) {
+      await savePersistedRedeemCodes(codes);
+    }
+  } catch (e) {
+    console.warn('[AutoPurge] Redeem code cleanup warning:', e.message);
+  }
+
+  // 4. Purge orphaned usage rows from Supabase
+  if (supabase) {
+    try {
+      const currentUsers = await getPersistedUsers();
+      const validUserIds = new Set(currentUsers.map(u => String(u._id || u.id)));
+      const { data: usageRows } = await supabase
+        .from('api_keys')
+        .select('model_id')
+        .like('model_id', '__usage_%');
+      if (usageRows && usageRows.length > 0) {
+        for (const row of usageRows) {
+          const uId = row.model_id.replace(/^__usage_/, '').replace(/__$/, '');
+          if (!validUserIds.has(uId)) {
+            await supabase.from('api_keys').delete().eq('model_id', row.model_id);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AutoPurge] Usage row cleanup warning:', e.message);
+    }
+  }
+
+  // 5. Synchronous flush to local backup
+  saveBackup();
+}
+
 module.exports = { 
   getModelConfig, 
   getApiKeyFromSupabase, 
@@ -507,6 +626,7 @@ module.exports = {
   savePersistedUsers,
   invalidateUsersCache,
   getSystemSettings,
-  saveSystemSettings
+  saveSystemSettings,
+  autoPurgeOrphanedDatabaseCaches
 };
 

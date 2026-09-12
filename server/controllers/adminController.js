@@ -374,7 +374,10 @@ const deleteUser = async (req, res) => {
     if (memoryStore.usageLogs) {
       memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId) && String(l.user_id) !== String(targetId));
     }
-    saveBackup();
+
+    // 5. Deep auto-purge orphaned caches & references
+    const { autoPurgeOrphanedDatabaseCaches } = require('../../utils/getModelConfig');
+    await autoPurgeOrphanedDatabaseCaches().catch(() => {});
 
     return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
@@ -642,7 +645,10 @@ const deleteRedeemCode = async (req, res) => {
     if (memoryStore.redeemCodes) {
       memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId && String(c.code).trim().toUpperCase() !== codeStrToFilter);
     }
-    saveBackup();
+    
+    // 4. Deep auto-purge orphaned caches & references
+    const { autoPurgeOrphanedDatabaseCaches } = require('../../utils/getModelConfig');
+    await autoPurgeOrphanedDatabaseCaches().catch(() => {});
 
     res.json({ success: true, message: 'রিডিম কোডটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
@@ -1073,8 +1079,9 @@ const deleteModel = async (req, res) => {
       }
     } catch (e) {}
 
-    // 8. Synchronous permanent write to backup disk
-    saveBackup();
+    // 8. Deep auto-purge orphaned caches & references across database
+    const { autoPurgeOrphanedDatabaseCaches } = require('../../utils/getModelConfig');
+    await autoPurgeOrphanedDatabaseCaches().catch(() => {});
 
     return res.json({ 
       success: true, 
