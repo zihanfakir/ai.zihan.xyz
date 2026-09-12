@@ -18,19 +18,6 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Top Loading Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_alignParentTop="true"
-        android:indeterminate="false"
-        android:max="100"
-        android:progressDrawable="@android:drawable/progress_horizontal"
-        android:progressBackgroundTint="#22FFFFFF"
-        android:progressTint="@color/primary"
-        android:visibility="gone" />
 
     <!-- Offline State View -->
     <LinearLayout

@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefresh;
-    private ProgressBar mProgressBar;
     private View mOfflineView;
     private ProgressBar mInitialSpinner;
 
@@ -140,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         mWebView = findViewById(R.id.webView);
         mSwipeRefresh = findViewById(R.id.swipeRefreshLayout);
-        mProgressBar = findViewById(R.id.progressBar);
         mOfflineView = findViewById(R.id.offlineView);
         mInitialSpinner = findViewById(R.id.initialSpinner);
 
@@ -179,11 +177,7 @@ public class MainActivity extends AppCompatActivity {
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                if (newProgress < 100) {
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    mProgressBar.setProgress(newProgress);
-                } else {
-                    mProgressBar.setVisibility(View.GONE);
+                if (newProgress >= 100) {
                     mInitialSpinner.setVisibility(View.GONE);
                 }
             }
@@ -286,13 +280,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                mProgressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                mProgressBar.setVisibility(View.GONE);
                 mInitialSpinner.setVisibility(View.GONE);
                 mSwipeRefresh.setRefreshing(false);
                 showOfflineView(false);
@@ -372,7 +364,6 @@ public class MainActivity extends AppCompatActivity {
         // Only enable swipe refresh on offline error view so user can pull down to retry
         mSwipeRefresh.setEnabled(show);
         if (show) {
-            mProgressBar.setVisibility(View.GONE);
             mInitialSpinner.setVisibility(View.GONE);
             mSwipeRefresh.setRefreshing(false);
         }

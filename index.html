@@ -2930,12 +2930,12 @@
       if (modelSearchInput) modelSearchInput.value = "";
       renderModelList();
       modelModalOverlay.classList.add("open");
-      if (modelSearchInput) setTimeout(() => modelSearchInput.focus(), 150);
       await fetchModelsFromServer();
       syncModelStatuses({ silent: true });
     }
 
     function closeModal() {
+      if (modelSearchInput) modelSearchInput.blur();
       modelModalOverlay.classList.remove("open");
     }
 
