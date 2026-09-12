@@ -26,6 +26,17 @@
   <style>
     :root {
       color-scheme: dark;
+      /* Design Tokens */
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+      --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.18);
+      --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.28);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
       /* Premium Dark Theme (Default) */
       --bg-main: #09090b;
       --bg-input: #18181b;
@@ -36,7 +47,7 @@
       --btn-send-disabled: #334155;
       --bubble-user-bg: linear-gradient(135deg, #27272a 0%, #18181b 100%);
       --accent-color: #3b82f6;
-      --glass-bg: rgba(9, 9, 11, 0.8);
+      --glass-bg: rgba(9, 9, 11, 0.85);
       --download-btn-bg: rgba(255, 255, 255, 0.08);
       --download-btn-bg-hover: rgba(255, 255, 255, 0.15);
       --download-btn-text: #e2e8f0;
@@ -86,7 +97,7 @@
       --btn-send-disabled: #d1d5db;
       --bubble-user-bg: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
       --accent-color: #2563eb;
-      --glass-bg: rgba(249, 250, 251, 0.85);
+      --glass-bg: rgba(249, 250, 251, 0.88);
       --download-btn-bg: rgba(0, 0, 0, 0.06);
       --download-btn-bg-hover: rgba(0, 0, 0, 0.12);
       --download-btn-text: #374151;
@@ -102,22 +113,47 @@
       /* Pure Black / Power Saving Theme */
       --bg-main: #000000;
       --bg-input: #000000;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --text-main: #e5e5e5;
-      --text-sub: #737373;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --text-main: #f5f5f5;
+      --text-sub: #888888;
       --btn-send: #ffffff;
       --btn-send-disabled: #262626;
-      --bubble-user-bg: #0f0f0f;
+      --bubble-user-bg: linear-gradient(135deg, #18181b 0%, #121214 100%);
       --accent-color: #3b82f6;
       --glass-bg: rgba(0, 0, 0, 0.95);
-      --download-btn-bg: rgba(255, 255, 255, 0.05);
-      --download-btn-bg-hover: rgba(255, 255, 255, 0.1);
-      --download-btn-text: #a3a3a3;
+      --download-btn-bg: rgba(255, 255, 255, 0.07);
+      --download-btn-bg-hover: rgba(255, 255, 255, 0.14);
+      --download-btn-text: #cccccc;
       --download-btn-text-hover: #ffffff;
       --sheen-base: rgba(255, 255, 255, 0.04);
       --sheen-base-hover: rgba(255, 255, 255, 0.08);
       --border: var(--border-color);
       --surface: #0a0a0a;
+      --text-muted: var(--text-sub);
+      --text-primary: var(--text-main);
+    }
+
+    :root[data-theme="sapphire"] {
+      color-scheme: dark;
+      /* Midnight Sapphire Luxury Theme */
+      --bg-main: #070d19;
+      --bg-input: #0f182c;
+      --border-color: rgba(96, 165, 250, 0.16);
+      --text-main: #f1f5f9;
+      --text-sub: #93a5c2;
+      --btn-send: #3b82f6;
+      --btn-send-disabled: #1e293b;
+      --bubble-user-bg: linear-gradient(135deg, #1e2c47 0%, #131e33 100%);
+      --accent-color: #60a5fa;
+      --glass-bg: rgba(7, 13, 25, 0.88);
+      --download-btn-bg: rgba(96, 165, 250, 0.1);
+      --download-btn-bg-hover: rgba(96, 165, 250, 0.2);
+      --download-btn-text: #bfdbfe;
+      --download-btn-text-hover: #ffffff;
+      --sheen-base: rgba(96, 165, 250, 0.05);
+      --sheen-base-hover: rgba(96, 165, 250, 0.1);
+      --border: var(--border-color);
+      --surface: var(--bg-input);
       --text-muted: var(--text-sub);
       --text-primary: var(--text-main);
     }
@@ -2139,6 +2175,750 @@
       animation-delay: -0.5s;
       background: var(--loader-ball-2);
     }
+
+    /* ===== Modern Sliding Sidebar Drawer ===== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .sidebar-drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 320px;
+      max-width: 85vw;
+      background: var(--bg-main);
+      border-right: 1px solid var(--border-color);
+      z-index: 101;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .sidebar-drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .drawer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-main);
+    }
+    .drawer-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    .drawer-close-btn:hover {
+      background: rgba(128, 128, 128, 0.15);
+      color: var(--text-main);
+    }
+    .drawer-action-row {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .drawer-new-chat-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      background: var(--bubble-user-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .drawer-new-chat-btn:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .drawer-new-chat-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    .drawer-search-wrap {
+      padding: 0 16px 10px;
+    }
+    .drawer-search-input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 10px center;
+    }
+    .drawer-search-input:focus {
+      border-color: var(--accent-color);
+    }
+    .drawer-history-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .drawer-section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      padding: 12px 8px 4px;
+    }
+    .drawer-session-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      font-size: 0.88rem;
+      gap: 8px;
+    }
+    .drawer-session-item:hover {
+      background: rgba(128, 128, 128, 0.1);
+    }
+    .drawer-session-item.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .drawer-session-title {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .drawer-session-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .drawer-session-item:hover .drawer-session-actions,
+    .drawer-session-item.active .drawer-session-actions {
+      opacity: 1;
+    }
+    .drawer-session-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .drawer-session-action-btn:hover {
+      background: rgba(128, 128, 128, 0.2);
+      color: var(--text-main);
+    }
+    .drawer-footer {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border-color);
+      background: var(--glass-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .drawer-user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      overflow: hidden;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      transition: background-color 0.15s;
+    }
+    .drawer-user-card:hover {
+      background: rgba(128, 128, 128, 0.1);
+    }
+    .drawer-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .drawer-user-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .drawer-user-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .drawer-user-plan {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+    }
+    .drawer-footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .drawer-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .drawer-icon-btn:hover {
+      background: rgba(128, 128, 128, 0.15);
+      color: var(--text-main);
+    }
+    .drawer-icon-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* ===== Navbar Enhancement ===== */
+    .drawer-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .drawer-toggle-btn:hover {
+      background: rgba(128, 128, 128, 0.12);
+    }
+    .drawer-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-credit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      padding: 5px 11px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .nav-credit-badge:hover {
+      background: rgba(59, 130, 246, 0.22);
+      transform: translateY(-1px);
+    }
+    .nav-credit-badge.warning {
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .nav-credit-badge.danger {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .quick-new-chat-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: rgba(128, 128, 128, 0.08);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-new-chat-btn:hover {
+      background: rgba(128, 128, 128, 0.16);
+      transform: translateY(-1px);
+    }
+    .quick-new-chat-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+    @media (max-width: 640px) {
+      .quick-new-chat-btn span { display: none; }
+      .quick-new-chat-btn { padding: 6px 8px; }
+      .nav-credit-badge { padding: 4px 8px; font-size: 0.72rem; }
+    }
+
+    /* ===== Floating Scroll-To-Bottom FAB ===== */
+    .scroll-to-bottom-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(10px) scale(0.9);
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 25;
+    }
+    .scroll-to-bottom-btn.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .scroll-to-bottom-btn:hover {
+      background: var(--bubble-user-bg);
+      border-color: var(--accent-color);
+      transform: translateY(-2px) scale(1.05);
+    }
+    .scroll-to-bottom-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ===== Streaming Pulse Cursor ===== */
+    .streaming-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1.15em;
+      background: var(--accent-color);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      border-radius: 2px;
+      animation: cursorPulse 0.85s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      box-shadow: 0 0 8px var(--accent-color);
+    }
+    @keyframes cursorPulse {
+      0%, 100% { opacity: 1; transform: scaleY(1); }
+      50% { opacity: 0.15; transform: scaleY(0.75); }
+    }
+
+    /* ===== macOS Code Block Header Bar ===== */
+    .code-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(20, 24, 35, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      user-select: none;
+    }
+    .code-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .code-window-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .code-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .code-dot.red { background-color: #ff5f56; }
+    .code-dot.yellow { background-color: #ffbd2e; }
+    .code-dot.green { background-color: #27c93f; }
+    .code-lang-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+    }
+    .code-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .code-header-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      font-size: 0.76rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .code-header-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+    }
+    .code-header-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    /* ===== Voice Wave Animation ===== */
+    .voice-wave-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      height: 14px;
+    }
+    .voice-wave-bar {
+      width: 2.5px;
+      height: 100%;
+      background: #ef4444;
+      border-radius: 2px;
+      animation: voiceWave 0.8s ease-in-out infinite alternate;
+    }
+    .voice-wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .voice-wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .voice-wave-bar:nth-child(4) { animation-delay: 0.1s; }
+    @keyframes voiceWave {
+      0% { transform: scaleY(0.25); }
+      100% { transform: scaleY(1); }
+    }
+    .composer-pill.recording {
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #ef4444 !important;
+      animation: pulseRecord 1.2s infinite;
+    }
+    @keyframes pulseRecord {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    }
+
+    /* ===== Composer Quick Bar Pills ===== */
+    .composer-quick-bar {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 4px 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .composer-quick-bar::-webkit-scrollbar { display: none; }
+    .composer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(128, 128, 128, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .composer-pill:hover {
+      background: rgba(128, 128, 128, 0.14);
+      color: var(--text-main);
+    }
+    .composer-pill.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .composer-pill.active.img-gen {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: #a855f7;
+      color: #a855f7;
+    }
+    .composer-pill svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ===== Hero Screen 2-Line Cards ===== */
+    .quick-prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 760px;
+      margin-top: 18px;
+    }
+    .quick-prompt-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      color: var(--text-main);
+      user-select: none;
+    }
+    .quick-prompt-card:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      background: var(--bubble-user-bg);
+    }
+    .prompt-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prompt-card-icon {
+      font-size: 1.15rem;
+    }
+    .prompt-card-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .prompt-card-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+      white-space: normal;
+    }
+
+    /* ===== Account Modal Tabs ===== */
+    .account-tabs-nav {
+      display: flex;
+      gap: 6px;
+      padding: 0 0 12px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .account-tabs-nav::-webkit-scrollbar { display: none; }
+    .account-tab-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .account-tab-pill:hover {
+      background: rgba(128, 128, 128, 0.1);
+      color: var(--text-main);
+    }
+    .account-tab-pill.active {
+      background: var(--bubble-user-bg);
+      border-color: var(--border-color);
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+    }
+    .account-tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .account-tab-panel.active {
+      display: flex;
+    }
+
+    /* ===== Drag and Drop Overlay ===== */
+    .drag-drop-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px dashed var(--accent-color);
+      border-radius: var(--radius-lg);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-main);
+      pointer-events: none;
+    }
+    .drag-drop-overlay.active {
+      display: flex;
+    }
+    .drag-drop-icon {
+      font-size: 40px;
+      animation: bounceFloat 1.2s infinite alternate;
+    }
+    @keyframes bounceFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* ===== In-Bubble Bengali Error Card ===== */
+    .ai-bubble-error-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin: 8px 0;
+    }
+    .ai-bubble-error-card svg {
+      width: 22px;
+      height: 22px;
+      fill: #ef4444;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .ai-error-content {
+      flex: 1;
+    }
+    .ai-error-retry-btn {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ai-error-retry-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
@@ -2158,11 +2938,69 @@
   </div>
 <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Sliding Sidebar Navigation Drawer & Backdrop -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="sidebar-drawer" id="sidebarDrawer" aria-label="প্রধান মেনু">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <img src="app_logo.png" alt="Logo" class="brand-logo-img">
+        <span>Alokpoth AI</span>
+      </div>
+      <button type="button" class="drawer-close-btn" id="drawerCloseBtn" aria-label="বন্ধ করুন">&times;</button>
+    </div>
+    
+    <div class="drawer-action-row">
+      <button type="button" class="drawer-new-chat-btn" id="drawerNewChatBtn">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+        <span>নতুন চ্যাট শুরু করুন</span>
+      </button>
+    </div>
+
+    <div class="drawer-search-wrap">
+      <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাট হিস্ট্রি অনুসন্ধান...">
+    </div>
+
+    <div class="drawer-history-scroll" id="drawerHistoryList">
+      <!-- Dynamically filled with grouped sessions -->
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-user-card" id="drawerUserCard" title="একাউন্ট ম্যানেজ করুন">
+        <div class="drawer-avatar" id="drawerAvatar">অ</div>
+        <div class="drawer-user-info">
+          <div class="drawer-user-name" id="drawerUserName">অতিথি ব্যবহারকারী</div>
+          <div class="drawer-user-plan" id="drawerUserPlan">Free প্ল্যান</div>
+        </div>
+      </div>
+      <div class="drawer-footer-actions">
+        <button type="button" class="drawer-icon-btn" id="drawerThemeBtn" title="থিম পরিবর্তন">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+        </button>
+        <button type="button" class="drawer-icon-btn" id="drawerSettingsBtn" title="একাউন্ট ও সেটিংস">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <nav class="navbar">
-    <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
-      <span class="brand-name">Alokpoth AI</span>
-    </button>
+    <div class="nav-left">
+      <button class="drawer-toggle-btn" id="drawerToggleBtn" type="button" aria-label="মেনু খুলুন" title="সাইডবার মেনু">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
+        <span class="brand-name">Alokpoth AI</span>
+      </button>
+      <button class="quick-new-chat-btn" id="quickNewChatBtn" type="button" title="নতুন চ্যাট শুরু করুন">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+        <span>নতুন চ্যাট</span>
+      </button>
+    </div>
     <div class="navbar-right">
+      <div class="nav-credit-badge" id="navCreditBadge" title="আপনার অবশিষ্ট বার্তা সীমা">
+        <span>⚡</span>
+        <span id="navCreditCount">...</span>
+      </div>
       <button class="model-selector sheen-surface" id="modelTrigger" type="button">
         <span id="triggerStatusDot" class="trigger-status-dot status-dot checking"></span>
         <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
@@ -2241,194 +3079,213 @@
         <button class="modal-close" id="accountModalClose" type="button" aria-label="Close">&times;</button>
       </div>
       <div class="account-panel">
-        <div class="account-avatar-row">
-          <div class="account-avatar" id="accountAvatar">অ</div>
-          <div>
-            <div class="account-name" id="accountNameDisplay">অতিথি ব্যবহারকারী</div>
-            <div class="account-sub">Alokpoth AI ব্যবহারকারী</div>
-          </div>
+        <div class="account-tabs-nav" id="accountTabsNav">
+          <button type="button" class="account-tab-pill active" data-tab="tabProfile">👤 প্রোফাইল</button>
+          <button type="button" class="account-tab-pill" data-tab="tabPlan">⚡ প্ল্যান ও লিমিট</button>
+          <button type="button" class="account-tab-pill" data-tab="tabUsage">📊 ব্যবহার</button>
+          <button type="button" class="account-tab-pill" data-tab="tabSecurity">🔑 সিকিউরিটি ও রিডিম</button>
         </div>
 
-        <div class="account-field">
-          <label for="accountNameInput">নাম</label>
-          <input type="text" id="accountNameInput" placeholder="আপনার নাম লিখুন" maxlength="40">
-        </div>
-
-        <div class="account-credit-row">
-          <div class="account-credit-info">
-            <div class="account-plan-badge-row">
-              <span class="account-credit-label">বর্তমান প্ল্যান</span>
-              <span class="account-plan-badge plan-Max" id="accountPlanDisplay">Max</span>
+        <!-- Tab 1: Profile -->
+        <div class="account-tab-panel active" id="tabProfile">
+          <div class="account-avatar-row">
+            <div class="account-avatar" id="accountAvatar">অ</div>
+            <div>
+              <div class="account-name" id="accountNameDisplay">অতিথি ব্যবহারকারী</div>
+              <div class="account-sub">Alokpoth AI ব্যবহারকারী</div>
             </div>
-            <div class="account-plan-expiry-text" id="accountPlanExpiryDisplay">মেয়াদ: আজীবন / মেয়াদহীন</div>
           </div>
-          <div class="account-plan-limit-badge" id="accountPlanLimitBadge" title="প্ল্যানের বার্তা লিমিট">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span id="accountPlanLimitText">৫০ বার্তা / ১ ঘণ্টা</span>
-          </div>
-        </div>
-        <div class="account-credit-warning" id="accountPlanWarning">⚠️ আপনার মেসেজ লিমিট শেষ!</div>
 
-        <!-- Plan Limits View Card -->
-        <div class="account-limits-card">
-          <div class="account-limits-top">
-            <div class="account-limits-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          <div class="account-field">
+            <label for="accountNameInput">আপনার নাম</label>
+            <input type="text" id="accountNameInput" placeholder="আপনার নাম লিখুন" maxlength="40">
+          </div>
+
+          <button class="account-action-btn account-save-btn" id="accountSaveBtn" type="button">নাম সংরক্ষণ করুন</button>
+          <button class="account-action-btn account-auth-btn" id="accountAuthBtn" type="button" style="background: var(--accent-color); color: #fff;">লগইন / রেজিস্টার করুন</button>
+          <button class="account-action-btn account-logout-btn" id="accountLogoutBtn" type="button">লগআউট করুন</button>
+        </div>
+
+        <!-- Tab 2: Plan & Limits -->
+        <div class="account-tab-panel" id="tabPlan">
+          <div class="account-credit-row">
+            <div class="account-credit-info">
+              <div class="account-plan-badge-row">
+                <span class="account-credit-label">বর্তমান প্ল্যান</span>
+                <span class="account-plan-badge plan-Max" id="accountPlanDisplay">Max</span>
+              </div>
+              <div class="account-plan-expiry-text" id="accountPlanExpiryDisplay">মেয়াদ: আজীবন / মেয়াদহীন</div>
+            </div>
+            <div class="account-plan-limit-badge" id="accountPlanLimitBadge" title="প্ল্যানের বার্তা লিমিট">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
-              <span>প্ল্যান লিমিট ও সুবিধাসমূহ</span>
+              <span id="accountPlanLimitText">৫০ বার্তা / ১ ঘণ্টা</span>
             </div>
-            <button type="button" class="account-limits-toggle-btn" id="accountLimitsToggleBtn">
-              <span id="accountLimitsToggleText">সব প্ল্যান দেখুন</span>
-              <svg id="accountLimitsToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          </div>
+          <div class="account-credit-warning" id="accountPlanWarning">⚠️ আপনার মেসেজ লিমিট শেষ!</div>
+
+          <!-- Plan Limits View Card -->
+          <div class="account-limits-card">
+            <div class="account-limits-top">
+              <div class="account-limits-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <span>প্ল্যান লিমিট ও সুবিধাসমূহ</span>
+              </div>
+              <button type="button" class="account-limits-toggle-btn" id="accountLimitsToggleBtn">
+                <span id="accountLimitsToggleText">সব প্ল্যান দেখুন</span>
+                <svg id="accountLimitsToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Active Plan Limit Overview -->
+            <div class="account-limits-summary" id="accountLimitsSummary">
+              <div class="account-limit-item">
+                <div class="account-limit-icon">💬</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label">বার্তা লিমিট</span>
+                  <span class="account-limit-val" id="limitValMessages">৫০ বার্তা / ১ ঘণ্টা</span>
+                </div>
+              </div>
+              <div class="account-limit-item">
+                <div class="account-limit-icon">⚡</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label">মডেল এক্সেস</span>
+                  <span class="account-limit-val" id="limitValModels">সকল ফ্ল্যাগশিপ মডেল</span>
+                </div>
+              </div>
+              <div class="account-limit-item">
+                <div class="account-limit-icon">🚀</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label">অগ্রাধিকার</span>
+                  <span class="account-limit-val" id="limitValSpeed">সর্বোচ্চ আল্ট্রা স্পিড</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- All Plans Comparison Grid -->
+            <div class="account-all-plans-grid" id="accountAllPlansGrid" style="display: none;">
+              <div class="plan-compare-card" id="compareCardFree">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name">Free</span>
+                  <span class="plan-compare-tag">বেসিক</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>১০ বার্তা প্রতি ৩ ঘণ্টায়</li>
+                  <li>ফ্রি এআই মডেলসমূহ</li>
+                  <li>সাধারণ রেসপন্স স্পিড</li>
+                </ul>
+              </div>
+              <div class="plan-compare-card" id="compareCardPro">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name" style="color: #a855f7;">Pro</span>
+                  <span class="plan-compare-tag" style="background: rgba(168,85,247,0.15); color: #a855f7;">উন্নত</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>৩০ বার্তা প্রতি ৩ ঘণ্টায়</li>
+                  <li>সকল প্রো মডেল এক্সেস</li>
+                  <li>টার্বো রেসপন্স স্পিড</li>
+                </ul>
+              </div>
+              <div class="plan-compare-card" id="compareCardMax">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name" style="color: #f59e0b;">Max</span>
+                  <span class="plan-compare-tag" style="background: rgba(245,158,11,0.15); color: #f59e0b;">সর্বোচ্চ</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>৫০ বার্তা প্রতি ১ ঘণ্টায়</li>
+                  <li>সবচেয়ে শক্তিশালী মডেল</li>
+                  <li>সর্বোচ্চ অগ্রাধিকার ও স্পিড</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Usage Stats -->
+        <div class="account-tab-panel" id="tabUsage">
+          <div class="account-stats-grid">
+            <div class="account-stat">
+              <span class="account-stat-value" id="accountStatTokens">0</span>
+              <span class="account-stat-label">মোট টোকেন</span>
+            </div>
+            <div class="account-stat">
+              <span class="account-stat-value" id="accountStatCost">$0.0000</span>
+              <span class="account-stat-label">আনুমানিক খরচ</span>
+            </div>
+            <div class="account-stat">
+              <span class="account-stat-value" id="accountStatMessages">0</span>
+              <span class="account-stat-label">মোট বার্তা</span>
+            </div>
+            <div class="account-stat">
+              <span class="account-stat-value" id="accountStatImages">0</span>
+              <span class="account-stat-label">তৈরি হওয়া ছবি</span>
+            </div>
+            <div class="account-stat">
+              <span class="account-stat-value" id="accountStatDailyCost">$0.0000</span>
+              <span class="account-stat-label">আজকের খরচ</span>
+            </div>
+          </div>
+          <button class="account-action-btn account-reset-btn" id="accountResetBtn" type="button">চ্যাট ও ব্যবহারের হিসাব রিসেট করুন</button>
+        </div>
+
+        <!-- Tab 4: Security & Redeem -->
+        <div class="account-tab-panel" id="tabSecurity">
+          <!-- Redeem Code Section -->
+          <div class="account-redeem-card">
+            <div class="account-redeem-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+              <span>রিডিম কোড ব্যবহার করুন</span>
+            </div>
+            <div class="account-redeem-body">
+              <input type="text" id="accountRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX বা কাস্টম কোড" maxlength="50" autocomplete="off" spellcheck="false">
+              <button type="button" id="accountRedeemBtn" class="account-redeem-btn">দাবি করুন</button>
+            </div>
+            <div class="account-redeem-msg" id="accountRedeemMsg"></div>
+          </div>
+
+          <!-- Password Change Card (Logged-in users) -->
+          <div class="account-redeem-card" id="accountPasswordCard" style="display: none;">
+            <div class="account-redeem-header" id="accountPasswordToggleBtn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>পাসওয়ার্ড পরিবর্তন করুন</span>
+              </div>
+              <svg id="accountPasswordToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
-            </button>
-          </div>
-
-          <!-- Active Plan Limit Overview -->
-          <div class="account-limits-summary" id="accountLimitsSummary">
-            <div class="account-limit-item">
-              <div class="account-limit-icon">💬</div>
-              <div class="account-limit-detail">
-                <span class="account-limit-label">বার্তা লিমিট</span>
-                <span class="account-limit-val" id="limitValMessages">৫০ বার্তা / ১ ঘণ্টা</span>
-              </div>
             </div>
-            <div class="account-limit-item">
-              <div class="account-limit-icon">⚡</div>
-              <div class="account-limit-detail">
-                <span class="account-limit-label">মডেল এক্সেস</span>
-                <span class="account-limit-val" id="limitValModels">সকল ফ্ল্যাগশিপ মডেল</span>
+            <div id="accountPasswordBody" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px;">
+              <div class="account-field">
+                <label for="currentPasswordInput">বর্তমান পাসওয়ার্ড *</label>
+                <input type="password" id="currentPasswordInput" placeholder="বর্তমান পাসওয়ার্ড লিখুন" autocomplete="current-password">
               </div>
-            </div>
-            <div class="account-limit-item">
-              <div class="account-limit-icon">🚀</div>
-              <div class="account-limit-detail">
-                <span class="account-limit-label">অগ্রাধিকার</span>
-                <span class="account-limit-val" id="limitValSpeed">সর্বোচ্চ আল্ট্রা স্পিড</span>
+              <div class="account-field">
+                <label for="newPasswordInput">নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর) *</label>
+                <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
               </div>
-            </div>
-          </div>
-
-          <!-- All Plans Comparison Grid -->
-          <div class="account-all-plans-grid" id="accountAllPlansGrid" style="display: none;">
-            <div class="plan-compare-card" id="compareCardFree">
-              <div class="plan-compare-header">
-                <span class="plan-compare-name">Free</span>
-                <span class="plan-compare-tag">বেসিক</span>
+              <div class="account-field">
+                <label for="confirmPasswordInput">নতুন পাসওয়ার্ড নিশ্চিত করুন *</label>
+                <input type="password" id="confirmPasswordInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
               </div>
-              <ul class="plan-compare-features">
-                <li>১০ বার্তা প্রতি ৩ ঘণ্টায়</li>
-                <li>ফ্রি এআই মডেলসমূহ</li>
-                <li>সাধারণ রেসপন্স স্পিড</li>
-              </ul>
-            </div>
-            <div class="plan-compare-card" id="compareCardPro">
-              <div class="plan-compare-header">
-                <span class="plan-compare-name" style="color: #a855f7;">Pro</span>
-                <span class="plan-compare-tag" style="background: rgba(168,85,247,0.15); color: #a855f7;">উন্নত</span>
-              </div>
-              <ul class="plan-compare-features">
-                <li>৩০ বার্তা প্রতি ৩ ঘণ্টায়</li>
-                <li>সকল প্রো মডেল এক্সেস</li>
-                <li>টার্বো রেসপন্স স্পিড</li>
-              </ul>
-            </div>
-            <div class="plan-compare-card" id="compareCardMax">
-              <div class="plan-compare-header">
-                <span class="plan-compare-name" style="color: #f59e0b;">Max</span>
-                <span class="plan-compare-tag" style="background: rgba(245,158,11,0.15); color: #f59e0b;">সর্বোচ্চ</span>
-              </div>
-              <ul class="plan-compare-features">
-                <li>৫০ বার্তা প্রতি ১ ঘণ্টায়</li>
-                <li>সবচেয়ে শক্তিশালী মডেল</li>
-                <li>সর্বোচ্চ অগ্রাধিকার ও স্পিড</li>
-              </ul>
+              <div id="passwordChangeMsg" style="font-size: 0.82rem; min-height: 18px;"></div>
+              <button type="button" id="changePasswordSubmitBtn" class="account-redeem-btn" style="width: 100%; border-radius: 999px; padding: 10px 16px; font-size: 0.88rem;">
+                পাসওয়ার্ড সেভ করুন
+              </button>
             </div>
           </div>
         </div>
-
-        <!-- Redeem Code Section -->
-        <div class="account-redeem-card">
-          <div class="account-redeem-header">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-              <line x1="2" y1="10" x2="22" y2="10"></line>
-            </svg>
-            <span>রিডিম কোড ব্যবহার করুন</span>
-          </div>
-          <div class="account-redeem-body">
-            <input type="text" id="accountRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX" maxlength="35" autocomplete="off" spellcheck="false">
-            <button type="button" id="accountRedeemBtn" class="account-redeem-btn">দাবি করুন</button>
-          </div>
-          <div class="account-redeem-msg" id="accountRedeemMsg"></div>
-        </div>
-
-        <!-- Password Change Card (Logged-in users) -->
-        <div class="account-redeem-card" id="accountPasswordCard" style="display: none;">
-          <div class="account-redeem-header" id="accountPasswordToggleBtn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <span>পাসওয়ার্ড পরিবর্তন করুন</span>
-            </div>
-            <svg id="accountPasswordToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </div>
-          <div id="accountPasswordBody" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px;">
-            <div class="account-field">
-              <label for="currentPasswordInput">বর্তমান পাসওয়ার্ড *</label>
-              <input type="password" id="currentPasswordInput" placeholder="বর্তমান পাসওয়ার্ড লিখুন" autocomplete="current-password">
-            </div>
-            <div class="account-field">
-              <label for="newPasswordInput">নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর) *</label>
-              <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
-            </div>
-            <div class="account-field">
-              <label for="confirmPasswordInput">নতুন পাসওয়ার্ড নিশ্চিত করুন *</label>
-              <input type="password" id="confirmPasswordInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
-            </div>
-            <div id="passwordChangeMsg" style="font-size: 0.82rem; min-height: 18px;"></div>
-            <button type="button" id="changePasswordSubmitBtn" class="account-redeem-btn" style="width: 100%; border-radius: 999px; padding: 10px 16px; font-size: 0.88rem;">
-              পাসওয়ার্ড সেভ করুন
-            </button>
-          </div>
-        </div>
-
-        <div class="account-stats-grid">
-          <div class="account-stat">
-            <span class="account-stat-value" id="accountStatTokens">0</span>
-            <span class="account-stat-label">মোট টোকেন</span>
-          </div>
-          <div class="account-stat">
-            <span class="account-stat-value" id="accountStatCost">$0.0000</span>
-            <span class="account-stat-label">আনুমানিক খরচ</span>
-          </div>
-          <div class="account-stat">
-            <span class="account-stat-value" id="accountStatMessages">0</span>
-            <span class="account-stat-label">মোট বার্তা</span>
-          </div>
-          <div class="account-stat">
-            <span class="account-stat-value" id="accountStatImages">0</span>
-            <span class="account-stat-label">তৈরি হওয়া ছবি</span>
-          </div>
-          <div class="account-stat">
-            <span class="account-stat-value" id="accountStatDailyCost">$0.0000</span>
-            <span class="account-stat-label">আজকের খরচ</span>
-          </div>
-        </div>
-
-        <button class="account-action-btn account-auth-btn" id="accountAuthBtn" type="button" style="background: var(--accent-color); color: #fff;">লগইন / রেজিস্টার করুন</button>
-        <button class="account-action-btn account-save-btn" id="accountSaveBtn" type="button">সংরক্ষণ করুন</button>
-        <button class="account-action-btn account-logout-btn" id="accountLogoutBtn" type="button">লগআউট করুন</button>
-        <button class="account-action-btn account-reset-btn" id="accountResetBtn" type="button">চ্যাট ও ব্যবহারের হিসাব রিসেট করুন</button>
       </div>
     </div>
   </div>
@@ -2491,23 +3348,84 @@
   <div class="offline-banner" id="offlineBanner">📡 ইন্টারনেট সংযোগ নেই — বার্তা পাঠানো যাবে না</div>
 
   <div class="chat-container" id="scrollContainer">
+    <div class="drag-drop-overlay" id="dropOverlay">
+      <div class="drag-drop-icon">📁</div>
+      <div style="font-weight:600; font-size:1.1rem;">ফাইল বা ছবি এখানে ড্রপ করুন</div>
+      <div style="color:var(--text-sub); font-size:0.85rem;">ছবি, পিডিএফ বা টেক্সট ফাইল সরাসরি যুক্ত হবে</div>
+    </div>
+    
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
-        <span>যেকোনো প্রশ্ন লিখুন</span>
-        <div class="quick-prompts-row">
-          <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">💻 ফুল ওয়েবসাইট কোড</button>
-          <button type="button" class="quick-prompt-chip" data-prompt="এই লেখাটি বাংলায় অনুবাদ করুন: ">🌐 অনুবাদ করুন</button>
-          <button type="button" class="quick-prompt-chip" data-prompt="এই বিষয়টির একটি সংক্ষিপ্ত সারাংশ তৈরি করে দিন: ">📝 সারাংশ তৈরি</button>
-          <button type="button" class="quick-prompt-chip" data-prompt="একটি সৃজনশীল গল্প লিখে দিন">📖 গল্প লিখুন</button>
+        <div class="empty-state-logo-wrap" style="margin-bottom: 8px;">
+          <img src="app_logo.png" alt="Logo" style="width: 52px; height: 52px; border-radius: 16px; box-shadow: 0 4px 20px rgba(59,130,246,0.35);">
+        </div>
+        <div id="heroGreetingText" style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">আজ কীভাবে সাহায্য করতে পারি?</div>
+        <span style="font-size: 0.92rem; color: var(--text-sub);">যেকোনো প্রশ্ন, কোডিং বা সৃজনশীল লেখার জন্য আলোকপথ প্রস্তুত</span>
+        
+        <div class="quick-prompts-grid">
+          <div class="quick-prompt-card" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, Tailwind CSS ও JS সহ) লিখে দিন">
+            <div class="prompt-card-header">
+              <span class="prompt-card-icon">💻</span>
+              <span class="prompt-card-title">ফুল ওয়েবসাইট প্রজেক্ট</span>
+            </div>
+            <div class="prompt-card-desc">HTML, CSS ও JavaScript দিয়ে একটি আকর্ষণীয় রেসপন্সিভ ওয়েব পেজ তৈরি করুন</div>
+          </div>
+          
+          <div class="quick-prompt-card" data-prompt="এই বিষয়টির একটি তথ্যবহুল ও আকর্ষণীয় বাংলা নিবন্ধ লিখে দিন: ">
+            <div class="prompt-card-header">
+              <span class="prompt-card-icon">✍️</span>
+              <span class="prompt-card-title">কনটেন্ট ও লেখালেখি</span>
+            </div>
+            <div class="prompt-card-desc">ব্লগ বা সোশ্যাল মিডিয়ার জন্য প্রফেশনাল ও নির্ভুল বাংলা কনটেন্ট লিখুন</div>
+          </div>
+          
+          <div class="quick-prompt-card" data-prompt="নিচের কোডের বাগ চিহ্নিত করে ঠিক করুন এবং ব্যাখ্যা দিন:\n">
+            <div class="prompt-card-header">
+              <span class="prompt-card-icon">🔍</span>
+              <span class="prompt-card-title">কোড ডিবাগ ও বিশ্লেষণ</span>
+            </div>
+            <div class="prompt-card-desc">কোড পেস্ট করে বাগ ফিক্স, লজিক অপটিমাইজেশন ও স্পিড বৃদ্ধি করুন</div>
+          </div>
+          
+          <div class="quick-prompt-card" data-prompt="একটি নতুন স্টার্টআপ বা প্রজেক্ট আইডিয়ার জন্য কার্যকরী রোডম্যাপ তৈরি করে দিন">
+            <div class="prompt-card-header">
+              <span class="prompt-card-icon">🚀</span>
+              <span class="prompt-card-title">আইডিয়া ও রোডম্যাপ</span>
+            </div>
+            <div class="prompt-card-desc">মার্কেট রিসার্চ, স্টেপ-বাই-স্টেপ এক্সিকিউশন প্ল্যান ও স্ট্র্যাটেজি তৈরি করুন</div>
+          </div>
         </div>
       </div>
     </div>
+
+    <button type="button" class="scroll-to-bottom-btn" id="scrollToBottomBtn" aria-label="নিচে স্ক্রোল করুন" title="নতুন বার্তায় যান">
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
   </div>
 
   <div class="input-wrapper">
     <div class="image-preview-row" id="imagePreviewRow"></div>
     <div class="file-preview-row" id="filePreviewRow"></div>
+
+    <div class="composer-quick-bar">
+      <button type="button" class="composer-pill" id="pillWebSearch" title="লাইভ ইন্টারনেট থেকে তথ্য সার্চ করুন">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <span>ওয়েব সার্চ</span>
+      </button>
+      <button type="button" class="composer-pill" id="pillImageGen" title="AI ছবি তৈরি করুন">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <span>ছবি তৈরি</span>
+      </button>
+      <button type="button" class="composer-pill" id="micBtn" title="ভয়েস রেকর্ড করে কথা বলুন">
+        <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span>ভয়েস</span>
+      </button>
+      <button type="button" class="composer-pill" id="clearInputBtn" style="display:none;" title="লেখা মুছে ফেলুন">
+        <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <span>মুছুন</span>
+      </button>
+    </div>
+
     <form class="input-card" id="chatForm">
       <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
       <input type="file" id="docInput" accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.css,.js,.jsx,.ts,.tsx" style="display:none" multiple>
@@ -2597,6 +3515,273 @@
         div.textContent = String(md || "");
         return div.innerHTML;
       }
+    }
+
+    // ===== Sound Synthesizer Engine (Zero Dependency Web Audio) =====
+    const soundEngine = {
+      ctx: null,
+      getCtx() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+      playSend() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(480, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(960, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.06, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.12);
+        } catch {}
+      },
+      playReceive() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.22);
+        } catch {}
+      },
+      playClick() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          gain.gain.setValueAtTime(0.03, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.03);
+        } catch {}
+      },
+      playSuccess() {
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.07);
+            gain.gain.setValueAtTime(0.05, ctx.currentTime + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.07);
+            osc.stop(ctx.currentTime + i * 0.07 + 0.18);
+          });
+        } catch {}
+      }
+    };
+
+    function triggerHaptic(type = "light") {
+      if ("vibrate" in navigator) {
+        try {
+          if (type === "light") navigator.vibrate(10);
+          else if (type === "medium") navigator.vibrate(25);
+          else if (type === "success") navigator.vibrate([15, 30, 20]);
+          else if (type === "error") navigator.vibrate([40, 50, 30]);
+        } catch {}
+      }
+    }
+
+    // ===== Lightweight Canvas Confetti Burst =====
+    function triggerConfetti() {
+      const canvas = document.createElement("canvas");
+      canvas.style.position = "fixed";
+      canvas.style.inset = "0";
+      canvas.style.width = "100vw";
+      canvas.style.height = "100vh";
+      canvas.style.pointerEvents = "none";
+      canvas.style.zIndex = "9999";
+      document.body.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+
+      const colors = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899", "#60a5fa"];
+      const particles = Array.from({ length: 65 }, () => ({
+        x: window.innerWidth * 0.5,
+        y: window.innerHeight * 0.45,
+        vx: (Math.random() - 0.5) * 16,
+        vy: (Math.random() - 0.8) * 18,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rSpeed: (Math.random() - 0.5) * 12,
+        opacity: 1
+      }));
+
+      const startTime = performance.now();
+      function render(now) {
+        const elapsed = now - startTime;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.45;
+          p.vx *= 0.98;
+          p.rotation += p.rSpeed;
+          p.opacity = Math.max(0, 1 - elapsed / 2200);
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.opacity;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        });
+
+        if (elapsed < 2200) {
+          requestAnimationFrame(render);
+        } else {
+          canvas.remove();
+        }
+      }
+      requestAnimationFrame(render);
+    }
+
+    // ===== Bengali Text-to-Speech (TTS) =====
+    function speakBengaliText(text) {
+      if (!("speechSynthesis" in window)) {
+        showToast("আপনার ব্রাউজারে স্পিচ সাপোর্ট নেই", "error");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const clean = text
+        .replace(/```[\s\S]*?```/g, "কোড ব্লক বাদ দেওয়া হয়েছে।")
+        .replace(/`[^`]+`/g, "")
+        .replace(/[*_#>`~]/g, "")
+        .replace(/\[.*?\]\(.*?\)/g, "")
+        .trim();
+      if (!clean) return;
+
+      const utter = new SpeechSynthesisUtterance(clean);
+      utter.lang = "bn-BD";
+      utter.rate = 1.0;
+      utter.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const bnVoice = voices.find((v) => v.lang && (v.lang.includes("bn") || v.lang.includes("Bengali")));
+      if (bnVoice) utter.voice = bnVoice;
+
+      window.speechSynthesis.speak(utter);
+      showToast("ভয়েস অডিও প্লে হচ্ছে...", "success");
+    }
+
+    // ===== Speech-to-Text Voice Input =====
+    let speechRecognitionInstance = null;
+    let isSpeechRecording = false;
+
+    function initVoiceInput() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const micBtn = document.getElementById("micBtn");
+      if (!micBtn) return;
+
+      if (!SpeechRec) {
+        micBtn.style.display = "none";
+        return;
+      }
+
+      speechRecognitionInstance = new SpeechRec();
+      speechRecognitionInstance.lang = "bn-BD";
+      speechRecognitionInstance.continuous = false;
+      speechRecognitionInstance.interimResults = true;
+
+      speechRecognitionInstance.onstart = () => {
+        isSpeechRecording = true;
+        micBtn.classList.add("recording");
+        micBtn.innerHTML = `
+          <div class="voice-wave-container">
+            <span class="voice-wave-bar"></span>
+            <span class="voice-wave-bar"></span>
+            <span class="voice-wave-bar"></span>
+            <span class="voice-wave-bar"></span>
+          </div>
+          <span>রেকর্ড হচ্ছে</span>
+        `;
+        soundEngine.playClick();
+        triggerHaptic("medium");
+        showToast("কথা বলুন... (বাংলা ও ইংরেজি)", "success");
+      };
+
+      speechRecognitionInstance.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript) {
+          const input = document.getElementById("userInput");
+          input.value = (input.value ? input.value + " " : "") + transcript;
+          input.dispatchEvent(new Event("input"));
+        }
+      };
+
+      speechRecognitionInstance.onerror = (e) => {
+        isSpeechRecording = false;
+        resetMicBtn();
+        if (e.error !== "no-speech") {
+          showToast("মাইক্রোফোনে সমস্যা হয়েছে", "error");
+        }
+      };
+
+      speechRecognitionInstance.onend = () => {
+        isSpeechRecording = false;
+        resetMicBtn();
+      };
+
+      function resetMicBtn() {
+        micBtn.classList.remove("recording");
+        micBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+          <span>ভয়েস</span>
+        `;
+      }
+
+      micBtn.addEventListener("click", () => {
+        if (isSpeechRecording) {
+          speechRecognitionInstance.stop();
+          isSpeechRecording = false;
+          resetMicBtn();
+        } else {
+          try {
+            speechRecognitionInstance.start();
+          } catch {
+            speechRecognitionInstance.stop();
+          }
+        }
+      });
     }
 
     function stopGeneration() {
@@ -2961,6 +4146,7 @@
           warningEl.classList.remove("visible");
         }
       }
+      if (typeof updateNavbarCreditBadge === "function") updateNavbarCreditBadge();
       if (typeof updateSendAvailability === "function") updateSendAvailability();
     }
 
@@ -3244,18 +4430,392 @@
       if (e.target === modelModalOverlay) closeModal();
     });
 
+    // ===== Sliding Sidebar Drawer Engine =====
+    const drawerToggleBtn = document.getElementById("drawerToggleBtn");
+    const sidebarDrawer = document.getElementById("sidebarDrawer");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const drawerCloseBtn = document.getElementById("drawerCloseBtn");
+    const drawerNewChatBtn = document.getElementById("drawerNewChatBtn");
+    const quickNewChatBtn = document.getElementById("quickNewChatBtn");
+    const drawerSearchInput = document.getElementById("drawerSearchInput");
+    const drawerUserCard = document.getElementById("drawerUserCard");
+    const drawerSettingsBtn = document.getElementById("drawerSettingsBtn");
+    const drawerThemeBtn = document.getElementById("drawerThemeBtn");
+    const navCreditBadge = document.getElementById("navCreditBadge");
+
+    function openSidebarDrawer() {
+      if (sidebarDrawer) sidebarDrawer.classList.add("open");
+      if (drawerBackdrop) drawerBackdrop.classList.add("open");
+      renderDrawerHistoryList(drawerSearchInput ? drawerSearchInput.value : "");
+      updateNavbarCreditBadge();
+      soundEngine.playClick();
+      triggerHaptic("light");
+    }
+
+    function closeSidebarDrawer() {
+      if (sidebarDrawer) sidebarDrawer.classList.remove("open");
+      if (drawerBackdrop) drawerBackdrop.classList.remove("open");
+    }
+
+    if (drawerToggleBtn) drawerToggleBtn.addEventListener("click", openSidebarDrawer);
+    if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeSidebarDrawer);
+    if (drawerBackdrop) drawerBackdrop.addEventListener("click", closeSidebarDrawer);
+
+    if (drawerNewChatBtn) {
+      drawerNewChatBtn.addEventListener("click", () => {
+        startNewChat();
+        closeSidebarDrawer();
+        soundEngine.playClick();
+      });
+    }
+
+    if (quickNewChatBtn) {
+      quickNewChatBtn.addEventListener("click", () => {
+        startNewChat();
+        soundEngine.playClick();
+      });
+    }
+
+    if (drawerSearchInput) {
+      drawerSearchInput.addEventListener("input", (e) => {
+        renderDrawerHistoryList(e.target.value);
+      });
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.addEventListener("click", () => {
+        closeSidebarDrawer();
+        openAccountModal();
+      });
+    }
+
+    if (drawerSettingsBtn) {
+      drawerSettingsBtn.addEventListener("click", () => {
+        closeSidebarDrawer();
+        openAccountModal();
+      });
+    }
+
+    if (drawerThemeBtn) {
+      drawerThemeBtn.addEventListener("click", () => {
+        if (typeof cycleTheme === "function") cycleTheme();
+      });
+    }
+
+    if (navCreditBadge) {
+      navCreditBadge.addEventListener("click", () => {
+        openAccountModal();
+        soundEngine.playClick();
+      });
+    }
+
+    function updateNavbarCreditBadge() {
+      const badgeEl = document.getElementById("navCreditBadge");
+      const countEl = document.getElementById("navCreditCount");
+      const drawerPlanEl = document.getElementById("drawerUserPlan");
+      if (!badgeEl || !countEl) return;
+
+      const userStr = localStorage.getItem("alokpoth_user");
+      let isAdmin = false;
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+            isAdmin = true;
+          }
+        } catch {}
+      }
+
+      if (isAdmin) {
+        countEl.textContent = "আনলিমিটেড";
+        badgeEl.className = "nav-credit-badge";
+        if (drawerPlanEl) drawerPlanEl.textContent = "Admin (আনলিমিটেড)";
+        return;
+      }
+
+      const { limit } = getPlanWindowLimit();
+      const usage = getWindowUsage();
+      const used = usage.count || 0;
+      const remaining = Math.max(0, limit - used);
+
+      countEl.textContent = `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
+      if (remaining <= 0) {
+        badgeEl.className = "nav-credit-badge danger";
+      } else if (remaining <= Math.ceil(limit * 0.2)) {
+        badgeEl.className = "nav-credit-badge warning";
+      } else {
+        badgeEl.className = "nav-credit-badge";
+      }
+
+      if (drawerPlanEl) {
+        drawerPlanEl.textContent = `${currentPlan || "Free"} (${toBengaliDigits(remaining)} বার্তা বাকি)`;
+      }
+    }
+
+    function renderDrawerHistoryList(filterQuery = "") {
+      const drawerListEl = document.getElementById("drawerHistoryList");
+      if (!drawerListEl) return;
+
+      let sessions = loadAllSessions().sort((a, b) => b.updatedAt - a.updatedAt);
+      if (filterQuery && filterQuery.trim()) {
+        const q = filterQuery.trim().toLowerCase();
+        sessions = sessions.filter(s => (s.title || "").toLowerCase().includes(q));
+      }
+
+      if (!sessions.length) {
+        drawerListEl.innerHTML = `<div style="text-align:center; padding: 24px 12px; color: var(--text-sub); font-size: 0.85rem;">${filterQuery ? "কোনো চ্যাট মেলেনি" : "কোনো সংরক্ষিত চ্যাট নেই"}</div>`;
+        return;
+      }
+
+      drawerListEl.innerHTML = "";
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const yesterdayStart = todayStart - 86400000;
+      const weekStart = todayStart - 6 * 86400000;
+
+      const groups = {
+        today: { label: "আজ", items: [] },
+        yesterday: { label: "গতকাল", items: [] },
+        week: { label: "বিগত ৭ দিন", items: [] },
+        older: { label: "পূর্ববর্তী চ্যাট", items: [] }
+      };
+
+      sessions.forEach((s) => {
+        const t = s.updatedAt || 0;
+        if (t >= todayStart) groups.today.items.push(s);
+        else if (t >= yesterdayStart) groups.yesterday.items.push(s);
+        else if (t >= weekStart) groups.week.items.push(s);
+        else groups.older.items.push(s);
+      });
+
+      Object.values(groups).forEach((group) => {
+        if (!group.items.length) return;
+        const sectionLabel = document.createElement("div");
+        sectionLabel.className = "drawer-section-label";
+        sectionLabel.textContent = group.label;
+        drawerListEl.appendChild(sectionLabel);
+
+        group.items.forEach((session) => {
+          const item = document.createElement("div");
+          item.className = `drawer-session-item ${session.id === currentSessionId ? "active" : ""}`;
+
+          item.innerHTML = `
+            <div class="drawer-session-title" title="${escapeHtml(session.title)}">${escapeHtml(session.title || "নামহীন চ্যাট")}</div>
+            <div class="drawer-session-actions">
+              <button type="button" class="drawer-session-action-btn edit-session-btn" title="নাম পরিবর্তন করুন">✏️</button>
+              <button type="button" class="drawer-session-action-btn del-session-btn" title="মুছে ফেলুন">🗑️</button>
+            </div>
+          `;
+
+          item.addEventListener("click", (e) => {
+            if (e.target.closest(".drawer-session-action-btn")) return;
+            loadSession(session.id);
+            closeSidebarDrawer();
+            soundEngine.playClick();
+          });
+
+          const editBtn = item.querySelector(".edit-session-btn");
+          editBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showCustomUI("prompt", "চ্যাটের নতুন শিরোনাম লিখুন:", session.title, (newTitle) => {
+              if (newTitle && newTitle.trim()) {
+                session.title = newTitle.trim();
+                const all = loadAllSessions();
+                const idx = all.findIndex(s => s.id === session.id);
+                if (idx !== -1) {
+                  all[idx].title = session.title;
+                  saveAllSessions(all);
+                  renderDrawerHistoryList(drawerSearchInput ? drawerSearchInput.value : "");
+                  renderChatHistoryList();
+                  showToast("শিরোনাম পরিবর্তিত হয়েছে", "success");
+                }
+              }
+            });
+          });
+
+          const delBtn = item.querySelector(".del-session-btn");
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showCustomUI("confirm", "আপনি কি এই চ্যাটটি মুছে ফেলতে চান?", null, (confirmed) => {
+              if (confirmed) {
+                const remaining = loadAllSessions().filter((s) => s.id !== session.id);
+                saveAllSessions(remaining);
+                if (currentSessionId === session.id) startNewChat();
+                renderDrawerHistoryList(drawerSearchInput ? drawerSearchInput.value : "");
+                renderChatHistoryList();
+                showToast("চ্যাট মুছে ফেলা হয়েছে", "success");
+              }
+            });
+          });
+
+          drawerListEl.appendChild(item);
+        });
+      });
+    }
+
+    // ===== Account Modal Tabs Initialization =====
+    function initAccountTabs() {
+      const nav = document.getElementById("accountTabsNav");
+      if (!nav) return;
+      nav.addEventListener("click", (e) => {
+        const btn = e.target.closest(".account-tab-pill");
+        if (!btn) return;
+        const targetTabId = btn.dataset.tab;
+        if (!targetTabId) return;
+
+        nav.querySelectorAll(".account-tab-pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const modal = document.getElementById("accountModalOverlay");
+        if (!modal) return;
+        modal.querySelectorAll(".account-tab-panel").forEach(p => p.classList.remove("active"));
+        const targetPanel = document.getElementById(targetTabId);
+        if (targetPanel) targetPanel.classList.add("active");
+
+        soundEngine.playClick();
+        triggerHaptic("light");
+      });
+    }
+
+    // ===== Scroll-to-Bottom FAB =====
+    function initScrollToBottomFAB() {
+      const btn = document.getElementById("scrollToBottomBtn");
+      const container = document.getElementById("scrollContainer");
+      if (!btn || !container) return;
+
+      container.addEventListener("scroll", () => {
+        const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+        if (distFromBottom > 160) {
+          btn.classList.add("visible");
+        } else {
+          btn.classList.remove("visible");
+        }
+      });
+
+      btn.addEventListener("click", () => {
+        scrollToBottom();
+        soundEngine.playClick();
+        triggerHaptic("light");
+      });
+    }
+
+    // ===== Drag and Drop Overlay =====
+    function initDragAndDrop() {
+      const scrollEl = document.getElementById("scrollContainer");
+      const overlay = document.getElementById("dropOverlay");
+      if (!scrollEl || !overlay) return;
+
+      let dragCounter = 0;
+
+      scrollEl.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        dragCounter++;
+        overlay.classList.add("active");
+      });
+
+      scrollEl.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      scrollEl.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          overlay.classList.remove("active");
+        }
+      });
+
+      scrollEl.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        overlay.classList.remove("active");
+
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const files = Array.from(e.dataTransfer.files);
+          const images = files.filter(f => f.type.startsWith("image/"));
+          const docs = files.filter(f => !f.type.startsWith("image/"));
+
+          if (images.length > 0 && typeof handleImageFiles === "function") {
+            handleImageFiles(images);
+          }
+          if (docs.length > 0 && typeof handleDocFiles === "function") {
+            handleDocFiles(docs);
+          }
+          soundEngine.playReceive();
+          triggerHaptic("medium");
+          showToast(`${files.length}টি ফাইল যুক্ত করা হয়েছে`, "success");
+        }
+      });
+    }
+
+    // ===== Composer Quick Bar Pills =====
+    function initComposerQuickBar() {
+      const pillSearch = document.getElementById("pillWebSearch");
+      const pillImage = document.getElementById("pillImageGen");
+      const clearBtn = document.getElementById("clearInputBtn");
+      const userInput = document.getElementById("userInput");
+
+      if (pillSearch) {
+        pillSearch.addEventListener("click", () => {
+          isWebSearchEnabled = !isWebSearchEnabled;
+          pillSearch.classList.toggle("active", isWebSearchEnabled);
+          soundEngine.playClick();
+          triggerHaptic("light");
+          showToast(isWebSearchEnabled ? "ওয়েব সার্চ সক্রিয় হয়েছে" : "ওয়েব সার্চ নিষ্ক্রিয় হয়েছে", "success");
+          if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
+          const txt = document.getElementById("webSearchText");
+          if (txt) txt.textContent = isWebSearchEnabled ? "ওয়েব সার্চ: চালু" : "ওয়েব সার্চ: বন্ধ";
+        });
+      }
+
+      if (pillImage) {
+        pillImage.addEventListener("click", () => {
+          isImageGenEnabled = !isImageGenEnabled;
+          pillImage.classList.toggle("active", isImageGenEnabled);
+          soundEngine.playClick();
+          triggerHaptic("light");
+          showToast(isImageGenEnabled ? "ছবি তৈরি সক্রিয় হয়েছে" : "ছবি তৈরি নিষ্ক্রিয় হয়েছে", "success");
+          if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
+          const txt = document.getElementById("imageGenText");
+          if (txt) txt.textContent = isImageGenEnabled ? "ছবি তৈরি: চালু" : "ছবি তৈরি: বন্ধ";
+        });
+      }
+
+      if (clearBtn && userInput) {
+        userInput.addEventListener("input", () => {
+          clearBtn.style.display = userInput.value.trim().length > 0 ? "inline-flex" : "none";
+        });
+        clearBtn.addEventListener("click", () => {
+          userInput.value = "";
+          userInput.style.height = "auto";
+          clearBtn.style.display = "none";
+          soundEngine.playClick();
+          if (typeof updateSendAvailability === "function") updateSendAvailability();
+        });
+      }
+    }
+
     const brandMenuBtn = document.getElementById("brandMenuBtn");
     const brandMenuOverlay = document.getElementById("brandMenuOverlay");
     const brandMenuClose = document.getElementById("brandMenuClose");
 
-    function openBrandMenu() { brandMenuOverlay.classList.add("open"); }
-    function closeBrandMenu() { brandMenuOverlay.classList.remove("open"); }
+    function openBrandMenu() {
+      openSidebarDrawer();
+    }
+    function closeBrandMenu() {
+      closeSidebarDrawer();
+      if (brandMenuOverlay) brandMenuOverlay.classList.remove("open");
+    }
 
     brandMenuBtn.addEventListener("click", openBrandMenu);
-    brandMenuClose.addEventListener("click", closeBrandMenu);
-    brandMenuOverlay.addEventListener("click", (e) => {
-      if (e.target === brandMenuOverlay) closeBrandMenu();
-    });
+    if (brandMenuClose) brandMenuClose.addEventListener("click", closeBrandMenu);
+    if (brandMenuOverlay) {
+      brandMenuOverlay.addEventListener("click", (e) => {
+        if (e.target === brandMenuOverlay) closeBrandMenu();
+      });
+    }
 
     const accountMenuBtn = document.getElementById("accountMenuBtn");
     const accountModalOverlay = document.getElementById("accountModalOverlay");
@@ -3282,7 +4842,25 @@
     function applyAccountName(name) {
       const displayName = name && name.trim() ? name.trim() : "অতিথি ব্যবহারকারী";
       accountNameDisplay.textContent = displayName;
-      accountAvatar.textContent = displayName.trim().charAt(0).toUpperCase() || "অ";
+      const initial = displayName.trim().charAt(0).toUpperCase() || "অ";
+      accountAvatar.textContent = initial;
+
+      const dName = document.getElementById("drawerUserName");
+      const dAv = document.getElementById("drawerAvatar");
+      if (dName) dName.textContent = displayName;
+      if (dAv) dAv.textContent = initial;
+
+      const heroGreeting = document.getElementById("heroGreetingText");
+      if (heroGreeting) {
+        const hr = new Date().getHours();
+        let timeGreeting = "আজ";
+        if (hr >= 5 && hr < 12) timeGreeting = "শুভ সকাল";
+        else if (hr >= 12 && hr < 16) timeGreeting = "শুভ দুপুর";
+        else if (hr >= 16 && hr < 19) timeGreeting = "শুভ বিকেল";
+        else timeGreeting = "শুভ সন্ধ্যা";
+        const firstName = displayName.split(" ")[0] || displayName;
+        heroGreeting.textContent = `${timeGreeting}, ${firstName}! আজ কীভাবে সাহায্য করতে পারি?`;
+      }
     }
 
     function renderAccountStats() {
@@ -3486,6 +5064,10 @@
               accountRedeemMsg.className = "account-redeem-msg show success";
             }
             showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+            triggerConfetti();
+            soundEngine.playSuccess();
+            triggerHaptic("success");
+            updateNavbarCreditBadge();
           } else {
             const errMsg = data.error || "রিডিম করতে ব্যর্থ হয়েছে! কোডটি পুনরায় পরীক্ষা করুন।";
             if (accountRedeemMsg) {
@@ -3493,6 +5075,8 @@
               accountRedeemMsg.className = "account-redeem-msg show error";
             }
             showToast(errMsg, "error");
+            soundEngine.playError();
+            triggerHaptic("error");
           }
         } catch (err) {
           const errMsg = "সার্ভারের সাথে যোগাযোগ করা যায়নি। অনুগ্রহ করে ইন্টারনেট সংযোগ চেক করুন।";
@@ -3501,6 +5085,8 @@
             accountRedeemMsg.className = "account-redeem-msg show error";
           }
           showToast(errMsg, "error");
+          soundEngine.playError();
+          triggerHaptic("error");
         } finally {
           accountRedeemBtn.disabled = false;
           accountRedeemBtn.textContent = "দাবি করুন";
@@ -4770,6 +6356,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.addEventListener("click", () => {
         const textToCopy = copyBtn.dataset.text || "";
         copyTextToClipboard(textToCopy).then((ok) => {
+          soundEngine.playClick();
+          triggerHaptic("light");
           const label = copyBtn.querySelector("span");
           const original = label ? label.textContent : "কপি";
           if (label) label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
@@ -4777,6 +6365,34 @@ Capabilities & Code Generation Instructions (CRITICAL):
         });
       });
       
+      const ttsBtn = document.createElement("button");
+      ttsBtn.type = "button";
+      ttsBtn.className = "action-icon-btn";
+      ttsBtn.style.display = "none";
+      ttsBtn.title = "বাংলায় ভয়েস শুনুন";
+      ttsBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span>শুনুন</span>`;
+      ttsBtn.addEventListener("click", () => {
+        const textToRead = copyBtn.dataset.text || textDiv.textContent || "";
+        speakBengaliText(textToRead);
+        triggerHaptic("light");
+      });
+
+      const shareBtn = document.createElement("button");
+      shareBtn.type = "button";
+      shareBtn.className = "action-icon-btn";
+      shareBtn.style.display = "none";
+      shareBtn.title = "উত্তর শেয়ার করুন";
+      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span>শেয়ার</span>`;
+      shareBtn.addEventListener("click", () => {
+        const textToShare = copyBtn.dataset.text || textDiv.textContent || "";
+        soundEngine.playClick();
+        if (navigator.share) {
+          navigator.share({ title: "Alokpoth AI", text: textToShare }).catch(() => {});
+        } else {
+          copyTextToClipboard(textToShare).then(() => showToast("শেয়ারের জন্য টেক্সট কপি হয়েছে", "success"));
+        }
+      });
+
       const regenBtn = document.createElement("button");
       regenBtn.type = "button";
       regenBtn.className = "action-icon-btn";
@@ -4784,12 +6400,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
       regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
       regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
       
-      actionRow.appendChild(copyBtn); actionRow.appendChild(regenBtn);
-      contentCol.appendChild(textDiv); contentCol.appendChild(actionRow);
+      actionRow.appendChild(copyBtn);
+      actionRow.appendChild(ttsBtn);
+      actionRow.appendChild(shareBtn);
+      actionRow.appendChild(regenBtn);
+      contentCol.appendChild(textDiv);
+      contentCol.appendChild(actionRow);
       container.appendChild(contentCol);
-      row.appendChild(container); chatStream.appendChild(row);
+      row.appendChild(container);
+      chatStream.appendChild(row);
       scrollToBottom();
-      return { textDiv, copyBtn, regenBtn };
+      return { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn };
     }
 
     const CODE_LANG_EXT = {
@@ -4817,17 +6438,33 @@ Capabilities & Code Generation Instructions (CRITICAL):
         wrapper.className = "code-block-wrapper";
         pre.parentNode.insertBefore(wrapper, pre);
 
+        const headerBar = document.createElement("div");
+        headerBar.className = "code-header-bar";
+
+        const leftCol = document.createElement("div");
+        leftCol.className = "code-header-left";
+        leftCol.innerHTML = `
+          <div class="code-window-dots">
+            <span class="code-dot red"></span>
+            <span class="code-dot yellow"></span>
+            <span class="code-dot green"></span>
+          </div>
+          <span class="code-lang-badge">${lang.toUpperCase()}</span>
+        `;
+
         const actionsBar = document.createElement("div");
-        actionsBar.className = "code-actions-bar";
+        actionsBar.className = "code-header-actions";
 
         // Copy button
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
-        copyBtn.className = "code-action-btn code-copy-btn";
+        copyBtn.className = "code-header-btn";
         copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
         copyBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           copyTextToClipboard(currentCode).then((ok) => {
+            soundEngine.playClick();
+            triggerHaptic("light");
             const span = copyBtn.querySelector("span");
             const old = span ? span.textContent : "কপি";
             if (span) span.textContent = ok ? "কপি হয়েছে!" : "ব্যর্থ!";
@@ -4838,7 +6475,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         // Download button
         const dlBtn = document.createElement("button");
         dlBtn.type = "button";
-        dlBtn.className = "code-action-btn code-download-btn";
+        dlBtn.className = "code-header-btn";
         dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ডাউনলোড</span>`;
         dlBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
@@ -4847,12 +6484,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
           const a = document.createElement("a");
           a.href = url; a.download = `code.${ext}`;
           document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+          soundEngine.playClick();
           showToast(`code.${ext} ডাউনলোড হয়েছে`, "success");
         });
         
         actionsBar.appendChild(copyBtn);
         actionsBar.appendChild(dlBtn);
-        wrapper.appendChild(actionsBar);
+        headerBar.appendChild(leftCol);
+        headerBar.appendChild(actionsBar);
+
+        wrapper.appendChild(headerBar);
         wrapper.appendChild(pre);
       });
     }
@@ -5381,6 +7022,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
               addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
                 isCodeGen: countCodeBlocks(renderedStream) > 0
               });
+              soundEngine.playReceive();
+              triggerHaptic("light");
+              updateNavbarCreditBadge();
               scrollToBottom();
               finishUp();
             }
@@ -5445,10 +7089,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
               } catch {
                 aiTextElement.textContent = renderedStream + "\n\n(উত্তর তৈরি থামানো হয়েছে)";
               }
+              messagesHistory.push({ role: "assistant", content: renderedStream });
+              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
+                isCodeGen: countCodeBlocks(renderedStream) > 0
+              });
             } else {
               aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
             }
+            soundEngine.playClick();
           } else {
+            soundEngine.playError();
+            triggerHaptic("error");
             // NEVER reveal internal model names or technical error stack traces
             let userFriendlyMsg = "দুঃখিত, এই মুহূর্তে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।";
             if (!navigator.onLine) {
@@ -5493,6 +7144,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     updateTokenCounter();
 
+    // Initialize luxury UI engines
+    initAccountTabs();
+    initScrollToBottomFAB();
+    initDragAndDrop();
+    initComposerQuickBar();
+    initVoiceInput();
+    updateNavbarCreditBadge();
+
     syncModelStatuses();
     setInterval(() => {
       if (navigator.onLine) syncModelStatuses({ silent: true });
@@ -5533,9 +7192,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       createUserBubble(text || (imagesForThisMessage.length ? "ছবি সংযুক্ত করা হয়েছে" : "ফাইল সংযুক্ত করা হয়েছে"), imagesForThisMessage, filesForThisMessage);
 
+      soundEngine.playSend();
+      triggerHaptic("medium");
+
       messageCount++;
       try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch {}
       deductCredit(1);
+      updateNavbarCreditBadge();
 
       let fileContext = "";
       if (filesForThisMessage.length) {
