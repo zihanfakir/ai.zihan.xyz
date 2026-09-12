@@ -30,7 +30,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefresh;
     private View mOfflineView;
-    private ProgressBar mInitialSpinner;
 
     private ValueCallback<Uri[]> mFilePathCallback;
     private Uri mCameraPhotoUri;
@@ -140,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
         mWebView = findViewById(R.id.webView);
         mSwipeRefresh = findViewById(R.id.swipeRefreshLayout);
         mOfflineView = findViewById(R.id.offlineView);
-        mInitialSpinner = findViewById(R.id.initialSpinner);
 
         Button btnRetry = findViewById(R.id.btnRetry);
         btnRetry.setOnClickListener(v -> retryLoading());
@@ -175,13 +172,6 @@ public class MainActivity extends AppCompatActivity {
         mWebView.addJavascriptInterface(new WebAppInterface(this), "AloAndroid");
 
         mWebView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                if (newProgress >= 100) {
-                    mInitialSpinner.setVisibility(View.GONE);
-                }
-            }
-
             @Override
             public void onPermissionRequest(PermissionRequest request) {
                 mPendingPermissionRequest = request;
@@ -285,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                mInitialSpinner.setVisibility(View.GONE);
                 mSwipeRefresh.setRefreshing(false);
                 showOfflineView(false);
             }
@@ -351,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
     private void retryLoading() {
         if (isNetworkAvailable()) {
             showOfflineView(false);
-            mInitialSpinner.setVisibility(View.VISIBLE);
             mWebView.loadUrl(APP_URL);
         } else {
             Toast.makeText(this, getString(R.string.error_offline_title), Toast.LENGTH_SHORT).show();
@@ -364,7 +352,6 @@ public class MainActivity extends AppCompatActivity {
         // Only enable swipe refresh on offline error view so user can pull down to retry
         mSwipeRefresh.setEnabled(show);
         if (show) {
-            mInitialSpinner.setVisibility(View.GONE);
             mSwipeRefresh.setRefreshing(false);
         }
     }

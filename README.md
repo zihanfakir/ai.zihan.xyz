@@ -6,9 +6,9 @@
 
 Alo AI এখন অ্যান্ড্রয়েডে সরাসরি নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
 
-- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download v1.0.2)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.2/AloAI.apk)
-- 🏷️ **GitHub Releases:** [Latest Release v1.0.2](https://github.com/zihanfakir/ai.zihan.xyz/releases/latest)
-- ⚡ **ফিচারসমূহ:** ক্যামেরা ও ফাইল আপলোড, ভয়েস চ্যাট ও মাইক্রোফোন সাপোর্ট, ডার্ক মোড, অফলাইন নোটিফিকেশন, ব্যাক বোতাম সুরক্ষা এবং দ্রুতগতির পারফরম্যান্স।
+- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download v1.0.3)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.3/AloAI.apk)
+- 🏷️ **GitHub Releases:** [Latest Release v1.0.3](https://github.com/zihanfakir/ai.zihan.xyz/releases/latest)
+- ⚡ **ফিচারসমূহ:** ব্র্যান্ডেড Interwind স্প্ল্যাশ লোডার (ডার্ক, লাইট, ওলেড ও আই-কেয়ার থিম সমর্থন), ক্যামেরা ও ফাইল আপলোড, ভয়েস চ্যাট ও মাইক্রোফোন সাপোর্ট, ব্যাক বোতাম সুরক্ষা এবং সুপারফাস্ট পারফরম্যান্স।
 
 ## Features
 

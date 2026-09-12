@@ -1919,12 +1919,143 @@
         scroll-behavior: auto !important;
       }
     }
+
+    /* ========================================================
+       Interwind App Entry Loading Splash Overlay
+       ======================================================== */
+    :root {
+      --loader-bg: #09090b;
+      --loader-ball-1: #3b82f6;
+      --loader-ball-2: #ffffff;
+      --loader-text: #f8fafc;
+    }
+    :root[data-theme="light"] {
+      --loader-bg: #f9fafb;
+      --loader-ball-1: #2563eb;
+      --loader-ball-2: #0f172a;
+      --loader-text: #0f172a;
+    }
+    :root[data-theme="oled"] {
+      --loader-bg: #000000;
+      --loader-ball-1: #3b82f6;
+      --loader-ball-2: #ffffff;
+      --loader-text: #e5e5e5;
+    }
+    :root[data-theme="eyecare"] {
+      --loader-bg: #f5eedc;
+      --loader-ball-1: #d97706;
+      --loader-ball-2: #4a3b2c;
+      --loader-text: #4a3b2c;
+    }
+
+    .app-splash-loader {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background-color: var(--loader-bg);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .app-splash-loader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash-loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .splash-brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--loader-text);
+      opacity: 0.9;
+      animation: splashPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes splashPulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes ldio-x2uulkbinbj-r {
+      0%, 100% { animation-timing-function: cubic-bezier(0.2, 0, 0.8, 0.8); }
+      50% { animation-timing-function: cubic-bezier(0.2, 0.2, 0.8, 1); }
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes ldio-x2uulkbinbj-s {
+      0%, 100% { animation-timing-function: cubic-bezier(0.2, 0, 0.8, 0.8); }
+      50% { animation-timing-function: cubic-bezier(0.2, 0.2, 0.8, 1); }
+      0% { transform: translate(-30px, -30px) scale(0); }
+      50% { transform: translate(-30px, -30px) scale(1); }
+      100% { transform: translate(-30px, -30px) scale(0); }
+    }
+    .loadingio-spinner-interwind-nq4q5u6dq7r {
+      width: 140px;
+      height: 140px;
+      display: inline-block;
+      overflow: hidden;
+      background: none;
+    }
+    .ldio-x2uulkbinbj {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform: translateZ(0) scale(0.7);
+      transform-origin: 0 0;
+      backface-visibility: hidden;
+    }
+    .ldio-x2uulkbinbj div { box-sizing: content-box; }
+    .ldio-x2uulkbinbj > div { transform: translate(0px, -15px); }
+    .ldio-x2uulkbinbj > div > div {
+      animation: ldio-x2uulkbinbj-r 1s linear infinite;
+      transform-origin: 100px 100px;
+    }
+    .ldio-x2uulkbinbj > div > div > div {
+      position: absolute;
+      transform: translate(100px, 82px);
+    }
+    .ldio-x2uulkbinbj > div > div > div > div {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--loader-ball-1);
+      animation: ldio-x2uulkbinbj-s 1s linear infinite;
+    }
+    .ldio-x2uulkbinbj > div > div:last-child {
+      animation-delay: -0.5s;
+    }
+    .ldio-x2uulkbinbj > div > div:last-child > div > div {
+      animation-delay: -0.5s;
+      background: var(--loader-ball-2);
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 </head>
 <body>
+  <!-- Fullscreen App Entry Splash Loader (Interwind Animation) -->
+  <div id="appSplashLoader" class="app-splash-loader" aria-label="Loading Alokpoth AI...">
+    <div class="splash-loader-container">
+      <div class="loadingio-spinner-interwind-nq4q5u6dq7r">
+        <div class="ldio-x2uulkbinbj">
+          <div><div><div><div></div></div></div><div><div><div></div></div></div></div>
+        </div>
+      </div>
+      <div class="splash-brand-title">Alokpoth AI</div>
+    </div>
+  </div>
 <div class="toast-container" id="toastContainer"></div>
 
   <nav class="navbar">
@@ -4959,6 +5090,26 @@ Capabilities & Code Generation Instructions (CRITICAL):
       updateSendAvailability();
       updateTokenCounter();
     });
+
+    /* ========================================================
+       App Entry Splash Loader Controller
+       ======================================================== */
+    function dismissSplashLoader() {
+      const loader = document.getElementById("appSplashLoader");
+      if (loader && !loader.classList.contains("fade-out")) {
+        loader.classList.add("fade-out");
+        setTimeout(() => {
+          try { loader.remove(); } catch (e) {}
+        }, 450);
+      }
+    }
+
+    if (document.readyState === "complete") {
+      setTimeout(dismissSplashLoader, 700);
+    } else {
+      window.addEventListener("load", () => setTimeout(dismissSplashLoader, 600));
+      setTimeout(dismissSplashLoader, 1800);
+    }
   </script>
 </body>
 </html>
