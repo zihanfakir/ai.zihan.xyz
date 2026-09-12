@@ -260,17 +260,19 @@ const saveChatSession = async (req, res) => {
 
     const cleanTitle = (typeof title === 'string' ? title.trim().slice(0, 100) : 'নতুন চ্যাট') || 'নতুন চ্যাট';
     const cleanHistory = Array.isArray(messagesHistory) ? messagesHistory.slice(-200) : [];
+    const validUpdatedAt = (updatedAt && !isNaN(new Date(updatedAt).getTime())) ? new Date(updatedAt).getTime() : Date.now();
+    const userId = String(user._id || user.id);
 
     if (getIsMongoConnected()) {
       await ChatSession.findOneAndUpdate(
-        { user_id: user._id, session_id },
-        { title: cleanTitle, messagesHistory: cleanHistory, updatedAt: updatedAt || Date.now() },
+        { user_id: userId, session_id },
+        { title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt },
         { upsert: true, new: true }
       );
     } else {
       if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
-      const idx = memoryStore.chatSessions.findIndex(s => s.session_id === session_id && String(s.user_id) === String(user._id));
-      const sessionDoc = { user_id: user._id, session_id, title: cleanTitle, messagesHistory: cleanHistory, updatedAt: updatedAt || Date.now() };
+      const idx = memoryStore.chatSessions.findIndex(s => s.session_id === session_id && String(s.user_id) === userId);
+      const sessionDoc = { user_id: userId, session_id, title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt };
       if (idx !== -1) {
         memoryStore.chatSessions[idx] = sessionDoc;
       } else {
@@ -287,12 +289,15 @@ const saveChatSession = async (req, res) => {
 const getChatSessions = async (req, res) => {
   try {
     const user = req.user;
+    const userId = String(user._id || user.id);
     let sessions = [];
     if (getIsMongoConnected()) {
-      sessions = await ChatSession.find({ user_id: user._id }).sort({ updatedAt: -1 });
+      sessions = await ChatSession.find({ user_id: userId }).sort({ updatedAt: -1 });
     } else {
       if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
-      sessions = memoryStore.chatSessions.filter(s => String(s.user_id) === String(user._id)).sort((a, b) => b.updatedAt - a.updatedAt);
+      sessions = memoryStore.chatSessions
+        .filter(s => String(s.user_id) === userId)
+        .sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
     }
     res.json({ success: true, sessions });
   } catch (error) {
@@ -304,11 +309,12 @@ const deleteChatSession = async (req, res) => {
   try {
     const { session_id } = req.params;
     const user = req.user;
+    const userId = String(user._id || user.id);
     if (getIsMongoConnected()) {
-      await ChatSession.findOneAndDelete({ user_id: user._id, session_id });
+      await ChatSession.findOneAndDelete({ user_id: userId, session_id });
     } else {
       if (memoryStore.chatSessions) {
-        memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === session_id && String(s.user_id) === String(user._id)));
+        memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === session_id && String(s.user_id) === userId));
         debouncedSave();
       }
     }

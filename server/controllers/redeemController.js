@@ -136,6 +136,18 @@ const claimRedeemCode = async (req, res) => {
       } else {
         console.warn('[Redeem] User not found in persisted users array, userId:', userId);
       }
+      if (memoryStore.users) {
+        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId));
+        if (mUser) mUser.subscription = subscriptionData;
+      }
+      if (memoryStore.redeemCodes) {
+        const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
+        if (mCode) {
+          mCode.is_used = true;
+          mCode.used_by = userId;
+          mCode.used_at = now;
+        }
+      }
       user.subscription = subscriptionData;
 
       await savePersistedRedeemCodes(codes);

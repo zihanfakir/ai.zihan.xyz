@@ -133,7 +133,7 @@
       --btn-send: #4a3b2c;
       --btn-send-disabled: #d5c8b5;
       --bubble-user-bg: linear-gradient(135deg, #eaddc5 0%, #f5eedc 100%);
-      --accent-color: #d97706;
+      --accent-color: #92400e;
       --glass-bg: rgba(245, 238, 220, 0.85);
       --download-btn-bg: rgba(74, 59, 44, 0.08);
       --download-btn-bg-hover: rgba(74, 59, 44, 0.15);
@@ -2949,7 +2949,7 @@
       }
     }, { passive: true });
 
-    const COPY_ALLOWED_SELECTOR = "input, textarea, .chat-textarea, .user-bubble, .ai-bubble, pre, code, [contenteditable='true']";
+    const COPY_ALLOWED_SELECTOR = "input, textarea, .chat-textarea, .user-bubble, .ai-bubble, pre, code, [contenteditable='true'], .modal-box, .account-modal, .auth-modal, .code-chip, .toast, .account-credit-warning, .ai-error-box, .custom-dialog-box";
 
     document.addEventListener("copy", (e) => {
       if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
@@ -3441,7 +3441,7 @@
       accountRedeemInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          accountRedeemBtn.click();
+          if (!accountRedeemBtn.disabled) accountRedeemBtn.click();
         }
       });
     }
@@ -3598,6 +3598,8 @@
       if (authModalOverlay) authModalOverlay.classList.remove("open");
       if (authErrorMsg) authErrorMsg.style.display = "none";
       if (authPasswordInput) authPasswordInput.value = "";
+      if (authEmailInput) authEmailInput.value = "";
+      if (authNameInput) authNameInput.value = "";
     }
 
     if (authModalClose) authModalClose.addEventListener("click", closeAuthModal);
@@ -4135,8 +4137,9 @@
       const files = Array.from(imageInput.files || []);
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        if (file.size > 15 * 1024 * 1024) {
-          showToast(`ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 15MB অনুমোদিত।`, "error");
+        const MAX_IMG_SIZE = 3.5 * 1024 * 1024; // 3.5MB safe for Vercel 4.5MB payload limit
+        if (file.size > MAX_IMG_SIZE) {
+          showToast(`ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
           continue;
         }
         const base64 = await fileToBase64(file);
@@ -4153,8 +4156,9 @@
         if (item.type.indexOf("image") !== -1) {
           const file = item.getAsFile();
           if (file) {
-            if (file.size > 15 * 1024 * 1024) {
-              showToast("পেস্ট করা ছবিটি অতিরিক্ত বড় (সর্বোচ্চ 15MB)", "error");
+            const MAX_IMG_SIZE = 3.5 * 1024 * 1024;
+            if (file.size > MAX_IMG_SIZE) {
+              showToast(`পেস্ট করা ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
               continue;
             }
             const base64 = await fileToBase64(file);
@@ -4560,7 +4564,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let lang = "txt";
         if (codeEl) {
           const cls = Array.from(codeEl.classList).find((c) => c.startsWith("language-"));
-          if (cls) lang = cls.replace("language-", "");
+          if (cls) lang = cls.replace("language-", "").split(/[:?#\s]/)[0] || "txt";
         }
         const ext = CODE_LANG_EXT[lang.toLowerCase()] || "txt";
         
@@ -4834,6 +4838,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
+        textArea.setSelectionRange(0, 999999);
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
         return successful;
@@ -4977,8 +4982,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
           attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
           
           try {
-            const imageUrl = await generateImageForVyceaiModel(lastUserMsg.content);
-            renderGeneratedImageBubble(aiTextElement, imageUrl, lastUserMsg.content);
+            let imgPrompt = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
+            if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
+            const imageUrl = await generateImageForVyceaiModel(imgPrompt);
+            renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);
             copyBtn.style.display = "none";
             regenBtn.style.display = "inline-flex";
             messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });

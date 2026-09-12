@@ -1,44 +1,41 @@
-// Zero-dependency IP Rate Limiter for DDoS and Brute Force Protection
-const rateLimits = new Map();
-
-// Periodic cleanup of expired records every 5 minutes
-const cleanupTimer = setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of rateLimits.entries()) {
-    if (now > record.resetTime) {
-      rateLimits.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
-
-if (cleanupTimer.unref) cleanupTimer.unref();
-
 const createRateLimiter = ({
   windowMs = 15 * 60 * 1000,
   max = 20,
   message = 'অতিরিক্ত অনুরোধ করা হয়েছে, অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।'
 } = {}) => {
+  const localStore = new Map();
+
+  const cleanup = setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of localStore.entries()) {
+      if (now > record.resetTime) {
+        localStore.delete(key);
+      }
+    }
+  }, Math.max(windowMs, 60 * 1000));
+  if (cleanup.unref) cleanup.unref();
+
   return (req, res, next) => {
     const xff = req.headers['x-forwarded-for'];
     const firstXff = Array.isArray(xff) ? xff[0] : (typeof xff === 'string' ? xff.split(',')[0].trim() : null);
     const rawIp = firstXff || req.socket?.remoteAddress || req.ip || '127.0.0.1';
     const cleanIp = String(rawIp).replace(/^::ffff:/, '');
-    const prefix = req.baseUrl || 'rate';
+    const prefix = req.baseUrl || req.route?.path || 'rate';
     const key = `${prefix}:${cleanIp}`;
     const now = Date.now();
 
     // Prevent memory bloat under spoofed IP floods
-    if (rateLimits.size > 5000) {
-      for (const [k, r] of rateLimits.entries()) {
-        if (now > r.resetTime) rateLimits.delete(k);
+    if (localStore.size > 5000) {
+      for (const [k, r] of localStore.entries()) {
+        if (now > r.resetTime) localStore.delete(k);
       }
-      if (rateLimits.size > 5000) rateLimits.clear();
+      if (localStore.size > 5000) localStore.clear();
     }
 
-    let record = rateLimits.get(key);
+    let record = localStore.get(key);
     if (!record || now > record.resetTime) {
       record = { count: 1, resetTime: now + windowMs };
-      rateLimits.set(key, record);
+      localStore.set(key, record);
       res.setHeader('X-RateLimit-Limit', max);
       res.setHeader('X-RateLimit-Remaining', max - 1);
       return next();
@@ -50,7 +47,7 @@ const createRateLimiter = ({
     res.setHeader('X-RateLimit-Remaining', remaining);
 
     if (record.count > max) {
-      const retryAfterSec = Math.ceil((record.resetTime - now) / 1000);
+      const retryAfterSec = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
       res.setHeader('Retry-After', retryAfterSec);
       return res.status(429).json({ success: false, error: message });
     }

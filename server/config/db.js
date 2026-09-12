@@ -19,6 +19,19 @@ const connectDB = async () => {
   }
 };
 
-const getIsMongoConnected = () => isMongoConnected;
+mongoose.connection.on('disconnected', () => {
+  console.warn('[Database Note] MongoDB disconnected. Falling back to memory mode.');
+  isMongoConnected = false;
+});
+mongoose.connection.on('reconnected', () => {
+  console.log('[Database Note] MongoDB reconnected.');
+  isMongoConnected = true;
+});
+mongoose.connection.on('error', (err) => {
+  console.warn('[Database Note] MongoDB error:', err.message);
+  isMongoConnected = false;
+});
+
+const getIsMongoConnected = () => isMongoConnected && mongoose.connection.readyState === 1;
 
 module.exports = { connectDB, getIsMongoConnected };

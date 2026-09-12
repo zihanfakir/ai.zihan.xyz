@@ -240,9 +240,16 @@ const updateProfile = async (req, res) => {
         user = users[uIdx];
         await savePersistedUsers(users);
       } else {
-        user = memoryStore.users.find(u => String(u._id || u.id) === String(targetUserId)) || req.user;
+        user = (memoryStore.users && memoryStore.users.find(u => String(u._id || u.id) === String(targetUserId))) || req.user;
         if (cleanName) user.name = cleanName;
         if (avatar !== undefined) user.avatar = avatar;
+      }
+      if (memoryStore.users) {
+        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(targetUserId));
+        if (mUser) {
+          if (cleanName) mUser.name = cleanName;
+          if (avatar !== undefined) mUser.avatar = avatar;
+        }
       }
       debouncedSave();
     }

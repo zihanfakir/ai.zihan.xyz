@@ -38,8 +38,19 @@ const MODEL_ALIASES = {
   'gemini-1.5-flash': 'gemini-3.5-flash-lite'
 };
 
+function resolveModelAlias(rawId) {
+  if (!rawId || typeof rawId !== 'string') return rawId;
+  let current = rawId;
+  const visited = new Set();
+  while (MODEL_ALIASES[current] && !visited.has(current)) {
+    visited.add(current);
+    current = MODEL_ALIASES[current];
+  }
+  return current;
+}
+
 async function getModelConfig(rawId) {
-  const modelId = MODEL_ALIASES[rawId] || rawId;
+  const modelId = resolveModelAlias(rawId);
 
   // 1. Check persisted models (from Supabase)
   const allModels = await getPersistedModels();

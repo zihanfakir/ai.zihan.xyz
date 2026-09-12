@@ -781,6 +781,9 @@ const reorderModels = async (req, res) => {
     }
 
     if (modelId && direction) {
+      if (!['up', 'down'].includes(direction)) {
+        return res.status(400).json({ success: false, error: 'দিক অবশ্যই up অথবা down হতে হবে' });
+      }
       models.sort((a, b) => (a.order || 0) - (b.order || 0));
       const idx = models.findIndex(m => (m.id === modelId || m.model_id === modelId));
       if (idx === -1) return res.status(404).json({ success: false, error: 'মডেল পাওয়া যায়নি' });

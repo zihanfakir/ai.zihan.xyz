@@ -1051,7 +1051,7 @@
           <td>
             <div style="display: flex; gap: 6px;">
               <button type="button" class="btn btn-success model-save-btn" style="padding: 6px 12px; font-size: 0.78rem;" onclick="saveModelConfig('${escapeHtml(mId)}', this)">Save</button>
-              <button type="button" class="btn btn-danger model-del-btn" style="padding: 6px 10px; font-size: 0.78rem;" onclick="deleteModel('${escapeHtml(mId)}')">মুছুন</button>
+              <button type="button" class="btn btn-danger model-del-btn" style="padding: 6px 10px; font-size: 0.78rem;" onclick="deleteModel('${escapeHtml(mId)}', this)">মুছুন</button>
             </div>
           </td>
         `;
@@ -1210,9 +1210,14 @@
       }
     }
 
-    async function deleteModel(modelId) {
+    async function deleteModel(modelId, btn) {
       const confirmed = await customConfirm(`আপনি কি নিশ্চিত '${modelId}' মডেলটি মুছে ফেলতে চান?`, "মডেল মুছে ফেলা");
       if (!confirmed) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "মুছছে...";
+      }
 
       try {
         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
@@ -1227,6 +1232,11 @@
         }
       } catch (err) {
         showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "মুছুন";
+        }
       }
     }
 
@@ -1320,7 +1330,7 @@
               <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${escapeHtml(uId)}', ${!u.is_blocked})">
                 ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
               </button>
-              <button type="button" class="btn btn-danger" onclick="deleteUserAccount('${escapeHtml(uId)}', '${escapeHtml(u.name || u.email)}')" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); padding: 4px 10px; font-size: 0.8rem;">
+              <button type="button" class="btn btn-danger" onclick="deleteUserAccount('${escapeHtml(uId)}', '${escapeHtml(u.name || u.email)}', this)" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); padding: 4px 10px; font-size: 0.8rem;">
                 মুছুন
               </button>
             </div>
@@ -1414,9 +1424,15 @@
       }
     }
 
-    async function deleteUserAccount(userId, userName) {
+    async function deleteUserAccount(userId, userName, btn) {
       const confirmed = await customConfirm(`আপনি কি নিশ্চিত '${userName || 'এই ইউজার'}' অ্যাকাউন্টটি সম্পূর্ণ মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।`, "ইউজার অ্যাকাউন্ট মুছে ফেলা");
       if (!confirmed) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "মুছছে...";
+      }
+
       try {
         const res = await authFetch(`${API_BASE}/admin/users/${encodeURIComponent(userId)}`, {
           method: "DELETE"
@@ -1431,6 +1447,11 @@
         }
       } catch (err) {
         showToast("সার্ভার ত্রুটি", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "মুছুন";
+        }
       }
     }
 
@@ -1578,7 +1599,7 @@
             <td>${status}</td>
             <td>${safeUsedBy}</td>
             <td>
-              <button type="button" class="btn btn-danger" onclick="deleteCode('${safeCode}')">মুছুন</button>
+              <button type="button" class="btn btn-danger" onclick="deleteCode('${safeCode}', this)">মুছুন</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -1588,9 +1609,15 @@
       }
     }
 
-    async function deleteCode(codeId) {
+    async function deleteCode(codeId, btn) {
       const confirmed = await customConfirm("আপনি কি নিশ্চিত এই কোডটি মুছে ফেলতে চান?", "রিডিম কোড মুছে ফেলা");
       if (!confirmed) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "মুছছে...";
+      }
+
       try {
         const res = await authFetch(`${API_BASE}/admin/redeem/${encodeURIComponent(codeId)}`, { method: "DELETE" });
         const data = await res.json();
@@ -1603,6 +1630,11 @@
         }
       } catch (e) {
         showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "মুছুন";
+        }
       }
     }
 

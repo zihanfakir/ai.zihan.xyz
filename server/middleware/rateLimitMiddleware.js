@@ -68,6 +68,10 @@ const checkRateLimit = async (req, res, next) => {
             users[uIdx].subscription = user.subscription;
             await savePersistedUsers(users);
           }
+          if (memoryStore.users) {
+            const mIdx = memoryStore.users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+            if (mIdx !== -1) memoryStore.users[mIdx].subscription = user.subscription;
+          }
           debouncedSave();
         }
       }
@@ -166,6 +170,7 @@ const checkRateLimit = async (req, res, next) => {
     }
 
     if (messageCount >= plan.message_limit) {
+      res.setHeader('Retry-After', Math.max(1, resetTimeMinutes * 60));
       return res.status(429).json({
         success: false,
         error: `বার্তা সীমা শেষ! ${plan.displayName}-এ প্রতি ${plan.window_hours} ঘণ্টায় সর্বোচ্চ ${plan.message_limit}টি বার্তা পাঠানো যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।`
