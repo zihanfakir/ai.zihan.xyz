@@ -1,5 +1,5 @@
-/* Alokpoth AI - Progressive Web App Service Worker (v1.0.9) */
-const CACHE_NAME = 'alokpoth-ai-v1.0.9';
+/* Alokpoth AI - Progressive Web App Service Worker (v1.1.0) */
+const CACHE_NAME = 'alokpoth-ai-v1.1.0';
 const CORE_ASSETS = [
   '/',
   '/index.html',
