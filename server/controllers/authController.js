@@ -38,6 +38,9 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, error: 'পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে' });
     }
     const cleanName = name.trim().slice(0, 50);
+    if (cleanName.length < 2) {
+      return res.status(400).json({ success: false, error: 'নাম কমপক্ষে ২ অক্ষরের হতে হবে' });
+    }
     const isAdminEmail = cleanEmail === 'zihanfakir@gmail.com';
 
     if (getIsMongoConnected()) {
@@ -112,9 +115,12 @@ const loginUser = async (req, res) => {
       if (user.is_blocked) {
         return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হয়েছে।' });
       }
-      if (cleanEmail === 'zihanfakir@gmail.com' && user.role !== 'admin') {
-        user.role = 'admin';
-        await user.save();
+      if (cleanEmail === 'zihanfakir@gmail.com') {
+        if (user.role !== 'admin' || !user.subscription || user.subscription.plan_name !== 'Max') {
+          user.role = 'admin';
+          user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
+          await user.save();
+        }
       }
       const token = generateToken(user);
       return res.json({
@@ -136,8 +142,9 @@ const loginUser = async (req, res) => {
       if (user.is_blocked) {
         return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হয়েছে।' });
       }
-      if (cleanEmail === 'zihanfakir@gmail.com' && user.role !== 'admin') {
+      if (cleanEmail === 'zihanfakir@gmail.com') {
         user.role = 'admin';
+        user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
       }
       const token = generateToken(user);
       return res.json({
@@ -199,7 +206,7 @@ const getMe = async (req, res) => {
         used: messageCount,
         limit: plan.message_limit,
         remaining: Math.max(0, plan.message_limit - messageCount),
-        resetInMinutes: resetTimeMinutes,
+        resetInMinutes: Math.max(1, resetTimeMinutes || 1),
         windowHours: plan.window_hours
       };
     }
@@ -220,7 +227,13 @@ const updateProfile = async (req, res) => {
     if (name !== undefined && typeof name !== 'string') return res.status(400).json({ success: false, error: 'অবৈধ নাম' });
     if (avatar !== undefined && typeof avatar !== 'string') return res.status(400).json({ success: false, error: 'অবৈধ প্রোফাইল ছবি' });
     if (avatar && avatar.length > 50000) return res.status(400).json({ success: false, error: 'ছবির সাইজ অতিরিক্ত বড় (সর্বোচ্চ 50KB)' });
-    const cleanName = name ? name.trim().slice(0, 50) : undefined;
+    if (avatar && avatar !== 'default' && !avatar.startsWith('data:image/') && !avatar.startsWith('http://') && !avatar.startsWith('https://')) {
+      return res.status(400).json({ success: false, error: 'অকার্যকর ছবির ফরম্যাট' });
+    }
+    const cleanName = name !== undefined ? name.trim().slice(0, 50) : undefined;
+    if (cleanName !== undefined && cleanName.length < 2) {
+      return res.status(400).json({ success: false, error: 'নাম কমপক্ষে ২ অক্ষরের হতে হবে' });
+    }
 
     const targetUserId = req.user._id || req.user.id;
     let user;

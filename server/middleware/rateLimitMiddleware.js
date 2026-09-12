@@ -39,6 +39,7 @@ const checkRateLimit = async (req, res, next) => {
 
       const usageDetails = await getUserUsageDetails(guestId, 3);
       if (usageDetails.count >= 10) {
+        res.setHeader('Retry-After', Math.max(1, (usageDetails.resetInMinutes || 180) * 60));
         return res.status(429).json({
           success: false,
           error: `গেস্ট বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন।`
@@ -57,9 +58,10 @@ const checkRateLimit = async (req, res, next) => {
         user.subscription.expires_at = null;
         user.subscription.is_active = true;
         if (getIsMongoConnected() && typeof user.save === 'function') {
-          await user.save();
-        } else if (!getIsMongoConnected()) {
-          // Persist downgrade to Supabase
+          await user.save().catch(() => {});
+        }
+        // Unconditionally persist downgrade across Supabase and memoryStore
+        try {
           const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
           let users = await getPersistedUsers();
           users = [...users];
@@ -73,6 +75,8 @@ const checkRateLimit = async (req, res, next) => {
             if (mIdx !== -1) memoryStore.users[mIdx].subscription = user.subscription;
           }
           debouncedSave();
+        } catch (syncErr) {
+          console.warn('[RateLimit Auto-Downgrade Sync Warning]:', syncErr.message);
         }
       }
     }

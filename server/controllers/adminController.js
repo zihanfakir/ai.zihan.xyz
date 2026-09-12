@@ -112,7 +112,7 @@ const updateUserPlan = async (req, res) => {
       return res.status(400).json({ success: false, error: 'প্ল্যান অবশ্যই Free, Pro অথবা Max হতে হবে' });
     }
 
-    const days = Math.min(Math.max(Number(duration_days) || 30, 1), 3650);
+    const days = Math.floor(Math.min(Math.max(Number(duration_days) || 30, 1), 3650));
     const now = new Date();
     let expiresAt = null;
     if (plan_name && plan_name !== 'Free') {
@@ -174,21 +174,22 @@ const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const { is_blocked } = req.body;
+    const cleanTarget = String(userId).toLowerCase().trim();
 
-    if (req.user && String(userId) === String(req.user._id || req.user.id)) {
-      return res.status(400).json({ success: false, error: 'অ্যাডমিন নিজের অ্যাকাউন্ট ব্লক করতে পারবেন না।' });
+    if (cleanTarget === 'zihanfakir@gmail.com' || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || cleanTarget === String(req.user.email).toLowerCase().trim()))) {
+      return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
     }
 
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
       const user = mongoose.Types.ObjectId.isValid(userId)
         ? await User.findById(userId)
-        : await User.findOne({ email: userId });
+        : await User.findOne({ email: cleanTarget });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      user.is_blocked = is_blocked !== undefined ? is_blocked : !user.is_blocked;
+      user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
       await user.save();
 
       return res.json({
@@ -200,12 +201,12 @@ const toggleBlockUser = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === String(userId).toLowerCase().trim()));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === cleanTarget));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      user.is_blocked = is_blocked !== undefined ? is_blocked : !user.is_blocked;
+      user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
       await savePersistedUsers(users);
       debouncedSave();
 
@@ -223,11 +224,11 @@ const toggleBlockUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    if (req.user && String(userId) === String(req.user._id || req.user.id || req.user.email)) {
-      return res.status(400).json({ success: false, error: 'অ্যাডমিন নিজের অ্যাকাউন্ট মুছতে পারবেন না।' });
-    }
-
     const cleanTarget = String(userId).toLowerCase().trim();
+
+    if (cleanTarget === 'zihanfakir@gmail.com' || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || cleanTarget === String(req.user.email).toLowerCase().trim()))) {
+      return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
+    }
 
     // 1. If Mongo connected, purge user, sessions, and usage logs
     if (getIsMongoConnected()) {
@@ -375,7 +376,7 @@ const generateRedeemCodes = async (req, res) => {
 
     const createdCodes = [];
     const numToCreate = Math.min(Math.max(Number(count) || 1, 1), 100);
-    const validDurationDays = Math.min(Math.max(Number(duration_days) || 30, 1), 3650);
+    const validDurationDays = Math.floor(Math.min(Math.max(Number(duration_days) || 30, 1), 3650));
 
     if (getIsMongoConnected()) {
       for (let i = 0; i < numToCreate; i++) {
@@ -462,6 +463,9 @@ const getRedeemCodes = async (req, res) => {
 const deleteRedeemCode = async (req, res) => {
   try {
     const { codeId } = req.params;
+    if (!codeId || typeof codeId !== 'string' || !codeId.trim()) {
+      return res.status(400).json({ success: false, error: 'সঠিক রিডিম কোড আইডি প্রদান করুন' });
+    }
     const cleanId = String(codeId).trim().toUpperCase();
 
     // 1. If Mongo connected, purge from MongoDB
@@ -524,6 +528,7 @@ const normalizeBaseUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
   let trimmed = url.trim();
   if (!trimmed) return '';
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return '';
   trimmed = trimmed.replace(/\/+$/, '');
   if (!trimmed.endsWith('/chat/completions')) {
     if (trimmed.endsWith('/completions')) {
@@ -616,22 +621,28 @@ const updateModel = async (req, res) => {
 const addModel = async (req, res) => {
   try {
     const { model_id, name, base_url, api_key, premium, efficient, provider, type } = req.body;
-    if (!model_id || !name) {
+    if (!model_id || !name || typeof model_id !== 'string' || typeof name !== 'string') {
       return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম আবশ্যক' });
+    }
+
+    const cleanModelId = model_id.trim().slice(0, 100);
+    const cleanName = name.trim().slice(0, 100);
+    if (!cleanModelId || !cleanName) {
+      return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম সঠিক হতে হবে' });
     }
 
     const cleanBaseUrl = normalizeBaseUrl(base_url);
 
     // 1. Save api_key in Supabase api_keys table
     if (api_key) {
-      await upsertApiKeyToSupabase(model_id, api_key);
+      await upsertApiKeyToSupabase(cleanModelId, api_key.trim());
     }
 
     const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
     models = [...models];
 
-    const existing = models.find(m => (m.id === model_id || m.model_id === model_id));
+    const existing = models.find(m => (m.id === cleanModelId || m.model_id === cleanModelId));
     if (existing) {
       return res.status(400).json({ success: false, error: 'এই মডেল আইডি ইতিমধ্যে বিদ্যমান' });
     }
@@ -641,13 +652,13 @@ const addModel = async (req, res) => {
 
     // 2. If Mongo connected, create in Mongo WITH api_key
     if (getIsMongoConnected()) {
-      const existingMongo = await AiModel.findOne({ model_id });
+      const existingMongo = await AiModel.findOne({ model_id: cleanModelId });
       if (!existingMongo) {
         await AiModel.create({
-          model_id,
-          name,
+          model_id: cleanModelId,
+          name: cleanName,
           base_url: cleanBaseUrl,
-          api_key: api_key || '',
+          api_key: api_key ? api_key.trim() : '',
           premium: Boolean(premium),
           efficient: Boolean(efficient),
           provider: provider || 'Alokpoth',
@@ -659,11 +670,11 @@ const addModel = async (req, res) => {
 
     // 3. ALWAYS add to Supabase __models_metadata__ and local memoryStore
     const newModel = {
-      id: model_id,
-      model_id,
-      name,
+      id: cleanModelId,
+      model_id: cleanModelId,
+      name: cleanName,
       base_url: cleanBaseUrl,
-      api_key: api_key || '',
+      api_key: api_key ? api_key.trim() : '',
       premium: Boolean(premium),
       efficient: Boolean(efficient),
       provider: provider || 'Alokpoth',
@@ -672,7 +683,7 @@ const addModel = async (req, res) => {
     };
     models.push(newModel);
     await savePersistedModels(models);
-    invalidateModelKeyCache(model_id);
+    invalidateModelKeyCache(cleanModelId);
     debouncedSave();
 
     return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
@@ -686,6 +697,11 @@ const deleteModel = async (req, res) => {
     let { modelId } = req.params;
     let decoded = modelId;
     try { decoded = decodeURIComponent(modelId); } catch {}
+
+    const PROTECTED_MODELS = ['openai/gpt-oss-120b', 'openrouter/free'];
+    if (PROTECTED_MODELS.includes(modelId) || PROTECTED_MODELS.includes(decoded)) {
+      return res.status(400).json({ success: false, error: 'এই মূল ব্যাকআপ মডেলটি মুছে ফেলা সম্ভব নয়।' });
+    }
 
     // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
@@ -827,6 +843,9 @@ const getSettings = async (req, res) => {
 const updateSettings = async (req, res) => {
   try {
     const { auto_fallback } = req.body;
+    if (auto_fallback !== undefined && typeof auto_fallback !== 'boolean') {
+      return res.status(400).json({ success: false, error: 'auto_fallback অবশ্যই boolean (true অথবা false) হতে হবে' });
+    }
     const { saveSystemSettings } = require('../../utils/getModelConfig');
     const toSave = {};
     if (auto_fallback !== undefined) toSave.auto_fallback = Boolean(auto_fallback);

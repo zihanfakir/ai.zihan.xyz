@@ -1321,22 +1321,40 @@
           <td>${u.is_blocked ? '<span style="color:var(--danger)">ব্লকড</span>' : '<span style="color:var(--success)">সক্রিয়</span>'}</td>
           <td>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <select onchange="updateUserPlan('${escapeHtml(uId)}', this.value)" style="padding: 4px 8px; font-size: 0.8rem;">
+              <select class="user-plan-select" data-user-id="${escapeHtml(uId)}" style="padding: 4px 8px; font-size: 0.8rem;">
                 <option value="">প্ল্যান সেট করুন</option>
                 <option value="Free">Free (অনন্তকাল)</option>
                 <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
                 <option value="Max">Max (কাস্টম মেয়াদ)</option>
               </select>
-              <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${escapeHtml(uId)}', ${!u.is_blocked})">
+              <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'} btn-toggle-block" data-user-id="${escapeHtml(uId)}" data-blocked="${!u.is_blocked}">
                 ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}
               </button>
-              <button type="button" class="btn btn-danger" onclick="deleteUserAccount('${escapeHtml(uId)}', '${escapeHtml(u.name || u.email)}', this)" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); padding: 4px 10px; font-size: 0.8rem;">
+              <button type="button" class="btn btn-danger btn-delete-user" data-user-id="${escapeHtml(uId)}" data-user-name="${escapeHtml(u.name || u.email)}" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); padding: 4px 10px; font-size: 0.8rem;">
                 মুছুন
               </button>
             </div>
           </td>
         `;
         tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll(".user-plan-select").forEach(sel => {
+        sel.addEventListener("change", function() {
+          if (this.value) updateUserPlan(this.dataset.userId, this.value);
+        });
+      });
+
+      tbody.querySelectorAll(".btn-toggle-block").forEach(btn => {
+        btn.addEventListener("click", function() {
+          toggleUserBlock(this.dataset.userId, this.dataset.blocked === "true");
+        });
+      });
+
+      tbody.querySelectorAll(".btn-delete-user").forEach(btn => {
+        btn.addEventListener("click", function() {
+          deleteUserAccount(this.dataset.userId, this.dataset.userName, this);
+        });
       });
     }
 

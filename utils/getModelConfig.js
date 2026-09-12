@@ -410,7 +410,8 @@ async function getSystemSettings() {
         .limit(1);
 
       if (!error && data && data.length > 0 && data[0].api_key) {
-        const parsed = JSON.parse(data[0].api_key);
+        let parsed = null;
+        try { parsed = JSON.parse(data[0].api_key); } catch {}
         if (parsed && typeof parsed === 'object') {
           settingsCache = parsed;
           settingsCacheTs = now;

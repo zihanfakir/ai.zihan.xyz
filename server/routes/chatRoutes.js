@@ -45,39 +45,40 @@ router.get('/models', async (req, res) => {
 
     res.json({ success: true, models: result });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'মডেল তালিকা লোড করতে সমস্যা হয়েছে।' });
   }
 });
 
 router.get('/ping', async (req, res) => {
   try {
     const { model } = req.query;
-    if (!model) {
+    if (!model || typeof model !== 'string' || !model.trim()) {
       return res.status(400).json({ success: false, error: 'মডেলের নাম প্রয়োজন' });
     }
+    const cleanModel = model.trim();
 
     const { getPersistedModels, getApiKeyFromSupabase, getModelConfig } = require('../../utils/getModelConfig');
     let aiModelConfig = null;
     if (getIsMongoConnected()) {
-      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: model }, { id: model }] });
+      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: cleanModel }, { id: cleanModel }] });
     } else {
       const allModels = await getPersistedModels();
-      aiModelConfig = allModels.find(m => (m.id === model || m.model_id === model));
+      aiModelConfig = allModels.find(m => (m.id === cleanModel || m.model_id === cleanModel));
     }
     
     if (!aiModelConfig) {
-      aiModelConfig = await getModelConfig(model);
+      aiModelConfig = await getModelConfig(cleanModel);
     }
 
     if (!aiModelConfig) {
-      return res.json({ success: true, latency: null, status: 'offline', error: 'Model not found' });
+      return res.json({ success: true, latency: null, status: 'offline' });
     }
 
     let targetUrl = (aiModelConfig.base_url || 'https://openrouter.ai/api/v1/chat/completions').trim();
     let targetKey = aiModelConfig.api_key;
     if (!targetKey) {
-      targetKey = await getApiKeyFromSupabase(model);
-      if (!targetKey && aiModelConfig.id && aiModelConfig.id !== model) {
+      targetKey = await getApiKeyFromSupabase(cleanModel);
+      if (!targetKey && aiModelConfig.id && aiModelConfig.id !== cleanModel) {
         targetKey = await getApiKeyFromSupabase(aiModelConfig.id);
       }
     }
@@ -109,7 +110,7 @@ router.get('/ping', async (req, res) => {
     // Gemini specific logic (GET models list)
     if (aiModelConfig.type === 'gemini' && targetUrl.includes('generativelanguage.googleapis.com')) {
       const gKey = targetKey || process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
-      pingUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + gKey;
+      pingUrl = "https://generativelanguage.googleapis.com/v1beta/models" + (gKey ? ("?key=" + gKey) : "");
       delete headers['Authorization'];
     }
 
@@ -135,11 +136,11 @@ router.get('/ping', async (req, res) => {
       }
     } catch(err) {
       clearTimeout(timeoutId);
-      return res.json({ success: true, latency: null, status: 'offline', error: err.message });
+      return res.json({ success: true, latency: null, status: 'offline' });
     }
 
   } catch (err) {
-    res.status(500).json({ success: false, latency: null, status: 'offline', error: err.message });
+    res.status(500).json({ success: false, latency: null, status: 'offline' });
   }
 });
 module.exports = router;

@@ -86,7 +86,7 @@ app.get('/api/plans', async (req, res) => {
       return res.json({ success: true, plans: plans.filter(p => p.is_active !== false) });
     }
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    res.status(500).json({ success: false, error: 'প্ল্যানের তথ্য লোড করতে সমস্যা হয়েছে।' });
   }
 });
 

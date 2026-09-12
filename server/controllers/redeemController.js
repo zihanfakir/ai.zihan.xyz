@@ -66,6 +66,41 @@ const claimRedeemCode = async (req, res) => {
       await User.findByIdAndUpdate(userId, { $set: { subscription: subscriptionData } });
       user.subscription = subscriptionData;
 
+      // Also sync to Supabase and memoryStore so multi-store stays in sync
+      try {
+        const { getPersistedUsers, savePersistedUsers, getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users];
+        const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId) || (u.email && user.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+        if (uIdx !== -1) {
+          users[uIdx].subscription = subscriptionData;
+          await savePersistedUsers(users);
+        }
+        if (memoryStore.users) {
+          const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId) || (u.email && user.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+          if (mUser) mUser.subscription = subscriptionData;
+        }
+        let pCodes = await getPersistedRedeemCodes();
+        const cIdx = pCodes.findIndex(c => c.code === cleanCode);
+        if (cIdx !== -1) {
+          pCodes[cIdx].is_used = true;
+          pCodes[cIdx].used_by = userId;
+          pCodes[cIdx].used_at = now;
+          await savePersistedRedeemCodes(pCodes);
+        }
+        if (memoryStore.redeemCodes) {
+          const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
+          if (mCode) {
+            mCode.is_used = true;
+            mCode.used_by = userId;
+            mCode.used_at = now;
+          }
+        }
+        debouncedSave();
+      } catch (syncErr) {
+        console.warn('[Redeem Mongo Sync Warning]:', syncErr.message);
+      }
+
       const newToken = jwt.sign({
         id: String(userId),
         role: user.role || 'user',

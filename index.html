@@ -2559,7 +2559,9 @@
         const raw = marked.parse(md || "");
         return (typeof DOMPurify !== "undefined") ? DOMPurify.sanitize(raw) : raw;
       } catch {
-        return String(md || "");
+        const div = document.createElement("div");
+        div.textContent = String(md || "");
+        return div.innerHTML;
       }
     }
 
@@ -2733,11 +2735,15 @@
     }
 
     let currentPlan = loadCurrentPlan();
+    const DYNAMIC_PLAN_LIMITS = {};
 
     const USAGE_WINDOW_KEY = "alokpoth_window_usage";
 
     function getPlanWindowLimit() {
       const plan = currentPlan || "Free";
+      if (DYNAMIC_PLAN_LIMITS[plan]) {
+        return DYNAMIC_PLAN_LIMITS[plan];
+      }
       if (plan === "Max") return { limit: 50, hours: 1 };
       if (plan === "Pro") return { limit: 30, hours: 3 };
       return { limit: 10, hours: 3 };
@@ -2764,6 +2770,15 @@
     }
 
     function hasCredit() {
+      try {
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+            return true;
+          }
+        }
+      } catch {}
       const { limit } = getPlanWindowLimit();
       const usage = getWindowUsage();
       return (usage.count || 0) < limit;
@@ -2797,9 +2812,11 @@
     async function syncPlanLimitsFromServer() {
       try {
         const res = await fetch(`${API_BASE}/plans`);
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.plans)) {
           data.plans.forEach(p => {
+            DYNAMIC_PLAN_LIMITS[p.name] = { limit: p.message_limit, hours: p.window_hours };
             if (PLAN_LIMIT_DETAILS[p.name]) {
               const str = `${toBengaliDigits(p.message_limit)} বার্তা / ${toBengaliDigits(p.window_hours)} ঘণ্টা`;
               PLAN_LIMIT_DETAILS[p.name].shortLimit = str;
@@ -3067,15 +3084,19 @@
       pingInFlight = true;
       if (!silent) renderModelList();
 
-      await Promise.all(MODELS.map(async (m) => {
-        const result = await pingModel(m);
-        m.latency = result.latency;
-        m.status = result.status;
-      }));
-
-      pingInFlight = false;
-      renderModelList();
-      updateTriggerStatusDot();
+      try {
+        await Promise.all(MODELS.map(async (m) => {
+          const result = await pingModel(m);
+          m.latency = result.latency;
+          m.status = result.status;
+        }));
+      } catch (err) {
+        console.warn("syncModelStatuses warning:", err);
+      } finally {
+        pingInFlight = false;
+        renderModelList();
+        updateTriggerStatusDot();
+      }
     }
 
     function updateTriggerStatusDot() {
@@ -3984,6 +4005,9 @@
     }
 
     async function extractPdfText(file) {
+      if (!window.pdfjsLib) {
+        return "[পিডিএফ প্রসেসিং লাইব্রেরি লোড করা যায়নি]";
+      }
       const buf = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
       let fullText = "";
@@ -3993,10 +4017,13 @@
         const content = await page.getTextContent();
         fullText += content.items.map((it) => it.str).join(" ") + "\n\n";
       }
-      return fullText.trim();
+      return fullText.trim() || "[এই পিডিএফ ফাইলে কোনো পড়ার মতো টেক্সট পাওয়া যায়নি]";
     }
 
-    async function extractPlainText(file) { return await file.text(); }
+    async function extractPlainText(file) {
+      const raw = await file.text();
+      return raw.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g, "");
+    }
 
     function renderFilePreviews() {
       filePreviewRow.innerHTML = "";
@@ -4226,14 +4253,30 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }));
         localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(sanitized));
       } catch (err) {
-        console.warn("LocalStorage quota warning:", err);
+        console.warn("LocalStorage quota warning, pruning oldest sessions:", err);
+        try {
+          const pruned = (sessions || []).slice(0, 15).map(s => ({
+            ...s,
+            messagesHistory: (s.messagesHistory || []).slice(-30).map(m => {
+              const copy = { ...m };
+              if (copy.images) {
+                copy.images = copy.images.map(img => ({ mimeType: img.mimeType, base64: "" }));
+              }
+              return copy;
+            })
+          }));
+          localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(pruned));
+        } catch (e2) {
+          console.error("Critical localStorage quota failure:", e2);
+        }
       }
     }
 
     function makeSessionTitle(history) {
       const firstUserMsg = history.find((m) => m.role === "user");
       if (!firstUserMsg) return "নতুন চ্যাট";
-      const text = (typeof firstUserMsg.content === "string" ? firstUserMsg.content : "").trim();
+      let text = (typeof firstUserMsg.content === "string" ? firstUserMsg.content : "").trim();
+      text = text.replace(/\[(?:অনুস্মারক|সংযুক্ত ফাইলের|ফাইল|ছবি|ওয়েব অনুসন্ধান|Web Search)[\s\S]*?\]/g, "").trim();
       return text ? (text.length > 40 ? text.slice(0, 40) + "…" : text) : "নতুন চ্যাট";
     }
 
@@ -4581,7 +4624,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         copyBtn.className = "code-action-btn code-copy-btn";
         copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
         copyBtn.addEventListener("click", () => {
-          copyTextToClipboard(codeText).then((ok) => {
+          const currentCode = (pre.querySelector("code") || pre).textContent;
+          copyTextToClipboard(currentCode).then((ok) => {
             const span = copyBtn.querySelector("span");
             const old = span ? span.textContent : "কপি";
             if (span) span.textContent = ok ? "কপি হয়েছে!" : "ব্যর্থ!";
@@ -4595,7 +4639,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         dlBtn.className = "code-action-btn code-download-btn";
         dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ডাউনলোড</span>`;
         dlBtn.addEventListener("click", () => {
-          const blob = new Blob([codeText], { type: "text/plain;charset=utf-8" });
+          const currentCode = (pre.querySelector("code") || pre).textContent;
+          const blob = new Blob([currentCode], { type: "text/plain;charset=utf-8" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url; a.download = `code.${ext}`;
@@ -4652,7 +4697,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
       
       editBtn.addEventListener("click", () => {
-        userInput.value = text;
+        const isPlaceholder = text === "ছবি সংযুক্ত করা হয়েছে" || text === "ফাইল সংযুক্ত করা হয়েছে";
+        userInput.value = isPlaceholder ? "" : text;
         userInput.style.height = "auto";
         userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
         userInput.focus();
@@ -4696,8 +4742,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
             combined += `Abstract: ${data.AbstractText}\nSource: ${data.AbstractSource}\n`;
           }
           if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-            data.RelatedTopics.slice(0, 3).forEach((item) => {
+            data.RelatedTopics.slice(0, 5).forEach((item) => {
               if (item.Text) combined += `- ${item.Text}\n`;
+              else if (item.Topics && Array.isArray(item.Topics)) {
+                item.Topics.slice(0, 2).forEach((sub) => {
+                  if (sub.Text) combined += `- ${sub.Text}\n`;
+                });
+              }
             });
           }
         }
@@ -4714,15 +4765,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (hits.length > 0) {
             combined += "\nWikipedia results:\n";
             hits.forEach((h) => {
-              const cleanSnippet = (h.snippet || "")
-                .replace(/<[^>]+>/g, "")
-                .replace(/&quot;/g, '"')
-                .replace(/&#039;/g, "'")
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&nbsp;/g, ' ');
-              combined += `- ${h.title}: ${cleanSnippet}\n`;
+              const tempDiv = document.createElement("div");
+              tempDiv.innerHTML = h.snippet || "";
+              const cleanSnippet = (tempDiv.textContent || tempDiv.innerText || "").trim();
+              if (cleanSnippet) combined += `- ${h.title}: ${cleanSnippet}\n`;
             });
           }
         }

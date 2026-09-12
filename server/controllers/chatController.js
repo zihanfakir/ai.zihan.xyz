@@ -254,25 +254,42 @@ const saveChatSession = async (req, res) => {
     const { session_id, title, messagesHistory, updatedAt } = req.body;
     const user = req.user;
 
-    if (!session_id || typeof session_id !== 'string') {
-      return res.status(400).json({ success: false, error: 'Session ID required' });
+    if (!session_id || typeof session_id !== 'string' || !session_id.trim()) {
+      return res.status(400).json({ success: false, error: 'সঠিক Session ID প্রদান করুন' });
     }
 
-    const cleanTitle = (typeof title === 'string' ? title.trim().slice(0, 100) : 'নতুন চ্যাট') || 'নতুন চ্যাট';
-    const cleanHistory = Array.isArray(messagesHistory) ? messagesHistory.slice(-200) : [];
+    const cleanTitle = (typeof title === 'string' ? title.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 100) : 'নতুন চ্যাট') || 'নতুন চ্যাট';
+    const cleanHistory = Array.isArray(messagesHistory) ? messagesHistory.slice(-100).map(m => {
+      if (m && typeof m === 'object') {
+        const item = { role: m.role || 'user', content: typeof m.content === 'string' ? m.content : '' };
+        if (m.images && Array.isArray(m.images)) {
+          item.images = m.images.map(img => ({
+            mimeType: img.mimeType || 'image/png',
+            base64: (img.base64 && img.base64.length > 5000) ? '' : (img.base64 || '')
+          }));
+        }
+        if (m.files && Array.isArray(m.files)) {
+          item.files = m.files.map(f => ({ name: f.name || 'file' }));
+        }
+        return item;
+      }
+      return null;
+    }).filter(Boolean) : [];
+
     const validUpdatedAt = (updatedAt && !isNaN(new Date(updatedAt).getTime())) ? new Date(updatedAt).getTime() : Date.now();
     const userId = String(user._id || user.id);
 
     if (getIsMongoConnected()) {
       await ChatSession.findOneAndUpdate(
-        { user_id: userId, session_id },
+        { user_id: userId, session_id: session_id.trim() },
         { title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt },
         { upsert: true, new: true }
       );
     } else {
       if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
-      const idx = memoryStore.chatSessions.findIndex(s => s.session_id === session_id && String(s.user_id) === userId);
-      const sessionDoc = { user_id: userId, session_id, title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt };
+      const trimmedSid = session_id.trim();
+      const idx = memoryStore.chatSessions.findIndex(s => s.session_id === trimmedSid && String(s.user_id) === userId);
+      const sessionDoc = { user_id: userId, session_id: trimmedSid, title: cleanTitle, messagesHistory: cleanHistory, updatedAt: validUpdatedAt };
       if (idx !== -1) {
         memoryStore.chatSessions[idx] = sessionDoc;
       } else {
@@ -282,7 +299,7 @@ const saveChatSession = async (req, res) => {
     }
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'চ্যাট সেশন সেভ করতে সমস্যা হয়েছে।' });
   }
 };
 
@@ -301,59 +318,82 @@ const getChatSessions = async (req, res) => {
     }
     res.json({ success: true, sessions });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'চ্যাট সেশন লোড করতে সমস্যা হয়েছে।' });
   }
 };
 
 const deleteChatSession = async (req, res) => {
   try {
     const { session_id } = req.params;
+    if (!session_id || typeof session_id !== 'string' || !session_id.trim()) {
+      return res.status(400).json({ success: false, error: 'সঠিক Session ID প্রদান করুন' });
+    }
+    const cleanSessionId = session_id.trim();
     const user = req.user;
     const userId = String(user._id || user.id);
     if (getIsMongoConnected()) {
-      await ChatSession.findOneAndDelete({ user_id: userId, session_id });
+      await ChatSession.findOneAndDelete({ user_id: userId, session_id: cleanSessionId });
     } else {
       if (memoryStore.chatSessions) {
-        memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === session_id && String(s.user_id) === userId));
+        memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === cleanSessionId && String(s.user_id) === userId));
         debouncedSave();
       }
     }
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'চ্যাট সেশন মুছতে সমস্যা হয়েছে।' });
   }
 };
 
 const generateImage = async (req, res) => {
   try {
     const { prompt } = req.body;
-    if (!prompt || typeof prompt !== 'string') {
+    if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
       return res.status(400).json({ success: false, error: 'অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।' });
     }
 
+    const cleanPrompt = prompt.trim().slice(0, 1000);
     const targetKey = process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY;
+    if (!targetKey) {
+      return res.status(503).json({ success: false, error: 'ছবি তৈরির সার্ভিস এই মুহূর্তে কনফিগার করা হয়নি।' });
+    }
+
     const targetUrl = 'https://vyceai.com/v1/images/generations';
 
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${targetKey}`
-      },
-      body: JSON.stringify({ prompt, n: 1, size: '1024x1024' })
-    });
+    const imgAbortController = new AbortController();
+    const imgTimeout = setTimeout(() => imgAbortController.abort(), 35000);
+
+    let response;
+    try {
+      response = await fetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${targetKey}`
+        },
+        body: JSON.stringify({ prompt: cleanPrompt, n: 1, size: '1024x1024' }),
+        signal: imgAbortController.signal
+      });
+    } catch (fetchErr) {
+      clearTimeout(imgTimeout);
+      if (fetchErr.name === 'AbortError') {
+        return res.status(504).json({ success: false, error: 'ছবি তৈরিতে অতিরিক্ত সময় লেগেছে, অনুগ্রহ করে আবার চেষ্টা করুন।' });
+      }
+      throw fetchErr;
+    }
+    clearTimeout(imgTimeout);
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error('[Image Gen Upstream Error]:', response.status, errText);
+      const errText = await response.text().catch(() => '');
+      console.error('[Image Gen Upstream Error]:', response.status, errText.slice(0, 200));
       return res.status(response.status).json({ success: false, error: 'ছবি তৈরি করতে সমস্যা হয়েছে, অনুগ্রহ করে আবার চেষ্টা করুন।' });
     }
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
     const item = data?.data?.[0];
     if (item?.url || item?.b64_json) {
       // Record usage log for image generation
-      const userId = req.user ? String(req.user._id || req.user.id) : req.guestId;
+      const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
       if (userId) {
         if (req.user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
           UsageLog.create({
@@ -386,7 +426,7 @@ const generateImage = async (req, res) => {
     }
     return res.status(500).json({ success: false, error: 'রেসপন্সে কোনো ছবি পাওয়া যায়নি।' });
   } catch (error) {
-    console.error('[Image Gen Error]:', error);
+    console.error('[Image Gen Error]:', error.message);
     return res.status(500).json({ success: false, error: 'সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।' });
   }
 };

@@ -38,7 +38,7 @@ PlanSchema.statics.seedDefaultPlans = async function() {
         displayName: 'ফ্রি প্ল্যান',
         message_limit: 10,
         window_hours: 3,
-        allowed_models: ['openrouter/free', 'gemini-1.5-flash']
+        allowed_models: ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash']
       },
       {
         name: 'Pro',
