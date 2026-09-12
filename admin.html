@@ -625,7 +625,7 @@
             <input type="text" id="newModelName" required placeholder="e.g. Alo GPT-4o Mini">
           </div>
           <div class="form-group" style="flex: 1.5; min-width: 220px;">
-            <label>API Base URL</label>
+            <label>API Base URL <span style="font-size: 0.72rem; color: #10b981; font-weight: normal;">(/chat/completions auto থাকবে)</span></label>
             <input type="text" id="newModelUrl" placeholder="https://api.openai.com/v1/chat/completions">
           </div>
           <div class="form-group" style="flex: 1; min-width: 160px;">
@@ -938,6 +938,21 @@
       }
     }
 
+    function normalizeApiUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      let trimmed = url.trim();
+      if (!trimmed) return '';
+      trimmed = trimmed.replace(/\/+$/, '');
+      if (!trimmed.endsWith('/chat/completions')) {
+        if (trimmed.endsWith('/completions')) {
+          trimmed = trimmed.replace(/\/completions$/, '/chat/completions');
+        } else {
+          trimmed = trimmed + '/chat/completions';
+        }
+      }
+      return trimmed;
+    }
+
     function getCurrentTableData() {
       const tbody = document.getElementById("modelTableBody");
       if (!tbody) return currentModelsList;
@@ -948,7 +963,8 @@
       rows.forEach((tr, idx) => {
         const mId = tr.dataset.modelId;
         const name = tr.querySelector(".model-input-name")?.value.trim() || "";
-        const base_url = tr.querySelector(".model-input-url")?.value.trim() || "";
+        const raw_url = tr.querySelector(".model-input-url")?.value.trim() || "";
+        const base_url = normalizeApiUrl(raw_url);
         const api_key = tr.querySelector(".model-input-key")?.value.trim() || "";
         const premium = tr.querySelector(".model-input-prem")?.checked || false;
         const efficient = tr.querySelector(".model-input-eff")?.checked || false;
@@ -993,7 +1009,7 @@
           </td>
           <td><div class="code-chip" style="font-size: 0.75rem;">${escapeHtml(mId)}</div></td>
           <td><input type="text" class="model-input-name" value="${escapeHtml(m.name || '')}" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
-          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
           <td>
             <div style="display: flex; align-items: center; gap: 4px;">
               <input type="password" class="model-input-key" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 110px; padding: 6px 8px; font-size: 0.82rem;">
@@ -1075,7 +1091,10 @@
       if (!tr) return;
 
       const name = tr.querySelector(".model-input-name")?.value.trim() || "";
-      const base_url = tr.querySelector(".model-input-url")?.value.trim() || "";
+      const raw_url = tr.querySelector(".model-input-url")?.value.trim() || "";
+      const base_url = normalizeApiUrl(raw_url);
+      const urlInput = tr.querySelector(".model-input-url");
+      if (urlInput && base_url) urlInput.value = base_url;
       const api_key = tr.querySelector(".model-input-key")?.value.trim() || "";
       const premium = tr.querySelector(".model-input-prem")?.checked || false;
       const efficient = tr.querySelector(".model-input-eff")?.checked || false;
@@ -1140,7 +1159,9 @@
       e.preventDefault();
       const model_id = document.getElementById("newModelId").value.trim();
       const name = document.getElementById("newModelName").value.trim();
-      const base_url = document.getElementById("newModelUrl").value.trim();
+      const raw_url = document.getElementById("newModelUrl").value.trim();
+      const base_url = normalizeApiUrl(raw_url);
+      document.getElementById("newModelUrl").value = base_url;
       const api_key = document.getElementById("newModelKey").value.trim();
       const premium = document.getElementById("newModelPrem").checked;
       const efficient = document.getElementById("newModelEff").checked;
@@ -1167,6 +1188,15 @@
         showToast("সার্ভারে সংযোগ করা যায়নি", "error");
       }
     });
+
+    const newModelUrlInput = document.getElementById("newModelUrl");
+    if (newModelUrlInput) {
+      newModelUrlInput.addEventListener("blur", function() {
+        if (this.value.trim()) {
+          this.value = normalizeApiUrl(this.value);
+        }
+      });
+    }
 
     const newModelPrem = document.getElementById("newModelPrem");
     const newModelEff = document.getElementById("newModelEff");

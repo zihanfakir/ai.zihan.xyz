@@ -480,6 +480,21 @@ const getModels = async (req, res) => {
   }
 };
 
+const normalizeBaseUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  let trimmed = url.trim();
+  if (!trimmed) return '';
+  trimmed = trimmed.replace(/\/+$/, '');
+  if (!trimmed.endsWith('/chat/completions')) {
+    if (trimmed.endsWith('/completions')) {
+      trimmed = trimmed.replace(/\/completions$/, '/chat/completions');
+    } else {
+      trimmed = trimmed + '/chat/completions';
+    }
+  }
+  return trimmed;
+};
+
 const updateModel = async (req, res) => {
   try {
     let { modelId } = req.params;
@@ -487,6 +502,7 @@ const updateModel = async (req, res) => {
     const { premium, efficient, name, base_url, api_key, clear_api_key } = req.body;
 
     const hasValidKey = typeof api_key === 'string' && api_key.trim().length > 0;
+    const cleanBaseUrl = base_url !== undefined ? normalizeBaseUrl(base_url) : undefined;
 
     // 1. Save api_key in Supabase api_keys table only if non-empty or explicitly requested to clear
     if (hasValidKey) {
@@ -502,7 +518,7 @@ const updateModel = async (req, res) => {
         if (premium !== undefined) mongoModel.premium = Boolean(premium);
         if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
         if (name !== undefined) mongoModel.name = name;
-        if (base_url !== undefined) mongoModel.base_url = base_url;
+        if (cleanBaseUrl !== undefined) mongoModel.base_url = cleanBaseUrl;
         if (hasValidKey) mongoModel.api_key = api_key.trim();
         else if (clear_api_key === true) mongoModel.api_key = '';
         await mongoModel.save();
@@ -520,7 +536,7 @@ const updateModel = async (req, res) => {
         id: modelId,
         model_id: modelId,
         name: name || modelId,
-        base_url: base_url || '',
+        base_url: cleanBaseUrl || '',
         api_key: hasValidKey ? api_key.trim() : (dbKey || ''),
         premium: Boolean(premium),
         efficient: Boolean(efficient),
@@ -535,7 +551,7 @@ const updateModel = async (req, res) => {
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
-      if (base_url !== undefined) model.base_url = base_url;
+      if (cleanBaseUrl !== undefined) model.base_url = cleanBaseUrl;
       if (hasValidKey) {
         model.api_key = api_key.trim();
       } else if (clear_api_key === true) {
@@ -564,6 +580,8 @@ const addModel = async (req, res) => {
       return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম আবশ্যক' });
     }
 
+    const cleanBaseUrl = normalizeBaseUrl(base_url);
+
     // 1. Save api_key in Supabase api_keys table
     if (api_key) {
       await upsertApiKeyToSupabase(model_id, api_key);
@@ -588,7 +606,7 @@ const addModel = async (req, res) => {
         await AiModel.create({
           model_id,
           name,
-          base_url: base_url || '',
+          base_url: cleanBaseUrl,
           api_key: api_key || '',
           premium: Boolean(premium),
           efficient: Boolean(efficient),
@@ -604,7 +622,7 @@ const addModel = async (req, res) => {
       id: model_id,
       model_id,
       name,
-      base_url: base_url || '',
+      base_url: cleanBaseUrl,
       api_key: api_key || '',
       premium: Boolean(premium),
       efficient: Boolean(efficient),
