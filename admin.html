@@ -1596,7 +1596,7 @@
 
     async function loadPlans() {
       try {
-        const res = await authFetch(`${API_BASE}/admin/plans`);
+        const res = await authFetch(`${API_BASE}/admin/plans?_t=${Date.now()}`);
         const data = await res.json();
         const container = document.getElementById("planCardsContainer");
         if (!data.success || !data.plans) return;

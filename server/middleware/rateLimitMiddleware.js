@@ -112,6 +112,8 @@ const checkRateLimit = async (req, res, next) => {
         is_active: true
       };
     }
+    plan.message_limit = Number(plan.message_limit) || 10;
+    plan.window_hours = Number(plan.window_hours) || 3;
 
     // 3. Model Access Permission Check
     const model_id = req.body.model || 'openrouter/free';

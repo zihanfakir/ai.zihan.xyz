@@ -423,9 +423,18 @@ const updatePlanLimits = async (req, res) => {
     }
 
     if (getIsMongoConnected()) {
-      const plan = await Plan.findOne({ name: planName });
+      let plan = await Plan.findOne({ name: planName });
       if (!plan) {
-        return res.status(404).json({ success: false, error: 'প্ল্যান পাওয়া যায়নি।' });
+        // If not in Mongo yet, create it from default
+        const defaultNames = { Free: 'ফ্রি প্ল্যান', Pro: 'প্রো প্ল্যান', Max: 'ম্যাক্স প্ল্যান' };
+        plan = await Plan.create({
+          name: planName,
+          displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
+          message_limit: validLimit !== undefined ? validLimit : 10,
+          window_hours: validWindow !== undefined ? validWindow : 3,
+          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+          is_active: true
+        });
       }
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
@@ -437,7 +446,7 @@ const updatePlanLimits = async (req, res) => {
 
       await plan.save();
       try {
-        const { getPersistedPlans, savePersistedPlans } = require('../../utils/getModelConfig');
+        const { getPersistedPlans, savePersistedPlans, invalidatePlansCache } = require('../../utils/getModelConfig');
         let plans = await getPersistedPlans();
         plans = JSON.parse(JSON.stringify(plans));
         const pIdx = plans.findIndex(p => p.name === planName);
@@ -448,10 +457,22 @@ const updatePlanLimits = async (req, res) => {
             const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
             plans[pIdx].is_active = activeBool;
           }
-          await savePersistedPlans(plans);
-          debouncedSave();
+        } else {
+          plans.push({
+            name: plan.name,
+            displayName: plan.displayName,
+            message_limit: plan.message_limit,
+            window_hours: plan.window_hours,
+            allowed_models: plan.allowed_models || ['*'],
+            is_active: plan.is_active !== false
+          });
         }
-      } catch {}
+        await savePersistedPlans(plans);
+        if (typeof invalidatePlansCache === 'function') invalidatePlansCache();
+        debouncedSave();
+      } catch (syncErr) {
+        console.warn('[updatePlanLimits Supabase sync warn]:', syncErr.message);
+      }
 
       return res.json({
         success: true,
@@ -459,12 +480,21 @@ const updatePlanLimits = async (req, res) => {
         plan
       });
     } else {
-      const { getPersistedPlans, savePersistedPlans } = require('../../utils/getModelConfig');
+      const { getPersistedPlans, savePersistedPlans, invalidatePlansCache } = require('../../utils/getModelConfig');
       let plans = await getPersistedPlans();
       plans = JSON.parse(JSON.stringify(plans));
-      const plan = plans.find(p => p.name === planName);
+      let plan = plans.find(p => p.name === planName);
       if (!plan) {
-        return res.status(404).json({ success: false, error: 'প্ল্যান পাওয়া যায়নি।' });
+        const defaultNames = { Free: 'ফ্রি প্ল্যান', Pro: 'প্রো প্ল্যান', Max: 'ম্যাক্স প্ল্যান' };
+        plan = {
+          name: planName,
+          displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
+          message_limit: validLimit !== undefined ? validLimit : 10,
+          window_hours: validWindow !== undefined ? validWindow : 3,
+          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+          is_active: true
+        };
+        plans.push(plan);
       }
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
@@ -475,6 +505,7 @@ const updatePlanLimits = async (req, res) => {
       }
 
       await savePersistedPlans(plans);
+      if (typeof invalidatePlansCache === 'function') invalidatePlansCache();
       debouncedSave();
 
       return res.json({

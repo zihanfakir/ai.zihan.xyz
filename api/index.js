@@ -60,9 +60,16 @@ app.get('/api', healthHandler);
 // Public plans endpoint
 const plansHandler = async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     if (getIsMongoConnected()) {
       const Plan = require('../server/models/Plan');
-      const plans = await Plan.find({ is_active: true });
+      let plans = await Plan.find({ is_active: true });
+      if (!plans || plans.length === 0) {
+        const { getPersistedPlans } = require('../utils/getModelConfig');
+        plans = await getPersistedPlans();
+      }
       return res.json({ success: true, plans });
     } else {
       const { getPersistedPlans } = require('../utils/getModelConfig');

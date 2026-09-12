@@ -152,7 +152,7 @@ async function savePersistedModels(models) {
 
 async function getUserUsageDetails(userId, windowHours) {
   const windowMs = (windowHours || 3) * 60 * 60 * 1000;
-  const def = { count: 0, resetInMinutes: Math.round((windowHours || 3) * 60) };
+  const def = { count: 0, resetInMinutes: Math.round((windowHours || 3) * 60), resetAt: null, start: null };
   if (!supabase) return def;
   try {
     const { data } = await supabase
@@ -168,7 +168,9 @@ async function getUserUsageDetails(userId, windowHours) {
         const remainingMs = Math.max(0, (usage.start + windowMs) - now);
         return {
           count: usage.count || 0,
-          resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000))
+          resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000)),
+          resetAt: new Date(usage.start + windowMs).toISOString(),
+          start: usage.start
         };
       }
     }
@@ -217,6 +219,11 @@ async function incrementUserUsage(userId, windowHours) {
 
 let plansCache = null;
 let plansCacheTs = 0;
+
+function invalidatePlansCache() {
+  plansCache = null;
+  plansCacheTs = 0;
+}
 
 async function getPersistedPlans() {
   const now = Date.now();
@@ -616,6 +623,7 @@ module.exports = {
   invalidateModelsCache,
   getPersistedPlans,
   savePersistedPlans,
+  invalidatePlansCache,
   getUserUsage,
   getUserUsageDetails,
   incrementUserUsage,

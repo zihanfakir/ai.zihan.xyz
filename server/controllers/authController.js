@@ -207,6 +207,7 @@ const getMe = async (req, res) => {
   try {
     const user = req.user;
     let rateLimit = null;
+    let usage = null;
     
     if (user.role !== 'admin') {
       const Plan = require('../models/Plan');
@@ -225,41 +226,102 @@ const getMe = async (req, res) => {
       if (!plan) {
         const defaultLimits = { 'Free': { limit: 10, window: 3 }, 'Pro': { limit: 30, window: 3 }, 'Max': { limit: 50, window: 1 } };
         const def = defaultLimits[currentPlanName] || defaultLimits['Free'];
-        plan = { message_limit: def.limit, window_hours: def.window };
+        plan = { message_limit: def.limit, window_hours: def.window, name: currentPlanName };
       }
+
+      const planLimit = Number(plan.message_limit) || 10;
+      const planWindow = Number(plan.window_hours) || 3;
       
       const userId = String(user._id || user.id);
-      const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
+      const windowStart = new Date(Date.now() - planWindow * 60 * 60 * 1000);
       let messageCount = 0;
-      let resetTimeMinutes = Math.round(plan.window_hours * 60);
+      let resetTimeMinutes = Math.round(planWindow * 60);
+      let resetAt = null;
+      let windowStartTs = windowStart.getTime();
       
       if (getIsMongoConnected()) {
         messageCount = await UsageLog.countDocuments({ user_id: userId, timestamp: { $gte: windowStart } });
         const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
-          resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
+          const resetMs = new Date(oldestLog.timestamp).getTime() + planWindow * 60 * 60 * 1000;
+          resetTimeMinutes = Math.max(1, Math.ceil((resetMs - Date.now()) / (60 * 1000)));
+          resetAt = new Date(resetMs).toISOString();
+          windowStartTs = new Date(oldestLog.timestamp).getTime();
+        } else {
+          resetAt = new Date(Date.now() + planWindow * 60 * 60 * 1000).toISOString();
         }
       } else {
         const { getUserUsageDetails } = require('../../utils/getModelConfig');
-        const usageDetails = await getUserUsageDetails(userId, plan.window_hours);
+        const usageDetails = await getUserUsageDetails(userId, planWindow);
         const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
         messageCount = Math.max(usageDetails.count, memCount);
         resetTimeMinutes = usageDetails.resetInMinutes;
+        if (usageDetails.resetAt) {
+          resetAt = usageDetails.resetAt;
+          windowStartTs = usageDetails.start || (new Date(resetAt).getTime() - planWindow * 60 * 60 * 1000);
+        } else {
+          resetAt = new Date(Date.now() + resetTimeMinutes * 60 * 1000).toISOString();
+        }
       }
       
       rateLimit = {
         used: messageCount,
-        limit: plan.message_limit,
-        remaining: Math.max(0, plan.message_limit - messageCount),
+        limit: planLimit,
+        remaining: Math.max(0, planLimit - messageCount),
         resetInMinutes: Math.max(1, resetTimeMinutes || 1),
-        windowHours: plan.window_hours
+        windowHours: planWindow,
+        resetAt,
+        windowStart: windowStartTs
+      };
+
+      usage = {
+        count: messageCount,
+        limit: planLimit,
+        remaining: Math.max(0, planLimit - messageCount),
+        resetInMinutes: Math.max(1, resetTimeMinutes || 1),
+        windowHours: planWindow,
+        resetAt,
+        start: windowStartTs
+      };
+    } else {
+      rateLimit = {
+        isAdmin: true,
+        unlimited: true,
+        used: 0,
+        limit: 999999,
+        remaining: 999999,
+        resetInMinutes: 0,
+        windowHours: 1,
+        resetAt: null,
+        windowStart: Date.now()
+      };
+      usage = {
+        isAdmin: true,
+        unlimited: true,
+        count: 0,
+        limit: 999999,
+        remaining: 999999,
+        resetInMinutes: 0,
+        windowHours: 1,
+        resetAt: null,
+        start: Date.now()
       };
     }
 
     const finalId = user._id || user.id;
     res.json({
       success: true,
-      user: { _id: finalId, id: finalId, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar, rateLimit }
+      user: {
+        _id: finalId,
+        id: finalId,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subscription: user.subscription,
+        avatar: user.avatar,
+        rateLimit,
+        usage
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
