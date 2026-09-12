@@ -7479,7 +7479,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       // Client-side stream watchdog & timeout (prevent infinite loading)
       let streamWatchdog = null;
-      const resetWatchdog = (timeoutMs = 28000) => {
+      const resetWatchdog = (timeoutMs = 12000) => {
         if (streamWatchdog) clearTimeout(streamWatchdog);
         streamWatchdog = setTimeout(() => {
           if (currentAbortController) {
@@ -7488,8 +7488,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }, timeoutMs);
       };
 
-      // Set initial 28s timeout to receive HTTP headers
-      resetWatchdog(28000);
+      // Set initial 12s timeout to receive HTTP response
+      resetWatchdog(12000);
 
       let response;
       try {
@@ -7502,16 +7502,27 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } catch (fetchErr) {
         if (streamWatchdog) clearTimeout(streamWatchdog);
         if (fetchErr.name === "AbortError" || fetchErr === "timeout" || currentAbortController?.signal?.aborted) {
-          throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
+          throw new Error("মডেল থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। মডেলটি সাময়িকভাবে ডাউন বা ধীরগতিতে থাকতে পারে।");
         }
         throw fetchErr;
       }
 
-      // Headers received - extend watchdog for initial token
-      resetWatchdog(25000);
+      // Headers received - extend watchdog for initial token (14s)
+      resetWatchdog(14000);
 
       if (!response.ok) {
         if (streamWatchdog) clearTimeout(streamWatchdog);
+        let serverError = "";
+        try {
+          const errJson = await response.json();
+          if (errJson && errJson.error) {
+            serverError = errJson.error;
+          }
+        } catch {}
+
+        if (serverError) {
+          throw new Error(serverError);
+        }
         if (response.status === 401 || response.status === 403) {
           throw new Error("এই মডেল ব্যবহারের জন্য লগইন অথবা প্ল্যান আপগ্রেড প্রয়োজন।");
         }
@@ -7536,12 +7547,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       try {
         while (true) {
-          // If no chunk arrives for 22s mid-stream, abort
-          resetWatchdog(22000);
+          // If no chunk arrives for 16s mid-stream, abort
+          resetWatchdog(16000);
           const { done, value } = await reader.read();
           if (done) break;
 
-          resetWatchdog(22000);
+          resetWatchdog(16000);
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop();
@@ -7556,9 +7567,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
               const json = JSON.parse(payload);
               if (json.error) {
                 const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
-                const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("Error") && !rawErrMsg.includes("/"))
+                const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("/"))
                   ? rawErrMsg
-                  : "সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।";
+                  : "মডেল থেকে কোনো উত্তর পাওয়া যায়নি।";
                 throw new Error(safeMsg);
               }
               const delta = json.choices?.[0]?.delta?.content 
@@ -7629,20 +7640,22 @@ Capabilities & Code Generation Instructions (CRITICAL):
       element.innerHTML = `<span class="status-indicator status-${kind}"><span class="status-icon">${STATUS_ICONS[kind] || STATUS_ICONS.thinking}</span><span class="status-label">${label}</span></span>`;
     }
 
-    function startDynamicStatusSequence(element) {
-      const steps = [
-        { kind: "thinking", label: "চিন্তা করছি..." },
-        { kind: "searching", label: "ওয়েব সার্চ করা হচ্ছে..." },
-        { kind: "working", label: "কাজ করছি..." },
-        { kind: "generating", label: "প্রস্তুত করা হচ্ছে..." }
-      ];
-      let currentStep = 0;
-      setBubbleStatus(element, steps[currentStep].kind, steps[currentStep].label);
+    function startDynamicStatusSequence(element, modelName = "") {
+      element.style.whiteSpace = "";
+      const prefix = modelName ? `${modelName}: ` : "";
       
+      // Stage 1: Immediate thinking state
+      setBubbleStatus(element, "thinking", `${prefix}চিন্তা করছি...`);
+      
+      const startTime = Date.now();
       const intervalId = setInterval(() => {
-        currentStep = (currentStep + 1) % steps.length;
-        setBubbleStatus(element, steps[currentStep].kind, steps[currentStep].label);
-      }, 1800);
+        const elapsed = (Date.now() - startTime) / 1000;
+        if (elapsed >= 7) {
+          setBubbleStatus(element, "working", `${prefix}উত্তর আসতে দেরি হচ্ছে, অপেক্ষা করুন...`);
+        } else if (elapsed >= 3) {
+          setBubbleStatus(element, "thinking", `${prefix}মডেলের সাথে সংযোগ স্থাপন হচ্ছে...`);
+        }
+      }, 1000);
       
       return intervalId;
     }
@@ -7825,7 +7838,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         const inputTokensForThisCall = activeHistory.reduce((sum, m) => sum + estimateTokens(m.content || ""), 0);
 
-        const statusIntervalId = startDynamicStatusSequence(aiTextElement);
+        const curModelObj = MODELS.find(m => m.id === selectedModelId);
+        const curModelName = curModelObj ? curModelObj.name : "";
+        const statusIntervalId = startDynamicStatusSequence(aiTextElement, curModelName);
 
         let started = false;
         let streamQueue = "";
@@ -7840,12 +7855,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         let overallWatchdog = setTimeout(() => {
           if (!apiFinished) {
-            console.warn("[Client Watchdog]: Hard timeout (55s) reached.");
+            console.warn("[Client Watchdog]: Hard timeout (18s) reached.");
             if (currentAbortController) {
               try { currentAbortController.abort("timeout"); } catch {}
             }
           }
-        }, 55000);
+        }, 18000);
 
         const finishUp = () => {
           if (overallWatchdog) {
@@ -7943,9 +7958,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
             clearInterval(statusIntervalId);
             aiTextElement.classList.remove("streaming", "no-children");
             aiTextElement.innerHTML = `
-              <div class="ai-error-box">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <span>দুঃখিত, কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>
+              <div class="ai-error-box" style="display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি</span>
+                  <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য মডেল নির্বাচন করে চেষ্টা করুন।</span>
+                </div>
               </div>
             `;
             regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
@@ -7987,14 +8005,27 @@ Capabilities & Code Generation Instructions (CRITICAL):
           } else {
             soundEngine.playError();
             triggerHaptic("error");
-            // NEVER reveal internal model names or technical error stack traces
-            let userFriendlyMsg = "দুঃখিত, এই মুহূর্তে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।";
+
+            let userFriendlyMsg = "";
+            let errorDetail = "";
             if (!navigator.onLine) {
-              userFriendlyMsg = "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে। আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
+              userFriendlyMsg = "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে।";
+              errorDetail = "আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
+            } else if (err.name === "AbortError" || err === "timeout" || (err.message && err.message.toLowerCase().includes("timeout"))) {
+              userFriendlyMsg = `AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
+              errorDetail = "মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য কোনো মডেল নির্বাচন করে চেষ্টা করুন।";
             } else if (err.message && (err.message.includes("সীমা") || err.message.includes("429"))) {
-              userFriendlyMsg = "মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।";
+              userFriendlyMsg = "মেসেজ পাঠানোর সীমা শেষ হয়েছে।";
+              errorDetail = "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && (err.message.includes("লগইন") || err.message.includes("প্ল্যান") || err.message.includes("অনুমোদন"))) {
               userFriendlyMsg = err.message;
+              errorDetail = "অনুমোদিত মডেল নির্বাচন করুন অথবা লগইন করুন।";
+            } else if (err.message && err.message.length > 5 && !err.message.includes("fetch") && !err.message.includes("Object") && !err.message.includes("JSON")) {
+              userFriendlyMsg = err.message;
+              errorDetail = "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিয়ে পুনরায় চেষ্টা করতে পারেন।";
+            } else {
+              userFriendlyMsg = `AI মডেল '${curModelName}' থেকে কোনো উত্তর পাওয়া যায়নি।`;
+              errorDetail = "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             }
 
             if (renderedStream && renderedStream.trim().length > 0) {
@@ -8006,9 +8037,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
               }
             } else {
               aiTextElement.innerHTML = `
-                <div class="ai-error-box">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                  <span>${userFriendlyMsg}</span>
+                <div class="ai-error-box" style="display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                    <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(userFriendlyMsg)}</span>
+                    <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(errorDetail)}</span>
+                  </div>
                 </div>
               `;
             }

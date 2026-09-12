@@ -86,22 +86,14 @@ const streamChatCompletions = async (req, res) => {
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
     }
 
-    // Flush SSE headers early with keep-alive comment so Vercel does not time out or drop the connection
-    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    if (res.flushHeaders) res.flushHeaders();
-    res.write(': keepalive\n\n');
-
     // Abort upstream immediately if client disconnects
     const abortController = new AbortController();
     req.on('close', () => {
       try { abortController.abort(); } catch (e) {}
     });
 
-    // Helper to attempt completion fetch with timeout (4.5s max to fit within Vercel serverless window)
-    const tryFetchCompletion = async (url, key, modName, timeoutMs = 4500) => {
+    // Helper to attempt completion fetch with timeout (6.5s max to fit within Vercel serverless window)
+    const tryFetchCompletion = async (url, key, modName, timeoutMs = 6500) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
@@ -136,35 +128,36 @@ const streamChatCompletions = async (req, res) => {
       }
     };
 
-    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 8000);
+    // Primary model attempt with a 6.5s timeout (No auto-fallback per user instruction)
+    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 6500);
 
     // Guard against client socket abort / closure
     if (req.destroyed || req.aborted || (abortController && abortController.signal.aborted) || res.writableEnded) {
       return;
     }
 
-    if (!res.headersSent) {
-      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-      res.setHeader('Cache-Control', 'no-cache, no-transform');
-      res.setHeader('Connection', 'keep-alive');
-      res.setHeader('X-Accel-Buffering', 'no');
-      if (res.flushHeaders) res.flushHeaders();
-    }
-
+    // If model failed or timed out, send proper HTTP error JSON before headers are locked
     if (!response || !response.ok) {
-      const status = response ? response.status : 500;
-      let userSafeError = 'সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
+      const status = response ? response.status : 504;
+      const modelDisplayName = (aiModelConfig && (aiModelConfig.name || aiModelConfig.id)) || model || 'AI Model';
+      let userSafeError = `নির্বাচিত AI মডেলটি (${modelDisplayName}) এই মুহূর্তে সাড়া দিচ্ছে না। অনুগ্রহ করে অন্য কোনো মডেল নির্বাচন করুন।`;
       if (status === 429) {
         userSafeError = 'মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
       } else if (status === 401 || status === 403) {
         userSafeError = 'এই মডেল ব্যবহারের জন্য অনুমোদন প্রয়োজন।';
-      } else if (status === 502 || status === 503) {
-        userSafeError = 'AI মডেল প্রোভাইডার সার্ভার সাময়িকভাবে ডাউন রয়েছে। অন্য কোনো মডেল নির্বাচন করুন।';
+      } else if (status === 502 || status === 503 || status === 504) {
+        userSafeError = `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
       }
-      res.write(`data: ${JSON.stringify({ error: userSafeError })}\n\n`);
-      res.write('data: [DONE]\n\n');
-      return res.end();
+      return res.status(status >= 400 && status < 600 ? status : 503).json({ success: false, error: userSafeError });
     }
+
+    // Model is verified healthy and responding: Now establish SSE streaming
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (res.flushHeaders) res.flushHeaders();
+    res.write(': keepalive\n\n');
 
     let hasStreamedData = false;
     let streamIdleTimeout = null;
