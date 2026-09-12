@@ -260,52 +260,6 @@
       gap: 8px;
     }
 
-    .nav-download-app-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(37, 99, 235, 0.22));
-      border: 1px solid rgba(59, 130, 246, 0.35);
-      border-radius: var(--radius-md);
-      color: #60a5fa;
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      white-space: nowrap;
-    }
-
-    .nav-download-app-btn:hover {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(37, 99, 235, 0.38));
-      border-color: rgba(59, 130, 246, 0.6);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
-    }
-
-    .nav-download-app-btn:active {
-      transform: translateY(0);
-    }
-
-    .nav-download-text-short {
-      display: none;
-    }
-
-    @media (max-width: 480px) {
-      .nav-download-app-btn {
-        padding: 5px 8px;
-        font-size: 0.75rem;
-      }
-      .nav-download-text-full {
-        display: none;
-      }
-      .nav-download-text-short {
-        display: inline;
-        font-weight: 700;
-      }
-    }
 
     .hero-app-banner {
       margin: 12px 0 16px;
@@ -3475,11 +3429,6 @@
       </button>
     </div>
     <div class="navbar-right">
-      <button type="button" class="nav-download-app-btn sheen-surface" id="navDownloadAppBtn" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন (APK)">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span class="nav-download-text-full">অ্যাপ ডাউনলোড</span>
-        <span class="nav-download-text-short">APK</span>
-      </button>
       <button class="model-selector sheen-surface" id="modelTrigger" type="button">
         <span id="triggerStatusDot" class="trigger-status-dot status-dot checking"></span>
         <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
@@ -6516,7 +6465,6 @@
     const drawerDownloadAppWrap = document.getElementById("drawerDownloadAppWrap");
     const drawerDownloadAppBtn = document.getElementById("drawerDownloadAppBtn");
     const brandMenuDownloadAppBtn = document.getElementById("brandMenuDownloadAppBtn");
-    const navDownloadAppBtn = document.getElementById("navDownloadAppBtn");
     const heroAppDownloadBanner = document.getElementById("heroAppDownloadBanner");
     const appDownloadModalOverlay = document.getElementById("appDownloadModalOverlay");
     const appDownloadModalClose = document.getElementById("appDownloadModalClose");
@@ -6546,24 +6494,15 @@
         // Running inside installed Android App - strictly hide all download prompts
         if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "none";
         if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "none";
-        if (navDownloadAppBtn) navDownloadAppBtn.style.display = "none";
         if (heroAppDownloadBanner) heroAppDownloadBanner.style.display = "none";
         if (appDownloadModalOverlay) appDownloadModalOverlay.style.display = "none";
         return;
       }
 
-      // On website: show app download options everywhere
+      // On website: show app download options
       if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "block";
       if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "flex";
-      if (navDownloadAppBtn) navDownloadAppBtn.style.display = "inline-flex";
       if (heroAppDownloadBanner) heroAppDownloadBanner.style.display = "inline-flex";
-
-      if (navDownloadAppBtn) {
-        navDownloadAppBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          openAppDownloadModal();
-        });
-      }
 
       if (heroAppDownloadBanner) {
         heroAppDownloadBanner.addEventListener("click", (e) => {
