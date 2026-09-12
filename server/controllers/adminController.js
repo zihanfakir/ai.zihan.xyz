@@ -480,7 +480,7 @@ const updatePlanLimits = async (req, res) => {
 const generateRandomCode = (planName) => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let rand = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 12; i++) {
     rand += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return `ALO-${planName.toUpperCase()}-${rand}`;
@@ -634,6 +634,108 @@ const deleteRedeemCode = async (req, res) => {
     debouncedSave();
 
     res.json({ success: true, message: 'রিডিম কোডটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const createCustomRedeemCode = async (req, res) => {
+  try {
+    const { custom_code, plan_name, duration_days = 30, max_uses = 10 } = req.body;
+    
+    if (!custom_code || typeof custom_code !== 'string' || !custom_code.trim()) {
+      return res.status(400).json({ success: false, error: 'কাস্টম রিডিম কোড অবশ্যই লিখতে হবে' });
+    }
+    if (!['Pro', 'Max'].includes(plan_name)) {
+      return res.status(400).json({ success: false, error: 'প্ল্যান অবশ্যই Pro অথবা Max হতে হবে' });
+    }
+    
+    const cleanCode = custom_code.trim().toUpperCase();
+    if (cleanCode.length < 3 || cleanCode.length > 50) {
+      return res.status(400).json({ success: false, error: 'কাস্টম কোড ৩ থেকে ৫০ অক্ষরের মধ্যে হতে হবে' });
+    }
+    
+    const validDuration = Math.floor(Math.min(Math.max(Number(duration_days) || 30, 1), 3650));
+    const validMaxUses = Math.floor(Math.min(Math.max(Number(max_uses) || 10, 1), 100000));
+    
+    if (getIsMongoConnected()) {
+      const existing = await RedeemCode.findOne({ code: cleanCode });
+      if (existing) {
+        return res.status(400).json({ success: false, error: 'এই কোডটি ইতিমধ্যে বিদ্যমান আছে!' });
+      }
+      
+      const codeDoc = await RedeemCode.create({
+        code: cleanCode,
+        plan_name,
+        duration_days: validDuration,
+        is_used: false,
+        is_custom: true,
+        max_uses: validMaxUses,
+        use_count: 0,
+        used_by_list: [],
+        created_by: req.user._id || req.user.id
+      });
+      
+      // Sync to Supabase
+      try {
+        const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+        let currentCodes = await getPersistedRedeemCodes();
+        currentCodes = [...currentCodes, {
+          _id: String(codeDoc._id),
+          code: cleanCode,
+          plan_name,
+          duration_days: validDuration,
+          is_used: false,
+          is_custom: true,
+          max_uses: validMaxUses,
+          use_count: 0,
+          used_by_list: [],
+          used_by: null,
+          used_at: null,
+          createdAt: codeDoc.createdAt
+        }];
+        await savePersistedRedeemCodes(currentCodes);
+        debouncedSave();
+      } catch {}
+      
+      return res.status(201).json({
+        success: true,
+        message: `কাস্টম রিডিম কোড "${cleanCode}" সফলভাবে তৈরি হয়েছে (সর্বোচ্চ ${validMaxUses} জন ব্যবহার করতে পারবে)।`,
+        code: codeDoc
+      });
+    } else {
+      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+      let currentCodes = await getPersistedRedeemCodes();
+      
+      if (currentCodes.some(c => c.code === cleanCode)) {
+        return res.status(400).json({ success: false, error: 'এই কোডটি ইতিমধ্যে বিদ্যমান আছে!' });
+      }
+      
+      const codeDoc = {
+        _id: 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        code: cleanCode,
+        plan_name,
+        duration_days: validDuration,
+        is_used: false,
+        is_custom: true,
+        max_uses: validMaxUses,
+        use_count: 0,
+        used_by_list: [],
+        used_by: null,
+        used_at: null,
+        createdAt: new Date()
+      };
+      
+      currentCodes = [...currentCodes, codeDoc];
+      await savePersistedRedeemCodes(currentCodes);
+      debouncedSave();
+      
+      return res.status(201).json({
+        success: true,
+        message: `কাস্টম রিডিম কোড "${cleanCode}" সফলভাবে তৈরি হয়েছে (সর্বোচ্চ ${validMaxUses} জন ব্যবহার করতে পারবে)।`,
+        code: codeDoc
+      });
+    }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -1028,6 +1130,7 @@ module.exports = {
   generateRedeemCodes,
   getRedeemCodes,
   deleteRedeemCode,
+  createCustomRedeemCode,
   getSettings,
   updateSettings
 };

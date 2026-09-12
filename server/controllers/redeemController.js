@@ -27,24 +27,71 @@ const claimRedeemCode = async (req, res) => {
     const currentTier = (user.subscription && user.subscription.plan_name) ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
 
     let claimedCodeId = null;
+    let isCustomCode = false;
 
     if (getIsMongoConnected()) {
-      const redeemCode = await RedeemCode.findOneAndUpdate(
-        { code: cleanCode, is_used: false },
-        { $set: { is_used: true, used_by: userId, used_at: now } },
-        { new: true }
-      );
+      // First, find the code to check if it's custom multi-use
+      let redeemCode = await RedeemCode.findOne({ code: cleanCode });
       if (!redeemCode) {
-        return res.status(400).json({ success: false, error: 'অবৈধ, অকার্যকর অথবা ইতিমধ্যে ব্যবহৃত রিডিম কোড!' });
+        return res.status(400).json({ success: false, error: 'অবৈধ বা অকার্যকর রিডিম কোড!' });
       }
-      claimedCodeId = redeemCode._id;
+
+      // Check if custom multi-use code
+      if (redeemCode.is_custom) {
+        isCustomCode = true;
+        // Check if already used by this user
+        const alreadyUsed = (redeemCode.used_by_list || []).some(u => String(u.user_id) === String(userId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+        if (alreadyUsed) {
+          return res.status(400).json({ success: false, error: 'আপনি ইতিমধ্যে এই কাস্টম রিডিম কোডটি ব্যবহার করেছেন!' });
+        }
+        // Check max uses
+        if ((redeemCode.use_count || 0) >= (redeemCode.max_uses || 1)) {
+          return res.status(400).json({ success: false, error: 'এই কাস্টম রিডিম কোডটির সর্বোচ্চ ব্যবহার সীমা পূর্ণ হয়েছে!' });
+        }
+        // Atomically increment use_count and add to used_by_list
+        redeemCode = await RedeemCode.findOneAndUpdate(
+          { code: cleanCode, use_count: { $lt: redeemCode.max_uses || 1 } },
+          { 
+            $inc: { use_count: 1 },
+            $push: { used_by_list: { user_id: userId, email: user.email || '', used_at: now } },
+            $set: { is_used: (redeemCode.use_count + 1) >= (redeemCode.max_uses || 1) }
+          },
+          { new: true }
+        );
+        if (!redeemCode) {
+          return res.status(400).json({ success: false, error: 'এই কাস্টম রিডিম কোডটির সর্বোচ্চ ব্যবহার সীমা পূর্ণ হয়েছে!' });
+        }
+        claimedCodeId = redeemCode._id;
+      } else {
+        // Standard single-use code - use atomic findOneAndUpdate
+        if (redeemCode.is_used) {
+          return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+        }
+        redeemCode = await RedeemCode.findOneAndUpdate(
+          { code: cleanCode, is_used: false },
+          { $set: { is_used: true, used_by: userId, used_at: now } },
+          { new: true }
+        );
+        if (!redeemCode) {
+          return res.status(400).json({ success: false, error: 'অবৈধ, অকার্যকর অথবা ইতিমধ্যে ব্যবহৃত রিডিম কোড!' });
+        }
+        claimedCodeId = redeemCode._id;
+      }
 
       const durationDays = redeemCode.duration_days || 30;
       const newTier = PLAN_HIERARCHY[redeemCode.plan_name] || 1;
 
       // Lifetime plan holders with >= tier: rollback and reject
       if (isLifetime && currentTier >= newTier) {
-        await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        if (isCustomCode) {
+          await RedeemCode.updateOne({ _id: redeemCode._id }, { 
+            $inc: { use_count: -1 },
+            $pull: { used_by_list: { user_id: userId } },
+            $set: { is_used: false }
+          });
+        } else {
+          await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        }
         claimedCodeId = null;
         return res.status(400).json({ success: false, error: 'আপনার অ্যাকাউন্টে ইতিমধ্যে আজীবন সক্রিয় প্ল্যান রয়েছে। এই কোডটি ব্যবহার করা সম্ভব নয়।' });
       }
@@ -53,7 +100,15 @@ const claimRedeemCode = async (req, res) => {
       const isCurrentActive = !isLifetime && user.subscription && user.subscription.expires_at && new Date(user.subscription.expires_at) > now;
       let baseDate, finalPlanName;
       if (isCurrentActive && currentTier > newTier) {
-        await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        if (isCustomCode) {
+          await RedeemCode.updateOne({ _id: redeemCode._id }, { 
+            $inc: { use_count: -1 },
+            $pull: { used_by_list: { user_id: userId } },
+            $set: { is_used: false }
+          });
+        } else {
+          await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        }
         claimedCodeId = null;
         return res.status(400).json({ success: false, error: `আপনার অ্যাকাউন্টে ইতিমধ্যে উচ্চতর প্ল্যান (${user.subscription.plan_name}) সক্রিয় আছে। এই কোডটি ব্যবহার করা সম্ভব নয়।` });
       } else if (isCurrentActive && currentTier === newTier) {
@@ -93,17 +148,31 @@ const claimRedeemCode = async (req, res) => {
         let pCodes = await getPersistedRedeemCodes();
         const cIdx = pCodes.findIndex(c => c.code === cleanCode);
         if (cIdx !== -1) {
-          pCodes[cIdx].is_used = true;
-          pCodes[cIdx].used_by = userId;
-          pCodes[cIdx].used_at = now;
+          if (pCodes[cIdx].is_custom) {
+            pCodes[cIdx].use_count = (pCodes[cIdx].use_count || 0) + 1;
+            if (!Array.isArray(pCodes[cIdx].used_by_list)) pCodes[cIdx].used_by_list = [];
+            pCodes[cIdx].used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
+            pCodes[cIdx].is_used = pCodes[cIdx].use_count >= (pCodes[cIdx].max_uses || 1);
+          } else {
+            pCodes[cIdx].is_used = true;
+            pCodes[cIdx].used_by = userId;
+            pCodes[cIdx].used_at = now;
+          }
           await savePersistedRedeemCodes(pCodes);
         }
         if (memoryStore.redeemCodes) {
           const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
           if (mCode) {
-            mCode.is_used = true;
-            mCode.used_by = userId;
-            mCode.used_at = now;
+            if (mCode.is_custom) {
+              mCode.use_count = (mCode.use_count || 0) + 1;
+              if (!Array.isArray(mCode.used_by_list)) mCode.used_by_list = [];
+              mCode.used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
+              mCode.is_used = mCode.use_count >= (mCode.max_uses || 1);
+            } else {
+              mCode.is_used = true;
+              mCode.used_by = userId;
+              mCode.used_at = now;
+            }
           }
         }
         debouncedSave();
@@ -130,11 +199,23 @@ const claimRedeemCode = async (req, res) => {
         subscription: subscriptionData
       });
     } else {
+      // ========== Non-Mongo (Supabase/memoryStore) Mode ==========
+      
       // Atomic pre-check in memoryStore
       if (memoryStore.redeemCodes) {
         const memCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
-        if (memCode && memCode.is_used) {
-          return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+        if (memCode) {
+          if (memCode.is_custom) {
+            const alreadyUsed = (memCode.used_by_list || []).some(u => String(u.user_id) === String(userId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+            if (alreadyUsed) {
+              return res.status(400).json({ success: false, error: 'আপনি ইতিমধ্যে এই কাস্টম রিডিম কোডটি ব্যবহার করেছেন!' });
+            }
+            if ((memCode.use_count || 0) >= (memCode.max_uses || 1)) {
+              return res.status(400).json({ success: false, error: 'এই কাস্টম রিডিম কোডটির সর্বোচ্চ ব্যবহার সীমা পূর্ণ হয়েছে!' });
+            }
+          } else if (memCode.is_used) {
+            return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+          }
         }
       }
 
@@ -146,8 +227,20 @@ const claimRedeemCode = async (req, res) => {
       if (!redeemCode) {
         return res.status(400).json({ success: false, error: 'অবৈধ বা অকার্যকর রিডিম কোড!' });
       }
-      if (redeemCode.is_used) {
-        return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+
+      if (redeemCode.is_custom) {
+        isCustomCode = true;
+        const alreadyUsed = (redeemCode.used_by_list || []).some(u => String(u.user_id) === String(userId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+        if (alreadyUsed) {
+          return res.status(400).json({ success: false, error: 'আপনি ইতিমধ্যে এই কাস্টম রিডিম কোডটি ব্যবহার করেছেন!' });
+        }
+        if ((redeemCode.use_count || 0) >= (redeemCode.max_uses || 1)) {
+          return res.status(400).json({ success: false, error: 'এই কাস্টম রিডিম কোডটির সর্বোচ্চ ব্যবহার সীমা পূর্ণ হয়েছে!' });
+        }
+      } else {
+        if (redeemCode.is_used) {
+          return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+        }
       }
 
       const durationDays = redeemCode.duration_days || 30;
@@ -175,9 +268,16 @@ const claimRedeemCode = async (req, res) => {
       const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
 
       // Mark code as used
-      redeemCode.is_used = true;
-      redeemCode.used_by = userId;
-      redeemCode.used_at = now;
+      if (redeemCode.is_custom) {
+        redeemCode.use_count = (redeemCode.use_count || 0) + 1;
+        if (!Array.isArray(redeemCode.used_by_list)) redeemCode.used_by_list = [];
+        redeemCode.used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
+        redeemCode.is_used = redeemCode.use_count >= (redeemCode.max_uses || 1);
+      } else {
+        redeemCode.is_used = true;
+        redeemCode.used_by = userId;
+        redeemCode.used_at = now;
+      }
 
       // Update user subscription in Supabase
       let users = await getPersistedUsers();
@@ -197,9 +297,16 @@ const claimRedeemCode = async (req, res) => {
       if (memoryStore.redeemCodes) {
         const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
         if (mCode) {
-          mCode.is_used = true;
-          mCode.used_by = userId;
-          mCode.used_at = now;
+          if (mCode.is_custom) {
+            mCode.use_count = (mCode.use_count || 0) + 1;
+            if (!Array.isArray(mCode.used_by_list)) mCode.used_by_list = [];
+            mCode.used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
+            mCode.is_used = mCode.use_count >= (mCode.max_uses || 1);
+          } else {
+            mCode.is_used = true;
+            mCode.used_by = userId;
+            mCode.used_at = now;
+          }
         }
       }
       user.subscription = subscriptionData;
@@ -231,7 +338,16 @@ const claimRedeemCode = async (req, res) => {
     if (claimedCodeId && getIsMongoConnected()) {
       try {
         const RedeemCode = require('../models/RedeemCode');
-        await RedeemCode.updateOne({ _id: claimedCodeId }, { $set: { is_used: false, used_by: null, used_at: null } });
+        const failedCode = await RedeemCode.findById(claimedCodeId);
+        if (failedCode && failedCode.is_custom) {
+          await RedeemCode.updateOne({ _id: claimedCodeId }, { 
+            $inc: { use_count: -1 },
+            $pull: { used_by_list: { user_id: userId } },
+            $set: { is_used: false }
+          });
+        } else {
+          await RedeemCode.updateOne({ _id: claimedCodeId }, { $set: { is_used: false, used_by: null, used_at: null } });
+        }
       } catch {}
     }
     res.status(500).json({ success: false, error: 'সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।' });

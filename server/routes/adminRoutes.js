@@ -11,6 +11,7 @@ const {
   generateRedeemCodes,
   getRedeemCodes,
   deleteRedeemCode,
+  createCustomRedeemCode,
   getModels,
   updateModel,
   addModel,
@@ -38,6 +39,7 @@ router.get('/plans', getPlans);
 router.put('/plans/:planName', updatePlanLimits);
 
 router.post('/redeem/generate', generateRedeemCodes);
+router.post('/redeem/custom', createCustomRedeemCode);
 router.get('/redeem/list', getRedeemCodes);
 router.delete('/redeem/:codeId', deleteRedeemCode);
 

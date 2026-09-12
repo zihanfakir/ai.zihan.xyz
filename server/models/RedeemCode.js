@@ -33,6 +33,27 @@ const RedeemCodeSchema = new mongoose.Schema({
   created_by: {
     type: mongoose.Schema.Types.Mixed,
     default: null
+  },
+  // Custom reusable code fields
+  is_custom: {
+    type: Boolean,
+    default: false
+  },
+  max_uses: {
+    type: Number,
+    default: 1
+  },
+  use_count: {
+    type: Number,
+    default: 0
+  },
+  used_by_list: {
+    type: [{
+      user_id: mongoose.Schema.Types.Mixed,
+      email: String,
+      used_at: { type: Date, default: Date.now }
+    }],
+    default: []
   }
 }, { timestamps: true });
 

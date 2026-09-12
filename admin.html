@@ -625,6 +625,38 @@
         <button type="submit" class="btn btn-primary" style="height: 42px;">কোড জেনারেট করুন</button>
       </form>
 
+      <h4 style="margin-top: 20px;">কাস্টম রিডিম কোড তৈরি করুন (Multi-Use)</h4>
+      <form id="customCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+        <div class="form-group">
+          <label>কাস্টম কোড (আপনার পছন্দের শব্দ)</label>
+          <input type="text" id="customCodeWord" placeholder="যেমন: ALOAI2026" maxlength="50" style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label>প্ল্যান বেছে নিন</label>
+          <select id="customCodePlan">
+            <option value="Pro">Pro Plan</option>
+            <option value="Max">Max Plan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>মেয়াদ</label>
+          <select id="customCodeDuration">
+            <option value="1">1 দিন</option>
+            <option value="3">3 দিন</option>
+            <option value="7">7 দিন</option>
+            <option value="30" selected>1 মাস (30 দিন)</option>
+            <option value="90">3 মাস (90 দিন)</option>
+            <option value="180">6 মাস (180 দিন)</option>
+            <option value="365">1 বছর (365 দিন)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>সর্বোচ্চ কতজন ব্যবহার করতে পারবে</label>
+          <input type="number" id="customMaxUses" value="10" min="1" max="100000">
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 42px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">কাস্টম কোড তৈরি করুন</button>
+      </form>
+
       <h4 style="margin-top: 16px;">বিদ্যমান রিডিম কোডসমূহ</h4>
       <div style="overflow-x: auto; max-height: 400px;">
         <table>
@@ -632,14 +664,15 @@
             <tr>
               <th>কোড</th>
               <th>প্ল্যান</th>
-              <th>মেয়াদ</th>
+              <th>মেয়াদ</th>
+              <th>ধরন</th>
               <th>স্ট্যাটাস</th>
               <th>ব্যবহারকারী</th>
               <th>অ্যাকশন</th>
             </tr>
           </thead>
           <tbody id="redeemTableBody">
-            <tr><td colspan="6" style="text-align: center;">লোড হচ্ছে...</td></tr>
+            <tr><td colspan="7" style="text-align: center;">লোড হচ্ছে...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1860,6 +1893,48 @@
       }
     });
 
+    document.getElementById("customCodeForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector("button[type='submit']");
+      const custom_code = document.getElementById("customCodeWord").value;
+      const plan_name = document.getElementById("customCodePlan").value;
+      const duration_days = document.getElementById("customCodeDuration").value;
+      const max_uses = document.getElementById("customMaxUses").value;
+
+      if (!custom_code || !custom_code.trim()) {
+        showToast("কাস্টম কোড লিখুন", "error");
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "কোড তৈরি হচ্ছে...";
+      }
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/redeem/custom`, {
+          method: "POST",
+          body: JSON.stringify({ custom_code, plan_name, duration_days, max_uses })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "কাস্টম রিডিম কোড তৈরি হয়েছে!", "success");
+          document.getElementById("customCodeWord").value = "";
+          loadRedeemCodes();
+          loadStats();
+        } else {
+          showToast(data.error || "কাস্টম কোড তৈরি করতে সমস্যা হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "কাস্টম কোড তৈরি করুন";
+        }
+      }
+    });
+
     async function copyToClipboard(text, msg) {
       try {
         await navigator.clipboard.writeText(text);
@@ -1875,17 +1950,37 @@
         const data = await res.json();
         const tbody = document.getElementById("redeemTableBody");
         if (!data.success || !data.codes || !data.codes.length) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">কোনো কোড নেই</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">কোনো কোড নেই</td></tr>`;
           return;
         }
         tbody.innerHTML = "";
         data.codes.forEach(c => {
-          const status = c.is_used ? `<span style="color:var(--danger)">ব্যবহৃত</span>` : `<span style="color:var(--success)">উপলব্ধ</span>`;
-          const usedBy = c.used_by
-            ? (typeof c.used_by === 'object' && c.used_by.name
-                ? `${c.used_by.name} (${c.used_by.email || ''})`
-                : String(c.used_by))
-            : '—';
+          let status;
+          let usedBy;
+          let codeType;
+          
+          if (c.is_custom) {
+            const useCount = c.use_count || 0;
+            const maxUses = c.max_uses || 1;
+            status = useCount >= maxUses 
+              ? `<span style="color:var(--danger)">পূর্ণ (${useCount}/${maxUses})</span>` 
+              : `<span style="color:var(--success)">উপলব্ধ (${useCount}/${maxUses})</span>`;
+            codeType = `<span style="color:#8b5cf6; font-weight:600;">কাস্টম</span>`;
+            if (Array.isArray(c.used_by_list) && c.used_by_list.length > 0) {
+              usedBy = c.used_by_list.map(u => u.email || String(u.user_id)).join(', ');
+            } else {
+              usedBy = '—';
+            }
+          } else {
+            status = c.is_used ? `<span style="color:var(--danger)">ব্যবহৃত</span>` : `<span style="color:var(--success)">উপলব্ধ</span>`;
+            codeType = `<span style="color:#60a5fa;">সাধারণ</span>`;
+            usedBy = c.used_by
+              ? (typeof c.used_by === 'object' && c.used_by.name
+                  ? `${c.used_by.name} (${c.used_by.email || ''})`
+                  : String(c.used_by))
+              : '—';
+          }
+          
           const safeCode = escapeHtml(c.code);
           const safeUsedBy = escapeHtml(usedBy);
           
@@ -1897,6 +1992,7 @@
             </td>
             <td><strong>${escapeHtml(c.plan_name)}</strong></td>
             <td>${c.duration_days} দিন</td>
+            <td>${codeType}</td>
             <td>${status}</td>
             <td>${safeUsedBy}</td>
             <td>
