@@ -1318,11 +1318,12 @@
 
       try {
         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
-          method: "DELETE"
+          method: "DELETE",
+          body: JSON.stringify({ modelId })
         });
         const data = await res.json();
         if (data.success) {
-          showToast("মডেল মুছে ফেলা হয়েছে", "info");
+          showToast(data.message || "মডেলটি স্থায়ীভাবে মুছে ফেলা হয়েছে", "success");
           loadModels();
         } else {
           showToast(data.error || "মডেল মুছতে সমস্যা হয়েছে", "error");

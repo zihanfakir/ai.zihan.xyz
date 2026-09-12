@@ -827,7 +827,7 @@ const updateModel = async (req, res) => {
     }
 
     // 3. ALWAYS update Supabase __models_metadata__ and local memoryStore
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
     models = [...models];
     let model = models.find(m => m.id === modelId || m.model_id === modelId || (m.id && decodeURIComponent(m.id) === modelId));
@@ -849,10 +849,10 @@ const updateModel = async (req, res) => {
     } else {
       model.id = modelId;
       model.model_id = modelId;
-      if (premium !== undefined) model.premium = Boolean(premium);
-      if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (name !== undefined) model.name = name;
       if (cleanBaseUrl !== undefined) model.base_url = cleanBaseUrl;
+      if (premium !== undefined) model.premium = Boolean(premium);
+      if (efficient !== undefined) model.efficient = Boolean(efficient);
       if (hasValidKey) {
         model.api_key = api_key.trim();
       } else if (shouldClearKey) {
@@ -865,8 +865,9 @@ const updateModel = async (req, res) => {
     }
 
     await savePersistedModels(models);
+    invalidateModelsCache();
     invalidateModelKeyCache(modelId);
-    debouncedSave();
+    saveBackup();
 
     return res.json({ success: true, message: 'মডেল ও API Key সফলভাবে আপডেট হয়েছে', model });
   } catch (error) {
@@ -894,7 +895,7 @@ const addModel = async (req, res) => {
       await upsertApiKeyToSupabase(cleanModelId, api_key.trim());
     }
 
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
     models = [...models];
 
@@ -939,8 +940,9 @@ const addModel = async (req, res) => {
     };
     models.push(newModel);
     await savePersistedModels(models);
+    invalidateModelsCache();
     invalidateModelKeyCache(cleanModelId);
-    debouncedSave();
+    saveBackup();
 
     return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
   } catch (error) {
@@ -950,48 +952,135 @@ const addModel = async (req, res) => {
 
 const deleteModel = async (req, res) => {
   try {
-    let { modelId } = req.params;
-    let decoded = modelId;
-    try { decoded = decodeURIComponent(modelId); } catch {}
+    let rawTarget = req.params.modelId || (req.body && req.body.modelId) || req.query.modelId;
+    if (!rawTarget || typeof rawTarget !== 'string' || !rawTarget.trim()) {
+      return res.status(400).json({ success: false, error: 'সঠিক মডেল আইডি প্রদান করুন' });
+    }
 
-    const cleanModelId = String(modelId || '').trim();
+    let decoded = rawTarget;
+    try { decoded = decodeURIComponent(rawTarget); } catch {}
+
+    const cleanModelId = String(rawTarget || '').trim();
     const cleanDecoded = String(decoded || '').trim();
 
-    const PROTECTED_MODELS = ['openai/gpt-oss-120b', 'openrouter/free'];
-    if (PROTECTED_MODELS.includes(cleanModelId) || PROTECTED_MODELS.includes(cleanDecoded)) {
-      return res.status(400).json({ success: false, error: 'এই মূল ব্যাকআপ মডেলটি মুছে ফেলা সম্ভব নয়।' });
-    }
+    // No hardcoded restrictions: Admin has full authority to permanently delete any model.
 
     // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
-      await AiModel.deleteMany({ $or: [{ model_id: modelId }, { id: modelId }, { model_id: decoded }, { id: decoded }] });
+      const mongoose = require('mongoose');
+      const queryList = [
+        { model_id: cleanModelId },
+        { model_id: cleanDecoded },
+        { id: cleanModelId },
+        { id: cleanDecoded },
+        { name: cleanModelId },
+        { name: cleanDecoded }
+      ];
+      if (mongoose.Types.ObjectId.isValid(cleanModelId)) {
+        queryList.push({ _id: cleanModelId });
+      }
+      if (mongoose.Types.ObjectId.isValid(cleanDecoded)) {
+        queryList.push({ _id: cleanDecoded });
+      }
+      await AiModel.deleteMany({ $or: queryList }).catch(() => {});
     }
 
-    // 2. Delete from Supabase individual api_keys rows
+    // 2. Delete individual model api_key rows from Supabase api_keys table
     if (supabase) {
-      await supabase.from('api_keys').delete().eq('model_id', modelId);
-      if (decoded !== modelId) {
-        await supabase.from('api_keys').delete().eq('model_id', decoded);
+      const keysToDelete = [cleanModelId, cleanDecoded, `key_${cleanModelId}`, `key_${cleanDecoded}`];
+      for (const k of keysToDelete) {
+        if (k) {
+          await supabase.from('api_keys').delete().eq('model_id', k).catch(() => {});
+        }
       }
     }
 
-    // 3. ALWAYS remove from Supabase __models_metadata__
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    // 3. Matcher function to filter out model cleanly across all variations
+    const isTargetModel = (m) => {
+      if (!m) return false;
+      const mId = String(m.id || m.model_id || '').trim().toLowerCase();
+      const mName = String(m.name || '').trim().toLowerCase();
+      const t1 = cleanModelId.toLowerCase();
+      const t2 = cleanDecoded.toLowerCase();
+      const mongoId = m._id ? String(m._id) : '';
+      return mId === t1 || mId === t2 || mName === t1 || mName === t2 || mongoId === cleanModelId || mongoId === cleanDecoded;
+    };
+
+    // 4. ALWAYS remove from Supabase __models_metadata__
+    const { 
+      getPersistedModels, 
+      savePersistedModels, 
+      invalidateModelsCache, 
+      invalidateModelKeyCache,
+      getSystemSettings,
+      saveSystemSettings,
+      getPersistedPlans,
+      savePersistedPlans
+    } = require('../../utils/getModelConfig');
+
     let models = await getPersistedModels();
-    models = models.filter(m => (m.id !== modelId && m.model_id !== modelId && m.id !== decoded && m.model_id !== decoded));
+    models = Array.isArray(models) ? models.filter(m => !isTargetModel(m)) : [];
+    
     // Re-normalize orders
     models.forEach((m, idx) => { m.order = idx + 1; });
     await savePersistedModels(models);
+    invalidateModelsCache();
 
-    // 4. ALWAYS remove from memoryStore
+    // 5. ALWAYS remove from memoryStore
     if (memoryStore.models) {
-      memoryStore.models = memoryStore.models.filter(m => (m.id !== modelId && m.model_id !== modelId && m.id !== decoded && m.model_id !== decoded));
+      memoryStore.models = memoryStore.models.filter(m => !isTargetModel(m));
     }
-    invalidateModelKeyCache(modelId);
-    invalidateModelKeyCache(decoded);
+    invalidateModelKeyCache(cleanModelId);
+    invalidateModelKeyCache(cleanDecoded);
+
+    // 6. Clean up fallback_models in system_settings if this model was configured as a fallback
+    try {
+      const sysSettings = await getSystemSettings();
+      if (sysSettings && Array.isArray(sysSettings.fallback_models)) {
+        const t1 = cleanModelId.toLowerCase();
+        const t2 = cleanDecoded.toLowerCase();
+        const updatedFallbacks = sysSettings.fallback_models.filter(fId => {
+          const f = String(fId || '').trim().toLowerCase();
+          return f !== t1 && f !== t2;
+        });
+        if (updatedFallbacks.length !== sysSettings.fallback_models.length) {
+          sysSettings.fallback_models = updatedFallbacks;
+          await saveSystemSettings(sysSettings);
+        }
+      }
+    } catch (e) {}
+
+    // 7. Clean up allowed_models in Plans if this model was explicitly listed
+    try {
+      let plans = await getPersistedPlans();
+      let plansModified = false;
+      if (Array.isArray(plans)) {
+        const t1 = cleanModelId.toLowerCase();
+        const t2 = cleanDecoded.toLowerCase();
+        plans.forEach(p => {
+          if (Array.isArray(p.allowed_models)) {
+            const beforeLen = p.allowed_models.length;
+            p.allowed_models = p.allowed_models.filter(m => {
+              const low = String(m || '').trim().toLowerCase();
+              return low !== t1 && low !== t2;
+            });
+            if (p.allowed_models.length !== beforeLen) plansModified = true;
+          }
+        });
+        if (plansModified) {
+          await savePersistedPlans(plans);
+        }
+      }
+    } catch (e) {}
+
+    // 8. Synchronous permanent write to backup disk
     saveBackup();
 
-    return res.json({ success: true, message: 'মডেলটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে' });
+    return res.json({ 
+      success: true, 
+      message: `মডেল '${cleanDecoded}' ডাটাবেস ও সিস্টেম থেকে চিরতরে মুছে ফেলা হয়েছে (Permanent Delete)।`,
+      remaining_count: models.length
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -1009,7 +1098,7 @@ const reorderModels = async (req, res) => {
       });
     }
 
-    const { getPersistedModels, savePersistedModels, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
 
     let models = await getPersistedModels();
     models = [...models];
@@ -1050,8 +1139,9 @@ const reorderModels = async (req, res) => {
       }
 
       await savePersistedModels(reordered);
+      invalidateModelsCache();
       invalidateModelKeyCache();
-      debouncedSave();
+      saveBackup();
       return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: reordered });
     }
 
@@ -1076,8 +1166,9 @@ const reorderModels = async (req, res) => {
         }
 
         await savePersistedModels(models);
+        invalidateModelsCache();
         invalidateModelKeyCache();
-        debouncedSave();
+        saveBackup();
         return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models });
       }
       return res.json({ success: true, models });

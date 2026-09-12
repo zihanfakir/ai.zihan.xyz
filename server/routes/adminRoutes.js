@@ -47,6 +47,7 @@ router.get('/models', getModels);
 router.post('/models', addModel);
 router.put('/models/reorder', reorderModels);
 router.put('/models/:modelId(*)', updateModel);
+router.delete('/models', deleteModel);
 router.delete('/models/:modelId(*)', deleteModel);
 
 module.exports = router;

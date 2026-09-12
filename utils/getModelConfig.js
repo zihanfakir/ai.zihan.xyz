@@ -90,6 +90,11 @@ function invalidateModelKeyCache(modelId) {
 let modelsCache = null;
 let modelsCacheTs = 0;
 
+function invalidateModelsCache() {
+  modelsCache = null;
+  modelsCacheTs = 0;
+}
+
 async function getPersistedModels() {
   const now = Date.now();
   if (modelsCache && (now - modelsCacheTs) < 10000) { // 10s cache
@@ -106,7 +111,7 @@ async function getPersistedModels() {
 
       if (!error && data && data.length > 0 && data[0].api_key) {
         const parsed = JSON.parse(data[0].api_key);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           modelsCache = parsed;
           modelsCacheTs = now;
           return parsed;
@@ -489,6 +494,7 @@ module.exports = {
   invalidateModelKeyCache,
   getPersistedModels,
   savePersistedModels,
+  invalidateModelsCache,
   getPersistedPlans,
   savePersistedPlans,
   getUserUsage,
