@@ -263,11 +263,24 @@ class MainActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
                 
-                // Inject Native Auth Token
+                // Inject Native Auth Token and User Info
                 val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
                 val token = prefs.getString("auth_token", null)
+                val userName = prefs.getString("user_name", null)
+                val userEmail = prefs.getString("user_email", null)
+                val userPlan = prefs.getString("user_plan", null)
                 if (token != null) {
-                    view.evaluateJavascript("localStorage.setItem('alokpoth_token', '$token');", null)
+                    val js = StringBuilder()
+                    js.append("localStorage.setItem('alokpoth_token', '$token');")
+                    if (!userName.isNullOrEmpty()) js.append("localStorage.setItem('alokpoth_name', '${userName.replace("'", "\\'")}');")
+                    if (!userEmail.isNullOrEmpty()) js.append("localStorage.setItem('alokpoth_email', '${userEmail.replace("'", "\\'")}');")
+                    if (!userPlan.isNullOrEmpty()) {
+                        js.append("localStorage.setItem('alokpoth_current_plan', '$userPlan');")
+                        js.append("localStorage.setItem('alokpoth_user_plan', '$userPlan');")
+                        js.append("localStorage.setItem('alokpoth_plan', '$userPlan');")
+                    }
+                    js.append("if (typeof updateAuthUIState === 'function') updateAuthUIState();")
+                    view.evaluateJavascript(js.toString(), null)
                 }
 
                 if (url != null && url != "about:blank" && !url.startsWith("data:")) {

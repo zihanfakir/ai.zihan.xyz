@@ -19,7 +19,14 @@ data class UserData(
     val id: String?,
     val name: String?,
     val email: String?,
-    val role: String?
+    val role: String?,
+    val subscription: SubscriptionData?
+)
+
+data class SubscriptionData(
+    val plan_name: String?,
+    val is_active: Boolean?,
+    val expires_at: String?
 )
 
 interface AloApi {
