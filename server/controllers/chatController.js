@@ -4,7 +4,7 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
-const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage, getSystemSettings } = require('../../utils/getModelConfig');
+const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
 
 const resolveModelTarget = async (targetModelId, targetModelConfig) => {
   let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
@@ -159,59 +159,6 @@ const streamChatCompletions = async (req, res) => {
     // Guard against client socket abort / closure
     if (res.writableEnded || res.destroyed) {
       return;
-    }
-
-    // Auto-fallback check if primary model failed or timed out
-    if (!response || !response.ok) {
-      const sysSettings = await getSystemSettings().catch(() => ({}));
-      const autoFallbackEnabled = sysSettings.auto_fallback !== false;
-
-      if (autoFallbackEnabled) {
-        console.warn(`[Auto-Fallback] Primary model '${model}' failed. Attempting fallback...`);
-        const fallbackCandidates = Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0
-          ? sysSettings.fallback_models
-          : ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash'];
-
-        const currentPlanName = req.currentPlan ? req.currentPlan.name : (user && user.subscription && user.subscription.plan_name ? user.subscription.plan_name : 'Free');
-        const freeModelIds = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
-
-        for (const candidateId of fallbackCandidates) {
-          if (!candidateId || candidateId === model) continue;
-
-          // Strictly enforce user plan authorization on fallback candidate
-          if (currentPlanName === 'Free') {
-            if (!freeModelIds.includes(candidateId)) continue;
-          } else if (currentPlanName === 'Pro') {
-            if (candidateId === 'gpt-5.6') continue;
-          }
-
-          let candidateConfig = null;
-          if (getIsMongoConnected()) {
-            candidateConfig = await AiModel.findOne({ $or: [{ model_id: candidateId }, { id: candidateId }] }).catch(() => null);
-          } else {
-            candidateConfig = await getModelConfig(candidateId).catch(() => null);
-          }
-
-          // Double check badge restrictions
-          if (currentPlanName === 'Free' && candidateConfig && (candidateConfig.premium || candidateConfig.efficient)) {
-            continue;
-          }
-          if (currentPlanName === 'Pro' && candidateConfig && candidateConfig.efficient) {
-            continue;
-          }
-
-          const target = await resolveModelTarget(candidateId, candidateConfig);
-          console.log(`[Auto-Fallback] Trying candidate '${candidateId}'...`);
-          const fbResponse = await tryFetchCompletion(target.targetUrl, target.targetKey, target.actualModel, 15000);
-
-          if (fbResponse && fbResponse.ok) {
-            console.log(`[Auto-Fallback] Candidate '${candidateId}' succeeded! Switching stream.`);
-            response = fbResponse;
-            effectiveModel = candidateId;
-            break;
-          }
-        }
-      }
     }
 
     // If model failed or timed out, send proper HTTP error JSON before headers are locked

@@ -1022,7 +1022,9 @@ const deleteModel = async (req, res) => {
       const keysToDelete = [cleanModelId, cleanDecoded, `key_${cleanModelId}`, `key_${cleanDecoded}`];
       for (const k of keysToDelete) {
         if (k) {
-          await supabase.from('api_keys').delete().eq('model_id', k).catch(() => {});
+          try {
+            await supabase.from('api_keys').delete().eq('model_id', k);
+          } catch (e) {}
         }
       }
     }
@@ -1044,8 +1046,6 @@ const deleteModel = async (req, res) => {
       savePersistedModels, 
       invalidateModelsCache, 
       invalidateModelKeyCache,
-      getSystemSettings,
-      saveSystemSettings,
       getPersistedPlans,
       savePersistedPlans
     } = require('../../utils/getModelConfig');
@@ -1066,24 +1066,7 @@ const deleteModel = async (req, res) => {
     invalidateModelKeyCache(cleanDecoded);
     debouncedSave(); // Persist memoryStore backup to disk
 
-    // 6. Clean up fallback_models in system_settings if this model was configured as a fallback
-    try {
-      const sysSettings = await getSystemSettings();
-      if (sysSettings && Array.isArray(sysSettings.fallback_models)) {
-        const t1 = cleanModelId.toLowerCase();
-        const t2 = cleanDecoded.toLowerCase();
-        const updatedFallbacks = sysSettings.fallback_models.filter(fId => {
-          const f = String(fId || '').trim().toLowerCase();
-          return f !== t1 && f !== t2;
-        });
-        if (updatedFallbacks.length !== sysSettings.fallback_models.length) {
-          sysSettings.fallback_models = updatedFallbacks;
-          await saveSystemSettings(sysSettings);
-        }
-      }
-    } catch (e) {}
-
-    // 7. Clean up allowed_models in Plans if this model was explicitly listed
+    // 6. Clean up allowed_models in Plans if this model was explicitly listed
     try {
       let plans = await getPersistedPlans();
       let plansModified = false;

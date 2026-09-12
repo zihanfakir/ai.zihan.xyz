@@ -436,10 +436,7 @@ async function getSystemSettings() {
     return settingsCache;
   }
 
-  const defaultSettings = {
-    auto_fallback: true,
-    fallback_models: ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash']
-  };
+  const defaultSettings = {};
 
   if (supabase) {
     try {
@@ -517,22 +514,10 @@ async function autoPurgeOrphanedDatabaseCaches() {
   settingsCacheTs = 0;
   keyCache.clear();
 
-  // 2. Clean fallback models & plans referencing non-existent models
+  // 2. Clean plans allowed_models referencing non-existent models
   try {
     const currentModels = await getPersistedModels();
     const validModelIds = new Set(currentModels.map(m => String(m.id || m.model_id || '').toLowerCase().trim()));
-
-    // Clean fallback_models
-    const sysSettings = await getSystemSettings();
-    if (sysSettings && Array.isArray(sysSettings.fallback_models)) {
-      const cleanedFallbacks = sysSettings.fallback_models.filter(fId => {
-        return validModelIds.has(String(fId || '').toLowerCase().trim());
-      });
-      if (cleanedFallbacks.length !== sysSettings.fallback_models.length) {
-        sysSettings.fallback_models = cleanedFallbacks;
-        await saveSystemSettings(sysSettings);
-      }
-    }
 
     // Clean plans allowed_models
     const plans = await getPersistedPlans();
