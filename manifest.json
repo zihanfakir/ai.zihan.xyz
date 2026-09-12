@@ -1,0 +1,25 @@
+{
+  "name": "Alokpoth AI",
+  "short_name": "Alo AI",
+  "description": "বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন।",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

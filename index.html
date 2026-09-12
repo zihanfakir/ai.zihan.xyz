@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" href="app_logo.png">
   <link rel="shortcut icon" type="image/png" href="app_logo.png">
   <link rel="apple-touch-icon" href="app_logo.png">
+  <link rel="manifest" href="manifest.json">
   <title>Alokpoth AI</title>
   
   <script>
@@ -3038,11 +3039,22 @@
       <!-- Dynamically filled with grouped sessions -->
     </div>
 
+    <!-- App Download Row (Website Only) -->
+    <div class="drawer-download-row" id="drawerDownloadAppWrap" style="padding: 8px 12px 6px; display: none;">
+      <button type="button" class="drawer-download-btn sheen-surface" id="drawerDownloadAppBtn" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; color: var(--text-color); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>অ্যাপ ডাউনলোড</span>
+        </span>
+        <span style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #3b82f6; color: #fff; font-weight: 600;">APK</span>
+      </button>
+    </div>
+
     <div class="drawer-footer">
       <div class="drawer-user-card" id="drawerUserCard" title="একাউন্ট ম্যানেজ করুন">
         <div class="drawer-avatar" id="drawerAvatar">অ</div>
         <div class="drawer-user-info">
-          <div class="drawer-user-name" id="drawerUserName">অতিথি ব্যবহারকারী</div>
+          <div class="drawer-user-name" id="drawerUserName">লগইন করা নেই</div>
           <div class="drawer-user-plan" id="drawerUserPlan">Free প্ল্যান</div>
         </div>
       </div>
@@ -3117,12 +3129,66 @@
             <span>লগইন / রেজিস্টার</span>
           </span>
         </button>
+        <button class="brand-menu-item sheen-surface" id="brandMenuDownloadAppBtn" type="button" style="display: none; color: #3b82f6;">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>অ্যাপ ডাউনলোড করুন</span>
+          </span>
+          <span style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #3b82f6; color: #fff; font-weight: 600;">APK</span>
+        </button>
         <button class="brand-menu-item sheen-surface" id="brandMenuLogoutBtn" type="button" style="color: #ef4444;">
           <span class="brand-menu-item-left">
             <svg viewBox="0 0 24 24" style="fill: #ef4444;"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
             <span>লগআউট</span>
           </span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Download Modal (Website Only) -->
+  <div class="modal-overlay" id="appDownloadModalOverlay" style="display: none;">
+    <div class="modal-sheet" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-weight: 600; font-size: 16px;">Alokpoth AI অ্যাপ</span>
+        </div>
+        <button class="modal-close" id="appDownloadModalClose" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div style="padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="text-align: center; padding: 6px 4px 10px;">
+          <div style="font-size: 18px; font-weight: 700; color: var(--text-color); margin-bottom: 4px;">Alokpoth AI for Android</div>
+          <div style="font-size: 12px; color: var(--text-muted);">ভার্সন ১.০.৬ • সাইজ ~৬ MB • নিরাপদ ও দ্রুতগতির অভিজ্ঞতা</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5;">
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 16px;">⚡</span>
+            <span><strong>অফলাইনেও কার্যকর:</strong> নেট না থাকলেও সরাসরি অ্যাপ ওপেন ও পূর্ববর্তী চ্যাট দেখা যাবে।</span>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 16px;">🚀</span>
+            <span><strong>১১টি এআই মডেল:</strong> Gemini, Groq, DeepSeek, Claude সহ সেরা মডেলের সাপোর্ট।</span>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 16px;">🔒</span>
+            <span><strong>নিরাপদ ও হালকা:</strong> কোনো বাড়তি পারমিশন ছাড়া দ্রুত কাজ করে।</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+          <a href="AloAI.apk" download="AloAI.apk" id="modalApkDownloadBtn" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 13px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: transform 0.15s ease;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>সরাসরি APK ডাউনলোড করুন (v1.0.6)</span>
+          </a>
+
+          <button type="button" id="modalPwaInstallBtn" class="sheen-surface" style="display: none; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.06); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; font-weight: 500; font-size: 13px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span>ব্রাউজার থেকে ইন্সটল করুন (PWA)</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -3179,7 +3245,7 @@
           <div class="account-avatar-row">
             <div class="account-avatar" id="accountAvatar">অ</div>
             <div>
-              <div class="account-name" id="accountNameDisplay">অতিথি ব্যবহারকারী</div>
+              <div class="account-name" id="accountNameDisplay">লগইন করা নেই</div>
               <div class="account-sub">Alokpoth AI ব্যবহারকারী</div>
             </div>
           </div>
@@ -4047,6 +4113,8 @@
 
     function loadCurrentPlan() {
       try {
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) return "Free";
         checkPlanExpiration(true);
         const raw = localStorage.getItem(PLAN_STORAGE_KEY);
         return raw ? raw : DEFAULT_PLAN;
@@ -4596,7 +4664,12 @@
     if (drawerUserCard) {
       drawerUserCard.addEventListener("click", () => {
         closeSidebarDrawer();
-        openAccountModal();
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) {
+          openAuthModal("login");
+        } else {
+          openAccountModal();
+        }
       });
     }
 
@@ -4624,6 +4697,14 @@
       const badgeEl = document.getElementById("navCreditBadge");
       const countEl = document.getElementById("navCreditCount");
       const drawerPlanEl = document.getElementById("drawerUserPlan");
+
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        if (countEl) countEl.textContent = "লগইন করুন";
+        if (badgeEl) badgeEl.className = "nav-credit-badge";
+        if (drawerPlanEl) drawerPlanEl.textContent = "চ্যাট করতে লগইন করুন";
+        return;
+      }
 
       const userStr = localStorage.getItem("alokpoth_user");
       let isAdmin = false;
@@ -4956,9 +5037,10 @@
     }
 
     function applyAccountName(name) {
-      const displayName = name && name.trim() ? name.trim() : "অতিথি ব্যবহারকারী";
+      const token = localStorage.getItem("alokpoth_token");
+      const displayName = (token && name && name.trim()) ? name.trim() : "লগইন করা নেই";
       accountNameDisplay.textContent = displayName;
-      const initial = displayName.trim().charAt(0).toUpperCase() || "অ";
+      const initial = (token && name && name.trim()) ? displayName.trim().charAt(0).toUpperCase() : "অ";
       accountAvatar.textContent = initial;
 
       const dName = document.getElementById("drawerUserName");
@@ -4968,14 +5050,18 @@
 
       const heroGreeting = document.getElementById("heroGreetingText");
       if (heroGreeting) {
-        const hr = new Date().getHours();
-        let timeGreeting = "আজ";
-        if (hr >= 5 && hr < 12) timeGreeting = "শুভ সকাল";
-        else if (hr >= 12 && hr < 16) timeGreeting = "শুভ দুপুর";
-        else if (hr >= 16 && hr < 19) timeGreeting = "শুভ বিকেল";
-        else timeGreeting = "শুভ সন্ধ্যা";
-        const firstName = displayName.split(" ")[0] || displayName;
-        heroGreeting.textContent = `${timeGreeting}, ${firstName}! আজ কীভাবে সাহায্য করতে পারি?`;
+        if (!token) {
+          heroGreeting.textContent = "আজ কীভাবে সাহায্য করতে পারি?";
+        } else {
+          const hr = new Date().getHours();
+          let timeGreeting = "আজ";
+          if (hr >= 5 && hr < 12) timeGreeting = "শুভ সকাল";
+          else if (hr >= 12 && hr < 16) timeGreeting = "শুভ দুপুর";
+          else if (hr >= 16 && hr < 19) timeGreeting = "শুভ বিকেল";
+          else timeGreeting = "শুভ সন্ধ্যা";
+          const firstName = displayName.split(" ")[0] || displayName;
+          heroGreeting.textContent = `${timeGreeting}, ${firstName}! আজ কীভাবে সাহায্য করতে পারি?`;
+        }
       }
     }
 
@@ -5309,6 +5395,9 @@
       const currentBrandAuth = document.getElementById("brandMenuAuthBtn");
       const currentBrandLogout = document.getElementById("brandMenuLogoutBtn");
       const currentNameDisplay = document.getElementById("accountNameDisplay");
+      const dName = document.getElementById("drawerUserName");
+      const dAv = document.getElementById("drawerAvatar");
+      const dPlan = document.getElementById("drawerUserPlan");
 
       if (token) {
         if (currentAuthBtn) currentAuthBtn.style.display = "none";
@@ -5316,18 +5405,31 @@
         if (currentBrandAuth) currentBrandAuth.style.display = "none";
         if (currentBrandLogout) currentBrandLogout.style.display = "flex";
       } else {
+        // Not logged in: wipe any orphaned stored credentials so nothing leaks
+        try {
+          localStorage.removeItem("alokpoth_account_name");
+          localStorage.removeItem("alokpoth_user");
+          localStorage.removeItem(PLAN_EXPIRY_KEY);
+        } catch (e) {}
+
         if (currentAuthBtn) currentAuthBtn.style.display = "block";
         if (currentLogoutBtn) currentLogoutBtn.style.display = "none";
         if (currentBrandAuth) currentBrandAuth.style.display = "flex";
         if (currentBrandLogout) currentBrandLogout.style.display = "none";
-        if (currentNameDisplay && !localStorage.getItem("alokpoth_account_name")) {
-          currentNameDisplay.textContent = "অতিথি ব্যবহারকারী";
-        }
+        if (currentNameDisplay) currentNameDisplay.textContent = "লগইন করা নেই";
+        if (dName) dName.textContent = "লগইন করা নেই";
+        if (dAv) dAv.textContent = "অ";
+        if (dPlan) dPlan.textContent = "চ্যাট করতে লগইন করুন";
+        applyAccountName("");
       }
 
       const currentPasswordCard = document.getElementById("accountPasswordCard");
       if (currentPasswordCard) {
         currentPasswordCard.style.display = token ? "block" : "none";
+      }
+
+      if (typeof updateNavbarCreditBadge === "function") {
+        updateNavbarCreditBadge();
       }
     }
 
@@ -5611,6 +5713,122 @@
 
     updateAuthUIState();
 
+    /* ========================================================
+       App Download & PWA Controller (Website Only)
+       ======================================================== */
+    function isRunningInApp() {
+      if (typeof window.AloAndroid !== "undefined" || (window.AloAndroid && window.AloAndroid.isNativeApp())) {
+        return true;
+      }
+      if (navigator.userAgent && navigator.userAgent.includes("AloAI-Android")) {
+        return true;
+      }
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) {
+        return true;
+      }
+      if (window.navigator.standalone === true) {
+        return true;
+      }
+      return false;
+    }
+
+    const drawerDownloadAppWrap = document.getElementById("drawerDownloadAppWrap");
+    const drawerDownloadAppBtn = document.getElementById("drawerDownloadAppBtn");
+    const brandMenuDownloadAppBtn = document.getElementById("brandMenuDownloadAppBtn");
+    const appDownloadModalOverlay = document.getElementById("appDownloadModalOverlay");
+    const appDownloadModalClose = document.getElementById("appDownloadModalClose");
+    const modalPwaInstallBtn = document.getElementById("modalPwaInstallBtn");
+    let deferredPwaPrompt = null;
+
+    function openAppDownloadModal() {
+      if (appDownloadModalOverlay) {
+        appDownloadModalOverlay.style.display = "flex";
+        requestAnimationFrame(() => appDownloadModalOverlay.classList.add("open"));
+      }
+    }
+
+    function closeAppDownloadModal() {
+      if (appDownloadModalOverlay) {
+        appDownloadModalOverlay.classList.remove("open");
+        setTimeout(() => {
+          if (!appDownloadModalOverlay.classList.contains("open")) {
+            appDownloadModalOverlay.style.display = "none";
+          }
+        }, 250);
+      }
+    }
+
+    function initAppDownloadSystem() {
+      const inApp = isRunningInApp();
+      if (inApp) {
+        // Running inside installed Android App or Standalone PWA - strictly hide all download prompts
+        if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "none";
+        if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "none";
+        if (appDownloadModalOverlay) appDownloadModalOverlay.style.display = "none";
+        return;
+      }
+
+      // On website: show app download options
+      if (drawerDownloadAppWrap) drawerDownloadAppWrap.style.display = "block";
+      if (brandMenuDownloadAppBtn) brandMenuDownloadAppBtn.style.display = "flex";
+
+      if (drawerDownloadAppBtn) {
+        drawerDownloadAppBtn.addEventListener("click", () => {
+          closeSidebarDrawer();
+          openAppDownloadModal();
+        });
+      }
+
+      if (brandMenuDownloadAppBtn) {
+        brandMenuDownloadAppBtn.addEventListener("click", () => {
+          closeBrandMenu();
+          openAppDownloadModal();
+        });
+      }
+
+      if (appDownloadModalClose) {
+        appDownloadModalClose.addEventListener("click", closeAppDownloadModal);
+      }
+
+      if (appDownloadModalOverlay) {
+        appDownloadModalOverlay.addEventListener("click", (e) => {
+          if (e.target === appDownloadModalOverlay) closeAppDownloadModal();
+        });
+      }
+
+      // PWA Install Prompt handling
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPwaPrompt = e;
+        if (modalPwaInstallBtn && !inApp) {
+          modalPwaInstallBtn.style.display = "inline-flex";
+          modalPwaInstallBtn.addEventListener("click", async () => {
+            if (deferredPwaPrompt) {
+              deferredPwaPrompt.prompt();
+              const { outcome } = await deferredPwaPrompt.userChoice;
+              if (outcome === "accepted") {
+                modalPwaInstallBtn.style.display = "none";
+              }
+              deferredPwaPrompt = null;
+            }
+          });
+        }
+      });
+    }
+
+    initAppDownloadSystem();
+
+    // Register Service Worker for offline app loading
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").then((reg) => {
+          console.log("[PWA Service Worker] Registered:", reg.scope);
+        }).catch((err) => {
+          console.warn("[PWA Service Worker] Registration failed:", err);
+        });
+      });
+    }
+
     accountResetBtn.addEventListener("click", () => {
       showCustomUI('confirm', "আপনি কি নিশ্চিত? এতে চ্যাট হিস্ট্রি ও ব্যবহারের সব হিসাব মুছে যাবে।", null, (confirmed) => {
         if (!confirmed) return;
@@ -5632,7 +5850,12 @@
       });
     });
 
-    applyAccountName(getAccountName());
+    const initialToken = localStorage.getItem("alokpoth_token");
+    if (initialToken) {
+      applyAccountName(getAccountName());
+    } else {
+      applyAccountName("");
+    }
 
     const chatStream = document.getElementById("chatStream");
     const scrollContainer = document.getElementById("scrollContainer");

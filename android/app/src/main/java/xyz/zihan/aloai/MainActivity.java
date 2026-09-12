@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefresh;
     private View mOfflineView;
+    private boolean mHasLoadedPageSuccessfully = false;
 
     private ValueCallback<Uri[]> mFilePathCallback;
     private Uri mCameraPhotoUri;
@@ -127,11 +128,12 @@ public class MainActivity extends AppCompatActivity {
         setupBackNavigation();
         checkAndRequestInitialPermissions();
 
-        if (isNetworkAvailable()) {
-            mWebView.loadUrl(APP_URL);
+        if (!isNetworkAvailable()) {
+            mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         } else {
-            showOfflineView(true);
+            mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         }
+        mWebView.loadUrl(APP_URL);
     }
 
     private void initViews() {
@@ -152,7 +154,11 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        if (isNetworkAvailable()) {
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        } else {
+            settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        }
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setSupportZoom(false);
@@ -280,7 +286,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 mSwipeRefresh.setRefreshing(false);
-                showOfflineView(false);
+                if (url != null && !url.equals("about:blank") && !url.startsWith("data:")) {
+                    mHasLoadedPageSuccessfully = true;
+                    showOfflineView(false);
+                }
             }
 
             @Override
@@ -288,7 +297,12 @@ public class MainActivity extends AppCompatActivity {
                 super.onReceivedError(view, request, error);
                 if (request.isForMainFrame()) {
                     Log.e(TAG, "Page load error: " + error.getDescription());
-                    showOfflineView(true);
+                    // Allow offline entry: if content was cached, don't hide the WebView!
+                    if (!mHasLoadedPageSuccessfully) {
+                        showOfflineView(true);
+                    } else {
+                        Toast.makeText(MainActivity.this, getString(R.string.error_offline_title), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -307,17 +321,24 @@ public class MainActivity extends AppCompatActivity {
 
         mSwipeRefresh.setOnRefreshListener(() -> {
             if (isNetworkAvailable()) {
+                mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
                 mWebView.reload();
             } else {
+                mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+                mWebView.reload();
                 mSwipeRefresh.setRefreshing(false);
-                showOfflineView(true);
             }
         });
     }
 
     public void reloadWebView() {
-        if (mWebView != null && isNetworkAvailable()) {
+        if (mWebView != null) {
             showOfflineView(false);
+            if (isNetworkAvailable()) {
+                mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+            } else {
+                mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+            }
             mWebView.reload();
         }
     }
@@ -342,12 +363,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void retryLoading() {
+        showOfflineView(false);
         if (isNetworkAvailable()) {
-            showOfflineView(false);
-            mWebView.loadUrl(APP_URL);
+            mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         } else {
-            Toast.makeText(this, getString(R.string.error_offline_title), Toast.LENGTH_SHORT).show();
+            mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         }
+        mWebView.loadUrl(APP_URL);
     }
 
     private void showOfflineView(boolean show) {

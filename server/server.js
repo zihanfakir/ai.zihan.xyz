@@ -90,10 +90,27 @@ app.get('/api/plans', async (req, res) => {
   }
 });
 
-// Serve Frontend and Admin HTML safely (never expose server directory)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
-app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
-app.get('/admin.html', (req, res) => res.sendFile(path.join(__dirname, '../admin.html')));
+// Serve Frontend, Pages, PWA assets, and APK safely (never expose server directory)
+const ROOT_DIR = path.join(__dirname, '..');
+app.get('/', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
+app.get('/admin.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'admin.html')));
+app.get('/login.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'login.html')));
+app.get('/account.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'account.html')));
+app.get('/plans.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'plans.html')));
+app.get('/manifest.json', (req, res) => res.sendFile(path.join(ROOT_DIR, 'manifest.json')));
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.sendFile(path.join(ROOT_DIR, 'sw.js'));
+});
+app.get('/AloAI.apk', (req, res) => {
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename="AloAI.apk"');
+  res.sendFile(path.join(ROOT_DIR, 'AloAI.apk'));
+});
+app.get('/favicon.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'favicon.png')));
+app.get('/app_logo.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'app_logo.png')));
 
 // 404 handler
 app.use((req, res) => {

@@ -48,6 +48,6 @@ public class WebAppInterface {
 
     @JavascriptInterface
     public String getAppVersion() {
-        return "1.0.1";
+        return "1.0.6";
     }
 }
