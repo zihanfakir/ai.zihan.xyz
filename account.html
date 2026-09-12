@@ -58,6 +58,19 @@
       --text-muted: #94a3b8;
     }
 
+    [data-theme="eyecare"] {
+      --bg-base: #f5eedc;
+      --bg-surface: rgba(251, 247, 239, 0.95);
+      --bg-surface-hover: #ede3ce;
+      --border-subtle: rgba(107, 78, 51, 0.15);
+      --border-focus: rgba(146, 64, 14, 0.4);
+      --text-main: #4a3b2c;
+      --text-sub: #7a6b5c;
+      --text-muted: #9e8e7e;
+      --accent-primary: #92400e;
+      --accent-gradient: linear-gradient(135deg, #b45309, #92400e);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -604,7 +617,6 @@
 
   <header class="top-bar">
     <a href="index.html" class="brand-link">
-      <img src="app_logo.png" alt="Logo" class="brand-logo">
       <span>Alokpoth AI</span>
     </a>
     <div class="top-actions">
@@ -807,14 +819,36 @@
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
+    const THEME_META_COLORS = {
+      dark: "#09090b",
+      sapphire: "#070d19",
+      oled: "#000000",
+      eyecare: "#f5eedc",
+      light: "#f9fafb"
+    };
+
+    function updateThemeMetaColor(t) {
+      let meta = document.querySelector('meta[name="theme-color"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'theme-color');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', THEME_META_COLORS[t] || '#09090b');
+    }
+    updateThemeMetaColor(savedTheme);
+
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    const themes = ["dark", "sapphire", "oled", "light"];
+    const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
     themeToggleBtn.addEventListener("click", () => {
       const cur = document.documentElement.getAttribute("data-theme") || "dark";
       const next = themes[(themes.indexOf(cur) + 1) % themes.length];
       document.documentElement.setAttribute("data-theme", next);
       localStorage.setItem("alokpoth_theme", next);
       localStorage.setItem("alokpoth-theme", next);
+      updateThemeMetaColor(next);
+      const labels = { dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম" };
+      showToast(`${labels[next] || next} সক্রিয় করা হয়েছে`);
     });
 
     // Smart API Base
