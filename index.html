@@ -3062,15 +3062,8 @@
 
   <nav class="navbar">
     <div class="nav-left">
-      <button class="drawer-toggle-btn" id="drawerToggleBtn" type="button" aria-label="মেনু খুলুন" title="সাইডবার মেনু">
-        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-      </button>
-      <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
+      <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু" title="মেনু খুলতে চাপুন">
         <span class="brand-name">Alokpoth AI</span>
-      </button>
-      <button class="quick-new-chat-btn" id="quickNewChatBtn" type="button" title="নতুন চ্যাট শুরু করুন">
-        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
-        <span>নতুন চ্যাট</span>
       </button>
     </div>
     <div class="navbar-right">
@@ -6799,14 +6792,42 @@ Capabilities & Code Generation Instructions (CRITICAL):
       });
 
       currentAbortController = new AbortController();
-      const response = await fetch(`${API_BASE}/chat/completions`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true }),
-        signal: currentAbortController.signal
-      });
+
+      // Client-side stream watchdog & timeout (prevent infinite loading)
+      let streamWatchdog = null;
+      const resetWatchdog = (timeoutMs = 28000) => {
+        if (streamWatchdog) clearTimeout(streamWatchdog);
+        streamWatchdog = setTimeout(() => {
+          if (currentAbortController) {
+            try { currentAbortController.abort("timeout"); } catch {}
+          }
+        }, timeoutMs);
+      };
+
+      // Set initial 28s timeout to receive HTTP headers
+      resetWatchdog(28000);
+
+      let response;
+      try {
+        response = await fetch(`${API_BASE}/chat/completions`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true }),
+          signal: currentAbortController.signal
+        });
+      } catch (fetchErr) {
+        if (streamWatchdog) clearTimeout(streamWatchdog);
+        if (fetchErr.name === "AbortError" || fetchErr === "timeout" || currentAbortController?.signal?.aborted) {
+          throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
+        }
+        throw fetchErr;
+      }
+
+      // Headers received - extend watchdog for initial token
+      resetWatchdog(25000);
 
       if (!response.ok) {
+        if (streamWatchdog) clearTimeout(streamWatchdog);
         if (response.status === 401 || response.status === 403) {
           throw new Error("এই মডেল ব্যবহারের জন্য লগইন অথবা প্ল্যান আপগ্রেড প্রয়োজন।");
         }
@@ -6817,6 +6838,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       if (!response.body) {
+        if (streamWatchdog) clearTimeout(streamWatchdog);
         const data = await response.json();
         const full = data.choices?.[0]?.message?.content || data.content || "";
         onToken(full, full);
@@ -6828,47 +6850,63 @@ Capabilities & Code Generation Instructions (CRITICAL):
       let buffer = "";
       let fullText = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
+      try {
+        while (true) {
+          // If no chunk arrives for 22s mid-stream, abort
+          resetWatchdog(22000);
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || trimmed.startsWith(":")) continue;
-          if (!trimmed.startsWith("data:")) continue;
-          const payload = trimmed.slice(5).trim();
-          if (payload === "[DONE]") continue;
-          try {
-            const json = JSON.parse(payload);
-            if (json.error) {
-              const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
-              const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("Error") && !rawErrMsg.includes("/"))
-                ? rawErrMsg
-                : "সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।";
-              throw new Error(safeMsg);
-            }
-            const delta = json.choices?.[0]?.delta?.content 
-              ?? json.choices?.[0]?.delta?.reasoning 
-              ?? json.choices?.[0]?.delta?.reasoning_content 
-              ?? json.choices?.[0]?.delta?.text 
-              ?? json.choices?.[0]?.text 
-              ?? json.text 
-              ?? json.choices?.[0]?.message?.content 
-              ?? "";
-            if (delta) {
-              fullText += delta;
-              onToken(delta, fullText);
-            }
-          } catch (e) {
-            if (e.message && !e.message.includes("JSON")) {
-              throw e;
+          resetWatchdog(22000);
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith(":")) continue;
+            if (!trimmed.startsWith("data:")) continue;
+            const payload = trimmed.slice(5).trim();
+            if (payload === "[DONE]") continue;
+            try {
+              const json = JSON.parse(payload);
+              if (json.error) {
+                const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
+                const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("Error") && !rawErrMsg.includes("/"))
+                  ? rawErrMsg
+                  : "সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।";
+                throw new Error(safeMsg);
+              }
+              const delta = json.choices?.[0]?.delta?.content 
+                ?? json.choices?.[0]?.delta?.reasoning 
+                ?? json.choices?.[0]?.delta?.reasoning_content 
+                ?? json.choices?.[0]?.delta?.text 
+                ?? json.choices?.[0]?.text 
+                ?? json.text 
+                ?? json.choices?.[0]?.message?.content 
+                ?? "";
+              if (delta) {
+                fullText += delta;
+                onToken(delta, fullText);
+              }
+            } catch (e) {
+              if (e.message && !e.message.includes("JSON")) {
+                throw e;
+              }
             }
           }
         }
+      } catch (readErr) {
+        if (currentAbortController?.signal?.aborted) {
+          if (!fullText) {
+            throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।");
+          }
+        }
+        throw readErr;
+      } finally {
+        if (streamWatchdog) clearTimeout(streamWatchdog);
       }
+
       return fullText;
     }
 
@@ -7116,7 +7154,21 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let lastRenderTime = 0;
         const RENDER_THROTTLE = 30;
 
+        let overallWatchdog = setTimeout(() => {
+          if (!apiFinished) {
+            console.warn("[Client Watchdog]: Hard timeout (55s) reached.");
+            if (currentAbortController) {
+              try { currentAbortController.abort("timeout"); } catch {}
+            }
+          }
+        }, 55000);
+
         const finishUp = () => {
+          if (overallWatchdog) {
+            clearTimeout(overallWatchdog);
+            overallWatchdog = null;
+          }
+          if (statusIntervalId) clearInterval(statusIntervalId);
           if (queueRafId) {
             cancelAnimationFrame(queueRafId);
             queueRafId = null;
@@ -7370,11 +7422,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
       userInput.value = ""; userInput.style.height = "auto";
       updateTokenCounter();
 
-      await generateAIReply();
-      
-      isGenerating = false;
-      updateSendAvailability();
-      updateTokenCounter();
+      try {
+        await generateAIReply();
+      } catch (err) {
+        console.error("[Chat Form generateAIReply Error]:", err);
+      } finally {
+        isGenerating = false;
+        updateSendAvailability();
+        updateTokenCounter();
+      }
     });
 
     /* ========================================================
