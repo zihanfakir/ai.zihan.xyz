@@ -54,10 +54,45 @@ const registerUser = async (req, res) => {
       const user = await User.create({
         name: cleanName,
         email: cleanEmail,
-        password,
+        password: cleanPassword,
         role,
         subscription: { plan_name: isAdminEmail ? 'Max' : 'Free', starts_at: new Date(), expires_at: null, is_active: true }
       });
+
+      // Sync new user to Supabase __users_metadata__ and memoryStore.users
+      try {
+        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users, {
+          _id: String(user._id),
+          id: String(user._id),
+          name: user.name,
+          email: user.email,
+          password: user.password,
+          role: user.role,
+          is_blocked: false,
+          subscription: user.subscription,
+          createdAt: user.createdAt
+        }];
+        await savePersistedUsers(users);
+        if (memoryStore.users) {
+          memoryStore.users.push({
+            _id: String(user._id),
+            id: String(user._id),
+            name: user.name,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+            is_blocked: false,
+            subscription: user.subscription,
+            createdAt: user.createdAt
+          });
+        }
+        debouncedSave();
+      } catch (syncErr) {
+        console.warn('[Register Mongo Sync Warning]:', syncErr.message);
+      }
+
       const token = generateToken(user);
       return res.status(201).json({
         success: true,
@@ -74,7 +109,7 @@ const registerUser = async (req, res) => {
         return res.status(400).json({ success: false, error: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি আছে' });
       }
       const role = isAdminEmail ? 'admin' : 'user';
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(cleanPassword, 10);
       const user = {
         _id: 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         name: cleanName,
@@ -103,19 +138,25 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
-      return res.status(400).json({ success: false, error: 'সঠিক ইমেইল এবং পাসওয়ার্ড প্রদান করুন' });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'ইমেইল এবং পাসওয়ার্ড প্রয়োজন' });
     }
+
     const cleanEmail = email.toLowerCase().trim();
 
     if (getIsMongoConnected()) {
-      const user = await User.findOne({ email: cleanEmail }).select('+password');
-      if (!user || !(await user.matchPassword(password))) {
+      const user = await User.findOne({ email: cleanEmail });
+      if (!user) {
+        return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
+      }
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
         return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
       }
       if (user.is_blocked) {
         return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হয়েছে।' });
       }
+      // Ensure zihanfakir@gmail.com is always admin and Max plan
       if (cleanEmail === 'zihanfakir@gmail.com') {
         if (user.role !== 'admin' || !user.subscription || user.subscription.plan_name !== 'Max') {
           user.role = 'admin';
@@ -130,9 +171,10 @@ const loginUser = async (req, res) => {
         user: { _id: user._id, id: user._id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
       });
     } else {
-      const { getPersistedUsers } = require('../../utils/getModelConfig');
-      const users = await getPersistedUsers();
-      const user = users.find(u => u.email === cleanEmail);
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+      const user = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
       if (!user) {
         return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
       }
@@ -146,6 +188,8 @@ const loginUser = async (req, res) => {
       if (cleanEmail === 'zihanfakir@gmail.com') {
         user.role = 'admin';
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
+        await savePersistedUsers(users);
+        debouncedSave();
       }
       const token = generateToken(user);
       return res.json({
@@ -231,6 +275,9 @@ const updateProfile = async (req, res) => {
     if (avatar && avatar !== 'default' && !avatar.startsWith('data:image/') && !avatar.startsWith('http://') && !avatar.startsWith('https://')) {
       return res.status(400).json({ success: false, error: 'অকার্যকর ছবির ফরম্যাট' });
     }
+    if (avatar && avatar.startsWith('data:image/svg+xml')) {
+      return res.status(400).json({ success: false, error: 'SVG ফরম্যাটের ছবি গ্রহণযোগ্য নয়।' });
+    }
     const cleanName = name !== undefined ? name.trim().slice(0, 50) : undefined;
     if (cleanName !== undefined && cleanName.length < 2) {
       return res.status(400).json({ success: false, error: 'নাম কমপক্ষে ২ অক্ষরের হতে হবে' });
@@ -248,6 +295,29 @@ const updateProfile = async (req, res) => {
         if (cleanName) user.name = cleanName;
         if (avatar !== undefined) user.avatar = avatar;
         await user.save();
+
+        // Sync profile changes to Supabase and memoryStore
+        try {
+          const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+          let users = await getPersistedUsers();
+          users = [...users];
+          const pUser = users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+          if (pUser) {
+            if (cleanName) pUser.name = cleanName;
+            if (avatar !== undefined) pUser.avatar = avatar;
+            await savePersistedUsers(users);
+          }
+          if (memoryStore.users) {
+            const mUser = memoryStore.users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+            if (mUser) {
+              if (cleanName) mUser.name = cleanName;
+              if (avatar !== undefined) mUser.avatar = avatar;
+            }
+          }
+          debouncedSave();
+        } catch (syncErr) {
+          console.warn('[Profile Update Sync Warning]:', syncErr.message);
+        }
       }
     } else {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
@@ -298,7 +368,7 @@ const changePassword = async (req, res) => {
     if (cleanNewPass.length > 72) {
       return res.status(400).json({ success: false, error: 'নতুন পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে' });
     }
-    if (!confirm_password || typeof confirm_password !== 'string' || confirm_password !== cleanNewPass) {
+    if (!confirm_password || typeof confirm_password !== 'string' || confirm_password.trim() !== cleanNewPass) {
       return res.status(400).json({ success: false, error: 'নিশ্চিতকরণ পাসওয়ার্ড মেলেনি' });
     }
 

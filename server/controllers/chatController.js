@@ -15,8 +15,12 @@ const streamChatCompletions = async (req, res) => {
       return res.status(400).json({ success: false, error: 'সঠিক মেসেজ অ্যারে প্রদান করুন' });
     }
 
-    // Sanitize and cap messages array to prevent memory exhaustion
-    const safeMessages = messages.slice(-100).filter(m => m && typeof m === 'object' && typeof m.content === 'string');
+    // Sanitize and cap messages array to prevent memory exhaustion (support string or array multimodal content)
+    const MAX_CONTENT_LENGTH = 32000;
+    const safeMessages = messages.slice(-100).filter(m => m && typeof m === 'object' && (typeof m.content === 'string' || Array.isArray(m.content))).map(m => ({
+      role: m.role || 'user',
+      content: typeof m.content === 'string' ? m.content.slice(0, MAX_CONTENT_LENGTH) : m.content
+    }));
     if (safeMessages.length === 0) {
       return res.status(400).json({ success: false, error: 'মেসেজের বিবরণ সঠিক নয়' });
     }
@@ -209,6 +213,11 @@ const streamChatCompletions = async (req, res) => {
       console.log(`[Chat Fallback] Auto Fallback is disabled by Admin. Returning upstream error directly for ${model}.`);
     }
 
+    // Guard against client socket abort / closure during fallback requests
+    if (req.destroyed || req.aborted || (abortController && abortController.signal.aborted) || res.writableEnded) {
+      return;
+    }
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -222,6 +231,8 @@ const streamChatCompletions = async (req, res) => {
         userSafeError = 'মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
       } else if (status === 401 || status === 403) {
         userSafeError = 'এই মডেল ব্যবহারের জন্য অনুমোদন প্রয়োজন।';
+      } else if (status === 502 || status === 503) {
+        userSafeError = 'AI মডেল প্রোভাইডার সার্ভার সাময়িকভাবে ডাউন রয়েছে। অন্য কোনো মডেল নির্বাচন করুন।';
       }
       res.write(`data: ${JSON.stringify({ error: userSafeError })}\n\n`);
       res.write('data: [DONE]\n\n');
@@ -229,8 +240,26 @@ const streamChatCompletions = async (req, res) => {
     }
 
     let hasStreamedData = false;
+    let streamIdleTimeout = null;
+
+    const resetStreamIdleWatchdog = () => {
+      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
+      streamIdleTimeout = setTimeout(() => {
+        console.warn('[Stream Watchdog]: Inactivity timeout reached (60s), terminating stream.');
+        if (response && response.body && typeof response.body.destroy === 'function') {
+          try { response.body.destroy(); } catch {}
+        }
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ error: 'স্ট্রিম সময়সীমা অতিক্রম করেছে।' })}\n\n`);
+          res.write('data: [DONE]\n\n');
+          res.end();
+        }
+      }, 60000);
+    };
+    resetStreamIdleWatchdog();
 
     req.on('close', () => {
+      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
       if (response && response.body && typeof response.body.destroy === 'function') {
         try { response.body.destroy(); } catch {}
       }
@@ -238,10 +267,12 @@ const streamChatCompletions = async (req, res) => {
 
     response.body.on('data', (chunk) => {
       hasStreamedData = true;
+      resetStreamIdleWatchdog();
       res.write(chunk);
     });
 
     response.body.on('end', async () => {
+      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
       try {
         // Record usage log only after stream successfully delivers tokens
         if (hasStreamedData) {
@@ -253,6 +284,7 @@ const streamChatCompletions = async (req, res) => {
                 model_id: model || 'openrouter/free',
                 timestamp: new Date()
               }).catch(err => console.error('[UsageLog Write Error]:', err.message));
+              incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
             } else {
               memoryStore.usageLogs.push({
                 _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
@@ -280,6 +312,7 @@ const streamChatCompletions = async (req, res) => {
     });
 
     response.body.on('error', (err) => {
+      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
       console.error('[Stream Error]:', err.message);
       if (!res.writableEnded) {
         res.write(`data: ${JSON.stringify({ error: 'স্ট্রিম সংযোগে সমস্যা হয়েছে।' })}\n\n`);
@@ -314,7 +347,13 @@ const saveChatSession = async (req, res) => {
     const cleanTitle = (typeof title === 'string' ? title.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 100) : 'নতুন চ্যাট') || 'নতুন চ্যাট';
     const cleanHistory = Array.isArray(messagesHistory) ? messagesHistory.slice(-100).map(m => {
       if (m && typeof m === 'object') {
-        const item = { role: m.role || 'user', content: typeof m.content === 'string' ? m.content : '' };
+        let cleanContent = '';
+        if (typeof m.content === 'string') {
+          cleanContent = m.content;
+        } else if (Array.isArray(m.content)) {
+          cleanContent = JSON.stringify(m.content);
+        }
+        const item = { role: m.role || 'user', content: cleanContent };
         if (m.images && Array.isArray(m.images)) {
           item.images = m.images.map(img => ({
             mimeType: img.mimeType || 'image/png',

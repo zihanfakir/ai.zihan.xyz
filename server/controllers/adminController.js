@@ -119,13 +119,22 @@ const updateUserPlan = async (req, res) => {
       expiresAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
     }
 
+    const cleanTarget = String(userId).toLowerCase().trim();
+    if (cleanTarget === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+      return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
+    }
+
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
       const user = mongoose.Types.ObjectId.isValid(userId)
         ? await User.findById(userId)
-        : await User.findOne({ email: userId });
+        : await User.findOne({ email: cleanTarget });
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
+      }
+
+      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+        return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
       }
 
       user.subscription = {
@@ -136,6 +145,26 @@ const updateUserPlan = async (req, res) => {
       };
 
       await user.save();
+
+      // Multi-store sync to Supabase __users_metadata__ and memoryStore.users
+      try {
+        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users];
+        const pUser = users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+        if (pUser) {
+          pUser.subscription = user.subscription;
+          await savePersistedUsers(users);
+        }
+        if (memoryStore.users) {
+          const mUser = memoryStore.users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+          if (mUser) mUser.subscription = user.subscription;
+        }
+        debouncedSave();
+      } catch (syncErr) {
+        console.warn('[Admin updateUserPlan Sync Warning]:', syncErr.message);
+      }
+
       return res.json({
         success: true,
         message: `${user.name}-এর প্ল্যান ${plan_name} করা হয়েছে (${days} দিন)।`,
@@ -145,9 +174,13 @@ const updateUserPlan = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === String(userId).toLowerCase().trim()));
+      const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === cleanTarget));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
+      }
+
+      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+        return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
       }
 
       user.subscription = {
@@ -196,6 +229,25 @@ const toggleBlockUser = async (req, res) => {
       user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
       await user.save();
 
+      // Multi-store sync to Supabase __users_metadata__ and memoryStore.users
+      try {
+        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users];
+        const pUser = users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+        if (pUser) {
+          pUser.is_blocked = user.is_blocked;
+          await savePersistedUsers(users);
+        }
+        if (memoryStore.users) {
+          const mUser = memoryStore.users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+          if (mUser) mUser.is_blocked = user.is_blocked;
+        }
+        debouncedSave();
+      } catch (syncErr) {
+        console.warn('[Admin toggleBlockUser Sync Warning]:', syncErr.message);
+      }
+
       return res.json({
         success: true,
         message: `ইউজার ${user.is_blocked ? 'ব্লক' : 'আনব্লক'} করা হয়েছে।`,
@@ -238,6 +290,9 @@ const deleteUser = async (req, res) => {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
     }
 
+    let targetId = userId;
+    let targetEmail = '';
+
     // 1. If Mongo connected, purge user, sessions, and usage logs
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
@@ -259,25 +314,43 @@ const deleteUser = async (req, res) => {
         userDoc = await User.findOneAndDelete({ email: cleanTarget });
       }
 
-      const targetId = userDoc ? String(userDoc._id) : userId;
-      await ChatSession.deleteMany({ user_id: targetId }).catch(() => {});
-      await UsageLog.deleteMany({ user_id: targetId }).catch(() => {});
+      if (userDoc) {
+        targetId = String(userDoc._id);
+        if (userDoc.email) targetEmail = userDoc.email.toLowerCase().trim();
+      }
+      await ChatSession.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
+      await UsageLog.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
     }
+
+    // Helper matcher to purge across stores
+    const matchesTarget = u => {
+      if (!u) return false;
+      const uId = String(u._id || u.id || '');
+      if (uId === String(userId) || uId === String(targetId)) return true;
+      if (u.email) {
+        const uEmail = u.email.toLowerCase().trim();
+        if (uEmail === cleanTarget || (targetEmail && uEmail === targetEmail)) return true;
+      }
+      return false;
+    };
 
     // 2. ALWAYS purge from Supabase __users_metadata__
     const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
     let users = await getPersistedUsers();
-    const targetUser = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === cleanTarget));
+    const targetUser = users.find(matchesTarget);
     if (targetUser && targetUser.email && targetUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
     }
-    users = users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
+    users = users.filter(u => !matchesTarget(u));
     await savePersistedUsers(users);
 
     // 3. Purge user usage quota row from Supabase api_keys table
     if (supabase) {
       try {
         await supabase.from('api_keys').delete().eq('model_id', `__usage_${userId}__`);
+        if (targetId !== userId) {
+          await supabase.from('api_keys').delete().eq('model_id', `__usage_${targetId}__`);
+        }
       } catch (e) {
         console.warn('[Supabase] Usage row purge warning:', e.message);
       }
@@ -285,13 +358,13 @@ const deleteUser = async (req, res) => {
 
     // 4. ALWAYS purge from memoryStore
     if (memoryStore.users) {
-      memoryStore.users = memoryStore.users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
+      memoryStore.users = memoryStore.users.filter(u => !matchesTarget(u));
     }
     if (memoryStore.chatSessions) {
-      memoryStore.chatSessions = memoryStore.chatSessions.filter(s => String(s.user_id) !== String(userId));
+      memoryStore.chatSessions = memoryStore.chatSessions.filter(s => String(s.user_id) !== String(userId) && String(s.user_id) !== String(targetId));
     }
     if (memoryStore.usageLogs) {
-      memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId));
+      memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId) && String(l.user_id) !== String(targetId));
     }
     debouncedSave();
 
@@ -319,12 +392,15 @@ const getPlans = async (req, res) => {
 const updatePlanLimits = async (req, res) => {
   try {
     const { planName } = req.params;
+    if (!planName || !['Free', 'Pro', 'Max'].includes(planName)) {
+      return res.status(400).json({ success: false, error: 'সঠিক প্ল্যানের নাম দিন (Free, Pro, Max)' });
+    }
     const { message_limit, window_hours, is_active } = req.body;
 
     let validLimit = undefined;
     if (message_limit !== undefined) {
       const n = parseInt(message_limit, 10);
-      if (isNaN(n) || n < 1) return res.status(400).json({ success: false, error: 'বার্তা সীমা কমপক্ষে ১ হতে হবে।' });
+      if (isNaN(n) || n < 1 || n > 1000000) return res.status(400).json({ success: false, error: 'বার্তা সীমা ১ থেকে ১০,০০,০০০ এর মধ্যে হতে হবে।' });
       validLimit = n;
     }
 
@@ -343,7 +419,10 @@ const updatePlanLimits = async (req, res) => {
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
       if (validWindow !== undefined) plan.window_hours = validWindow;
-      if (is_active !== undefined) plan.is_active = Boolean(is_active);
+      if (is_active !== undefined) {
+        const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
+        plan.is_active = activeBool;
+      }
 
       await plan.save();
       try {
@@ -354,7 +433,10 @@ const updatePlanLimits = async (req, res) => {
         if (pIdx !== -1) {
           if (validLimit !== undefined) plans[pIdx].message_limit = validLimit;
           if (validWindow !== undefined) plans[pIdx].window_hours = validWindow;
-          if (is_active !== undefined) plans[pIdx].is_active = Boolean(is_active);
+          if (is_active !== undefined) {
+            const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
+            plans[pIdx].is_active = activeBool;
+          }
           await savePersistedPlans(plans);
           debouncedSave();
         }
@@ -376,7 +458,10 @@ const updatePlanLimits = async (req, res) => {
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
       if (validWindow !== undefined) plan.window_hours = validWindow;
-      if (is_active !== undefined) plan.is_active = Boolean(is_active);
+      if (is_active !== undefined) {
+        const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
+        plan.is_active = activeBool;
+      }
 
       await savePersistedPlans(plans);
       debouncedSave();
@@ -409,7 +494,7 @@ const generateRedeemCodes = async (req, res) => {
     }
 
     const createdCodes = [];
-    const numToCreate = Math.min(Math.max(Number(count) || 1, 1), 100);
+    const numToCreate = Math.floor(Math.min(Math.max(Number(count) || 1, 1), 100));
     const validDurationDays = Math.floor(Math.min(Math.max(Number(duration_days) || 30, 1), 3650));
 
     if (getIsMongoConnected()) {
@@ -520,11 +605,16 @@ const deleteRedeemCode = async (req, res) => {
       return res.status(400).json({ success: false, error: 'সঠিক রিডিম কোড আইডি প্রদান করুন' });
     }
     const cleanId = String(codeId).trim().toUpperCase();
+    let codeStrToFilter = cleanId;
 
     // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(codeId)) {
+        const found = await RedeemCode.findById(codeId);
+        if (found && found.code) {
+          codeStrToFilter = String(found.code).trim().toUpperCase();
+        }
         await RedeemCode.findByIdAndDelete(codeId);
       } else {
         await RedeemCode.findOneAndDelete({ code: cleanId });
@@ -534,12 +624,12 @@ const deleteRedeemCode = async (req, res) => {
     // 2. ALWAYS purge from Supabase __redeem_codes__
     const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
     let codes = await getPersistedRedeemCodes();
-    codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
+    codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId && String(c.code).trim().toUpperCase() !== codeStrToFilter);
     await savePersistedRedeemCodes(codes);
 
     // 3. ALWAYS purge from memoryStore
     if (memoryStore.redeemCodes) {
-      memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
+      memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId && String(c.code).trim().toUpperCase() !== codeStrToFilter);
     }
     debouncedSave();
 
@@ -752,8 +842,11 @@ const deleteModel = async (req, res) => {
     let decoded = modelId;
     try { decoded = decodeURIComponent(modelId); } catch {}
 
+    const cleanModelId = String(modelId || '').trim();
+    const cleanDecoded = String(decoded || '').trim();
+
     const PROTECTED_MODELS = ['openai/gpt-oss-120b', 'openrouter/free'];
-    if (PROTECTED_MODELS.includes(modelId) || PROTECTED_MODELS.includes(decoded)) {
+    if (PROTECTED_MODELS.includes(cleanModelId) || PROTECTED_MODELS.includes(cleanDecoded)) {
       return res.status(400).json({ success: false, error: 'এই মূল ব্যাকআপ মডেলটি মুছে ফেলা সম্ভব নয়।' });
     }
 

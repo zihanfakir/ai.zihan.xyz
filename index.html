@@ -3675,8 +3675,8 @@
         }
 
         const currentPass = currentPasswordInput ? currentPasswordInput.value : "";
-        const newPass = newPasswordInput ? newPasswordInput.value : "";
-        const confirmPass = confirmPasswordInput ? confirmPasswordInput.value : "";
+        const newPass = newPasswordInput ? newPasswordInput.value.trim() : "";
+        const confirmPass = confirmPasswordInput ? confirmPasswordInput.value.trim() : "";
 
         if (!currentPass) {
           if (passwordChangeMsg) {
@@ -5264,21 +5264,30 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let searchContext = "";
         // Web Search Logic based on Toggle
         if (isWebSearchEnabled && lastUserMsg && lastUserMsg.content) {
-          setBubbleStatus(aiTextElement, "searching", "ওয়েব সার্চ করা হচ্ছে...");
-          const searchData = await searchDuckDuckGo(lastUserMsg.content);
-          if (searchData) {
-            searchContext = `\n\n[Web Search Results Live Data]:\n${searchData}\n(এই তথ্যের উপর ভিত্তি করে উত্তর দাও)`;
-          } else {
-             searchContext = `\n\n[Web Search]: সরাসরি কোনো তথ্য পাওয়া যায়নি, আপনার সাধারণ জ্ঞান ব্যবহার করুন।`;
-             showToast("সার্চে কোনো ফলাফল পাওয়া যায়নি", "error");
+          try {
+            setBubbleStatus(aiTextElement, "searching", "ওয়েব সার্চ করা হচ্ছে...");
+            const searchData = await searchDuckDuckGo(lastUserMsg.content);
+            if (searchData) {
+              searchContext = `\n\n[Web Search Results Live Data]:\n${searchData}\n(এই তথ্যের উপর ভিত্তি করে উত্তর দাও)`;
+            } else {
+              searchContext = `\n\n[Web Search]: সরাসরি কোনো তথ্য পাওয়া যায়নি, আপনার সাধারণ জ্ঞান ব্যবহার করুন।`;
+              showToast("সার্চে কোনো ফলাফল পাওয়া যায়নি", "error");
+            }
+          } catch (searchErr) {
+            console.warn("[Web Search Error]:", searchErr);
+          } finally {
+            // Auto turn off toggle reliably
+            isWebSearchEnabled = false; 
+            updateAttachBtnActiveState();
+            if (webSearchText) webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
+            if (attachWebSearchOption) {
+              attachWebSearchOption.style.color = "var(--text-main)"; 
+              const span = attachWebSearchOption.querySelector("span");
+              if (span) span.style.color = "var(--text-sub)"; 
+              const svg = attachWebSearchOption.querySelector("svg");
+              if (svg) svg.style.stroke = "var(--text-sub)";
+            }
           }
-          // Auto turn off toggle
-          isWebSearchEnabled = false; 
-          updateAttachBtnActiveState();
-          webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
-          attachWebSearchOption.style.color = "var(--text-main)"; 
-          attachWebSearchOption.querySelector("span").style.color = "var(--text-sub)"; 
-          attachWebSearchOption.querySelector('svg').style.stroke = "var(--text-sub)";
         }
 
         let activeHistory = messagesHistory;

@@ -26,6 +26,8 @@ const claimRedeemCode = async (req, res) => {
     const isLifetime = user.subscription && user.subscription.is_active && user.subscription.expires_at === null && user.subscription.plan_name !== 'Free';
     const currentTier = (user.subscription && user.subscription.plan_name) ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
 
+    let claimedCodeId = null;
+
     if (getIsMongoConnected()) {
       const redeemCode = await RedeemCode.findOneAndUpdate(
         { code: cleanCode, is_used: false },
@@ -35,6 +37,7 @@ const claimRedeemCode = async (req, res) => {
       if (!redeemCode) {
         return res.status(400).json({ success: false, error: 'অবৈধ, অকার্যকর অথবা ইতিমধ্যে ব্যবহৃত রিডিম কোড!' });
       }
+      claimedCodeId = redeemCode._id;
 
       const durationDays = redeemCode.duration_days || 30;
       const newTier = PLAN_HIERARCHY[redeemCode.plan_name] || 1;
@@ -42,6 +45,7 @@ const claimRedeemCode = async (req, res) => {
       // Lifetime plan holders with >= tier: rollback and reject
       if (isLifetime && currentTier >= newTier) {
         await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        claimedCodeId = null;
         return res.status(400).json({ success: false, error: 'আপনার অ্যাকাউন্টে ইতিমধ্যে আজীবন সক্রিয় প্ল্যান রয়েছে। এই কোডটি ব্যবহার করা সম্ভব নয়।' });
       }
 
@@ -50,8 +54,9 @@ const claimRedeemCode = async (req, res) => {
       let baseDate, finalPlanName;
       if (isCurrentActive && currentTier > newTier) {
         await RedeemCode.updateOne({ _id: redeemCode._id }, { $set: { is_used: false, used_by: null, used_at: null } });
+        claimedCodeId = null;
         return res.status(400).json({ success: false, error: `আপনার অ্যাকাউন্টে ইতিমধ্যে উচ্চতর প্ল্যান (${user.subscription.plan_name}) সক্রিয় আছে। এই কোডটি ব্যবহার করা সম্ভব নয়।` });
-      } else if (isCurrentActive && currentTier <= newTier) {
+      } else if (isCurrentActive && currentTier === newTier) {
         baseDate = new Date(user.subscription.expires_at);
         finalPlanName = redeemCode.plan_name;
       } else {
@@ -62,8 +67,13 @@ const claimRedeemCode = async (req, res) => {
       const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
       const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
 
-      // Use findByIdAndUpdate to prevent crash on plain objects
-      await User.findByIdAndUpdate(userId, { $set: { subscription: subscriptionData } });
+      // Support both ObjectId and custom string user IDs without CastError
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        await User.findByIdAndUpdate(userId, { $set: { subscription: subscriptionData } });
+      } else if (user.email) {
+        await User.findOneAndUpdate({ email: user.email.toLowerCase().trim() }, { $set: { subscription: subscriptionData } });
+      }
       user.subscription = subscriptionData;
 
       // Also sync to Supabase and memoryStore so multi-store stays in sync
@@ -120,6 +130,14 @@ const claimRedeemCode = async (req, res) => {
         subscription: subscriptionData
       });
     } else {
+      // Atomic pre-check in memoryStore
+      if (memoryStore.redeemCodes) {
+        const memCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
+        if (memCode && memCode.is_used) {
+          return res.status(400).json({ success: false, error: 'এই রিডিম কোডটি ইতিমধ্যে অন্য ব্যবহারকারী দ্বারা দাবি করা হয়েছে!' });
+        }
+      }
+
       const { getPersistedRedeemCodes, savePersistedRedeemCodes, getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let codes = await getPersistedRedeemCodes();
       codes = [...codes];
@@ -145,7 +163,7 @@ const claimRedeemCode = async (req, res) => {
       let baseDate, finalPlanName;
       if (isCurrentActive && currentTier > newTier) {
         return res.status(400).json({ success: false, error: `আপনার অ্যাকাউন্টে ইতিমধ্যে উচ্চতর প্ল্যান (${user.subscription.plan_name}) সক্রিয় আছে। এই কোডটি ব্যবহার করা সম্ভব নয়।` });
-      } else if (isCurrentActive && currentTier <= newTier) {
+      } else if (isCurrentActive && currentTier === newTier) {
         baseDate = new Date(user.subscription.expires_at);
         finalPlanName = redeemCode.plan_name;
       } else {
@@ -164,7 +182,8 @@ const claimRedeemCode = async (req, res) => {
       // Update user subscription in Supabase
       let users = await getPersistedUsers();
       users = [...users];
-      const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId));
+      const userEmail = (user.email || '').toLowerCase().trim();
+      const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
       if (uIdx !== -1) {
         users[uIdx].subscription = subscriptionData;
         await savePersistedUsers(users);
@@ -172,7 +191,7 @@ const claimRedeemCode = async (req, res) => {
         console.warn('[Redeem] User not found in persisted users array, userId:', userId);
       }
       if (memoryStore.users) {
-        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId));
+        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
         if (mUser) mUser.subscription = subscriptionData;
       }
       if (memoryStore.redeemCodes) {
@@ -209,6 +228,12 @@ const claimRedeemCode = async (req, res) => {
     }
   } catch (error) {
     console.error('[Redeem Error]:', error);
+    if (claimedCodeId && getIsMongoConnected()) {
+      try {
+        const RedeemCode = require('../models/RedeemCode');
+        await RedeemCode.updateOne({ _id: claimedCodeId }, { $set: { is_used: false, used_by: null, used_at: null } });
+      } catch {}
+    }
     res.status(500).json({ success: false, error: 'সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।' });
   }
 };

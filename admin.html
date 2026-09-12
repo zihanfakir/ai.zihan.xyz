@@ -1941,6 +1941,12 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
+        const activePromptCancel = document.querySelector("#promptModalOverlay.open #promptModalCancelBtn");
+        if (activePromptCancel) { activePromptCancel.click(); return; }
+        const activeConfirmCancel = document.querySelector("#confirmModalOverlay.open #confirmModalCancelBtn");
+        if (activeConfirmCancel) { activeConfirmCancel.click(); return; }
+        const activePassCancel = document.querySelector("#adminPasswordModalOverlay.open #adminPassCancelBtn");
+        if (activePassCancel) { activePassCancel.click(); return; }
         document.querySelectorAll(".custom-modal-overlay.open").forEach(o => o.classList.remove("open"));
       }
     });
