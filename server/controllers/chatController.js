@@ -4,7 +4,7 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
-const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage, getSystemSettings } = require('../../utils/getModelConfig');
+const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -44,9 +44,9 @@ const streamChatCompletions = async (req, res) => {
     let actualModel = model || 'openrouter/free';
 
     // 1. Model ID Normalization & Provider Resolution
-    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
+    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile' || model === 'qwen/qwen3.8-27b') {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      actualModel = 'openai/gpt-oss-120b';
+      actualModel = 'qwen/qwen3.8-27b';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
     } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite' || model === 'openrouter/free' || !model) {
       targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
@@ -100,8 +100,8 @@ const streamChatCompletions = async (req, res) => {
       try { abortController.abort(); } catch (e) {}
     });
 
-    // Helper to attempt completion fetch with timeout (6s max to fit within Vercel serverless window)
-    const tryFetchCompletion = async (url, key, modName, timeoutMs = 6000) => {
+    // Helper to attempt completion fetch with timeout (4.5s max to fit within Vercel serverless window)
+    const tryFetchCompletion = async (url, key, modName, timeoutMs = 4500) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
@@ -136,92 +136,9 @@ const streamChatCompletions = async (req, res) => {
       }
     };
 
-    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 6000);
+    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 8000);
 
-    // 4. Intelligent Pre-Stream Fallback: Check if Auto Fallback is enabled
-    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'gemini-3.5-flash-lite'] }));
-    const isAutoFallback = sysSettings ? sysSettings.auto_fallback !== false : true;
-
-    if ((!response || !response.ok) && isAutoFallback) {
-      if (response) {
-        try {
-          const errBody = await response.text();
-          console.warn(`[Primary Upstream Failed] Status ${response.status} for ${actualModel} at ${targetUrl}:`, errBody.slice(0, 200));
-        } catch {}
-      }
-
-      // Dynamic Fallback: Iterate through admin-configured fallback models
-      if (req.aborted || (abortController && abortController.signal.aborted)) {
-        return;
-      }
-
-      const fallbackCandidates = (Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0)
-        ? sysSettings.fallback_models
-        : ['openai/gpt-oss-120b', 'gemini-3.5-flash-lite'];
-
-      const triedFallbackModels = new Set();
-
-      for (const fbModelId of fallbackCandidates) {
-        if (req.aborted || (abortController && abortController.signal.aborted)) break;
-        if (response && response.ok) break;
-        if (!fbModelId || typeof fbModelId !== 'string') continue;
-        const cleanFbModel = fbModelId.trim();
-
-        // Skip if it's the exact model that already failed or already tried
-        if (cleanFbModel === actualModel || cleanFbModel === model || triedFallbackModels.has(cleanFbModel)) {
-          continue;
-        }
-        triedFallbackModels.add(cleanFbModel);
-
-        console.log(`[Chat Fallback] Trying admin-configured fallback model ${cleanFbModel} for ${model}...`);
-
-        let fbConfig = null;
-        if (getIsMongoConnected()) {
-          fbConfig = await AiModel.findOne({ $or: [{ model_id: cleanFbModel }, { id: cleanFbModel }] });
-        } else {
-          const { getPersistedModels } = require('../../utils/getModelConfig');
-          const allModels = await getPersistedModels();
-          fbConfig = allModels.find(m => (m.id === cleanFbModel || m.model_id === cleanFbModel));
-        }
-        if (!fbConfig) {
-          fbConfig = await getModelConfig(cleanFbModel);
-        }
-
-        let fbUrl = (fbConfig && fbConfig.base_url) ? fbConfig.base_url.trim() : null;
-        let fbKey = fbConfig ? fbConfig.api_key : null;
-        let fbActualModel = (fbConfig && fbConfig.model_id) ? fbConfig.model_id : cleanFbModel;
-
-        if (!fbKey) {
-          fbKey = await getApiKeyFromSupabase(cleanFbModel);
-          if (!fbKey && fbConfig && fbConfig.id && fbConfig.id !== cleanFbModel) {
-            fbKey = await getApiKeyFromSupabase(fbConfig.id);
-          }
-        }
-
-        if (!fbUrl) {
-          if (cleanFbModel.startsWith('openai/') || cleanFbModel.includes('gpt-oss')) {
-            fbUrl = 'https://api.groq.com/openai/v1/chat/completions';
-            if (!fbKey) fbKey = process.env.GROQ_API_KEY;
-          } else {
-            fbUrl = 'https://openrouter.ai/api/v1/chat/completions';
-            if (!fbKey) fbKey = process.env.OPENROUTER_API_KEY;
-          }
-        } else {
-          if (!fbKey) {
-            if (fbUrl.includes('groq.com')) fbKey = process.env.GROQ_API_KEY;
-            else if (fbUrl.includes('openrouter.ai')) fbKey = process.env.OPENROUTER_API_KEY;
-            else if (fbUrl.includes('vyceai.com')) fbKey = process.env.VYCE_API_KEY;
-            else if (fbUrl.includes('api.b.ai')) fbKey = process.env.BAI_API_KEY;
-          }
-        }
-
-        response = await tryFetchCompletion(fbUrl, fbKey, fbActualModel, 4000);
-      }
-    } else if (!response || !response.ok) {
-      console.log(`[Chat Fallback] Auto Fallback is disabled by Admin. Returning upstream error directly for ${model}.`);
-    }
-
-    // Guard against client socket abort / closure during fallback requests
+    // Guard against client socket abort / closure
     if (req.destroyed || req.aborted || (abortController && abortController.signal.aborted) || res.writableEnded) {
       return;
     }
@@ -266,69 +183,84 @@ const streamChatCompletions = async (req, res) => {
         }
       }, 60000);
     };
-    resetStreamIdleWatchdog();
+    return new Promise((resolve) => {
+      let isResolved = false;
+      const safeResolve = () => {
+        if (!isResolved) {
+          isResolved = true;
+          if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
+          resolve();
+        }
+      };
 
-    req.on('close', () => {
-      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
-      if (response && response.body && typeof response.body.destroy === 'function') {
-        try { response.body.destroy(); } catch {}
-      }
-    });
+      const onClose = () => {
+        if (response && response.body && typeof response.body.destroy === 'function') {
+          try { response.body.destroy(); } catch {}
+        }
+        safeResolve();
+      };
+      req.on('close', onClose);
 
-    response.body.on('data', (chunk) => {
-      hasStreamedData = true;
-      resetStreamIdleWatchdog();
-      res.write(chunk);
-    });
+      response.body.on('data', (chunk) => {
+        hasStreamedData = true;
+        resetStreamIdleWatchdog();
+        try {
+          res.write(chunk);
+          if (typeof res.flush === 'function') res.flush();
+        } catch (e) {
+          safeResolve();
+        }
+      });
 
-    response.body.on('end', async () => {
-      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
-      try {
-        // Record usage log only after stream successfully delivers tokens
-        if (hasStreamedData) {
-          const userId = user ? String(user._id || user.id) : req.guestId;
-          if (userId) {
-            if (user && getIsMongoConnected()) {
-              UsageLog.create({
-                user_id: userId,
-                model_id: model || 'openrouter/free',
-                timestamp: new Date()
-              }).catch(err => console.error('[UsageLog Write Error]:', err.message));
-              incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
-            } else {
-              memoryStore.usageLogs.push({
-                _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-                user_id: userId,
-                model_id: model || 'openrouter/free',
-                timestamp: new Date()
-              });
-              if (memoryStore.usageLogs.length > 5000) {
-                memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
-              }
-              debouncedSave();
-              try {
-                await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-              } catch (e) {
-                console.error('[Increment User Usage Error]:', e.message);
+      response.body.on('end', async () => {
+        try {
+          // Record usage log only after stream successfully delivers tokens
+          if (hasStreamedData) {
+            const userId = user ? String(user._id || user.id) : req.guestId;
+            if (userId) {
+              if (user && getIsMongoConnected()) {
+                UsageLog.create({
+                  user_id: userId,
+                  model_id: model || 'openrouter/free',
+                  timestamp: new Date()
+                }).catch(err => console.error('[UsageLog Write Error]:', err.message));
+                incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
+              } else {
+                memoryStore.usageLogs.push({
+                  _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                  user_id: userId,
+                  model_id: model || 'openrouter/free',
+                  timestamp: new Date()
+                });
+                if (memoryStore.usageLogs.length > 5000) {
+                  memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+                }
+                debouncedSave();
+                try {
+                  await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+                } catch (e) {
+                  console.error('[Increment User Usage Error]:', e.message);
+                }
               }
             }
           }
+        } catch (streamErr) {
+          console.error('[Stream End Callback Error]:', streamErr.message);
+        } finally {
+          if (!res.writableEnded) res.end();
+          safeResolve();
         }
-      } catch (streamErr) {
-        console.error('[Stream End Callback Error]:', streamErr.message);
-      } finally {
-        if (!res.writableEnded) res.end();
-      }
-    });
+      });
 
-    response.body.on('error', (err) => {
-      if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
-      console.error('[Stream Error]:', err.message);
-      if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ error: 'স্ট্রিম সংযোগে সমস্যা হয়েছে।' })}\n\n`);
-        res.write('data: [DONE]\n\n');
-        res.end();
-      }
+      response.body.on('error', (err) => {
+        console.error('[Stream Error]:', err.message);
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ error: 'স্ট্রিম সংযোগে সমস্যা হয়েছে।' })}\n\n`);
+          res.write('data: [DONE]\n\n');
+          res.end();
+        }
+        safeResolve();
+      });
     });
 
   } catch (error) {

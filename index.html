@@ -5058,6 +5058,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
               throw new Error(safeMsg);
             }
             const delta = json.choices?.[0]?.delta?.content 
+              ?? json.choices?.[0]?.delta?.reasoning 
+              ?? json.choices?.[0]?.delta?.reasoning_content 
               ?? json.choices?.[0]?.delta?.text 
               ?? json.choices?.[0]?.text 
               ?? json.text 

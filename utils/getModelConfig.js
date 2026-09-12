@@ -426,7 +426,8 @@ async function getSystemSettings() {
         let parsed = null;
         try { parsed = JSON.parse(data[0].api_key); } catch {}
         if (parsed && typeof parsed === 'object') {
-          if (!parsed.fallback_models) parsed.fallback_models = ['openai/gpt-oss-120b', 'openrouter/free'];
+          delete parsed.auto_fallback;
+          delete parsed.fallback_models;
           settingsCache = parsed;
           settingsCacheTs = now;
           if (!memoryStore.settings) memoryStore.settings = {};
@@ -439,15 +440,16 @@ async function getSystemSettings() {
     }
   }
 
-  const def = memoryStore.settings || { auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'openrouter/free'] };
-  if (!def.fallback_models) def.fallback_models = ['openai/gpt-oss-120b', 'openrouter/free'];
+  const def = memoryStore.settings || {};
   settingsCache = def;
   settingsCacheTs = now;
   return def;
 }
 
 async function saveSystemSettings(settings) {
-  const updated = { auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'openrouter/free'], ...(memoryStore.settings || {}), ...settings };
+  const updated = { ...(memoryStore.settings || {}), ...settings };
+  delete updated.auto_fallback;
+  delete updated.fallback_models;
   settingsCache = updated;
   settingsCacheTs = Date.now();
   memoryStore.settings = updated;

@@ -684,45 +684,6 @@
         <h3>AI মডেল সেটিংস ও কনফিগারেশন</h3>
       </div>
 
-      <!-- Auto Fallback & Fallback Models Card -->
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <div style="max-width: 800px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-weight: 700; font-size: 1rem; color: #fff;">🔄 অটো-ফলব্যাক (Auto Fallback)</span>
-              <span id="autoFallbackBadge" class="tag" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px;">চালু</span>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-sub); margin-top: 4px; line-height: 1.4;">
-              কোনো মডেল ডাউন বা এরর দিলে সিস্টেম স্বয়ংক্রিয়ভাবে অনুমোদিত ব্যাকআপ মডেল দিয়ে রেসপন্স নিশ্চিত করবে। বন্ধ রাখলে মূল সার্ভারের এরর সরাসরি দেখাবে।
-            </p>
-          </div>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <label class="switch" title="অটো-ফলব্যাক চালু বা বন্ধ করুন">
-              <input type="checkbox" id="autoFallbackToggle" checked onchange="toggleAutoFallback(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Fallback Target Models Selection -->
-        <div id="fallbackModelsContainer" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">ফলব্যাক হিসেবে ব্যবহারের জন্য অনুমোদিত মডেলসমূহ:</span>
-              <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px;">
-                যে মডেলগুলোতে টিক চিহ্ন থাকবে, প্রাইমারি মডেল ফেইল করলে সিস্টেম শুধুমাত্র সেগুলোতে ধারাবাহিকভাবে ফলব্যাক করবে।
-              </p>
-            </div>
-            <button type="button" class="btn btn-primary" id="saveFallbackModelsBtn" onclick="saveFallbackModels()" style="padding: 6px 16px; font-size: 0.82rem;">
-              তালিকা সংরক্ষণ করুন
-            </button>
-          </div>
-          <div id="fallbackModelCheckboxes" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px;">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">মডেল লোড হচ্ছে...</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Add New Model Form -->
       <form id="addModelForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 14px; display: flex; flex-direction: column; gap: 14px;">
         <h4 style="color: var(--accent); font-size: 1rem;">+ নতুন AI মডেল যোগ করুন</h4>
@@ -1009,7 +970,6 @@
       loadPlans();
       loadRedeemCodes();
       loadModels();
-      loadSettings();
     }
 
     async function loadStats() {
@@ -1154,177 +1114,9 @@
         if (data.success && data.models) {
           currentModelsList = data.models;
           renderModelsTable(data.models);
-          renderFallbackModelCheckboxes();
         }
       } catch (err) {
         console.error(err);
-      }
-    }
-
-    let currentFallbackModels = ['openai/gpt-oss-120b', 'openrouter/free'];
-
-    async function loadSettings() {
-      try {
-        const res = await authFetch(`${API_BASE}/admin/settings`);
-        const data = await res.json();
-        if (data.success && data.settings) {
-          const isEnabled = data.settings.auto_fallback !== false;
-          if (Array.isArray(data.settings.fallback_models)) {
-            currentFallbackModels = data.settings.fallback_models;
-          }
-          const toggle = document.getElementById("autoFallbackToggle");
-          const badge = document.getElementById("autoFallbackBadge");
-          if (toggle) toggle.checked = isEnabled;
-          if (badge) {
-            badge.textContent = isEnabled ? "চালু" : "বন্ধ";
-            badge.style.background = isEnabled ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
-            badge.style.color = isEnabled ? "#34d399" : "#f87171";
-            badge.style.borderColor = isEnabled ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)";
-          }
-          const fbContainer = document.getElementById("fallbackModelsContainer");
-          if (fbContainer) {
-            fbContainer.style.opacity = isEnabled ? "1" : "0.5";
-            fbContainer.style.pointerEvents = isEnabled ? "auto" : "none";
-          }
-          renderFallbackModelCheckboxes();
-        }
-      } catch (err) {
-        console.error("Settings load error:", err);
-      }
-    }
-
-    function renderFallbackModelCheckboxes() {
-      const container = document.getElementById("fallbackModelCheckboxes");
-      if (!container) return;
-
-      const modelsMap = new Map();
-      if (Array.isArray(currentModelsList)) {
-        currentModelsList.forEach(m => {
-          const id = m.model_id || m.id;
-          if (id) modelsMap.set(id, m.name || id);
-        });
-      }
-      if (!modelsMap.has("openai/gpt-oss-120b")) modelsMap.set("openai/gpt-oss-120b", "Alo Pro (Groq 120b)");
-      if (!modelsMap.has("openrouter/free")) modelsMap.set("openrouter/free", "Alo Go (Free)");
-
-      container.innerHTML = "";
-      modelsMap.forEach((name, modelId) => {
-        const isChecked = currentFallbackModels.includes(modelId);
-        const label = document.createElement("label");
-        label.style.cssText = `
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 6px 14px;
-          background: ${isChecked ? "rgba(16, 185, 129, 0.12)" : "rgba(255, 255, 255, 0.04)"};
-          border: 1px solid ${isChecked ? "rgba(16, 185, 129, 0.4)" : "var(--border-color)"};
-          border-radius: 999px;
-          font-size: 0.82rem;
-          color: ${isChecked ? "#34d399" : "var(--text-primary)"};
-          cursor: pointer;
-          transition: all 0.2s;
-          user-select: none;
-        `;
-
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.value = modelId;
-        cb.checked = isChecked;
-        cb.className = "fallback-model-cb";
-        cb.style.cursor = "pointer";
-
-        cb.addEventListener("change", () => {
-          if (cb.checked) {
-            label.style.background = "rgba(16, 185, 129, 0.12)";
-            label.style.borderColor = "rgba(16, 185, 129, 0.4)";
-            label.style.color = "#34d399";
-          } else {
-            label.style.background = "rgba(255, 255, 255, 0.04)";
-            label.style.borderColor = "var(--border-color)";
-            label.style.color = "var(--text-primary)";
-          }
-        });
-
-        label.appendChild(cb);
-        const textSpan = document.createElement("span");
-        textSpan.textContent = name;
-        label.appendChild(textSpan);
-
-        const idSpan = document.createElement("span");
-        idSpan.style.cssText = "font-size: 0.72rem; opacity: 0.6;";
-        idSpan.textContent = `(${modelId})`;
-        label.appendChild(idSpan);
-
-        container.appendChild(label);
-      });
-    }
-
-    async function saveFallbackModels() {
-      const btn = document.getElementById("saveFallbackModelsBtn");
-      const cbs = document.querySelectorAll(".fallback-model-cb:checked");
-      const selected = Array.from(cbs).map(cb => cb.value);
-
-      if (selected.length === 0) {
-        showToast("কমপক্ষে একটি ফলব্যাক মডেল নির্বাচন করুন", "error");
-        return;
-      }
-
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "সংরক্ষণ হচ্ছে...";
-      }
-
-      try {
-        const res = await authFetch(`${API_BASE}/admin/settings`, {
-          method: "PUT",
-          body: JSON.stringify({ fallback_models: selected })
-        });
-        const data = await res.json();
-        if (data.success) {
-          currentFallbackModels = selected;
-          renderFallbackModelCheckboxes();
-          showToast("ফলব্যাক মডেল তালিকা সফলভাবে সংরক্ষিত হয়েছে!", "success");
-        } else {
-          showToast(data.error || "সংরক্ষণ ব্যর্থ হয়েছে", "error");
-        }
-      } catch (err) {
-        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "তালিকা সংরক্ষণ করুন";
-        }
-      }
-    }
-
-    async function toggleAutoFallback(enabled) {
-      const badge = document.getElementById("autoFallbackBadge");
-      if (badge) {
-        badge.textContent = enabled ? "চালু" : "বন্ধ";
-        badge.style.background = enabled ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
-        badge.style.color = enabled ? "#34d399" : "#f87171";
-        badge.style.borderColor = enabled ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)";
-      }
-      const fbContainer = document.getElementById("fallbackModelsContainer");
-      if (fbContainer) {
-        fbContainer.style.opacity = enabled ? "1" : "0.5";
-        fbContainer.style.pointerEvents = enabled ? "auto" : "none";
-      }
-      try {
-        const res = await authFetch(`${API_BASE}/admin/settings`, {
-          method: "PUT",
-          body: JSON.stringify({ auto_fallback: enabled })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(enabled ? "অটো-ফলব্যাক চালু করা হয়েছে" : "অটো-ফলব্যাক বন্ধ করা হয়েছে", "success");
-        } else {
-          showToast(data.error || "সেটিংস আপডেট ব্যর্থ হয়েছে", "error");
-          loadSettings();
-        }
-      } catch (err) {
-        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
-        loadSettings();
       }
     }
 

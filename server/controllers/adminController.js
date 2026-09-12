@@ -1093,21 +1093,10 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const { auto_fallback, fallback_models } = req.body;
-    if (auto_fallback !== undefined && typeof auto_fallback !== 'boolean') {
-      return res.status(400).json({ success: false, error: 'auto_fallback অবশ্যই boolean (true অথবা false) হতে হবে' });
-    }
-    if (fallback_models !== undefined) {
-      if (!Array.isArray(fallback_models) || fallback_models.some(m => typeof m !== 'string' || !m.trim())) {
-        return res.status(400).json({ success: false, error: 'fallback_models অবশ্যই মডেল আইডি সম্বলিত array হতে হবে' });
-      }
-    }
     const { saveSystemSettings } = require('../../utils/getModelConfig');
-    const toSave = {};
-    if (auto_fallback !== undefined) toSave.auto_fallback = Boolean(auto_fallback);
-    if (fallback_models !== undefined) {
-      toSave.fallback_models = fallback_models.map(m => m.trim().slice(0, 100));
-    }
+    const toSave = typeof req.body === 'object' && req.body !== null ? req.body : {};
+    delete toSave.auto_fallback;
+    delete toSave.fallback_models;
     const saved = await saveSystemSettings(toSave);
     debouncedSave();
     return res.json({ success: true, settings: saved, message: 'সিস্টেম সেটিংস সফলভাবে আপডেট হয়েছে' });
