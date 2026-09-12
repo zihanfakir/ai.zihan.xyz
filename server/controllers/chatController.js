@@ -275,46 +275,7 @@ const streamChatCompletions = async (req, res) => {
   }
 };
 
-const ChatSession = require('../models/ChatSession');
 
-// Chat privacy: Chat history is NOT saved to the database (remains local to client browser)
-const saveChatSession = async (req, res) => {
-  try {
-    // Purposefully disabled database persistence per user privacy preference
-    return res.json({ success: true, message: 'চ্যাট হিস্ট্রি সম্পূর্ণ লোকাল ব্রাউজারে সংরক্ষিত (ডাটাবেস সংরক্ষণ নিষ্ক্রিয়)' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'ত্রুটি ঘটেছে' });
-  }
-};
-
-const getChatSessions = async (req, res) => {
-  try {
-    // Chat history is maintained strictly locally in the browser
-    return res.json({ success: true, sessions: [] });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'ত্রুটি ঘটেছে' });
-  }
-};
-
-const deleteChatSession = async (req, res) => {
-  try {
-    const { session_id } = req.params;
-    if (session_id) {
-      const cleanSessionId = String(session_id).trim();
-      const user = req.user;
-      const userId = String(user._id || user.id);
-      if (getIsMongoConnected()) {
-        await ChatSession.deleteMany({ user_id: userId, session_id: cleanSessionId }).catch(() => {});
-      }
-      if (memoryStore.chatSessions) {
-        memoryStore.chatSessions = memoryStore.chatSessions.filter(s => !(s.session_id === cleanSessionId && String(s.user_id) === userId));
-      }
-    }
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'চ্যাট সেশন মুছতে সমস্যা হয়েছে।' });
-  }
-};
 
 const generateImage = async (req, res) => {
   try {
@@ -402,6 +363,6 @@ const generateImage = async (req, res) => {
   }
 };
 
-module.exports = { streamChatCompletions, generateImage, saveChatSession, getChatSessions, deleteChatSession };
+module.exports = { streamChatCompletions, generateImage };
 
 

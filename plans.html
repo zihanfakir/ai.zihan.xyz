@@ -621,13 +621,13 @@
         <div class="plan-name">প্রো (Pro)</div>
         <div class="plan-desc">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
-          <div class="quota-num" style="color:var(--accent-primary);">৫০</div>
+          <div class="quota-num" style="color:#8b5cf6;">৩০</div>
           <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
         </div>
         <ul class="features-list">
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            ৫০টি বার্তা প্রতি ৩ ঘণ্টায়
+            ৩০টি বার্তা প্রতি ৩ ঘণ্টায়
           </li>
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -650,13 +650,13 @@
         <div class="plan-name">ম্যাক্স (Max)</div>
         <div class="plan-desc">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
         <div class="plan-quota">
-          <div class="quota-num" style="color:#f59e0b;">২০০</div>
-          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+          <div class="quota-num" style="color:#f59e0b;">৫০</div>
+          <div class="quota-unit">বার্তা / ১ ঘণ্টা</div>
         </div>
         <ul class="features-list">
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            ২০০টি বার্তা প্রতি ৩ ঘণ্টায়
+            ৫০টি বার্তা প্রতি ১ ঘণ্টায়
           </li>
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -863,15 +863,28 @@
           const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
           const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
 
+          localStorage.setItem("alokpoth_current_plan", newPlan);
+          localStorage.setItem("alokpoth_user_plan", newPlan);
           localStorage.setItem("alokpoth_plan", newPlan);
-          if (expiresAt) localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+          if (expiresAt) {
+            localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+            localStorage.setItem("alokpoth_plan_expires_at", expiresAt);
+          } else {
+            localStorage.removeItem("alokpoth_plan_expiry");
+            localStorage.removeItem("alokpoth_plan_expires_at");
+          }
           if (data.token) localStorage.setItem("alokpoth_token", data.token);
 
           const userStr = localStorage.getItem("alokpoth_user");
           if (userStr) {
-            const u = JSON.parse(userStr);
-            u.plan = newPlan;
-            localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            try {
+              const u = JSON.parse(userStr);
+              if (!u.subscription) u.subscription = {};
+              u.subscription.plan_name = newPlan;
+              u.subscription.expires_at = expiresAt;
+              u.plan = newPlan;
+              localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            } catch {}
           }
 
           input.value = "";

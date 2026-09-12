@@ -209,6 +209,33 @@ const getMe = async (req, res) => {
     let rateLimit = null;
     let usage = null;
     
+    // Auto-downgrade expired subscriptions before computing quota and returning user object
+    if (user.subscription && user.subscription.plan_name !== 'Free' && user.subscription.expires_at) {
+      if (new Date() > new Date(user.subscription.expires_at)) {
+        user.subscription.plan_name = 'Free';
+        user.subscription.expires_at = null;
+        user.subscription.is_active = true;
+        if (getIsMongoConnected() && typeof user.save === 'function') {
+          await user.save().catch(() => {});
+        }
+        try {
+          const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+          let users = await getPersistedUsers();
+          users = [...users];
+          const uIdx = users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+          if (uIdx !== -1) {
+            users[uIdx].subscription = user.subscription;
+            await savePersistedUsers(users);
+          }
+          if (memoryStore.users) {
+            const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(user._id || user.id));
+            if (mUser) mUser.subscription = user.subscription;
+          }
+          debouncedSave();
+        } catch {}
+      }
+    }
+
     if (user.role !== 'admin') {
       const Plan = require('../models/Plan');
       const UsageLog = require('../models/UsageLog');

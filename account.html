@@ -762,10 +762,10 @@
         <!-- Pro Plan -->
         <div class="plan-card" id="cardPlanPro">
           <div class="plan-card-name">প্রো (Pro)</div>
-          <div class="plan-card-quota">৫০ <span>বার্তা / ৩ ঘণ্টা</span></div>
+          <div class="plan-card-quota">৩০ <span>বার্তা / ৩ ঘণ্টা</span></div>
           <div style="font-size:0.85rem; color:var(--text-sub);">প্রফেশনাল ডেভেলপার ও পাওয়ার ইউজারদের জন্য</div>
           <ul class="plan-features-list">
-            <li>৫০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li>৩০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
             <li>সবগুলো প্রিমিয়াম মডেলের অ্যাক্সেস</li>
             <li>দ্রুততম স্ট্রিমিং স্পিড</li>
             <li>কোড জেনারেশন ও ওয়েব সার্চ সাপোর্ট</li>
@@ -776,10 +776,10 @@
         <!-- Max Plan -->
         <div class="plan-card" id="cardPlanMax">
           <div class="plan-card-name">ম্যাক্স (Max)</div>
-          <div class="plan-card-quota">২০০ <span>বার্তা / ৩ ঘণ্টা</span></div>
+          <div class="plan-card-quota">৫০ <span>বার্তা / ১ ঘণ্টা</span></div>
           <div style="font-size:0.85rem; color:var(--text-sub);">সর্বোচ্চ ক্ষমতা ও আনলিমিটেড কাজের জন্য</div>
           <ul class="plan-features-list">
-            <li>২০০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li>৫০টি বার্তা প্রতি ১ ঘণ্টায়</li>
             <li>সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ</li>
             <li>সবচেয়ে বড় কনটেক্সট উইন্ডো</li>
             <li>এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস</li>
@@ -1098,17 +1098,21 @@
           if (data.success && data.user) {
             const u = data.user;
             localStorage.setItem("alokpoth_user", JSON.stringify(u));
-            if (u.subscription && u.subscription.plan_name) {
-              localStorage.setItem("alokpoth_plan", u.subscription.plan_name);
-              if (u.subscription.expires_at) {
-                localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
-              } else {
-                localStorage.removeItem("alokpoth_plan_expiry");
-              }
+            const isAdminUser = u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com");
+            const planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
+            localStorage.setItem("alokpoth_current_plan", planName);
+            localStorage.setItem("alokpoth_user_plan", planName);
+            localStorage.setItem("alokpoth_plan", planName);
+            if (!isAdminUser && u.subscription && u.subscription.expires_at) {
+              localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
+              localStorage.setItem("alokpoth_plan_expires_at", u.subscription.expires_at);
+            } else {
+              localStorage.removeItem("alokpoth_plan_expiry");
+              localStorage.removeItem("alokpoth_plan_expires_at");
             }
             if (u.rateLimit || u.usage) {
               const lim = u.rateLimit || u.usage;
-              const curPlan = (u.subscription && u.subscription.plan_name) || "Free";
+              const curPlan = planName;
               if (lim.limit && lim.windowHours) {
                 dynamicPlanLimits[curPlan] = { limit: Number(lim.limit), hours: Number(lim.windowHours) };
               }
@@ -1127,6 +1131,7 @@
       } catch (e) {}
     }
 
+    // Render User Info to DOM
     function renderUserData() {
       const userStr = localStorage.getItem("alokpoth_user");
       if (!userStr) return;
@@ -1140,14 +1145,14 @@
         const isAdmin = (user.role === "admin" || (user.email && user.email.toLowerCase() === "zihanfakir@gmail.com"));
         document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : "সদস্য";
 
-        const currentPlan = (user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_plan") || "Free";
+        const currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");
         const badge = document.getElementById("profilePlanBadge");
         badge.textContent = `${currentPlan} প্ল্যান`;
         badge.className = `badge-pill plan-${currentPlan}`;
 
         document.getElementById("currentPlanTitle").textContent = `${currentPlan} Plan`;
 
-        const expiryStr = localStorage.getItem("alokpoth_plan_expiry");
+        const expiryStr = localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (user.subscription && user.subscription.expires_at);
         const expiryEl = document.getElementById("currentPlanExpiry");
         if (currentPlan === "Free") {
           expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
@@ -1284,6 +1289,14 @@
     document.getElementById("logoutBtn").addEventListener("click", () => {
       localStorage.removeItem("alokpoth_token");
       localStorage.removeItem("alokpoth_user");
+      localStorage.removeItem("alokpoth_account_name");
+      localStorage.removeItem("alokpoth_current_plan");
+      localStorage.removeItem("alokpoth_user_plan");
+      localStorage.removeItem("alokpoth_plan");
+      localStorage.removeItem("alokpoth_plan_expiry");
+      localStorage.removeItem("alokpoth_plan_expires_at");
+      localStorage.removeItem("alokpoth_window_usage");
+      localStorage.removeItem("alokpoth_usage_window");
       showToast("লগআউট সফল হয়েছে!", "success");
       setTimeout(() => { window.location.href = "login.html"; }, 500);
     });
@@ -1358,9 +1371,15 @@
           const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
           const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
 
+          localStorage.setItem("alokpoth_current_plan", newPlan);
+          localStorage.setItem("alokpoth_user_plan", newPlan);
           localStorage.setItem("alokpoth_plan", newPlan);
           if (expiresAt) {
             localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+            localStorage.setItem("alokpoth_plan_expires_at", expiresAt);
+          } else {
+            localStorage.removeItem("alokpoth_plan_expiry");
+            localStorage.removeItem("alokpoth_plan_expires_at");
           }
           if (data.token) {
             localStorage.setItem("alokpoth_token", data.token);
@@ -1368,9 +1387,14 @@
 
           const userStr = localStorage.getItem("alokpoth_user");
           if (userStr) {
-            const u = JSON.parse(userStr);
-            u.plan = newPlan;
-            localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            try {
+              const u = JSON.parse(userStr);
+              if (!u.subscription) u.subscription = {};
+              u.subscription.plan_name = newPlan;
+              u.subscription.expires_at = expiresAt;
+              u.plan = newPlan;
+              localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            } catch {}
           }
 
           codeInput.value = "";

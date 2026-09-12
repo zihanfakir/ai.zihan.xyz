@@ -783,8 +783,18 @@
           localStorage.setItem("alokpoth_token", data.token);
           if (data.user) {
             localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
-            if (data.user.plan) {
-              localStorage.setItem("alokpoth_plan", data.user.plan);
+            const isAdmin = data.user.role === "admin" || (data.user.email && data.user.email.toLowerCase().trim() === "zihanfakir@gmail.com");
+            const planName = isAdmin ? "Max" : ((data.user.subscription && data.user.subscription.plan_name) || data.user.plan || "Free");
+            const expiresAt = (!isAdmin && data.user.subscription && data.user.subscription.expires_at) || null;
+            localStorage.setItem("alokpoth_current_plan", planName);
+            localStorage.setItem("alokpoth_user_plan", planName);
+            localStorage.setItem("alokpoth_plan", planName);
+            if (expiresAt) {
+              localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+              localStorage.setItem("alokpoth_plan_expires_at", expiresAt);
+            } else {
+              localStorage.removeItem("alokpoth_plan_expiry");
+              localStorage.removeItem("alokpoth_plan_expires_at");
             }
           }
 

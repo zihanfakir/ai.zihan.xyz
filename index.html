@@ -3431,7 +3431,7 @@
             <div class="account-credit-info">
               <div class="account-plan-badge-row">
                 <span class="account-credit-label">বর্তমান প্ল্যান</span>
-                <span class="account-plan-badge plan-Max" id="accountPlanDisplay">Max</span>
+                <span class="account-plan-badge plan-Free" id="accountPlanDisplay">Free</span>
               </div>
               <div class="account-plan-expiry-text" id="accountPlanExpiryDisplay">মেয়াদ: আজীবন / মেয়াদহীন</div>
             </div>
@@ -3440,7 +3440,7 @@
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
-              <span id="accountPlanLimitText">৫০ বার্তা / ১ ঘণ্টা</span>
+              <span id="accountPlanLimitText">১০ বার্তা / ৩ ঘণ্টা</span>
             </div>
           </div>
 
@@ -3925,20 +3925,7 @@
         } catch {}
       },
       playClick() {
-        try {
-          const ctx = this.getCtx();
-          if (!ctx) return;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(800, ctx.currentTime);
-          gain.gain.setValueAtTime(0.03, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.03);
-        } catch {}
+        // Intentionally muted per user preference - no click sound
       },
       playSuccess() {
         try {
@@ -4097,7 +4084,6 @@
           userInputEl.setAttribute("data-orig-placeholder", userInputEl.placeholder || "");
           userInputEl.placeholder = "শুনছি... কথা বলুন...";
         }
-        soundEngine.playClick();
         triggerHaptic("medium");
         showToast("কথা বলুন... (বাংলা ও ইংরেজি)", "success");
       };
@@ -4285,14 +4271,17 @@
     }
 
     function checkPlanExpiration(silent = false) {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) return false;
+
       let plan = "Free";
       try {
-        plan = localStorage.getItem(PLAN_STORAGE_KEY) || DEFAULT_PLAN;
+        plan = localStorage.getItem(PLAN_STORAGE_KEY) || localStorage.getItem("alokpoth_plan") || DEFAULT_PLAN;
       } catch { plan = DEFAULT_PLAN; }
 
       if (plan === "Free") return false;
 
-      const expiryStr = localStorage.getItem(PLAN_EXPIRY_KEY);
+      const expiryStr = localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
       if (!expiryStr) return false;
 
       const expiryDate = new Date(expiryStr);
@@ -4301,7 +4290,10 @@
       if (Date.now() >= expiryDate.getTime()) {
         currentPlan = "Free";
         saveCurrentPlan("Free");
-        try { localStorage.removeItem(PLAN_EXPIRY_KEY); } catch {}
+        try {
+          localStorage.removeItem(PLAN_EXPIRY_KEY);
+          localStorage.removeItem("alokpoth_plan_expiry");
+        } catch {}
         if (!silent && typeof showToast === "function") {
           showToast("আপনার প্ল্যানের মেয়াদ শেষ হয়ে গেছে! স্বয়ংক্রিয়ভাবে Free প্ল্যানে পরিবর্তন করা হয়েছে।", "warning");
         }
@@ -4310,22 +4302,64 @@
       return false;
     }
 
-    function loadCurrentPlan() {
+    function getResolvedUserPlan() {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) return "Free"; // Guests and non-logged-in visitors are ALWAYS Free!
+
       try {
-        const token = localStorage.getItem("alokpoth_token");
-        if (!token) return "Free";
-        checkPlanExpiration(true);
-        const raw = localStorage.getItem(PLAN_STORAGE_KEY);
-        return raw ? raw : DEFAULT_PLAN;
-      } catch { return DEFAULT_PLAN; }
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (u) {
+            // Master admin always receives Max tier
+            if (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com")) {
+              return "Max";
+            }
+            // Check expiry
+            const expiry = (u.subscription && u.subscription.expires_at) || localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
+            if (expiry && new Date(expiry).getTime() <= Date.now()) {
+              return "Free";
+            }
+            if (u.subscription && u.subscription.plan_name) {
+              return u.subscription.plan_name;
+            }
+            if (u.plan) return u.plan;
+          }
+        }
+      } catch (e) {}
+
+      const raw = localStorage.getItem(PLAN_STORAGE_KEY) || localStorage.getItem("alokpoth_plan") || localStorage.getItem("alokpoth_user_plan");
+      return (raw && ["Free", "Pro", "Max"].includes(raw)) ? raw : "Free";
+    }
+
+    function loadCurrentPlan() {
+      checkPlanExpiration(true);
+      return getResolvedUserPlan();
     }
 
     function saveCurrentPlan(val) {
       try {
+        const safeVal = (val && ["Free", "Pro", "Max"].includes(val)) ? val : "Free";
         const oldPlan = localStorage.getItem(PLAN_STORAGE_KEY);
-        localStorage.setItem(PLAN_STORAGE_KEY, val);
-        localStorage.setItem("alokpoth_user_plan", val);
-        if (oldPlan !== val) {
+        localStorage.setItem(PLAN_STORAGE_KEY, safeVal);
+        localStorage.setItem("alokpoth_user_plan", safeVal);
+        localStorage.setItem("alokpoth_plan", safeVal);
+
+        // Mirror to parsed user object in localStorage
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (userStr) {
+          try {
+            const u = JSON.parse(userStr);
+            if (u) {
+              if (!u.subscription) u.subscription = {};
+              u.subscription.plan_name = safeVal;
+              u.plan = safeVal;
+              localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            }
+          } catch {}
+        }
+
+        if (oldPlan !== safeVal) {
           localStorage.removeItem(USAGE_WINDOW_KEY);
         }
       } catch {}
@@ -5006,7 +5040,6 @@
       if (drawerBackdrop) drawerBackdrop.classList.add("open");
       renderDrawerHistoryList(drawerSearchInput ? drawerSearchInput.value : "");
       updateNavbarCreditBadge();
-      soundEngine.playClick();
       triggerHaptic("light");
     }
 
@@ -5023,14 +5056,12 @@
       drawerNewChatBtn.addEventListener("click", () => {
         startNewChat();
         closeSidebarDrawer();
-        soundEngine.playClick();
       });
     }
 
     if (quickNewChatBtn) {
       quickNewChatBtn.addEventListener("click", () => {
         startNewChat();
-        soundEngine.playClick();
       });
     }
 
@@ -5068,7 +5099,6 @@
     if (navCreditBadge) {
       navCreditBadge.addEventListener("click", () => {
         openAccountModal();
-        soundEngine.playClick();
       });
     }
 
@@ -5188,7 +5218,6 @@
             if (e.target.closest(".drawer-session-action-btn")) return;
             loadSession(session.id);
             closeSidebarDrawer();
-            soundEngine.playClick();
           });
 
           const editBtn = item.querySelector(".edit-session-btn");
@@ -5249,7 +5278,6 @@
         const targetPanel = document.getElementById(targetTabId);
         if (targetPanel) targetPanel.classList.add("active");
 
-        soundEngine.playClick();
         triggerHaptic("light");
       });
     }
@@ -5271,7 +5299,6 @@
 
       btn.addEventListener("click", () => {
         scrollToBottom();
-        soundEngine.playClick();
         triggerHaptic("light");
       });
     }
@@ -5337,7 +5364,6 @@
         pillSearch.addEventListener("click", () => {
           isWebSearchEnabled = !isWebSearchEnabled;
           pillSearch.classList.toggle("active", isWebSearchEnabled);
-          soundEngine.playClick();
           triggerHaptic("light");
           showToast(isWebSearchEnabled ? "ওয়েব সার্চ সক্রিয় হয়েছে" : "ওয়েব সার্চ নিষ্ক্রিয় হয়েছে", "success");
           if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
@@ -5350,7 +5376,6 @@
         pillImage.addEventListener("click", () => {
           isImageGenEnabled = !isImageGenEnabled;
           pillImage.classList.toggle("active", isImageGenEnabled);
-          soundEngine.playClick();
           triggerHaptic("light");
           showToast(isImageGenEnabled ? "ছবি তৈরি সক্রিয় হয়েছে" : "ছবি তৈরি নিষ্ক্রিয় হয়েছে", "success");
           if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
@@ -5367,7 +5392,6 @@
           userInput.value = "";
           userInput.style.height = "auto";
           clearBtn.style.display = "none";
-          soundEngine.playClick();
           if (typeof updateSendAvailability === "function") updateSendAvailability();
         });
       }
@@ -5472,26 +5496,64 @@
           try {
             localStorage.removeItem("alokpoth_token");
             localStorage.removeItem("alokpoth_user");
+            localStorage.removeItem(PLAN_EXPIRY_KEY);
+            localStorage.removeItem("alokpoth_plan_expiry");
           } catch (e) {}
+          currentPlan = "Free";
+          saveCurrentPlan("Free");
+          renderCreditBalance();
           if (typeof updateAuthUIState === "function") updateAuthUIState();
           return;
         }
         const data = await res.json();
         if (res.ok && data.success && data.user) {
           const u = data.user;
+          try { localStorage.setItem("alokpoth_user", JSON.stringify(u)); } catch {}
+
           if (u.name) {
             applyAccountName(u.name);
             if (accountNameInput) accountNameInput.value = u.name;
             try { localStorage.setItem("alokpoth_account_name", u.name); } catch {}
           }
-          if (u.subscription && u.subscription.plan_name) {
-            currentPlan = u.subscription.plan_name;
-            saveCurrentPlan(currentPlan);
+
+          const isAdminUser = u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com");
+          if (isAdminUser) {
+            currentPlan = "Max";
+            saveCurrentPlan("Max");
+            try {
+              localStorage.removeItem(PLAN_EXPIRY_KEY);
+              localStorage.removeItem("alokpoth_plan_expiry");
+            } catch {}
+          } else if (u.subscription && u.subscription.plan_name) {
+            // Check expiry
             if (u.subscription.expires_at) {
-              try { localStorage.setItem(PLAN_EXPIRY_KEY, u.subscription.expires_at); } catch {}
+              const expDate = new Date(u.subscription.expires_at);
+              if (!isNaN(expDate.getTime()) && Date.now() >= expDate.getTime()) {
+                currentPlan = "Free";
+                saveCurrentPlan("Free");
+                try {
+                  localStorage.removeItem(PLAN_EXPIRY_KEY);
+                  localStorage.removeItem("alokpoth_plan_expiry");
+                } catch {}
+              } else {
+                currentPlan = u.subscription.plan_name;
+                saveCurrentPlan(currentPlan);
+                try {
+                  localStorage.setItem(PLAN_EXPIRY_KEY, u.subscription.expires_at);
+                  localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
+                } catch {}
+              }
             } else {
-              try { localStorage.removeItem(PLAN_EXPIRY_KEY); } catch {}
+              currentPlan = u.subscription.plan_name;
+              saveCurrentPlan(currentPlan);
+              try {
+                localStorage.removeItem(PLAN_EXPIRY_KEY);
+                localStorage.removeItem("alokpoth_plan_expiry");
+              } catch {}
             }
+          } else {
+            currentPlan = "Free";
+            saveCurrentPlan("Free");
           }
           if (u.rateLimit || u.usage) {
             const lim = u.rateLimit || u.usage;
@@ -5736,8 +5798,11 @@
           localStorage.removeItem("alokpoth_token");
           localStorage.removeItem("alokpoth_user");
           localStorage.removeItem(PLAN_EXPIRY_KEY);
+          localStorage.removeItem("alokpoth_plan_expiry");
+          localStorage.removeItem(USAGE_WINDOW_KEY);
           localStorage.setItem("alokpoth_user_plan", "Free");
           localStorage.setItem(PLAN_STORAGE_KEY, "Free");
+          localStorage.setItem("alokpoth_plan", "Free");
         } catch (e) {}
 
         currentPlan = "Free";
@@ -5815,12 +5880,19 @@
         if (currentLogoutBtn) currentLogoutBtn.style.display = "block";
         if (currentBrandAuth) currentBrandAuth.style.display = "none";
         if (currentBrandLogout) currentBrandLogout.style.display = "flex";
+        currentPlan = getResolvedUserPlan();
       } else {
-        // Not logged in: wipe any orphaned stored credentials so nothing leaks
+        // Not logged in: strictly enforce Free tier and clean up credentials
+        currentPlan = "Free";
+        saveCurrentPlan("Free");
         try {
           localStorage.removeItem("alokpoth_account_name");
           localStorage.removeItem("alokpoth_user");
           localStorage.removeItem(PLAN_EXPIRY_KEY);
+          localStorage.removeItem("alokpoth_plan_expiry");
+          localStorage.setItem("alokpoth_current_plan", "Free");
+          localStorage.setItem("alokpoth_plan", "Free");
+          localStorage.setItem("alokpoth_user_plan", "Free");
         } catch (e) {}
 
         if (currentAuthBtn) currentAuthBtn.style.display = "block";
@@ -5832,6 +5904,9 @@
         if (dAv) dAv.textContent = "অ";
         if (dPlan) dPlan.textContent = "চ্যাট করতে লগইন করুন";
         applyAccountName("");
+        if (typeof renderCreditBalance === "function") {
+          renderCreditBalance();
+        }
       }
 
       const currentPasswordCard = document.getElementById("accountPasswordCard");
@@ -6320,9 +6395,7 @@
       if (notify && typeof showToast === "function") {
         showToast(`${THEME_NAMES[theme]} সক্রিয় করা হয়েছে`, "info");
       }
-      if (typeof soundEngine !== "undefined" && soundEngine && typeof soundEngine.playClick === "function") {
-        soundEngine.playClick();
-      }
+
     }
 
     function cycleTheme(notify = true) {
@@ -7116,7 +7189,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.addEventListener("click", () => {
         const textToCopy = copyBtn.dataset.text || "";
         copyTextToClipboard(textToCopy).then((ok) => {
-          soundEngine.playClick();
           triggerHaptic("light");
           const label = copyBtn.querySelector("span");
           const original = label ? label.textContent : "কপি";
@@ -7145,7 +7217,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span>শেয়ার</span>`;
       shareBtn.addEventListener("click", () => {
         const textToShare = copyBtn.dataset.text || textDiv.textContent || "";
-        soundEngine.playClick();
         if (navigator.share) {
           navigator.share({ title: "Alokpoth AI", text: textToShare }).catch(() => {});
         } else {
@@ -7223,7 +7294,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
         copyBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           copyTextToClipboard(currentCode).then((ok) => {
-            soundEngine.playClick();
             triggerHaptic("light");
             const span = copyBtn.querySelector("span");
             const old = span ? span.textContent : "কপি";
@@ -7244,7 +7314,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
           const a = document.createElement("a");
           a.href = url; a.download = `code.${ext}`;
           document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-          soundEngine.playClick();
           showToast(`code.${ext} ডাউনলোড হয়েছে`, "success");
         });
         
@@ -7915,7 +7984,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
             } else {
               aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
             }
-            soundEngine.playClick();
           } else {
             soundEngine.playError();
             triggerHaptic("error");

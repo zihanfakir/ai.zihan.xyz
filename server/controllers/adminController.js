@@ -301,7 +301,6 @@ const deleteUser = async (req, res) => {
     // 1. If Mongo connected, purge user, sessions, and usage logs
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
-      const ChatSession = require('../models/ChatSession');
       const UsageLog = require('../models/UsageLog');
 
       const queryOr = [{ email: cleanTarget }];
@@ -325,7 +324,6 @@ const deleteUser = async (req, res) => {
       if (targetEmail) {
         await User.deleteMany({ email: targetEmail }).catch(() => {});
       }
-      await ChatSession.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
       await UsageLog.deleteMany({ $or: [{ user_id: targetId }, { user_id: userId }] }).catch(() => {});
     }
 
@@ -367,9 +365,6 @@ const deleteUser = async (req, res) => {
     // 4. ALWAYS purge from memoryStore and write synchronously to disk
     if (memoryStore.users) {
       memoryStore.users = memoryStore.users.filter(u => !matchesTarget(u));
-    }
-    if (memoryStore.chatSessions) {
-      memoryStore.chatSessions = memoryStore.chatSessions.filter(s => String(s.user_id) !== String(userId) && String(s.user_id) !== String(targetId));
     }
     if (memoryStore.usageLogs) {
       memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId) && String(l.user_id) !== String(targetId));

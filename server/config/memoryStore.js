@@ -76,7 +76,6 @@ const seedDefaultAdmin = async () => {
       if (data.redeemCodes && data.redeemCodes.length) memoryStore.redeemCodes = data.redeemCodes;
       if (data.models && data.models.length) memoryStore.models = data.models;
       if (data.settings) memoryStore.settings = data.settings;
-      memoryStore.chatSessions = []; // Always keep chatSessions empty in memory store
       console.log('[Memory DB] Restored data from local backup file.');
     } catch (e) {
       console.error('[Memory DB] Backup file read error:', e.message);
