@@ -4800,17 +4800,16 @@
     }
 
     let MODELS = [
-      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter" },
       { id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", latency: null, status: "checking", type: "gemini" },
-      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq", premium: true },
+      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq" },
+      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
       { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", latency: null, status: "checking", premium: true },
+      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter" },
       { id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", latency: null, status: "checking", premium: true },
       { id: "nemotron-vision", name: "Alo Vision", provider: "Alokpoth", latency: null, status: "checking", premium: true },
       { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: true },
-      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
-      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
-      { id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
-      { id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: true }
+      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "offline", type: "bai", premium: true },
+      { id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", latency: null, status: "checking", type: "bai" }
     ];
 
     async function fetchModelsFromServer() {
@@ -4839,10 +4838,11 @@
           MODELS.sort((a, b) => (a.order || 0) - (b.order || 0));
 
           const savedModel = localStorage.getItem("alokpoth_selected_model");
-          if (savedModel && MODELS.some(m => m.id === savedModel)) {
+          if (savedModel && savedModel !== "mimo-v2.5" && MODELS.some(m => m.id === savedModel)) {
             selectedModelId = savedModel;
-          } else if (!MODELS.some(m => m.id === selectedModelId)) {
-            selectedModelId = MODELS[0].id;
+          } else {
+            selectedModelId = MODELS[0]?.id || "gemini-3.5-flash-lite";
+            try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
           }
 
           renderModelList();
@@ -4855,7 +4855,12 @@
       }
     }
 
-    let selectedModelId = localStorage.getItem("alokpoth_selected_model") || "openrouter/free";
+    let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
+    if (!initialSavedModel || initialSavedModel === "mimo-v2.5" || initialSavedModel === "openrouter/free") {
+      initialSavedModel = "gemini-3.5-flash-lite";
+      try { localStorage.setItem("alokpoth_selected_model", "gemini-3.5-flash-lite"); } catch (e) {}
+    }
+    let selectedModelId = initialSavedModel;
 
     const PING_INTERVAL_MS = 60000;
     const PING_TIMEOUT_MS = 8000;

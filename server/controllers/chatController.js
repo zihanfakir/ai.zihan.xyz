@@ -44,7 +44,11 @@ const streamChatCompletions = async (req, res) => {
     let actualModel = model || 'openrouter/free';
 
     // 1. Model ID Normalization & Provider Resolution
-    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile' || model === 'qwen/qwen3.8-27b') {
+    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
+      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      actualModel = 'openai/gpt-oss-120b';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
+    } else if (model === 'qwen/qwen3.8-27b') {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
       actualModel = 'qwen/qwen3.8-27b';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
@@ -55,6 +59,10 @@ const streamChatCompletions = async (req, res) => {
     } else if (model === 'deepseek-v4-flash' || model === 'deepseek-v4-flash-vision-exp') {
       targetUrl = 'https://vyceai.com/v1/chat/completions';
       actualModel = model === 'deepseek-v4-flash-vision-exp' ? 'deepseek-v4-flash-lr' : 'deepseek-v4-flash';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
+    } else if (model === 'claude-sonnet-4-6') {
+      targetUrl = 'https://vyceai.com/v1/chat/completions';
+      actualModel = 'claude-sonnet-4-6';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
     } else if (model === 'gpt-5.6') {
       targetUrl = 'https://vyceai.com/v1/chat/completions';
@@ -86,19 +94,22 @@ const streamChatCompletions = async (req, res) => {
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
     }
 
-    // Abort upstream immediately if client disconnects
+    // Upstream abort controller: triggered ONLY if client terminates response stream early
     const abortController = new AbortController();
-    req.on('close', () => {
-      try { abortController.abort(); } catch (e) {}
-    });
+    const onClientClose = () => {
+      if (!res.writableEnded) {
+        try { abortController.abort(); } catch (e) {}
+      }
+    };
+    res.on('close', onClientClose);
 
-    // Helper to attempt completion fetch with timeout (6.5s max to fit within Vercel serverless window)
-    const tryFetchCompletion = async (url, key, modName, timeoutMs = 6500) => {
+    // Helper to attempt completion fetch with 25s timeout
+    const tryFetchCompletion = async (url, key, modName, timeoutMs = 25000) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
-      const onClientAbort = () => { try { fetchController.abort(); } catch (e) {} };
-      abortController.signal.addEventListener('abort', onClientAbort);
+      const onAbort = () => { try { fetchController.abort(); } catch (e) {} };
+      abortController.signal.addEventListener('abort', onAbort);
 
       try {
         const h = { 'Content-Type': 'application/json' };
@@ -118,21 +129,21 @@ const streamChatCompletions = async (req, res) => {
           signal: fetchController.signal
         });
         clearTimeout(timeoutId);
-        abortController.signal.removeEventListener('abort', onClientAbort);
+        abortController.signal.removeEventListener('abort', onAbort);
         return r;
       } catch (err) {
         clearTimeout(timeoutId);
-        abortController.signal.removeEventListener('abort', onClientAbort);
+        abortController.signal.removeEventListener('abort', onAbort);
         console.warn(`[Fetch Attempt Error] ${url} (${modName}):`, err.message);
         return null;
       }
     };
 
-    // Primary model attempt with a 6.5s timeout (No auto-fallback per user instruction)
-    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 6500);
+    // Primary model attempt (No auto-fallback per user instruction)
+    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 25000);
 
     // Guard against client socket abort / closure
-    if (req.destroyed || req.aborted || (abortController && abortController.signal.aborted) || res.writableEnded) {
+    if (res.writableEnded || res.destroyed) {
       return;
     }
 
@@ -176,23 +187,17 @@ const streamChatCompletions = async (req, res) => {
         }
       }, 60000);
     };
+
     return new Promise((resolve) => {
       let isResolved = false;
       const safeResolve = () => {
         if (!isResolved) {
           isResolved = true;
           if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
+          res.removeListener('close', onClientClose);
           resolve();
         }
       };
-
-      const onClose = () => {
-        if (response && response.body && typeof response.body.destroy === 'function') {
-          try { response.body.destroy(); } catch {}
-        }
-        safeResolve();
-      };
-      req.on('close', onClose);
 
       response.body.on('data', (chunk) => {
         hasStreamedData = true;

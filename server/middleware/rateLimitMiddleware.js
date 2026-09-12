@@ -17,8 +17,8 @@ const checkRateLimit = async (req, res, next) => {
 
     // 0. Guest User (Not logged in)
     if (!user) {
-      const model_id = req.body.model || 'openrouter/free';
-      const freeModels = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
+      const model_id = req.body.model || 'gemini-3.5-flash-lite';
+      const freeModels = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
       const isKnownFree = freeModels.includes(model_id);
 
       let aiModel = null;
@@ -108,7 +108,7 @@ const checkRateLimit = async (req, res, next) => {
         displayName: def.name,
         message_limit: def.limit,
         window_hours: def.window,
-        allowed_models: currentPlanName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+        allowed_models: currentPlanName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
         is_active: true
       };
     }
