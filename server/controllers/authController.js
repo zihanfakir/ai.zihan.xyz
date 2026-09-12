@@ -275,6 +275,105 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe, updateProfile };
+const changePassword = async (req, res) => {
+  try {
+    const { current_password, new_password, confirm_password } = req.body;
+    if (!current_password || typeof current_password !== 'string') {
+      return res.status(400).json({ success: false, error: 'বর্তমান পাসওয়ার্ড প্রদান করুন' });
+    }
+    if (!new_password || typeof new_password !== 'string' || !new_password.trim()) {
+      return res.status(400).json({ success: false, error: 'নতুন পাসওয়ার্ড প্রদান করুন' });
+    }
+    const cleanNewPass = new_password.trim();
+    if (cleanNewPass.length < 6) {
+      return res.status(400).json({ success: false, error: 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে' });
+    }
+    if (cleanNewPass.length > 72) {
+      return res.status(400).json({ success: false, error: 'নতুন পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে' });
+    }
+    if (confirm_password && confirm_password !== new_password) {
+      return res.status(400).json({ success: false, error: 'নিশ্চিতকরণ পাসওয়ার্ড মেলেনি' });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'অননুমোদিত রিকোয়েস্ট' });
+    }
+
+    const userId = String(req.user._id || req.user.id || '');
+    let user;
+    if (getIsMongoConnected()) {
+      user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'ব্যবহারকারী পাওয়া যায়নি' });
+      }
+      const isMatch = await bcrypt.compare(current_password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, error: 'বর্তমান পাসওয়ার্ডটি সঠিক নয়' });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(cleanNewPass, salt);
+      await user.save();
+    } else {
+      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+      let users = await getPersistedUsers();
+      users = [...users];
+      let uIdx = users.findIndex(u => String(u._id || u.id) === userId || (req.user.email && u.email && u.email.toLowerCase() === req.user.email.toLowerCase()));
+      
+      let targetUser = uIdx !== -1 ? users[uIdx] : (memoryStore.users && memoryStore.users.find(u => String(u._id || u.id) === userId || (req.user.email && u.email && u.email.toLowerCase() === req.user.email.toLowerCase()))) || req.user;
+
+      if (!targetUser || !targetUser.password) {
+        return res.status(404).json({ success: false, error: 'ব্যবহারকারী পাওয়া যায়নি' });
+      }
+
+      const isMatch = await bcrypt.compare(current_password, targetUser.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, error: 'বর্তমান পাসওয়ার্ডটি সঠিক নয়' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashed = await bcrypt.hash(cleanNewPass, salt);
+      targetUser.password = hashed;
+
+      if (uIdx !== -1) {
+        users[uIdx].password = hashed;
+      } else {
+        users.push(targetUser);
+      }
+      await savePersistedUsers(users);
+
+      if (memoryStore.users) {
+        const mIdx = memoryStore.users.findIndex(u => String(u._id || u.id) === userId || (targetUser.email && u.email && u.email.toLowerCase() === targetUser.email.toLowerCase()));
+        if (mIdx !== -1) memoryStore.users[mIdx].password = hashed;
+        else memoryStore.users.push(targetUser);
+      }
+      debouncedSave();
+    }
+
+    // Also backup to memoryStore/Supabase in Mongo mode if possible
+    if (getIsMongoConnected() && user) {
+      try {
+        const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+        let users = await getPersistedUsers();
+        users = [...users];
+        const uIdx = users.findIndex(u => String(u._id || u.id) === userId || (u.email && u.email.toLowerCase() === user.email.toLowerCase()));
+        if (uIdx !== -1) {
+          users[uIdx].password = user.password;
+          await savePersistedUsers(users);
+        }
+        if (memoryStore.users) {
+          const mIdx = memoryStore.users.findIndex(u => String(u._id || u.id) === userId || (u.email && u.email.toLowerCase() === user.email.toLowerCase()));
+          if (mIdx !== -1) memoryStore.users[mIdx].password = user.password;
+        }
+        debouncedSave();
+      } catch {}
+    }
+
+    return res.json({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getMe, updateProfile, changePassword };
 
 

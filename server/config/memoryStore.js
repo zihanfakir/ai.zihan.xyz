@@ -24,7 +24,8 @@ const memoryStore = {
       { id: "deepseek-v4-flash-vision-exp", model_id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 11, type: "vyce" }
   ],
   settings: {
-    auto_fallback: true
+    auto_fallback: true,
+    fallback_models: ['openai/gpt-oss-120b', 'openrouter/free']
   }
 };
 

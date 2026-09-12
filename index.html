@@ -2368,6 +2368,40 @@
           <div class="account-redeem-msg" id="accountRedeemMsg"></div>
         </div>
 
+        <!-- Password Change Card (Logged-in users) -->
+        <div class="account-redeem-card" id="accountPasswordCard" style="display: none;">
+          <div class="account-redeem-header" id="accountPasswordToggleBtn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>পাসওয়ার্ড পরিবর্তন করুন</span>
+            </div>
+            <svg id="accountPasswordToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div id="accountPasswordBody" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px;">
+            <div class="account-field">
+              <label for="currentPasswordInput">বর্তমান পাসওয়ার্ড *</label>
+              <input type="password" id="currentPasswordInput" placeholder="বর্তমান পাসওয়ার্ড লিখুন" autocomplete="current-password">
+            </div>
+            <div class="account-field">
+              <label for="newPasswordInput">নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর) *</label>
+              <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
+            </div>
+            <div class="account-field">
+              <label for="confirmPasswordInput">নতুন পাসওয়ার্ড নিশ্চিত করুন *</label>
+              <input type="password" id="confirmPasswordInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
+            </div>
+            <div id="passwordChangeMsg" style="font-size: 0.82rem; min-height: 18px;"></div>
+            <button type="button" id="changePasswordSubmitBtn" class="account-redeem-btn" style="width: 100%; border-radius: 999px; padding: 10px 16px; font-size: 0.88rem;">
+              পাসওয়ার্ড সেভ করুন
+            </button>
+          </div>
+        </div>
+
         <div class="account-stats-grid">
           <div class="account-stat">
             <span class="account-stat-value" id="accountStatTokens">0</span>
@@ -3346,6 +3380,18 @@
         clearInterval(accountCountdownInterval);
         accountCountdownInterval = null;
       }
+      const curP = document.getElementById("currentPasswordInput");
+      const newP = document.getElementById("newPasswordInput");
+      const cnfP = document.getElementById("confirmPasswordInput");
+      const msgP = document.getElementById("passwordChangeMsg");
+      const bdyP = document.getElementById("accountPasswordBody");
+      const icnP = document.getElementById("accountPasswordToggleIcon");
+      if (curP) curP.value = "";
+      if (newP) newP.value = "";
+      if (cnfP) cnfP.value = "";
+      if (msgP) { msgP.textContent = ""; msgP.className = ""; }
+      if (bdyP) bdyP.style.display = "none";
+      if (icnP) icnP.style.transform = "rotate(0deg)";
     }
 
     accountMenuBtn.addEventListener("click", openAccountModal);
@@ -3586,6 +3632,133 @@
           currentNameDisplay.textContent = "অতিথি ব্যবহারকারী";
         }
       }
+
+      const currentPasswordCard = document.getElementById("accountPasswordCard");
+      if (currentPasswordCard) {
+        currentPasswordCard.style.display = token ? "block" : "none";
+      }
+    }
+
+    // Password Change Logic
+    const accountPasswordToggleBtn = document.getElementById("accountPasswordToggleBtn");
+    const accountPasswordBody = document.getElementById("accountPasswordBody");
+    const accountPasswordToggleIcon = document.getElementById("accountPasswordToggleIcon");
+    const changePasswordSubmitBtn = document.getElementById("changePasswordSubmitBtn");
+    const currentPasswordInput = document.getElementById("currentPasswordInput");
+    const newPasswordInput = document.getElementById("newPasswordInput");
+    const confirmPasswordInput = document.getElementById("confirmPasswordInput");
+    const passwordChangeMsg = document.getElementById("passwordChangeMsg");
+
+    if (accountPasswordToggleBtn && accountPasswordBody) {
+      accountPasswordToggleBtn.addEventListener("click", () => {
+        const isOpen = accountPasswordBody.style.display === "flex";
+        accountPasswordBody.style.display = isOpen ? "none" : "flex";
+        if (accountPasswordToggleIcon) {
+          accountPasswordToggleIcon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+        }
+        if (passwordChangeMsg) {
+          passwordChangeMsg.textContent = "";
+          passwordChangeMsg.className = "";
+        }
+      });
+    }
+
+    if (changePasswordSubmitBtn) {
+      changePasswordSubmitBtn.addEventListener("click", async () => {
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) {
+          showToast("পাসওয়ার্ড পরিবর্তনের জন্য অনুগ্রহ করে প্রথমে লগইন করুন", "error");
+          openAuthModal();
+          return;
+        }
+
+        const currentPass = currentPasswordInput ? currentPasswordInput.value : "";
+        const newPass = newPasswordInput ? newPasswordInput.value : "";
+        const confirmPass = confirmPasswordInput ? confirmPasswordInput.value : "";
+
+        if (!currentPass) {
+          if (passwordChangeMsg) {
+            passwordChangeMsg.textContent = "বর্তমান পাসওয়ার্ড প্রদান করুন";
+            passwordChangeMsg.style.color = "#ef4444";
+          }
+          return;
+        }
+        if (!newPass || newPass.trim().length < 6) {
+          if (passwordChangeMsg) {
+            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে";
+            passwordChangeMsg.style.color = "#ef4444";
+          }
+          return;
+        }
+        if (newPass.length > 72) {
+          if (passwordChangeMsg) {
+            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে";
+            passwordChangeMsg.style.color = "#ef4444";
+          }
+          return;
+        }
+        if (newPass !== confirmPass) {
+          if (passwordChangeMsg) {
+            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড ও নিশ্চিতকরণ পাসওয়ার্ড মেলেনি";
+            passwordChangeMsg.style.color = "#ef4444";
+          }
+          return;
+        }
+
+        changePasswordSubmitBtn.disabled = true;
+        changePasswordSubmitBtn.textContent = "সংরক্ষণ হচ্ছে...";
+        if (passwordChangeMsg) {
+          passwordChangeMsg.textContent = "";
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/auth/change-password`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              current_password: currentPass,
+              new_password: newPass,
+              confirm_password: confirmPass
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (passwordChangeMsg) {
+              passwordChangeMsg.textContent = data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!";
+              passwordChangeMsg.style.color = "#10b981";
+            }
+            showToast(data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+            if (currentPasswordInput) currentPasswordInput.value = "";
+            if (newPasswordInput) newPasswordInput.value = "";
+            if (confirmPasswordInput) confirmPasswordInput.value = "";
+            setTimeout(() => {
+              if (accountPasswordBody) accountPasswordBody.style.display = "none";
+              if (accountPasswordToggleIcon) accountPasswordToggleIcon.style.transform = "rotate(0deg)";
+              if (passwordChangeMsg) passwordChangeMsg.textContent = "";
+            }, 2200);
+          } else {
+            const err = data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে";
+            if (passwordChangeMsg) {
+              passwordChangeMsg.textContent = err;
+              passwordChangeMsg.style.color = "#ef4444";
+            }
+            showToast(err, "error");
+          }
+        } catch (err) {
+          const errMsg = "সার্ভারের সাথে যোগাযোগ করা যায়নি";
+          if (passwordChangeMsg) {
+            passwordChangeMsg.textContent = errMsg;
+            passwordChangeMsg.style.color = "#ef4444";
+          }
+          showToast(errMsg, "error");
+        } finally {
+          changePasswordSubmitBtn.disabled = false;
+          changePasswordSubmitBtn.textContent = "পাসওয়ার্ড সেভ করুন";
+        }
+      });
     }
 
     function setAuthMode(mode) {

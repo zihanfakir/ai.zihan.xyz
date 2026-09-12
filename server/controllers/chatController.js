@@ -127,7 +127,7 @@ const streamChatCompletions = async (req, res) => {
     let response = await tryFetchCompletion(targetUrl, targetKey, actualModel);
 
     // 4. Intelligent Pre-Stream Fallback: Check if Auto Fallback is enabled
-    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true }));
+    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true, fallback_models: ['openai/gpt-oss-120b', 'openrouter/free'] }));
     const isAutoFallback = sysSettings ? sysSettings.auto_fallback !== false : true;
 
     if ((!response || !response.ok) && isAutoFallback) {
@@ -138,25 +138,67 @@ const streamChatCompletions = async (req, res) => {
         } catch {}
       }
 
-      // Step 4a: Fallback to Groq openai/gpt-oss-120b
-      if (!targetUrl.includes('groq.com')) {
-        console.log(`[Chat Fallback] Trying Groq openai/gpt-oss-120b for ${model}...`);
-        const groqKey = (await getApiKeyFromSupabase('openai/gpt-oss-120b')) || process.env.GROQ_API_KEY;
-        response = await tryFetchCompletion('https://api.groq.com/openai/v1/chat/completions', groqKey, 'openai/gpt-oss-120b', 10000);
-      }
+      // Dynamic Fallback: Iterate through admin-configured fallback models
+      const fallbackCandidates = (Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0)
+        ? sysSettings.fallback_models
+        : ['openai/gpt-oss-120b', 'openrouter/free'];
 
-      // Step 4b: Fallback to OpenRouter google/gemini-2.5-flash
-      if ((!response || !response.ok) && actualModel !== 'google/gemini-2.5-flash') {
-        console.log(`[Chat Fallback] Trying OpenRouter google/gemini-2.5-flash for ${model}...`);
-        const orKey = (await getApiKeyFromSupabase('openrouter/free')) || process.env.OPENROUTER_API_KEY;
-        response = await tryFetchCompletion('https://openrouter.ai/api/v1/chat/completions', orKey, 'google/gemini-2.5-flash', 10000);
-      }
+      const triedFallbackModels = new Set();
 
-      // Step 4c: Fallback to OpenRouter openrouter/free
-      if ((!response || !response.ok) && actualModel !== 'openrouter/free') {
-        console.log(`[Chat Fallback] Trying OpenRouter openrouter/free for ${model}...`);
-        const orKey = (await getApiKeyFromSupabase('openrouter/free')) || process.env.OPENROUTER_API_KEY;
-        response = await tryFetchCompletion('https://openrouter.ai/api/v1/chat/completions', orKey, 'openrouter/free', 10000);
+      for (const fbModelId of fallbackCandidates) {
+        if (response && response.ok) break;
+        if (!fbModelId || typeof fbModelId !== 'string') continue;
+        const cleanFbModel = fbModelId.trim();
+
+        // Skip if it's the exact model that already failed or already tried
+        if (cleanFbModel === actualModel || cleanFbModel === model || triedFallbackModels.has(cleanFbModel)) {
+          continue;
+        }
+        triedFallbackModels.add(cleanFbModel);
+
+        console.log(`[Chat Fallback] Trying admin-configured fallback model ${cleanFbModel} for ${model}...`);
+
+        let fbConfig = null;
+        if (getIsMongoConnected()) {
+          fbConfig = await AiModel.findOne({ $or: [{ model_id: cleanFbModel }, { id: cleanFbModel }] });
+        } else {
+          const { getPersistedModels } = require('../../utils/getModelConfig');
+          const allModels = await getPersistedModels();
+          fbConfig = allModels.find(m => (m.id === cleanFbModel || m.model_id === cleanFbModel));
+        }
+        if (!fbConfig) {
+          fbConfig = await getModelConfig(cleanFbModel);
+        }
+
+        let fbUrl = (fbConfig && fbConfig.base_url) ? fbConfig.base_url.trim() : null;
+        let fbKey = fbConfig ? fbConfig.api_key : null;
+        let fbActualModel = (fbConfig && fbConfig.model_id) ? fbConfig.model_id : cleanFbModel;
+
+        if (!fbKey) {
+          fbKey = await getApiKeyFromSupabase(cleanFbModel);
+          if (!fbKey && fbConfig && fbConfig.id && fbConfig.id !== cleanFbModel) {
+            fbKey = await getApiKeyFromSupabase(fbConfig.id);
+          }
+        }
+
+        if (!fbUrl) {
+          if (cleanFbModel.startsWith('openai/') || cleanFbModel.includes('gpt-oss')) {
+            fbUrl = 'https://api.groq.com/openai/v1/chat/completions';
+            if (!fbKey) fbKey = process.env.GROQ_API_KEY;
+          } else {
+            fbUrl = 'https://openrouter.ai/api/v1/chat/completions';
+            if (!fbKey) fbKey = process.env.OPENROUTER_API_KEY;
+          }
+        } else {
+          if (!fbKey) {
+            if (fbUrl.includes('groq.com')) fbKey = process.env.GROQ_API_KEY;
+            else if (fbUrl.includes('openrouter.ai')) fbKey = process.env.OPENROUTER_API_KEY;
+            else if (fbUrl.includes('vyceai.com')) fbKey = process.env.VYCE_API_KEY;
+            else if (fbUrl.includes('api.b.ai')) fbKey = process.env.BAI_API_KEY;
+          }
+        }
+
+        response = await tryFetchCompletion(fbUrl, fbKey, fbActualModel, 10000);
       }
     } else if (!response || !response.ok) {
       console.log(`[Chat Fallback] Auto Fallback is disabled by Admin. Returning upstream error directly for ${model}.`);
