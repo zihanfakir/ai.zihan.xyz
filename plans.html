@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>প্ল্যান ও মূল্য তালিকা — Alokpoth AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #0a0d14;
+      --bg-surface: rgba(18, 24, 38, 0.85);
+      --bg-surface-hover: rgba(26, 35, 54, 0.95);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --accent-primary: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 24px;
+      --font-main: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    [data-theme="oled"] {
+      --bg-base: #000000;
+      --bg-surface: rgba(12, 12, 12, 0.95);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+      --border-focus: rgba(255, 255, 255, 0.4);
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #060913;
+      --bg-surface: rgba(11, 20, 38, 0.85);
+      --border-subtle: rgba(56, 189, 248, 0.12);
+      --border-focus: rgba(56, 189, 248, 0.5);
+      --accent-primary: #38bdf8;
+      --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: rgba(255, 255, 255, 0.95);
+      --bg-surface-hover: #f1f5f9;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.4);
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: -140px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 750px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
+      pointer-events: none;
+      filter: blur(50px);
+      z-index: 0;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      background: var(--bg-surface-hover);
+      transform: translateX(-2px);
+    }
+
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    /* Layout */
+    .plans-container {
+      flex: 1;
+      max-width: 1160px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .hero-section {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 48px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--text-main), var(--text-sub));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* Plans Grid */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+    .plan-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .plan-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .plan-card.featured {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 1px var(--accent-primary), 0 20px 48px rgba(99, 102, 241, 0.2);
+    }
+
+    .popular-tag {
+      position: absolute;
+      top: -12px;
+      right: 24px;
+      padding: 4px 12px;
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .plan-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .plan-desc {
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+      min-height: 42px;
+    }
+
+    .plan-quota {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .quota-num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .quota-unit {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+    }
+
+    .features-list {
+      list-style: none;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .features-list li {
+      padding: 10px 0;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .features-list li svg {
+      width: 18px;
+      height: 18px;
+      color: var(--success);
+      flex-shrink: 0;
+    }
+
+    .btn-plan {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .btn-plan:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-plan.primary {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-plan.primary:hover {
+      opacity: 0.95;
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Redeem Section */
+    .redeem-section-card {
+      background: var(--bg-surface);
+      border: 1px dashed rgba(139, 92, 246, 0.4);
+      border-radius: var(--radius-xl);
+      padding: 36px 32px;
+      margin-bottom: 60px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    }
+
+    .redeem-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .redeem-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.18);
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .redeem-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .redeem-desc {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .redeem-form {
+      display: flex;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .redeem-form {
+        flex-direction: column;
+      }
+    }
+
+    .redeem-input {
+      flex: 1;
+      height: 50px;
+      padding: 0 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      outline: none;
+      font-family: monospace;
+    }
+
+    .redeem-input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    }
+
+    .btn-claim {
+      height: 50px;
+      padding: 0 28px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-claim:hover {
+      opacity: 0.95;
+      transform: translateY(-2px);
+    }
+
+    .btn-claim:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* FAQ Section */
+    .faq-title {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .faq-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .faq-q {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .faq-a {
+      font-size: 0.92rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      z-index: 1000;
+      display: none;
+      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.success { background: #065f46; border-color: #059669; }
+    .toast.error { background: #991b1b; border-color: #dc2626; }
+
+    @keyframes toastIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+  <canvas id="confettiCanvas"></canvas>
+  <div id="toastEl" class="toast"></div>
+
+  <header class="top-bar">
+    <a href="index.html" class="brand-link">
+      <img src="app_logo.png" alt="Logo" class="brand-logo">
+      <span>Alokpoth AI</span>
+    </a>
+    <div class="top-actions">
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+      </button>
+      <a href="account.html" class="back-btn">
+        <span>আমার অ্যাকাউন্ট</span>
+      </a>
+      <a href="index.html" class="back-btn" style="background:var(--accent-gradient); color:#fff; border:none;">
+        <span>← চ্যাটে ফিরে যান</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="plans-container">
+    <div class="hero-section">
+      <div class="hero-badge">⚡ Alokpoth AI Plans</div>
+      <h1 class="hero-title">আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন</h1>
+      <p class="hero-subtitle">দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা</p>
+    </div>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <!-- Free Plan -->
+      <div class="plan-card">
+        <div class="plan-name">ফ্রি (Free)</div>
+        <div class="plan-desc">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
+        <div class="plan-quota">
+          <div class="quota-num">১০</div>
+          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+        </div>
+        <ul class="features-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            ১০টি বার্তা প্রতি ৩ ঘণ্টায়
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            সাধারণ এআই মডেল অ্যাক্সেস
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            স্ট্যান্ডার্ড স্ট্রিমিং গতি
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            আজীবন মেয়াদহীন সুবিধা
+          </li>
+        </ul>
+        <a href="index.html" class="btn-plan">বর্তমান প্ল্যান ব্যবহার করুন</a>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="plan-card featured">
+        <div class="popular-tag">সর্বাধিক জনপ্রিয়</div>
+        <div class="plan-name">প্রো (Pro)</div>
+        <div class="plan-desc">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
+        <div class="plan-quota">
+          <div class="quota-num" style="color:var(--accent-primary);">৫০</div>
+          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+        </div>
+        <ul class="features-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            ৫০টি বার্তা প্রতি ৩ ঘণ্টায়
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            কোড জেন ও লাইভ ওয়েব সার্চ
+          </li>
+        </ul>
+        <button type="button" class="btn-plan primary" onclick="scrollToRedeem()">রিডিম কোড দিয়ে আনলক করুন</button>
+      </div>
+
+      <!-- Max Plan -->
+      <div class="plan-card">
+        <div class="plan-name">ম্যাক্স (Max)</div>
+        <div class="plan-desc">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
+        <div class="plan-quota">
+          <div class="quota-num" style="color:#f59e0b;">২০০</div>
+          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+        </div>
+        <ul class="features-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            ২০০টি বার্তা প্রতি ৩ ঘণ্টায়
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            বৃহত্তম কনটেক্সট মেমোরি সাপোর্ট
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            সকল এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস
+          </li>
+        </ul>
+        <button type="button" class="btn-plan" style="background:linear-gradient(135deg, #ec4899, #f59e0b); color:#fff; border:none;" onclick="scrollToRedeem()">ম্যাক্স কোড রিডিম করুন</button>
+      </div>
+    </div>
+
+    <!-- Redeem Section -->
+    <div class="redeem-section-card" id="redeemSection">
+      <div class="redeem-header">
+        <div class="redeem-icon">🎟️</div>
+        <div>
+          <h2 class="redeem-title">রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!</h2>
+        </div>
+      </div>
+      <p class="redeem-desc">
+        আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।
+      </p>
+      <div class="redeem-form">
+        <input type="text" class="redeem-input" id="redeemInput" placeholder="কোড লিখুন (যেমন: ALOAI2026 বা ABCD-EFGH-IJKL)" maxlength="50">
+        <button type="button" class="btn-claim" id="claimBtn">আপগ্রেড করুন</button>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+      <h2 class="faq-title">সাধারণ জিজ্ঞাসা (FAQ)</h2>
+      <div class="faq-grid">
+        <div class="faq-card">
+          <div class="faq-q">৩ ঘণ্টার উইন্ডো কিভাবে কাজ করে?</div>
+          <div class="faq-a">আপনার পাঠানো প্রথম মেসেজ থেকে ৩ ঘণ্টার একটি সেশন শুরু হয়। ৩ ঘণ্টা শেষ হওয়ার সাথে সাথেই আপনার মেসেজ লিমিট পুনরায় স্বয়ংক্রিয়ভাবে রিচার্জ হয়ে যায়।</div>
+        </div>
+        <div class="faq-card">
+          <div class="faq-q">রিডিম কোড কিভাবে সংগ্রহ করব?</div>
+          <div class="faq-a">অফিসিয়াল প্রোমো ক্যাম্পেইন, বিশেষ অফার অথবা অ্যাডমিনের কাছ থেকে উপহারস্বরূপ রিডিম কোড সংগ্রহ করতে পারেন।</div>
+        </div>
+        <div class="faq-card">
+          <div class="faq-q">রিডিম করলে কি সাথে সাথে সক্রিয় হয়?</div>
+          <div class="faq-a">হ্যাঁ! কোডটি দেওয়ার সাথে সাথেই আপনার একাউন্ট নতুন প্ল্যানে আপগ্রেড হয়ে যায় এবং কোনো বিলম্ব ছাড়াই সব প্রিমিয়াম ফিচার আনলক হয়ে যায়।</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Theme sync
+    const savedTheme = localStorage.getItem("alokpoth_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themes = ["dark", "sapphire", "oled", "light"];
+    themeToggleBtn.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("alokpoth_theme", next);
+    });
+
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
+    const API_BASE = BACKEND_URL + "/api";
+
+    function scrollToRedeem() {
+      const el = document.getElementById("redeemSection");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        const input = document.getElementById("redeemInput");
+        if (input) setTimeout(() => input.focus(), 400);
+      }
+    }
+
+    const toastEl = document.getElementById("toastEl");
+    function showToast(msg, type = "success") {
+      toastEl.textContent = msg;
+      toastEl.className = "toast " + type;
+      toastEl.style.display = "block";
+      setTimeout(() => { toastEl.style.display = "none"; }, 3500);
+    }
+
+    // Confetti Engine
+    function triggerConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ["#6366f1", "#a855f7", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"];
+
+      for (let i = 0; i < 70; i++) {
+        particles.push({
+          x: canvas.width / 2 + (Math.random() - 0.5) * 80,
+          y: canvas.height * 0.4 + (Math.random() - 0.5) * 40,
+          vx: (Math.random() - 0.5) * 16,
+          vy: -Math.random() * 14 - 4,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          alpha: 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.4;
+          p.rotation += p.rotSpeed;
+          p.alpha -= 0.012;
+          if (p.alpha > 0) {
+            alive = true;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          }
+        });
+        if (alive) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    // Claim handler
+    document.getElementById("claimBtn").addEventListener("click", async () => {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        showToast("রিডিম কোড ব্যবহারের জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
+        setTimeout(() => { window.location.href = "login.html"; }, 1000);
+        return;
+      }
+
+      const input = document.getElementById("redeemInput");
+      const rawCode = input.value.trim().toUpperCase();
+      if (!rawCode) {
+        showToast("রিডিম কোড লিখুন", "error");
+        input.focus();
+        return;
+      }
+
+      const btn = document.getElementById("claimBtn");
+      btn.disabled = true;
+      btn.textContent = "যাচাই হচ্ছে...";
+
+      try {
+        const res = await fetch(`${API_BASE}/redeem/claim`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ code: rawCode })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
+          const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
+
+          localStorage.setItem("alokpoth_plan", newPlan);
+          if (expiresAt) localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+          if (data.token) localStorage.setItem("alokpoth_token", data.token);
+
+          const userStr = localStorage.getItem("alokpoth_user");
+          if (userStr) {
+            const u = JSON.parse(userStr);
+            u.plan = newPlan;
+            localStorage.setItem("alokpoth_user", JSON.stringify(u));
+          }
+
+          input.value = "";
+          triggerConfetti();
+          showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+          setTimeout(() => { window.location.href = "account.html?tab=tabPlan"; }, 1500);
+        } else {
+          showToast(data.error || "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!", "error");
+        }
+      } catch {
+        showToast("সার্ভারের সাথে যোগাযোগ করা যায়নি", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "আপগ্রেড করুন";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1257,6 +1257,44 @@
       stroke-linecap: round;
     }
 
+    .mic-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 2px;
+      margin-right: 4px;
+    }
+    .mic-btn:hover {
+      background-color: rgba(128, 128, 128, 0.12);
+      color: var(--text-main);
+      transform: scale(1.05);
+    }
+    .mic-btn.recording {
+      background: rgba(239, 68, 68, 0.18);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      animation: pulseRecord 1.5s infinite;
+    }
+    @keyframes pulseRecord {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .mic-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
     .attach-menu-wrap {
       position: relative;
       flex-shrink: 0;
@@ -2973,6 +3011,9 @@
         </div>
       </div>
       <div class="drawer-footer-actions">
+        <a href="plans.html" class="drawer-icon-btn" id="drawerPlansBtn" title="প্ল্যান ও আপগ্রেড" style="display:flex; align-items:center; justify-content:center; text-decoration:none;">
+          <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </a>
         <button type="button" class="drawer-icon-btn" id="drawerThemeBtn" title="থিম পরিবর্তন">
           <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
         </button>
@@ -2997,10 +3038,6 @@
       </button>
     </div>
     <div class="navbar-right">
-      <div class="nav-credit-badge" id="navCreditBadge" title="আপনার অবশিষ্ট বার্তা সীমা">
-        <span>⚡</span>
-        <span id="navCreditCount">...</span>
-      </div>
       <button class="model-selector sheen-surface" id="modelTrigger" type="button">
         <span id="triggerStatusDot" class="trigger-status-dot status-dot checking"></span>
         <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
@@ -3407,25 +3444,6 @@
     <div class="image-preview-row" id="imagePreviewRow"></div>
     <div class="file-preview-row" id="filePreviewRow"></div>
 
-    <div class="composer-quick-bar">
-      <button type="button" class="composer-pill" id="pillWebSearch" title="লাইভ ইন্টারনেট থেকে তথ্য সার্চ করুন">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-        <span>ওয়েব সার্চ</span>
-      </button>
-      <button type="button" class="composer-pill" id="pillImageGen" title="AI ছবি তৈরি করুন">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-        <span>ছবি তৈরি</span>
-      </button>
-      <button type="button" class="composer-pill" id="micBtn" title="ভয়েস রেকর্ড করে কথা বলুন">
-        <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <span>ভয়েস</span>
-      </button>
-      <button type="button" class="composer-pill" id="clearInputBtn" style="display:none;" title="লেখা মুছে ফেলুন">
-        <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        <span>মুছুন</span>
-      </button>
-    </div>
-
     <form class="input-card" id="chatForm">
       <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
       <input type="file" id="docInput" accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.css,.js,.jsx,.ts,.tsx" style="display:none" multiple>
@@ -3466,6 +3484,9 @@
         placeholder="আলোকপথ AI-কে জিজ্ঞাসা করুন..." 
         rows="1"
       ></textarea>
+      <button type="button" class="mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড করুন" title="কথা বলে লিখুন">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+      </button>
       <button type="submit" class="action-btn" id="sendBtn" aria-label="Send">
         <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>
       </button>
@@ -4513,7 +4534,6 @@
       const badgeEl = document.getElementById("navCreditBadge");
       const countEl = document.getElementById("navCreditCount");
       const drawerPlanEl = document.getElementById("drawerUserPlan");
-      if (!badgeEl || !countEl) return;
 
       const userStr = localStorage.getItem("alokpoth_user");
       let isAdmin = false;
@@ -4527,8 +4547,8 @@
       }
 
       if (isAdmin) {
-        countEl.textContent = "আনলিমিটেড";
-        badgeEl.className = "nav-credit-badge";
+        if (countEl) countEl.textContent = "আনলিমিটেড";
+        if (badgeEl) badgeEl.className = "nav-credit-badge";
         if (drawerPlanEl) drawerPlanEl.textContent = "Admin (আনলিমিটেড)";
         return;
       }
@@ -4538,13 +4558,15 @@
       const used = usage.count || 0;
       const remaining = Math.max(0, limit - used);
 
-      countEl.textContent = `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
-      if (remaining <= 0) {
-        badgeEl.className = "nav-credit-badge danger";
-      } else if (remaining <= Math.ceil(limit * 0.2)) {
-        badgeEl.className = "nav-credit-badge warning";
-      } else {
-        badgeEl.className = "nav-credit-badge";
+      if (countEl) countEl.textContent = `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
+      if (badgeEl) {
+        if (remaining <= 0) {
+          badgeEl.className = "nav-credit-badge danger";
+        } else if (remaining <= Math.ceil(limit * 0.2)) {
+          badgeEl.className = "nav-credit-badge warning";
+        } else {
+          badgeEl.className = "nav-credit-badge";
+        }
       }
 
       if (drawerPlanEl) {
@@ -4932,26 +4954,14 @@
 
     let accountCountdownInterval = null;
 
-    function openAccountModal() {
-      const savedName = getAccountName();
-      accountNameInput.value = savedName;
-      applyAccountName(savedName);
-      renderAccountStats();
-      renderCreditBalance();
-      closeBrandMenu();
-      accountModalOverlay.classList.add("open");
-      syncUserProfileFromServer();
-      syncPlanLimitsFromServer();
-
-      if (accountCountdownInterval) clearInterval(accountCountdownInterval);
-      accountCountdownInterval = setInterval(() => {
-        if (!accountModalOverlay.classList.contains("open")) {
-          clearInterval(accountCountdownInterval);
-          accountCountdownInterval = null;
-          return;
-        }
-        renderCreditBalance();
-      }, 1000);
+    function openAccountModal(targetTab = "") {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        window.location.href = "login.html";
+        return;
+      }
+      const url = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
+      window.location.href = url;
     }
 
     function closeAccountModal() {
@@ -5384,9 +5394,8 @@
     }
 
     function openAuthModal(mode = "login") {
-      setAuthMode(mode);
-      if (authModalOverlay) authModalOverlay.classList.add("open");
-      closeBrandMenu();
+      const url = mode === "register" ? "login.html?mode=register" : "login.html";
+      window.location.href = url;
     }
 
     function closeAuthModal() {
