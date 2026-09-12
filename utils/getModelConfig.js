@@ -612,7 +612,29 @@ async function autoPurgeOrphanedDatabaseCaches() {
     }
   }
 
-  // 5. Synchronous flush to local backup
+  // 5. Purge orphaned individual model API key rows from Supabase
+  if (supabase) {
+    try {
+      const currentModels = await getPersistedModels();
+      const validModelIds = new Set(currentModels.map(m => String(m.id || m.model_id || '')));
+      const { data: allRows } = await supabase.from('api_keys').select('model_id');
+      if (allRows && allRows.length > 0) {
+        for (const row of allRows) {
+          // Skip metadata rows (prefixed with __)
+          if (row.model_id.startsWith('__')) continue;
+          // If this model_id is not in the active models list, it's orphaned
+          if (!validModelIds.has(row.model_id)) {
+            await supabase.from('api_keys').delete().eq('model_id', row.model_id);
+            console.log(`[AutoPurge] Deleted orphaned API key row: ${row.model_id}`);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AutoPurge] Orphaned API key cleanup warning:', e.message);
+    }
+  }
+
+  // 6. Synchronous flush to local backup
   saveBackup();
 }
 

@@ -1064,6 +1064,7 @@ const deleteModel = async (req, res) => {
     }
     invalidateModelKeyCache(cleanModelId);
     invalidateModelKeyCache(cleanDecoded);
+    debouncedSave(); // Persist memoryStore backup to disk
 
     // 6. Clean up fallback_models in system_settings if this model was configured as a fallback
     try {
