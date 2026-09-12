@@ -167,6 +167,61 @@ router.get('/ping', async (req, res) => {
     res.json({ success: true, latency: null, status: 'offline' });
   }
 });
+router.get('/debug', async (req, res) => {
+  const { getIsMongoConnected } = require('../config/db');
+  res.json({
+    ok: true,
+    mongoConnected: getIsMongoConnected(),
+    nodeVersion: process.version,
+    env: {
+      hasBaiKey: !!process.env.BAI_API_KEY,
+      hasOpenrouterKey: !!process.env.OPENROUTER_API_KEY,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasMongoUri: !!process.env.MONGODB_URI
+    }
+  });
+});
+
+router.post('/debug-completions', async (req, res) => {
+  const steps = [];
+  const t0 = Date.now();
+  steps.push(`start at ${Date.now() - t0}ms`);
+  
+  const { model = 'mimo-v2.5' } = req.body || {};
+  const { getModelConfig } = require('../../utils/getModelConfig');
+  const cfg = await getModelConfig(model);
+  steps.push(`getModelConfig took ${Date.now() - t0}ms`);
+  
+  const fetch = require('node-fetch');
+  const c = new AbortController();
+  const tid = setTimeout(() => c.abort(), 6000);
+  try {
+    const upstream = await fetch(cfg.base_url || 'https://api.b.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cfg.api_key}`
+      },
+      body: JSON.stringify({
+        model: cfg.id || model,
+        messages: [{ role: 'user', content: 'hi' }],
+        max_tokens: 10,
+        stream: false
+      }),
+      signal: c.signal
+    });
+    clearTimeout(tid);
+    steps.push(`upstream fetch returned status ${upstream.status} at ${Date.now() - t0}ms`);
+    const text = await upstream.text();
+    steps.push(`upstream body length ${text.length} at ${Date.now() - t0}ms`);
+    return res.json({ success: true, steps, preview: text.slice(0, 100) });
+  } catch (err) {
+    clearTimeout(tid);
+    steps.push(`upstream fetch error: ${err.message} at ${Date.now() - t0}ms`);
+    return res.json({ success: false, steps });
+  }
+});
+
 module.exports = router;
 
 
