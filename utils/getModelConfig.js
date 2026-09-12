@@ -272,7 +272,16 @@ async function savePersistedPlans(plans) {
   }
 }
 
+// Cache for redeem codes metadata
+let redeemCodesCache = null;
+let redeemCodesCacheTs = 0;
+
 async function getPersistedRedeemCodes() {
+  const now = Date.now();
+  if (redeemCodesCache && (now - redeemCodesCacheTs) < 5000) { // 5s cache
+    return redeemCodesCache;
+  }
+
   if (!supabase) return memoryStore.redeemCodes || [];
   try {
     const { data, error } = await supabase
@@ -290,6 +299,8 @@ async function getPersistedRedeemCodes() {
         }
         const cleanCodes = Array.from(codeMap.values());
         memoryStore.redeemCodes = cleanCodes;
+        redeemCodesCache = cleanCodes;
+        redeemCodesCacheTs = now;
         return cleanCodes;
       }
     }
@@ -306,6 +317,8 @@ async function savePersistedRedeemCodes(codes) {
   }
   const cleanCodes = Array.from(codeMap.values());
   memoryStore.redeemCodes = cleanCodes;
+  redeemCodesCache = cleanCodes;
+  redeemCodesCacheTs = Date.now();
 
   if (!supabase) return;
   try {

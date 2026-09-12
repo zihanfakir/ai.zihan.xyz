@@ -145,11 +145,11 @@ const loginUser = async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
 
     if (getIsMongoConnected()) {
-      const user = await User.findOne({ email: cleanEmail });
+      const user = await User.findOne({ email: cleanEmail }).select('+password');
       if (!user) {
         return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
       }
-      const isMatch = await user.comparePassword(password);
+      const isMatch = user.password ? await bcrypt.compare(password, user.password) : false;
       if (!isMatch) {
         return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
       }

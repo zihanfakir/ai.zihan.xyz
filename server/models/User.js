@@ -69,4 +69,12 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+UserSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Database indexes for fast querying and sorting
+UserSchema.index({ createdAt: -1 });
+UserSchema.index({ 'subscription.plan_name': 1 });
+
 module.exports = mongoose.model('User', UserSchema);

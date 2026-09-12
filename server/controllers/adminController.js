@@ -28,12 +28,14 @@ async function upsertApiKeyToSupabase(modelId, apiKey) {
 const getAdminStats = async (req, res) => {
   try {
     if (getIsMongoConnected()) {
-      const totalUsers = await User.countDocuments();
-      const proUsers = await User.countDocuments({ 'subscription.plan_name': 'Pro' });
-      const maxUsers = await User.countDocuments({ 'subscription.plan_name': 'Max' });
-      const totalRedeemCodes = await RedeemCode.countDocuments();
-      const usedRedeemCodes = await RedeemCode.countDocuments({ is_used: true });
-      const totalMessages = await UsageLog.countDocuments();
+      const [totalUsers, proUsers, maxUsers, totalRedeemCodes, usedRedeemCodes, totalMessages] = await Promise.all([
+        User.countDocuments(),
+        User.countDocuments({ 'subscription.plan_name': 'Pro' }),
+        User.countDocuments({ 'subscription.plan_name': 'Max' }),
+        RedeemCode.countDocuments(),
+        RedeemCode.countDocuments({ is_used: true }),
+        UsageLog.countDocuments()
+      ]);
 
       const stats = {
         totalUsers,
@@ -91,7 +93,7 @@ const getAdminStats = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     if (getIsMongoConnected()) {
-      const users = await User.find().select('-password').sort({ createdAt: -1 });
+      const users = await User.find().select('-password').sort({ createdAt: -1 }).lean();
       return res.json({ success: true, count: users.length, users });
     } else {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
@@ -577,7 +579,8 @@ const getRedeemCodes = async (req, res) => {
     if (getIsMongoConnected()) {
       const codes = await RedeemCode.find()
         .populate({ path: 'used_by', model: 'User', select: 'name email', strictPopulate: false })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
       return res.json({ success: true, count: codes.length, codes });
     } else {
       const { getPersistedRedeemCodes, getPersistedUsers } = require('../../utils/getModelConfig');
@@ -746,8 +749,7 @@ const getModels = async (req, res) => {
     const { getPersistedModels, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
     let models = [];
     if (getIsMongoConnected()) {
-      const mongoModels = await AiModel.find().sort({ order: 1 });
-      models = mongoModels.map(m => m.toObject());
+      models = await AiModel.find().sort({ order: 1 }).lean();
     } else {
       models = await getPersistedModels();
     }

@@ -57,4 +57,9 @@ const RedeemCodeSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// Database indexes for fast querying, sorting, and filtering
+RedeemCodeSchema.index({ createdAt: -1 });
+RedeemCodeSchema.index({ is_used: 1 });
+RedeemCodeSchema.index({ is_custom: 1, is_used: 1 });
+
 module.exports = mongoose.model('RedeemCode', RedeemCodeSchema);

@@ -401,7 +401,7 @@ const getChatSessions = async (req, res) => {
     const userId = String(user._id || user.id);
     let sessions = [];
     if (getIsMongoConnected()) {
-      sessions = await ChatSession.find({ user_id: userId }).sort({ updatedAt: -1 });
+      sessions = await ChatSession.find({ user_id: userId }).sort({ updatedAt: -1 }).lean();
     } else {
       if (!memoryStore.chatSessions) memoryStore.chatSessions = [];
       sessions = memoryStore.chatSessions

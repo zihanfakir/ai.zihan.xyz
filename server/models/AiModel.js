@@ -12,6 +12,8 @@ const AiModelSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }
 }, { timestamps: true });
 
+AiModelSchema.index({ order: 1 });
+
 AiModelSchema.statics.seedDefaultModels = async function() {
   const count = await this.countDocuments();
   if (count === 0) {

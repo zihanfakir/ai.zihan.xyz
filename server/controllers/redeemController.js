@@ -146,6 +146,7 @@ const claimRedeemCode = async (req, res) => {
           if (mUser) mUser.subscription = subscriptionData;
         }
         let pCodes = await getPersistedRedeemCodes();
+        pCodes = [...pCodes];
         const cIdx = pCodes.findIndex(c => c.code === cleanCode);
         if (cIdx !== -1) {
           if (pCodes[cIdx].is_custom) {
@@ -159,21 +160,6 @@ const claimRedeemCode = async (req, res) => {
             pCodes[cIdx].used_at = now;
           }
           await savePersistedRedeemCodes(pCodes);
-        }
-        if (memoryStore.redeemCodes) {
-          const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
-          if (mCode) {
-            if (mCode.is_custom) {
-              mCode.use_count = (mCode.use_count || 0) + 1;
-              if (!Array.isArray(mCode.used_by_list)) mCode.used_by_list = [];
-              mCode.used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
-              mCode.is_used = mCode.use_count >= (mCode.max_uses || 1);
-            } else {
-              mCode.is_used = true;
-              mCode.used_by = userId;
-              mCode.used_at = now;
-            }
-          }
         }
         debouncedSave();
       } catch (syncErr) {
@@ -293,21 +279,6 @@ const claimRedeemCode = async (req, res) => {
       if (memoryStore.users) {
         const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
         if (mUser) mUser.subscription = subscriptionData;
-      }
-      if (memoryStore.redeemCodes) {
-        const mCode = memoryStore.redeemCodes.find(c => c.code === cleanCode);
-        if (mCode) {
-          if (mCode.is_custom) {
-            mCode.use_count = (mCode.use_count || 0) + 1;
-            if (!Array.isArray(mCode.used_by_list)) mCode.used_by_list = [];
-            mCode.used_by_list.push({ user_id: userId, email: user.email || '', used_at: now });
-            mCode.is_used = mCode.use_count >= (mCode.max_uses || 1);
-          } else {
-            mCode.is_used = true;
-            mCode.used_by = userId;
-            mCode.used_at = now;
-          }
-        }
       }
       user.subscription = subscriptionData;
 

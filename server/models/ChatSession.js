@@ -11,4 +11,7 @@ const ChatSessionSchema = new mongoose.Schema({
 // Compound index to ensure session_id is unique per user
 ChatSessionSchema.index({ user_id: 1, session_id: 1 }, { unique: true });
 
+// Compound index for user chat sessions list sorted by updatedAt
+ChatSessionSchema.index({ user_id: 1, updatedAt: -1 });
+
 module.exports = mongoose.model('ChatSession', ChatSessionSchema);
