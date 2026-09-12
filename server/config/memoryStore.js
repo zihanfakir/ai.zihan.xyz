@@ -22,7 +22,10 @@ const memoryStore = {
       { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 9, type: "bai" },
       { id: "deepseek-v4-flash", model_id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: false, efficient: false, order: 10, type: "vyce" },
       { id: "deepseek-v4-flash-vision-exp", model_id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 11, type: "vyce" }
-  ]
+  ],
+  settings: {
+    auto_fallback: true
+  }
 };
 
 const fs = require('fs');
@@ -47,6 +50,7 @@ const saveBackup = () => {
       redeemCodes: memoryStore.redeemCodes,
       usageLogs: memoryStore.usageLogs,
       models: memoryStore.models,
+      settings: memoryStore.settings || { auto_fallback: true },
       chatSessions: memoryStore.chatSessions || []
     };
     const tmpFile = BACKUP_FILE + '.tmp';
@@ -73,6 +77,7 @@ const seedDefaultAdmin = async () => {
       if (data.plans && data.plans.length) memoryStore.plans = data.plans;
       if (data.redeemCodes && data.redeemCodes.length) memoryStore.redeemCodes = data.redeemCodes;
       if (data.models && data.models.length) memoryStore.models = data.models;
+      if (data.settings) memoryStore.settings = data.settings;
       if (data.chatSessions && data.chatSessions.length) memoryStore.chatSessions = data.chatSessions;
       console.log('[Memory DB] Restored data from local backup file.');
     } catch (e) {

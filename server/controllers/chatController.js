@@ -4,7 +4,7 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
-const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
+const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage, getSystemSettings } = require('../../utils/getModelConfig');
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -126,8 +126,11 @@ const streamChatCompletions = async (req, res) => {
 
     let response = await tryFetchCompletion(targetUrl, targetKey, actualModel);
 
-    // 4. Intelligent Pre-Stream Fallback: If primary provider failed or was down, try reliable alternatives
-    if (!response || !response.ok) {
+    // 4. Intelligent Pre-Stream Fallback: Check if Auto Fallback is enabled
+    const sysSettings = await getSystemSettings().catch(() => ({ auto_fallback: true }));
+    const isAutoFallback = sysSettings ? sysSettings.auto_fallback !== false : true;
+
+    if ((!response || !response.ok) && isAutoFallback) {
       if (response) {
         try {
           const errBody = await response.text();
@@ -155,6 +158,8 @@ const streamChatCompletions = async (req, res) => {
         const orKey = (await getApiKeyFromSupabase('openrouter/free')) || process.env.OPENROUTER_API_KEY;
         response = await tryFetchCompletion('https://openrouter.ai/api/v1/chat/completions', orKey, 'openrouter/free', 10000);
       }
+    } else if (!response || !response.ok) {
+      console.log(`[Chat Fallback] Auto Fallback is disabled by Admin. Returning upstream error directly for ${model}.`);
     }
 
     res.setHeader('Content-Type', 'text/event-stream');

@@ -15,7 +15,9 @@ const {
   updateModel,
   addModel,
   deleteModel,
-  reorderModels
+  reorderModels,
+  getSettings,
+  updateSettings
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { adminOnly } = require('../middleware/adminMiddleware');
@@ -25,6 +27,8 @@ router.use(protect);
 router.use(adminOnly);
 
 router.get('/stats', getAdminStats);
+router.get('/settings', getSettings);
+router.put('/settings', updateSettings);
 router.get('/users', getUsers);
 router.delete('/users/:userId', deleteUser);
 router.put('/users/:userId/plan', updateUserPlan);

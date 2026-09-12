@@ -227,23 +227,54 @@ const deleteUser = async (req, res) => {
       return res.status(400).json({ success: false, error: 'অ্যাডমিন নিজের অ্যাকাউন্ট মুছতে পারবেন না।' });
     }
 
+    const cleanTarget = String(userId).toLowerCase().trim();
+
+    // 1. If Mongo connected, purge user, sessions, and usage logs
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
+      const ChatSession = require('../models/ChatSession');
+      const UsageLog = require('../models/UsageLog');
+
+      let userDoc = null;
       if (mongoose.Types.ObjectId.isValid(userId)) {
-        await User.findByIdAndDelete(userId);
+        userDoc = await User.findByIdAndDelete(userId);
       } else {
-        await User.findOneAndDelete({ email: String(userId).toLowerCase().trim() });
+        userDoc = await User.findOneAndDelete({ email: cleanTarget });
       }
-    } else {
-      const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
-      let users = await getPersistedUsers();
-      const cleanTarget = String(userId).toLowerCase().trim();
-      users = users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
-      await savePersistedUsers(users);
-      debouncedSave();
+
+      const targetId = userDoc ? String(userDoc._id) : userId;
+      await ChatSession.deleteMany({ user_id: targetId }).catch(() => {});
+      await UsageLog.deleteMany({ user_id: targetId }).catch(() => {});
     }
 
-    return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে।' });
+    // 2. ALWAYS purge from Supabase __users_metadata__
+    const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+    let users = await getPersistedUsers();
+    users = users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
+    await savePersistedUsers(users);
+
+    // 3. Purge user usage quota row from Supabase api_keys table
+    if (supabase) {
+      try {
+        await supabase.from('api_keys').delete().eq('model_id', `__usage_${userId}__`);
+      } catch (e) {
+        console.warn('[Supabase] Usage row purge warning:', e.message);
+      }
+    }
+
+    // 4. ALWAYS purge from memoryStore
+    if (memoryStore.users) {
+      memoryStore.users = memoryStore.users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
+    }
+    if (memoryStore.chatSessions) {
+      memoryStore.chatSessions = memoryStore.chatSessions.filter(s => String(s.user_id) !== String(userId));
+    }
+    if (memoryStore.usageLogs) {
+      memoryStore.usageLogs = memoryStore.usageLogs.filter(l => String(l.user_id) !== String(userId));
+    }
+    debouncedSave();
+
+    return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -432,6 +463,8 @@ const deleteRedeemCode = async (req, res) => {
   try {
     const { codeId } = req.params;
     const cleanId = String(codeId).trim().toUpperCase();
+
+    // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(codeId)) {
@@ -439,14 +472,21 @@ const deleteRedeemCode = async (req, res) => {
       } else {
         await RedeemCode.findOneAndDelete({ code: cleanId });
       }
-    } else {
-      const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
-      let codes = await getPersistedRedeemCodes();
-      codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
-      await savePersistedRedeemCodes(codes);
-      debouncedSave();
     }
-    res.json({ success: true, message: 'রিডিম কোডটি মুছে ফেলা হয়েছে।' });
+
+    // 2. ALWAYS purge from Supabase __redeem_codes__
+    const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+    let codes = await getPersistedRedeemCodes();
+    codes = codes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
+    await savePersistedRedeemCodes(codes);
+
+    // 3. ALWAYS purge from memoryStore
+    if (memoryStore.redeemCodes) {
+      memoryStore.redeemCodes = memoryStore.redeemCodes.filter(c => String(c._id) !== String(codeId) && String(c.code).trim().toUpperCase() !== cleanId);
+    }
+    debouncedSave();
+
+    res.json({ success: true, message: 'রিডিম কোডটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -644,29 +684,39 @@ const addModel = async (req, res) => {
 const deleteModel = async (req, res) => {
   try {
     let { modelId } = req.params;
-    try { modelId = decodeURIComponent(modelId); } catch {}
+    let decoded = modelId;
+    try { decoded = decodeURIComponent(modelId); } catch {}
 
-    // 1. If Mongo connected, delete from Mongo
+    // 1. If Mongo connected, purge from MongoDB
     if (getIsMongoConnected()) {
-      await AiModel.findOneAndDelete({ $or: [{ model_id: modelId }, { id: modelId }] });
+      await AiModel.deleteMany({ $or: [{ model_id: modelId }, { id: modelId }, { model_id: decoded }, { id: decoded }] });
     }
 
-    // 2. Delete from Supabase individual api_keys row
+    // 2. Delete from Supabase individual api_keys rows
     if (supabase) {
       await supabase.from('api_keys').delete().eq('model_id', modelId);
+      if (decoded !== modelId) {
+        await supabase.from('api_keys').delete().eq('model_id', decoded);
+      }
     }
 
-    // 3. ALWAYS remove from Supabase __models_metadata__ and memoryStore
+    // 3. ALWAYS remove from Supabase __models_metadata__
     const { getPersistedModels, savePersistedModels, invalidateModelKeyCache } = require('../../utils/getModelConfig');
     let models = await getPersistedModels();
-    models = models.filter(m => (m.id !== modelId && m.model_id !== modelId));
+    models = models.filter(m => (m.id !== modelId && m.model_id !== modelId && m.id !== decoded && m.model_id !== decoded));
     // Re-normalize orders
     models.forEach((m, idx) => { m.order = idx + 1; });
     await savePersistedModels(models);
+
+    // 4. ALWAYS remove from memoryStore
+    if (memoryStore.models) {
+      memoryStore.models = memoryStore.models.filter(m => (m.id !== modelId && m.model_id !== modelId && m.id !== decoded && m.model_id !== decoded));
+    }
     invalidateModelKeyCache(modelId);
+    invalidateModelKeyCache(decoded);
     debouncedSave();
 
-    return res.json({ success: true, message: 'মডেল মুছে ফেলা হয়েছে' });
+    return res.json({ success: true, message: 'মডেলটি ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -761,6 +811,30 @@ const reorderModels = async (req, res) => {
   }
 };
 
+const getSettings = async (req, res) => {
+  try {
+    const { getSystemSettings } = require('../../utils/getModelConfig');
+    const settings = await getSystemSettings();
+    return res.json({ success: true, settings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const updateSettings = async (req, res) => {
+  try {
+    const { auto_fallback } = req.body;
+    const { saveSystemSettings } = require('../../utils/getModelConfig');
+    const toSave = {};
+    if (auto_fallback !== undefined) toSave.auto_fallback = Boolean(auto_fallback);
+    const saved = await saveSystemSettings(toSave);
+    debouncedSave();
+    return res.json({ success: true, settings: saved, message: 'সিস্টেম সেটিংস সফলভাবে আপডেট হয়েছে' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = { 
   getModels, 
   updateModel, 
@@ -776,5 +850,8 @@ module.exports = {
   updatePlanLimits,
   generateRedeemCodes,
   getRedeemCodes,
-  deleteRedeemCode
+  deleteRedeemCode,
+  getSettings,
+  updateSettings
 };
+

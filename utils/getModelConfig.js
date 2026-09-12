@@ -381,6 +381,69 @@ async function savePersistedUsers(users) {
   }
 }
 
+let settingsCache = null;
+let settingsCacheTs = 0;
+
+async function getSystemSettings() {
+  const now = Date.now();
+  if (settingsCache && (now - settingsCacheTs) < 10000) {
+    return settingsCache;
+  }
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__system_settings__')
+        .limit(1);
+
+      if (!error && data && data.length > 0 && data[0].api_key) {
+        const parsed = JSON.parse(data[0].api_key);
+        if (parsed && typeof parsed === 'object') {
+          settingsCache = parsed;
+          settingsCacheTs = now;
+          if (!memoryStore.settings) memoryStore.settings = {};
+          Object.assign(memoryStore.settings, parsed);
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('[Supabase] __system_settings__ fetch failed:', e.message);
+    }
+  }
+
+  const def = memoryStore.settings || { auto_fallback: true };
+  settingsCache = def;
+  settingsCacheTs = now;
+  return def;
+}
+
+async function saveSystemSettings(settings) {
+  const updated = { auto_fallback: true, ...(memoryStore.settings || {}), ...settings };
+  settingsCache = updated;
+  settingsCacheTs = Date.now();
+  memoryStore.settings = updated;
+
+  if (!supabase) return updated;
+
+  try {
+    const { error } = await supabase
+      .from('api_keys')
+      .upsert({
+        model_id: '__system_settings__',
+        api_key: JSON.stringify(updated),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'model_id' });
+    if (error) {
+      console.error('[Supabase] Failed to persist system settings:', error.message);
+    }
+  } catch (e) {
+    console.error('[Supabase] Failed to persist system settings exception:', e.message);
+  }
+  return updated;
+}
+
 module.exports = { 
   getModelConfig, 
   getApiKeyFromSupabase, 
@@ -395,5 +458,8 @@ module.exports = {
   getPersistedRedeemCodes,
   savePersistedRedeemCodes,
   getPersistedUsers,
-  savePersistedUsers
+  savePersistedUsers,
+  getSystemSettings,
+  saveSystemSettings
 };
+

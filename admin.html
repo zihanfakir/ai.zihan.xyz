@@ -99,6 +99,14 @@
     .tag-pro { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: #fff; box-shadow: 0 2px 6px rgba(59,130,246,0.35); border: 1px solid rgba(255,255,255,0.2); }
     .tag-max { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #fff; box-shadow: 0 2px 6px rgba(245,158,11,0.35); border: 1px solid rgba(255,255,255,0.2); }
     
+    /* Switch Toggle */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .25s; border-radius: 999px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; }
+    input:checked + .slider { background-color: #10b981; }
+    input:checked + .slider:before { transform: translateX(20px); }
+    
     /* Login Overlay */
     .login-overlay { position: fixed; inset: 0; background: rgba(9,9,11,0.9); backdrop-filter: blur(16px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
     .login-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
@@ -612,6 +620,25 @@
         <h3>AI মডেল সেটিংস ও কনফিগারেশন</h3>
       </div>
 
+      <!-- Auto Fallback Toggle Card -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div style="max-width: 800px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-weight: 700; font-size: 1rem; color: #fff;">🔄 অটো-ফলব্যাক (Auto Fallback)</span>
+            <span id="autoFallbackBadge" class="tag" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px;">চালু</span>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-sub); margin-top: 4px; line-height: 1.4;">
+            কোনো মডেলের মূল প্রোভাইডার ডাউন বা রক্ষণাবেক্ষণে থাকলে সিস্টেম স্বয়ংক্রিয়ভাবে কার্যকর ব্যাকআপ মডেল (Groq/OpenRouter) দিয়ে উত্তর নিশ্চিত করবে। বন্ধ রাখলে মূল সার্ভারের এরর সরাসরি দেখাবে।
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label class="switch" title="অটো-ফলব্যাক চালু বা বন্ধ করুন">
+            <input type="checkbox" id="autoFallbackToggle" checked onchange="toggleAutoFallback(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
       <!-- Add New Model Form -->
       <form id="addModelForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 14px; display: flex; flex-direction: column; gap: 14px;">
         <h4 style="color: var(--accent); font-size: 1rem;">+ নতুন AI মডেল যোগ করুন</h4>
@@ -898,6 +925,7 @@
       loadPlans();
       loadRedeemCodes();
       loadModels();
+      loadSettings();
     }
 
     async function loadStats() {
@@ -1040,6 +1068,53 @@
         }
       } catch (err) {
         console.error(err);
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/settings`);
+        const data = await res.json();
+        if (data.success && data.settings) {
+          const isEnabled = data.settings.auto_fallback !== false;
+          const toggle = document.getElementById("autoFallbackToggle");
+          const badge = document.getElementById("autoFallbackBadge");
+          if (toggle) toggle.checked = isEnabled;
+          if (badge) {
+            badge.textContent = isEnabled ? "চালু" : "বন্ধ";
+            badge.style.background = isEnabled ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
+            badge.style.color = isEnabled ? "#34d399" : "#f87171";
+            badge.style.borderColor = isEnabled ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)";
+          }
+        }
+      } catch (err) {
+        console.error("Settings load error:", err);
+      }
+    }
+
+    async function toggleAutoFallback(enabled) {
+      const badge = document.getElementById("autoFallbackBadge");
+      if (badge) {
+        badge.textContent = enabled ? "চালু" : "বন্ধ";
+        badge.style.background = enabled ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
+        badge.style.color = enabled ? "#34d399" : "#f87171";
+        badge.style.borderColor = enabled ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)";
+      }
+      try {
+        const res = await authFetch(`${API_BASE}/admin/settings`, {
+          method: "PUT",
+          body: JSON.stringify({ auto_fallback: enabled })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(enabled ? "অটো-ফলব্যাক চালু করা হয়েছে" : "অটো-ফলব্যাক বন্ধ করা হয়েছে", "success");
+        } else {
+          showToast(data.error || "সেটিংস আপডেট ব্যর্থ হয়েছে", "error");
+          loadSettings();
+        }
+      } catch (err) {
+        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
+        loadSettings();
       }
     }
 
