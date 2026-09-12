@@ -42,12 +42,20 @@ const streamChatCompletions = async (req, res) => {
     // 1. Model ID Normalization & Provider Resolution
     if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
       targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      actualModel = 'llama-3.3-70b-versatile';
+      actualModel = 'openai/gpt-oss-120b';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
     } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite') {
       targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-      actualModel = 'google/gemini-3.5-flash-lite';
+      actualModel = 'google/gemini-2.5-flash';
       targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.OPENROUTER_API_KEY;
+    } else if (model === 'deepseek-v4-flash' || model === 'deepseek-v4-flash-vision-exp') {
+      targetUrl = 'https://vyceai.com/v1/chat/completions';
+      actualModel = model === 'deepseek-v4-flash-vision-exp' ? 'deepseek-v4-flash-lr' : 'deepseek-v4-flash';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
+    } else if (model === 'gpt-5.6') {
+      targetUrl = 'https://vyceai.com/v1/chat/completions';
+      actualModel = 'gpt-5.6-new';
+      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
     } else if (aiModelConfig && aiModelConfig.base_url) {
       let bUrl = aiModelConfig.base_url.trim();
       if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions')) {
@@ -55,7 +63,7 @@ const streamChatCompletions = async (req, res) => {
       }
       targetUrl = bUrl;
       if (aiModelConfig.api_key) targetKey = aiModelConfig.api_key;
-      actualModel = model;
+      actualModel = aiModelConfig.id || model;
     }
 
     // 2. Global Key Fallback from Supabase if not found
@@ -74,11 +82,79 @@ const streamChatCompletions = async (req, res) => {
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
     }
 
-    // 4. Provider Fallback for down services
-    if (targetUrl.includes('b.ai') || targetUrl.includes('vyceai.com')) {
-      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      targetKey = (await getApiKeyFromSupabase('llama-3.3-70b-versatile')) || process.env.GROQ_API_KEY;
-      actualModel = 'llama-3.3-70b-versatile';
+    // Abort upstream immediately if client disconnects
+    const abortController = new AbortController();
+    req.on('close', () => {
+      try { abortController.abort(); } catch (e) {}
+    });
+
+    // Helper to attempt completion fetch with timeout
+    const tryFetchCompletion = async (url, key, modName, timeoutMs = 12000) => {
+      const fetchController = new AbortController();
+      const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
+
+      const onClientAbort = () => { try { fetchController.abort(); } catch (e) {} };
+      abortController.signal.addEventListener('abort', onClientAbort);
+
+      try {
+        const h = { 'Content-Type': 'application/json' };
+        if (key) h['Authorization'] = `Bearer ${key}`;
+
+        const p = {
+          model: modName,
+          messages: safeMessages,
+          max_tokens: 4096,
+          stream: true
+        };
+
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: h,
+          body: JSON.stringify(p),
+          signal: fetchController.signal
+        });
+        clearTimeout(timeoutId);
+        abortController.signal.removeEventListener('abort', onClientAbort);
+        return r;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        abortController.signal.removeEventListener('abort', onClientAbort);
+        console.warn(`[Fetch Attempt Error] ${url} (${modName}):`, err.message);
+        return null;
+      }
+    };
+
+    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel);
+
+    // 4. Intelligent Pre-Stream Fallback: If primary provider failed or was down, try reliable alternatives
+    if (!response || !response.ok) {
+      if (response) {
+        try {
+          const errBody = await response.text();
+          console.warn(`[Primary Upstream Failed] Status ${response.status} for ${actualModel} at ${targetUrl}:`, errBody.slice(0, 200));
+        } catch {}
+      }
+
+      // Step 4a: Fallback to Groq openai/gpt-oss-120b
+      if (!targetUrl.includes('groq.com')) {
+        console.log(`[Chat Fallback] Trying Groq openai/gpt-oss-120b for ${model}...`);
+        const groqKey = (await getApiKeyFromSupabase('openai/gpt-oss-120b')) || process.env.GROQ_API_KEY;
+        response = await tryFetchCompletion('https://api.groq.com/openai/v1/chat/completions', groqKey, 'openai/gpt-oss-120b', 10000);
+      }
+
+      // Step 4b: Fallback to OpenRouter google/gemini-2.5-flash
+      if ((!response || !response.ok) && actualModel !== 'google/gemini-2.5-flash') {
+        console.log(`[Chat Fallback] Trying OpenRouter google/gemini-2.5-flash for ${model}...`);
+        const orKey = (await getApiKeyFromSupabase('openrouter/free')) || process.env.OPENROUTER_API_KEY;
+        response = await tryFetchCompletion('https://openrouter.ai/api/v1/chat/completions', orKey, 'google/gemini-2.5-flash', 10000);
+      }
+
+      // Step 4c: Fallback to OpenRouter openrouter/free
+      if ((!response || !response.ok) && actualModel !== 'openrouter/free') {
+        console.log(`[Chat Fallback] Trying OpenRouter openrouter/free for ${model}...`);
+        const orKey = (await getApiKeyFromSupabase('openrouter/free')) || process.env.OPENROUTER_API_KEY;
+        response = await tryFetchCompletion('https://openrouter.ai/api/v1/chat/completions', orKey, 'openrouter/free', 10000);
+      }
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -87,38 +163,12 @@ const streamChatCompletions = async (req, res) => {
     res.setHeader('X-Accel-Buffering', 'no');
     if (res.flushHeaders) res.flushHeaders();
 
-    let payload = {
-      model: actualModel,
-      messages: safeMessages,
-      max_tokens: 4096,
-      stream: true
-    };
-
-    let headers = { 'Content-Type': 'application/json' };
-    if (targetKey) {
-      headers['Authorization'] = `Bearer ${targetKey}`;
-    }
-
-    // Abort upstream immediately if client disconnects
-    const abortController = new AbortController();
-    req.on('close', () => {
-      try { abortController.abort(); } catch (e) {}
-    });
-
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-      signal: abortController.signal
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`[Upstream API Error] Status ${response.status}:`, errText);
-      let userSafeError = 'সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।';
-      if (response.status === 429) {
+    if (!response || !response.ok) {
+      const status = response ? response.status : 500;
+      let userSafeError = 'সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
+      if (status === 429) {
         userSafeError = 'মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
-      } else if (response.status === 401 || response.status === 403) {
+      } else if (status === 401 || status === 403) {
         userSafeError = 'এই মডেল ব্যবহারের জন্য অনুমোদন প্রয়োজন।';
       }
       res.write(`data: ${JSON.stringify({ error: userSafeError })}\n\n`);

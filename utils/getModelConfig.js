@@ -34,8 +34,8 @@ async function getApiKeyFromSupabase(modelId) {
 }
 
 const MODEL_ALIASES = {
-  'openai/gpt-oss-120b': 'llama-3.3-70b-versatile',
-  'gemini-3.5-flash-lite': 'gemini-1.5-flash'
+  'llama-3.3-70b-versatile': 'openai/gpt-oss-120b',
+  'gemini-1.5-flash': 'gemini-3.5-flash-lite'
 };
 
 async function getModelConfig(rawId) {

@@ -56,7 +56,7 @@ router.get('/ping', async (req, res) => {
       return res.status(400).json({ success: false, error: 'মডেলের নাম প্রয়োজন' });
     }
 
-    const { getPersistedModels, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    const { getPersistedModels, getApiKeyFromSupabase, getModelConfig } = require('../../utils/getModelConfig');
     let aiModelConfig = null;
     if (getIsMongoConnected()) {
       aiModelConfig = await AiModel.findOne({ $or: [{ model_id: model }, { id: model }] });
@@ -66,6 +66,10 @@ router.get('/ping', async (req, res) => {
     }
     
     if (!aiModelConfig) {
+      aiModelConfig = await getModelConfig(model);
+    }
+
+    if (!aiModelConfig) {
       return res.json({ success: true, latency: null, status: 'offline', error: 'Model not found' });
     }
 
@@ -73,13 +77,18 @@ router.get('/ping', async (req, res) => {
     let targetKey = aiModelConfig.api_key;
     if (!targetKey) {
       targetKey = await getApiKeyFromSupabase(model);
+      if (!targetKey && aiModelConfig.id && aiModelConfig.id !== model) {
+        targetKey = await getApiKeyFromSupabase(aiModelConfig.id);
+      }
     }
     if (!targetKey) {
       if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
       else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
       else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
       else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
-      else if (targetUrl.includes('googleapis.com')) targetKey = process.env.GEMINI_API_KEY;
+      else if (targetUrl.includes('googleapis.com')) {
+        targetKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
+      }
     }
 
     let pingUrl = targetUrl;
@@ -98,8 +107,8 @@ router.get('/ping', async (req, res) => {
     }
     
     // Gemini specific logic (GET models list)
-    if (aiModelConfig.type === 'gemini' || targetUrl.includes('generativelanguage.googleapis.com')) {
-      const gKey = targetKey || process.env.GEMINI_API_KEY;
+    if (aiModelConfig.type === 'gemini' && targetUrl.includes('generativelanguage.googleapis.com')) {
+      const gKey = targetKey || process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
       pingUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + gKey;
       delete headers['Authorization'];
     }

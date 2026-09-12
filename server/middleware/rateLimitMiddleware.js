@@ -97,7 +97,7 @@ const checkRateLimit = async (req, res, next) => {
         displayName: def.name,
         message_limit: def.limit,
         window_hours: def.window,
-        allowed_models: currentPlanName === 'Free' ? ['openrouter/free', 'gemini-1.5-flash'] : ['*'],
+        allowed_models: currentPlanName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
         is_active: true
       };
     }
