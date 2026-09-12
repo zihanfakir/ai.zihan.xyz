@@ -1259,20 +1259,24 @@
     }
 
     .mic-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 36px;
       height: 36px;
       flex-shrink: 0;
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
       border-radius: 50%;
       color: var(--text-sub);
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       margin-bottom: 2px;
       margin-right: 4px;
+      padding: 0;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .mic-btn:hover {
       background-color: rgba(128, 128, 128, 0.12);
@@ -1280,10 +1284,24 @@
       transform: scale(1.05);
     }
     .mic-btn.recording {
-      background: rgba(239, 68, 68, 0.18);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      width: auto !important;
+      min-width: 36px;
+      padding: 0 12px !important;
+      border-radius: 999px !important;
+      background: rgba(239, 68, 68, 0.12) !important;
+      color: #ef4444 !important;
+      border: 1px solid rgba(239, 68, 68, 0.4) !important;
       animation: pulseRecord 1.5s infinite;
+      gap: 6px;
+      justify-content: center;
+    }
+    .mic-btn.recording .mic-rec-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ef4444;
+      white-space: nowrap;
+      line-height: 1;
+      display: inline-block;
     }
     @keyframes pulseRecord {
       0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
@@ -1966,6 +1984,24 @@
       .attach-btn svg {
         width: 20px;
         height: 20px;
+      }
+      .mic-btn {
+        width: 36px;
+        height: 36px;
+        margin-right: 2px;
+      }
+      .mic-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .mic-btn.recording {
+        width: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        justify-content: center !important;
+      }
+      .mic-btn.recording .mic-rec-text {
+        display: none !important;
       }
       .chat-textarea {
         font-size: 1rem;
@@ -2708,14 +2744,16 @@
     .voice-wave-container {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
-      height: 14px;
+      justify-content: center;
+      gap: 2.5px;
+      height: 16px;
     }
     .voice-wave-bar {
       width: 2.5px;
       height: 100%;
       background: #ef4444;
       border-radius: 2px;
+      transform-origin: center;
       animation: voiceWave 0.8s ease-in-out infinite alternate;
     }
     .voice-wave-bar:nth-child(2) { animation-delay: 0.2s; }
@@ -2730,10 +2768,6 @@
       background: rgba(239, 68, 68, 0.15) !important;
       color: #ef4444 !important;
       animation: pulseRecord 1.2s infinite;
-    }
-    @keyframes pulseRecord {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
     }
 
     /* ===== Composer Quick Bar Pills ===== */
@@ -3778,6 +3812,7 @@
       speechRecognitionInstance.onstart = () => {
         isSpeechRecording = true;
         micBtn.classList.add("recording");
+        micBtn.setAttribute("title", "রেকর্ডিং বন্ধ করতে চাপুন");
         micBtn.innerHTML = `
           <div class="voice-wave-container">
             <span class="voice-wave-bar"></span>
@@ -3785,8 +3820,13 @@
             <span class="voice-wave-bar"></span>
             <span class="voice-wave-bar"></span>
           </div>
-          <span>রেকর্ড হচ্ছে</span>
+          <span class="mic-rec-text">রেকর্ড হচ্ছে</span>
         `;
+        const userInputEl = document.getElementById("userInput");
+        if (userInputEl && !userInputEl.value.trim()) {
+          userInputEl.setAttribute("data-orig-placeholder", userInputEl.placeholder || "");
+          userInputEl.placeholder = "শুনছি... কথা বলুন...";
+        }
         soundEngine.playClick();
         triggerHaptic("medium");
         showToast("কথা বলুন... (বাংলা ও ইংরেজি)", "success");
@@ -3819,10 +3859,20 @@
 
       function resetMicBtn() {
         micBtn.classList.remove("recording");
+        micBtn.setAttribute("title", "কথা বলে লিখুন");
         micBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" style="fill: currentColor; stroke: none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-          <span>ভয়েস</span>
+          <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         `;
+        const userInputEl = document.getElementById("userInput");
+        if (userInputEl) {
+          const orig = userInputEl.getAttribute("data-orig-placeholder");
+          if (orig) {
+            userInputEl.placeholder = orig;
+            userInputEl.removeAttribute("data-orig-placeholder");
+          } else if (userInputEl.placeholder && userInputEl.placeholder.includes("শুনছি")) {
+            userInputEl.placeholder = "আলোকপথ AI-কে জিজ্ঞাসা করুন...";
+          }
+        }
       }
 
       micBtn.addEventListener("click", () => {
