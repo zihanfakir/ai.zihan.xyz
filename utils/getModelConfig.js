@@ -436,6 +436,11 @@ async function getSystemSettings() {
     return settingsCache;
   }
 
+  const defaultSettings = {
+    auto_fallback: true,
+    fallback_models: ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash']
+  };
+
   if (supabase) {
     try {
       const { data, error } = await supabase
@@ -448,13 +453,12 @@ async function getSystemSettings() {
         let parsed = null;
         try { parsed = JSON.parse(data[0].api_key); } catch {}
         if (parsed && typeof parsed === 'object') {
-          delete parsed.auto_fallback;
-          delete parsed.fallback_models;
-          settingsCache = parsed;
+          const merged = { ...defaultSettings, ...parsed };
+          settingsCache = merged;
           settingsCacheTs = now;
           if (!memoryStore.settings) memoryStore.settings = {};
-          Object.assign(memoryStore.settings, parsed);
-          return parsed;
+          Object.assign(memoryStore.settings, merged);
+          return merged;
         }
       }
     } catch (e) {
@@ -462,7 +466,7 @@ async function getSystemSettings() {
     }
   }
 
-  const def = memoryStore.settings || {};
+  const def = { ...defaultSettings, ...(memoryStore.settings || {}) };
   settingsCache = def;
   settingsCacheTs = now;
   return def;
@@ -470,8 +474,6 @@ async function getSystemSettings() {
 
 async function saveSystemSettings(settings) {
   const updated = { ...(memoryStore.settings || {}), ...settings };
-  delete updated.auto_fallback;
-  delete updated.fallback_models;
   settingsCache = updated;
   settingsCacheTs = Date.now();
   memoryStore.settings = updated;

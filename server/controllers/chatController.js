@@ -4,7 +4,73 @@ const UsageLog = require('../models/UsageLog');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
-const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
+const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage, getSystemSettings } = require('../../utils/getModelConfig');
+
+const resolveModelTarget = async (targetModelId, targetModelConfig) => {
+  let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
+  let targetKey = (targetModelConfig && targetModelConfig.api_key) || null;
+  let actualModel = targetModelId || 'gemini-3.5-flash-lite';
+
+  // 1. Model ID Normalization & Provider Resolution
+  if (targetModelId === 'openai/gpt-oss-120b' || targetModelId === 'llama-3.3-70b-versatile') {
+    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    actualModel = 'openai/gpt-oss-120b';
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+  } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b') {
+    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    actualModel = 'qwen/qwen3.8-27b';
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+  } else if (targetModelId === 'gemini-1.5-flash' || targetModelId === 'gemini-3.5-flash-lite' || targetModelId === 'openrouter/free' || !targetModelId) {
+    targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
+    actualModel = 'google/gemini-2.5-flash';
+    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY;
+  } else if (targetModelId === 'deepseek-v4-flash' || targetModelId === 'deepseek-v4-flash-vision-exp') {
+    targetUrl = 'https://vyceai.com/v1/chat/completions';
+    actualModel = targetModelId === 'deepseek-v4-flash-vision-exp' ? 'deepseek-v4-flash-lr' : 'deepseek-v4-flash';
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+  } else if (targetModelId === 'claude-sonnet-4-6') {
+    targetUrl = 'https://vyceai.com/v1/chat/completions';
+    actualModel = 'claude-sonnet-4-6';
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+  } else if (targetModelId === 'gpt-5.6') {
+    targetUrl = 'https://vyceai.com/v1/chat/completions';
+    actualModel = 'gpt-5.6-new';
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+  } else if (targetModelId === 'nemotron-ultra-550b' || targetModelId === 'nemotron-vision') {
+    targetUrl = 'https://vyceai.com/v1/chat/completions';
+    actualModel = targetModelId;
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+  } else if (targetModelId === 'mimo-v2.5' || targetModelId === 'hy3') {
+    targetUrl = 'https://api.b.ai/v1/chat/completions';
+    actualModel = targetModelId;
+    if (!targetKey) targetKey = process.env.BAI_API_KEY;
+  } else if (targetModelConfig && targetModelConfig.base_url) {
+    let bUrl = targetModelConfig.base_url.trim();
+    if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions')) {
+      bUrl = bUrl.replace(/\/+$/, '') + '/chat/completions';
+    }
+    targetUrl = bUrl;
+    actualModel = targetModelConfig.id || targetModelId;
+  }
+
+  // 2. Global Key Fallback from Supabase if not found
+  if (!targetKey) {
+    targetKey = await getApiKeyFromSupabase(targetModelId);
+    if (!targetKey && actualModel !== targetModelId) {
+      targetKey = await getApiKeyFromSupabase(actualModel);
+    }
+  }
+
+  // 3. Provider Default Key Fallback
+  if (!targetKey) {
+    if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
+    else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
+    else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
+    else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
+  }
+
+  return { targetUrl, targetKey, actualModel };
+};
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -39,60 +105,7 @@ const streamChatCompletions = async (req, res) => {
       aiModelConfig = await getModelConfig(model);
     }
 
-    let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    let targetKey = process.env.OPENROUTER_API_KEY;
-    let actualModel = model || 'gemini-3.5-flash-lite';
-
-    // 1. Model ID Normalization & Provider Resolution
-    if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
-      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      actualModel = 'openai/gpt-oss-120b';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
-    } else if (model === 'qwen/qwen3.8-27b') {
-      targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-      actualModel = 'qwen/qwen3.8-27b';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.GROQ_API_KEY;
-    } else if (model === 'gemini-1.5-flash' || model === 'gemini-3.5-flash-lite' || model === 'openrouter/free' || !model) {
-      targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-      actualModel = 'google/gemini-2.5-flash';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.OPENROUTER_API_KEY;
-    } else if (model === 'deepseek-v4-flash' || model === 'deepseek-v4-flash-vision-exp') {
-      targetUrl = 'https://vyceai.com/v1/chat/completions';
-      actualModel = model === 'deepseek-v4-flash-vision-exp' ? 'deepseek-v4-flash-lr' : 'deepseek-v4-flash';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
-    } else if (model === 'claude-sonnet-4-6') {
-      targetUrl = 'https://vyceai.com/v1/chat/completions';
-      actualModel = 'claude-sonnet-4-6';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
-    } else if (model === 'gpt-5.6') {
-      targetUrl = 'https://vyceai.com/v1/chat/completions';
-      actualModel = 'gpt-5.6-new';
-      targetKey = (aiModelConfig && aiModelConfig.api_key) || process.env.VYCE_API_KEY;
-    } else if (aiModelConfig && aiModelConfig.base_url) {
-      let bUrl = aiModelConfig.base_url.trim();
-      if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions')) {
-        bUrl = bUrl.replace(/\/+$/, '') + '/chat/completions';
-      }
-      targetUrl = bUrl;
-      if (aiModelConfig.api_key) targetKey = aiModelConfig.api_key;
-      actualModel = aiModelConfig.id || model;
-    }
-
-    // 2. Global Key Fallback from Supabase if not found
-    if (!targetKey) {
-      targetKey = await getApiKeyFromSupabase(model);
-      if (!targetKey && actualModel !== model) {
-        targetKey = await getApiKeyFromSupabase(actualModel);
-      }
-    }
-
-    // 3. Provider Default Key Fallback
-    if (!targetKey) {
-      if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
-      else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
-      else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
-      else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
-    }
+    const { targetUrl, targetKey, actualModel } = await resolveModelTarget(model, aiModelConfig);
 
     // Upstream abort controller: triggered ONLY if client terminates response stream early
     const abortController = new AbortController();
@@ -103,7 +116,7 @@ const streamChatCompletions = async (req, res) => {
     };
     res.on('close', onClientClose);
 
-    // Helper to attempt completion fetch with 25s timeout
+    // Helper to attempt completion fetch with timeout
     const tryFetchCompletion = async (url, key, modName, timeoutMs = 25000) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
@@ -139,12 +152,66 @@ const streamChatCompletions = async (req, res) => {
       }
     };
 
-    // Primary model attempt (No auto-fallback per user instruction)
+    // Primary model attempt
     let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 25000);
+    let effectiveModel = model || 'gemini-3.5-flash-lite';
 
     // Guard against client socket abort / closure
     if (res.writableEnded || res.destroyed) {
       return;
+    }
+
+    // Auto-fallback check if primary model failed or timed out
+    if (!response || !response.ok) {
+      const sysSettings = await getSystemSettings().catch(() => ({}));
+      const autoFallbackEnabled = sysSettings.auto_fallback !== false;
+
+      if (autoFallbackEnabled) {
+        console.warn(`[Auto-Fallback] Primary model '${model}' failed. Attempting fallback...`);
+        const fallbackCandidates = Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0
+          ? sysSettings.fallback_models
+          : ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash'];
+
+        const currentPlanName = req.currentPlan ? req.currentPlan.name : (user && user.subscription && user.subscription.plan_name ? user.subscription.plan_name : 'Free');
+        const freeModelIds = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
+
+        for (const candidateId of fallbackCandidates) {
+          if (!candidateId || candidateId === model) continue;
+
+          // Strictly enforce user plan authorization on fallback candidate
+          if (currentPlanName === 'Free') {
+            if (!freeModelIds.includes(candidateId)) continue;
+          } else if (currentPlanName === 'Pro') {
+            if (candidateId === 'gpt-5.6') continue;
+          }
+
+          let candidateConfig = null;
+          if (getIsMongoConnected()) {
+            candidateConfig = await AiModel.findOne({ $or: [{ model_id: candidateId }, { id: candidateId }] }).catch(() => null);
+          } else {
+            candidateConfig = await getModelConfig(candidateId).catch(() => null);
+          }
+
+          // Double check badge restrictions
+          if (currentPlanName === 'Free' && candidateConfig && (candidateConfig.premium || candidateConfig.efficient)) {
+            continue;
+          }
+          if (currentPlanName === 'Pro' && candidateConfig && candidateConfig.efficient) {
+            continue;
+          }
+
+          const target = await resolveModelTarget(candidateId, candidateConfig);
+          console.log(`[Auto-Fallback] Trying candidate '${candidateId}'...`);
+          const fbResponse = await tryFetchCompletion(target.targetUrl, target.targetKey, target.actualModel, 15000);
+
+          if (fbResponse && fbResponse.ok) {
+            console.log(`[Auto-Fallback] Candidate '${candidateId}' succeeded! Switching stream.`);
+            response = fbResponse;
+            effectiveModel = candidateId;
+            break;
+          }
+        }
+      }
     }
 
     // If model failed or timed out, send proper HTTP error JSON before headers are locked
@@ -221,7 +288,7 @@ const streamChatCompletions = async (req, res) => {
               if (user && getIsMongoConnected()) {
                 UsageLog.create({
                   user_id: userId,
-                  model_id: model || 'gemini-3.5-flash-lite',
+                  model_id: effectiveModel || model || 'gemini-3.5-flash-lite',
                   timestamp: new Date()
                 }).catch(err => console.error('[UsageLog Write Error]:', err.message));
                 incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
@@ -229,7 +296,7 @@ const streamChatCompletions = async (req, res) => {
                 memoryStore.usageLogs.push({
                   _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
                   user_id: userId,
-                  model_id: model || 'gemini-3.5-flash-lite',
+                  model_id: effectiveModel || model || 'gemini-3.5-flash-lite',
                   timestamp: new Date()
                 });
                 if (memoryStore.usageLogs.length > 5000) {

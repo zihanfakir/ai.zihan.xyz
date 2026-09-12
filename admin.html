@@ -571,6 +571,7 @@
       <button type="button" class="tab-btn" data-target="secPlans">ডাইনামিক প্ল্যান সেটিংস</button>
       <button type="button" class="tab-btn" data-target="secRedeem">রিডিম কোড জেনারেটর</button>
       <button type="button" class="tab-btn" data-target="secModels">মডেল সেটিংস</button>
+      <button type="button" class="tab-btn" data-target="secSettings">ফলব্যাক ও সিস্টেম</button>
     </div>
 
     <!-- Section 1: User Management -->
@@ -747,6 +748,33 @@
             <tr><td colspan="7" style="text-align: center;">লোড হচ্ছে...</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Section 5: System & Fallback Settings -->
+    <div class="section" id="secSettings">
+      <h3>সিস্টেম ও অটো-ফলব্যাক সেটিংস</h3>
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 22px; border-radius: 14px; max-width: 680px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); gap: 16px;">
+          <div>
+            <div style="font-weight: 600; font-size: 1.05rem; color: #fff;">অটো ফলব্যাক (Auto Fallback)</div>
+            <div style="font-size: 0.82rem; color: var(--text-sub); margin-top: 4px;">নির্বাচিত মডেল ডাউন বা টাইমআউট হলে স্বয়ংক্রিয়ভাবে সক্রিয় ফলব্যাক মডেলে সুইচ করবে। ফলব্যাক সর্বদা ইউজারের প্ল্যান পারমিশন মেনে চলবে।</div>
+          </div>
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <input type="checkbox" id="autoFallbackToggle" style="width: 20px; height: 20px; cursor: pointer;">
+            <span id="autoFallbackStatusText" style="font-size: 0.88rem; font-weight: 600; color: var(--success);">সক্রিয়</span>
+          </label>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="font-weight: 600; font-size: 0.92rem; color: #fff; display: block; margin-bottom: 8px;">ফলব্যাক মডেলসমূহ (অগ্রাধিকার অনুযায়ী):</label>
+          <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 10px;">যে মডেলগুলোতে টিক চিহ্ন থাকবে, প্রাইমারি মডেল ফেইল করলে সেগুলোতে স্বয়ংক্রিয়ভাবে চেষ্টা করা হবে:</div>
+          <div id="fallbackModelList" style="display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="color: var(--text-sub); font-size: 0.85rem;">লোড হচ্ছে...</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="saveSettingsBtn" style="padding: 10px 24px; font-weight: 600;">সেটিংস সংরক্ষণ করুন</button>
       </div>
     </div>
 
@@ -982,6 +1010,7 @@
       loadPlans();
       loadRedeemCodes();
       loadModels();
+      loadSettings();
     }
 
     async function loadStats() {
@@ -1134,6 +1163,7 @@
         if (data.success && data.models) {
           currentModelsList = data.models;
           renderModelsTable(data.models);
+          renderSettingsUI();
         }
       } catch (err) {
         console.error(err);
@@ -1847,6 +1877,107 @@
         }
       }
     }
+
+    /* System Settings & Auto-Fallback Logic */
+    let currentSettings = { auto_fallback: true, fallback_models: ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash'] };
+
+    async function loadSettings() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/settings`);
+        const data = await res.json();
+        if (data.success && data.settings) {
+          currentSettings = {
+            auto_fallback: data.settings.auto_fallback !== false,
+            fallback_models: Array.isArray(data.settings.fallback_models) ? data.settings.fallback_models : ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash']
+          };
+          renderSettingsUI();
+        }
+      } catch (err) {
+        console.error("Settings load error:", err);
+      }
+    }
+
+    function renderSettingsUI() {
+      const toggle = document.getElementById("autoFallbackToggle");
+      const statusText = document.getElementById("autoFallbackStatusText");
+      if (toggle && statusText) {
+        toggle.checked = currentSettings.auto_fallback;
+        statusText.textContent = currentSettings.auto_fallback ? "সক্রিয়" : "নিষ্ক্রিয়";
+        statusText.style.color = currentSettings.auto_fallback ? "var(--success)" : "var(--danger)";
+      }
+
+      const listContainer = document.getElementById("fallbackModelList");
+      if (!listContainer) return;
+
+      if (!currentModelsList || currentModelsList.length === 0) {
+        listContainer.innerHTML = `<div style="color: var(--text-sub); font-size: 0.85rem;">কোনো মডেল পাওয়া যায়নি।</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = "";
+      currentModelsList.forEach(m => {
+        const modelId = m.id || m.model_id;
+        const isChecked = currentSettings.fallback_models.includes(modelId);
+        const row = document.createElement("label");
+        row.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.02);";
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" class="fallback-model-cb" value="${escapeHtml(modelId)}" ${isChecked ? 'checked' : ''} style="cursor: pointer;">
+            <span style="font-size: 0.88rem; color: #fff;">${escapeHtml(m.name || modelId)}</span>
+            <span style="font-size: 0.75rem; color: var(--text-sub); font-family: monospace;">(${escapeHtml(modelId)})</span>
+          </div>
+          <div>
+            ${m.efficient ? '<span class="tag tag-max">MAX</span>' : (m.premium ? '<span class="tag tag-pro">PRO</span>' : '<span style="font-size:0.7rem; color:#10b981; border:1px solid #10b98133; padding:1px 6px; border-radius:4px;">FREE</span>')}
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    document.getElementById("autoFallbackToggle")?.addEventListener("change", (e) => {
+      const statusText = document.getElementById("autoFallbackStatusText");
+      if (statusText) {
+        statusText.textContent = e.target.checked ? "সক্রিয়" : "নিষ্ক্রিয়";
+        statusText.style.color = e.target.checked ? "var(--success)" : "var(--danger)";
+      }
+    });
+
+    document.getElementById("saveSettingsBtn")?.addEventListener("click", async () => {
+      const btn = document.getElementById("saveSettingsBtn");
+      const toggle = document.getElementById("autoFallbackToggle");
+      const checkedModels = Array.from(document.querySelectorAll(".fallback-model-cb:checked")).map(cb => cb.value);
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "সংরক্ষণ হচ্ছে...";
+      }
+
+      try {
+        const payload = {
+          auto_fallback: toggle ? toggle.checked : true,
+          fallback_models: checkedModels.length > 0 ? checkedModels : ['gemini-3.5-flash-lite', 'openrouter/free', 'deepseek-v4-flash']
+        };
+        const res = await authFetch(`${API_BASE}/admin/settings`, {
+          method: "PUT",
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || "সেটিংস সফলভাবে সংরক্ষিত হয়েছে!", "success");
+          currentSettings = payload;
+          renderSettingsUI();
+        } else {
+          showToast(data.error || "সেটিংস সংরক্ষণে সমস্যা হয়েছে", "error");
+        }
+      } catch (e) {
+        showToast("সার্ভারে সমস্যা হয়েছে", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "সেটিংস সংরক্ষণ করুন";
+        }
+      }
+    });
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {

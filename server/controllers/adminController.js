@@ -1227,8 +1227,6 @@ const updateSettings = async (req, res) => {
   try {
     const { saveSystemSettings } = require('../../utils/getModelConfig');
     const toSave = typeof req.body === 'object' && req.body !== null ? req.body : {};
-    delete toSave.auto_fallback;
-    delete toSave.fallback_models;
     const saved = await saveSystemSettings(toSave);
     debouncedSave();
     return res.json({ success: true, settings: saved, message: 'সিস্টেম সেটিংস সফলভাবে আপডেট হয়েছে' });

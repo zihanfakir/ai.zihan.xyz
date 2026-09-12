@@ -18,8 +18,15 @@ const checkRateLimit = async (req, res, next) => {
     // 0. Guest User (Not logged in)
     if (!user) {
       const model_id = req.body.model || 'gemini-3.5-flash-lite';
-      const freeModels = ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
+      const freeModels = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
       const isKnownFree = freeModels.includes(model_id);
+
+      if (!isKnownFree) {
+        return res.status(403).json({
+          success: false,
+          error: `এই মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং প্রো বা ম্যাক্স প্ল্যান সক্রিয় করুন।`
+        });
+      }
 
       let aiModel = null;
       if (getIsMongoConnected()) {
@@ -27,10 +34,10 @@ const checkRateLimit = async (req, res, next) => {
       } else {
         aiModel = await getModelConfig(model_id);
       }
-      if (!isKnownFree && aiModel && (aiModel.premium || aiModel.efficient)) {
+      if (aiModel && (aiModel.premium || aiModel.efficient)) {
         return res.status(403).json({
           success: false,
-          error: `এই প্রিমিয়াম মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং প্রো বা ম্যাক্স প্ল্যান সক্রিয় করুন।`
+          error: `এই মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং প্রো বা ম্যাক্স প্ল্যান সক্রিয় করুন।`
         });
       }
 
@@ -50,7 +57,7 @@ const checkRateLimit = async (req, res, next) => {
       }
 
       req.guestId = guestId;
-      req.currentPlan = { name: 'Free', displayName: 'গেস্ট প্ল্যান', message_limit: 10, window_hours: 3 };
+      req.currentPlan = { name: 'Free', displayName: 'গেস্ট প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: freeModels };
       return next();
     }
 
@@ -96,11 +103,13 @@ const checkRateLimit = async (req, res, next) => {
       plan = plans.find(p => p.name === currentPlanName);
     }
 
+    const freeModelIds = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'];
+
     if (!plan) {
       const defaultLimits = {
-        'Free': { limit: 10, window: 3, name: 'ফ্রি প্ল্যান' },
-        'Pro': { limit: 30, window: 3, name: 'প্রো প্ল্যান' },
-        'Max': { limit: 50, window: 1, name: 'ম্যাক্স প্ল্যান' }
+        'Free': { limit: 10, window: 3, name: 'ফ্রি প্ল্যান', allowed: freeModelIds },
+        'Pro': { limit: 30, window: 3, name: 'প্রো প্ল্যান', allowed: ['*'] },
+        'Max': { limit: 50, window: 1, name: 'ম্যাক্স প্ল্যান', allowed: ['*'] }
       };
       const def = defaultLimits[currentPlanName] || defaultLimits['Free'];
       plan = {
@@ -108,7 +117,7 @@ const checkRateLimit = async (req, res, next) => {
         displayName: def.name,
         message_limit: def.limit,
         window_hours: def.window,
-        allowed_models: currentPlanName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+        allowed_models: def.allowed,
         is_active: true
       };
     }
@@ -125,34 +134,49 @@ const checkRateLimit = async (req, res, next) => {
       aiModel = await getModelConfig(model_id);
     }
 
-    const isKnownFree = ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'].includes(model_id);
-    const isExplicitlyAllowed = Array.isArray(plan.allowed_models) && (plan.allowed_models.includes('*') || plan.allowed_models.includes(model_id));
+    const isKnownFree = freeModelIds.includes(model_id) && (!aiModel || (!aiModel.premium && !aiModel.efficient));
+    const isMaxModel = (aiModel && Boolean(aiModel.efficient)) || model_id === 'gpt-5.6';
+    const isProModel = (aiModel && Boolean(aiModel.premium)) && !isMaxModel;
 
-    if (aiModel && !isKnownFree && !isExplicitlyAllowed) {
-      if (aiModel.efficient) {
-        // Max Badge Model -> Only Max Plan users allowed
-        if (currentPlanName !== 'Max') {
+    if (currentPlanName === 'Free') {
+      // Free users can ONLY use models that are confirmed free!
+      if (isMaxModel) {
+        return res.status(403).json({
+          success: false,
+          error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'ফ্রি প্ল্যান'}।`
+        });
+      }
+      if (isProModel) {
+        return res.status(403).json({
+          success: false,
+          error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Pro বা Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'ফ্রি প্ল্যান'}।`
+        });
+      }
+      if (!isKnownFree) {
+        // Also check if explicitly in plan.allowed_models (excluding wildcard '*')
+        const explicitlyAllowed = Array.isArray(plan.allowed_models) && plan.allowed_models.includes(model_id) && !plan.allowed_models.includes('*');
+        if (!explicitlyAllowed) {
           return res.status(403).json({
             success: false,
-            error: `'${aiModel.name || model_id}' মডেলটি ব্যবহারের জন্য Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || currentPlanName}।`
-          });
-        }
-      } else if (aiModel.premium) {
-        // Pro Badge Model -> Pro and Max Plan users allowed
-        if (currentPlanName !== 'Pro' && currentPlanName !== 'Max') {
-          return res.status(403).json({
-            success: false,
-            error: `'${aiModel.name || model_id}' মডেলটি ব্যবহারের জন্য Pro বা Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || currentPlanName}।`
+            error: `'${aiModel?.name || model_id}' মডেলটি ফ্রি প্ল্যানে অনুমোদিত নয়। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
           });
         }
       }
-    } else if (!aiModel) {
-      // Fallback check against allowed_models list
-      const allowed = Array.isArray(plan.allowed_models) ? plan.allowed_models : ['*'];
+    } else if (currentPlanName === 'Pro') {
+      // Pro users can use Free and Pro models, but CANNOT use Max models!
+      if (isMaxModel) {
+        return res.status(403).json({
+          success: false,
+          error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'প্রো প্ল্যান'}।`
+        });
+      }
+    } else if (currentPlanName !== 'Max' && user.role !== 'admin') {
+      // Unknown non-max/non-pro/non-free plan fallback check
+      const allowed = Array.isArray(plan.allowed_models) ? plan.allowed_models : [];
       if (!allowed.includes('*') && !allowed.includes(model_id)) {
         return res.status(403).json({
           success: false,
-          error: `আপনার ${plan.displayName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই। Pro বা Max প্ল্যানে আপগ্রেড করুন।`
+          error: `আপনার ${plan.displayName || currentPlanName} এ '${model_id}' মডেল ব্যবহারের অনুমতি নেই।`
         });
       }
     }
