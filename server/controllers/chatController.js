@@ -18,8 +18,8 @@ const streamChatCompletions = async (req, res) => {
     // Sanitize and cap messages array to prevent memory exhaustion (support string or array multimodal content)
     const MAX_CONTENT_LENGTH = 32000;
     const safeMessages = messages.slice(-100).filter(m => m && typeof m === 'object' && (typeof m.content === 'string' || Array.isArray(m.content))).map(m => ({
-      role: m.role || 'user',
-      content: typeof m.content === 'string' ? m.content.slice(0, MAX_CONTENT_LENGTH) : m.content
+      role: ['user', 'assistant', 'system'].includes(m.role) ? m.role : 'user',
+      content: typeof m.content === 'string' ? m.content.slice(0, MAX_CONTENT_LENGTH) : (Array.isArray(m.content) ? m.content.filter(c => c && typeof c === 'object' && (c.type === 'text' || c.type === 'image_url')).slice(0, 20) : '')
     }));
     if (safeMessages.length === 0) {
       return res.status(400).json({ success: false, error: 'মেসেজের বিবরণ সঠিক নয়' });
@@ -41,7 +41,7 @@ const streamChatCompletions = async (req, res) => {
 
     let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
     let targetKey = process.env.OPENROUTER_API_KEY;
-    let actualModel = model || 'openrouter/free';
+    let actualModel = model || 'gemini-3.5-flash-lite';
 
     // 1. Model ID Normalization & Provider Resolution
     if (model === 'openai/gpt-oss-120b' || model === 'llama-3.3-70b-versatile') {
@@ -171,6 +171,7 @@ const streamChatCompletions = async (req, res) => {
     res.write(': keepalive\n\n');
 
     let hasStreamedData = false;
+    let hasContentTokens = false;
     let streamIdleTimeout = null;
 
     const resetStreamIdleWatchdog = () => {
@@ -201,6 +202,7 @@ const streamChatCompletions = async (req, res) => {
 
       response.body.on('data', (chunk) => {
         hasStreamedData = true;
+        if (!hasContentTokens) { try { const s = chunk.toString(); if (s.includes('"delta"') || s.includes('"content"')) hasContentTokens = true; } catch {} }
         resetStreamIdleWatchdog();
         try {
           res.write(chunk);
@@ -213,13 +215,13 @@ const streamChatCompletions = async (req, res) => {
       response.body.on('end', async () => {
         try {
           // Record usage log only after stream successfully delivers tokens
-          if (hasStreamedData) {
+          if (hasContentTokens) {
             const userId = user ? String(user._id || user.id) : req.guestId;
             if (userId) {
               if (user && getIsMongoConnected()) {
                 UsageLog.create({
                   user_id: userId,
-                  model_id: model || 'openrouter/free',
+                  model_id: model || 'gemini-3.5-flash-lite',
                   timestamp: new Date()
                 }).catch(err => console.error('[UsageLog Write Error]:', err.message));
                 incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
@@ -227,7 +229,7 @@ const streamChatCompletions = async (req, res) => {
                 memoryStore.usageLogs.push({
                   _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
                   user_id: userId,
-                  model_id: model || 'openrouter/free',
+                  model_id: model || 'gemini-3.5-flash-lite',
                   timestamp: new Date()
                 });
                 if (memoryStore.usageLogs.length > 5000) {

@@ -4316,6 +4316,35 @@
       }
     });
 
+    window.handleAppBackButton = function() {
+      const customOverlay = document.getElementById("customDialogOverlay");
+      if (customOverlay && customOverlay.classList.contains("open")) {
+        closeCustomUI(false);
+        return true;
+      }
+      if (typeof closeModal === "function" && modelModalOverlay && modelModalOverlay.classList.contains("open")) {
+        closeModal();
+        return true;
+      }
+      if (typeof closeAccountModal === "function" && accountModalOverlay && accountModalOverlay.classList.contains("open")) {
+        closeAccountModal();
+        return true;
+      }
+      if (typeof closeAuthModal === "function" && authModalOverlay && authModalOverlay.classList.contains("open")) {
+        closeAuthModal();
+        return true;
+      }
+      if (typeof closeChatHistoryModal === "function" && chatHistoryModalOverlay && chatHistoryModalOverlay.classList.contains("open")) {
+        closeChatHistoryModal();
+        return true;
+      }
+      if (typeof closeBrandMenu === "function" && brandMenuOverlay && brandMenuOverlay.classList.contains("open")) {
+        closeBrandMenu();
+        return true;
+      }
+      return false;
+    };
+
     const PLAN_STORAGE_KEY = "alokpoth_current_plan";
     const PLAN_EXPIRY_KEY = "alokpoth_plan_expires_at";
     const DEFAULT_PLAN = "Free"; 
@@ -4631,7 +4660,8 @@
       const warningEl = document.getElementById("accountPlanWarning");
 
       if (valueEl) {
-        valueEl.textContent = currentPlan;
+        const planDisplayNames = { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
+        valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
         valueEl.className = "account-plan-badge plan-" + currentPlan;
       }
 
@@ -5055,7 +5085,17 @@
           </div>
         `;
 
+        const isOffline = m.status === "offline";
+        if (isOffline) {
+          card.classList.add("model-offline");
+          card.style.opacity = "0.55";
+        }
+
         card.addEventListener("click", () => {
+          if (isOffline) {
+            showToast(`'${m.name}' মডেলটি বর্তমানে অফলাইন রয়েছে। অনুগ্রহ করে সক্রিয় মডেল বেছে নিন।`, "warning");
+            return;
+          }
           selectedModelId = m.id;
           try { localStorage.setItem("alokpoth_selected_model", m.id); } catch {}
           modelTriggerLabel.textContent = m.name;
@@ -5791,6 +5831,9 @@
               try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
             }
             renderCreditBalance();
+            if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
+            if (typeof updateAuthUIState === "function") updateAuthUIState();
+            if (typeof updateSendAvailability === "function") updateSendAvailability();
 
             accountRedeemInput.value = "";
             if (accountRedeemMsg) {
@@ -7011,10 +7054,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         item.querySelector(".chat-history-delete-btn").addEventListener("click", (e) => {
           e.stopPropagation();
+          if (!confirm("আপনি কি নিশ্চিতভাবে এই চ্যাটটি মুছে ফেলতে চান?")) return;
           const remaining = loadAllSessions().filter((s) => s.id !== session.id);
           saveAllSessions(remaining);
           if (currentSessionId === session.id) currentSessionId = null;
           renderChatHistoryList();
+          showToast("চ্যাট সফলভাবে মুছে ফেলা হয়েছে", "info");
         });
 
         listEl.appendChild(item);
@@ -7514,17 +7559,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       // Client-side stream watchdog & timeout (prevent infinite loading)
       let streamWatchdog = null;
-      const resetWatchdog = (timeoutMs = 12000) => {
+      let isTimeoutAbort = false;
+      const resetWatchdog = (timeoutMs = 28000) => {
         if (streamWatchdog) clearTimeout(streamWatchdog);
         streamWatchdog = setTimeout(() => {
+          isTimeoutAbort = true;
           if (currentAbortController) {
             try { currentAbortController.abort("timeout"); } catch {}
           }
         }, timeoutMs);
       };
 
-      // Set initial 12s timeout to receive HTTP response
-      resetWatchdog(12000);
+      // Set initial 28s timeout to receive HTTP response
+      resetWatchdog(28000);
 
       let response;
       try {
@@ -7536,14 +7583,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
         });
       } catch (fetchErr) {
         if (streamWatchdog) clearTimeout(streamWatchdog);
-        if (fetchErr.name === "AbortError" || fetchErr === "timeout" || currentAbortController?.signal?.aborted) {
+        if (isTimeoutAbort || fetchErr === "timeout") {
           throw new Error("মডেল থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। মডেলটি সাময়িকভাবে ডাউন বা ধীরগতিতে থাকতে পারে।");
+        }
+        if (fetchErr.name === "AbortError" || currentAbortController?.signal?.aborted) {
+          const abortError = new Error("AbortError");
+          abortError.name = "AbortError";
+          throw abortError;
         }
         throw fetchErr;
       }
 
-      // Headers received - extend watchdog for initial token (14s)
-      resetWatchdog(14000);
+      // Headers received - extend watchdog for initial token (28s)
+      resetWatchdog(28000);
 
       if (!response.ok) {
         if (streamWatchdog) clearTimeout(streamWatchdog);
@@ -7582,12 +7634,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       try {
         while (true) {
-          // If no chunk arrives for 16s mid-stream, abort
-          resetWatchdog(16000);
+          // If no chunk arrives for 28s mid-stream, abort
+          resetWatchdog(28000);
           const { done, value } = await reader.read();
           if (done) break;
 
-          resetWatchdog(16000);
+          resetWatchdog(28000);
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop();
@@ -7627,10 +7679,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
           }
         }
       } catch (readErr) {
-        if (currentAbortController?.signal?.aborted) {
+        if (isTimeoutAbort) {
           if (!fullText) {
             throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।");
           }
+        } else if (currentAbortController?.signal?.aborted || readErr.name === "AbortError") {
+          const abortError = new Error("AbortError");
+          abortError.name = "AbortError";
+          throw abortError;
         }
         throw readErr;
       } finally {
@@ -7890,12 +7946,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         let overallWatchdog = setTimeout(() => {
           if (!apiFinished) {
-            console.warn("[Client Watchdog]: Hard timeout (18s) reached.");
+            console.warn("[Client Watchdog]: Hard timeout (35s) reached.");
             if (currentAbortController) {
               try { currentAbortController.abort("timeout"); } catch {}
             }
           }
-        }, 18000);
+        }, 35000);
 
         const finishUp = () => {
           if (overallWatchdog) {
@@ -8125,6 +8181,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
         stopGeneration();
         return;
       }
+
+      if (chatForm._isSubmitting) return;
+      chatForm._isSubmitting = true;
+      setTimeout(() => { chatForm._isSubmitting = false; }, 800);
       
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
@@ -8179,6 +8239,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } catch (err) {
         console.error("[Chat Form generateAIReply Error]:", err);
       } finally {
+        chatForm._isSubmitting = false;
         isGenerating = false;
         updateSendAvailability();
         updateTokenCounter();

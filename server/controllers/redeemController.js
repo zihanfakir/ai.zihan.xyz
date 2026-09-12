@@ -3,6 +3,7 @@ const RedeemCode = require('../models/RedeemCode');
 const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
+const { JWT_SECRET } = require('../config/jwtSecret');
 
 const PLAN_HIERARCHY = { 'Free': 1, 'Pro': 2, 'Max': 3 };
 
@@ -173,7 +174,7 @@ const claimRedeemCode = async (req, res) => {
         expires_at: expiresAt.toISOString(),
         name: user.name || '',
         email: user.email || ''
-      }, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', { expiresIn: '30d' });
+      }, JWT_SECRET, { expiresIn: '30d' });
 
       return res.json({
         success: true,
@@ -292,7 +293,7 @@ const claimRedeemCode = async (req, res) => {
         expires_at: expiresAt.toISOString(),
         name: user.name || '',
         email: user.email || ''
-      }, process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877', { expiresIn: '30d' });
+      }, JWT_SECRET, { expiresIn: '30d' });
 
       return res.json({
         success: true,

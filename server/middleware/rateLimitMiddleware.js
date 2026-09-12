@@ -36,7 +36,7 @@ const checkRateLimit = async (req, res, next) => {
 
       // Enforce IP-based Guest Rate Limit: 10 messages per 3 hours
       const xff = req.headers['x-forwarded-for'];
-      const rawIp = Array.isArray(xff) ? xff[0] : (typeof xff === 'string' ? xff.split(',')[0].trim() : req.socket?.remoteAddress || '127.0.0.1');
+      const rawIp = req.socket?.remoteAddress || (typeof xff === 'string' ? xff.split(',').pop().trim() : '127.0.0.1');
       const cleanIp = String(rawIp).replace(/^::ffff:/, '').replace(/[^a-zA-Z0-9]/g, '_');
       const guestId = `guest_${cleanIp}`;
 
@@ -125,7 +125,7 @@ const checkRateLimit = async (req, res, next) => {
       aiModel = await getModelConfig(model_id);
     }
 
-    const isKnownFree = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'].includes(model_id);
+    const isKnownFree = ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'].includes(model_id);
     const isExplicitlyAllowed = Array.isArray(plan.allowed_models) && (plan.allowed_models.includes('*') || plan.allowed_models.includes(model_id));
 
     if (aiModel && !isKnownFree && !isExplicitlyAllowed) {

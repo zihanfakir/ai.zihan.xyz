@@ -316,15 +316,22 @@ class MainActivity : AppCompatActivity() {
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastBackPressTime < BACK_PRESS_INTERVAL) {
-                        finish()
-                    } else {
-                        lastBackPressTime = currentTime
-                        Toast.makeText(this@MainActivity, getString(R.string.exit_prompt), Toast.LENGTH_SHORT).show()
+                webView.evaluateJavascript(
+                    "(function(){ try { if (typeof window.handleAppBackButton === 'function') { return window.handleAppBackButton(); } } catch(e){} return false; })()"
+                ) { result ->
+                    val handled = result?.trim()?.equals("true", ignoreCase = true) == true
+                    if (!handled) {
+                        if (webView.canGoBack()) {
+                            webView.goBack()
+                        } else {
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastBackPressTime < BACK_PRESS_INTERVAL) {
+                                finish()
+                            } else {
+                                lastBackPressTime = currentTime
+                                Toast.makeText(this@MainActivity, getString(R.string.exit_prompt), Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
             }

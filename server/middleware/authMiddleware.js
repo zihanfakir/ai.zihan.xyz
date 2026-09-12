@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore } = require('../config/memoryStore');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'alokpoth_secret_jwt_key_2026_super_secure_998877';
+const { JWT_SECRET } = require('../config/jwtSecret');
 
 function extractToken(req) {
   const authHeader = req.headers.authorization;
@@ -40,7 +39,7 @@ const protect = async (req, res, next) => {
     if (!user) {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email === decoded.email));
+      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
     if (!user && decoded && userId) {
@@ -53,7 +52,7 @@ const protect = async (req, res, next) => {
         role: isVerifiedAdminEmail ? 'admin' : 'user', // NEVER allow arbitrary admin escalation
         is_blocked: false,
         subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : (decoded.plan || 'Free'),
+          plan_name: isVerifiedAdminEmail ? 'Max' : 'Free',
           expires_at: decoded.expires_at || null,
           is_active: true
         }
@@ -105,7 +104,7 @@ const optionalProtect = async (req, res, next) => {
     if (!user) {
       const { getPersistedUsers } = require('../../utils/getModelConfig');
       const users = await getPersistedUsers();
-      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email === decoded.email));
+      user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
     if (!user && decoded && userId) {
@@ -118,7 +117,7 @@ const optionalProtect = async (req, res, next) => {
         role: isVerifiedAdminEmail ? 'admin' : 'user',
         is_blocked: false,
         subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : (decoded.plan || 'Free'),
+          plan_name: isVerifiedAdminEmail ? 'Max' : 'Free',
           expires_at: decoded.expires_at || null,
           is_active: true
         }
