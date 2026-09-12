@@ -139,6 +139,10 @@ const streamChatCompletions = async (req, res) => {
       }
 
       // Dynamic Fallback: Iterate through admin-configured fallback models
+      if (req.aborted || (abortController && abortController.signal.aborted)) {
+        return;
+      }
+
       const fallbackCandidates = (Array.isArray(sysSettings.fallback_models) && sysSettings.fallback_models.length > 0)
         ? sysSettings.fallback_models
         : ['openai/gpt-oss-120b', 'openrouter/free'];
@@ -146,6 +150,7 @@ const streamChatCompletions = async (req, res) => {
       const triedFallbackModels = new Set();
 
       for (const fbModelId of fallbackCandidates) {
+        if (req.aborted || (abortController && abortController.signal.aborted)) break;
         if (response && response.ok) break;
         if (!fbModelId || typeof fbModelId !== 'string') continue;
         const cleanFbModel = fbModelId.trim();
@@ -225,6 +230,12 @@ const streamChatCompletions = async (req, res) => {
 
     let hasStreamedData = false;
 
+    req.on('close', () => {
+      if (response && response.body && typeof response.body.destroy === 'function') {
+        try { response.body.destroy(); } catch {}
+      }
+    });
+
     response.body.on('data', (chunk) => {
       hasStreamedData = true;
       res.write(chunk);
@@ -236,7 +247,7 @@ const streamChatCompletions = async (req, res) => {
         if (hasStreamedData) {
           const userId = user ? String(user._id || user.id) : req.guestId;
           if (userId) {
-            if (user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
+            if (user && getIsMongoConnected()) {
               UsageLog.create({
                 user_id: userId,
                 model_id: model || 'openrouter/free',
@@ -437,7 +448,7 @@ const generateImage = async (req, res) => {
       // Record usage log for image generation
       const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
       if (userId) {
-        if (req.user && getIsMongoConnected() && mongoose.Types.ObjectId.isValid(userId)) {
+        if (req.user && getIsMongoConnected()) {
           UsageLog.create({
             user_id: userId,
             model_id: 'image-generation',

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
@@ -238,10 +239,16 @@ const updateProfile = async (req, res) => {
     const targetUserId = req.user._id || req.user.id;
     let user;
     if (getIsMongoConnected()) {
-      user = await User.findById(targetUserId);
-      if (cleanName) user.name = cleanName;
-      if (avatar !== undefined) user.avatar = avatar;
-      await user.save();
+      if (mongoose.Types.ObjectId.isValid(targetUserId)) {
+        user = await User.findById(targetUserId);
+      } else if (req.user && req.user.email) {
+        user = await User.findOne({ email: req.user.email.toLowerCase().trim() });
+      }
+      if (user) {
+        if (cleanName) user.name = cleanName;
+        if (avatar !== undefined) user.avatar = avatar;
+        await user.save();
+      }
     } else {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
@@ -291,7 +298,7 @@ const changePassword = async (req, res) => {
     if (cleanNewPass.length > 72) {
       return res.status(400).json({ success: false, error: 'নতুন পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে' });
     }
-    if (confirm_password && confirm_password !== new_password) {
+    if (!confirm_password || typeof confirm_password !== 'string' || confirm_password !== cleanNewPass) {
       return res.status(400).json({ success: false, error: 'নিশ্চিতকরণ পাসওয়ার্ড মেলেনি' });
     }
 
@@ -302,7 +309,11 @@ const changePassword = async (req, res) => {
     const userId = String(req.user._id || req.user.id || '');
     let user;
     if (getIsMongoConnected()) {
-      user = await User.findById(userId);
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId).select('+password');
+      } else if (req.user && req.user.email) {
+        user = await User.findOne({ email: req.user.email.toLowerCase().trim() }).select('+password');
+      }
       if (!user) {
         return res.status(404).json({ success: false, error: 'ব্যবহারকারী পাওয়া যায়নি' });
       }
@@ -310,8 +321,8 @@ const changePassword = async (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ success: false, error: 'বর্তমান পাসওয়ার্ডটি সঠিক নয়' });
       }
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(cleanNewPass, salt);
+      // Assign plaintext new password: UserSchema.pre('save') handles hashing once
+      user.password = cleanNewPass;
       await user.save();
     } else {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');

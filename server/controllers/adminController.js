@@ -189,6 +189,10 @@ const toggleBlockUser = async (req, res) => {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
+      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+        return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
+      }
+
       user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
       await user.save();
 
@@ -204,6 +208,10 @@ const toggleBlockUser = async (req, res) => {
       const user = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === cleanTarget));
       if (!user) {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
+      }
+
+      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+        return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
       }
 
       user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
@@ -236,6 +244,14 @@ const deleteUser = async (req, res) => {
       const ChatSession = require('../models/ChatSession');
       const UsageLog = require('../models/UsageLog');
 
+      const existingUser = mongoose.Types.ObjectId.isValid(userId)
+        ? await User.findById(userId)
+        : await User.findOne({ email: cleanTarget });
+
+      if (existingUser && existingUser.email && existingUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+        return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
+      }
+
       let userDoc = null;
       if (mongoose.Types.ObjectId.isValid(userId)) {
         userDoc = await User.findByIdAndDelete(userId);
@@ -251,6 +267,10 @@ const deleteUser = async (req, res) => {
     // 2. ALWAYS purge from Supabase __users_metadata__
     const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
     let users = await getPersistedUsers();
+    const targetUser = users.find(u => String(u._id) === String(userId) || String(u.id) === String(userId) || (u.email && u.email.toLowerCase().trim() === cleanTarget));
+    if (targetUser && targetUser.email && targetUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+      return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
+    }
     users = users.filter(u => String(u._id) !== String(userId) && String(u.id) !== String(userId) && (u.email ? u.email.toLowerCase().trim() !== cleanTarget : true));
     await savePersistedUsers(users);
 
@@ -326,6 +346,20 @@ const updatePlanLimits = async (req, res) => {
       if (is_active !== undefined) plan.is_active = Boolean(is_active);
 
       await plan.save();
+      try {
+        const { getPersistedPlans, savePersistedPlans } = require('../../utils/getModelConfig');
+        let plans = await getPersistedPlans();
+        plans = JSON.parse(JSON.stringify(plans));
+        const pIdx = plans.findIndex(p => p.name === planName);
+        if (pIdx !== -1) {
+          if (validLimit !== undefined) plans[pIdx].message_limit = validLimit;
+          if (validWindow !== undefined) plans[pIdx].window_hours = validWindow;
+          if (is_active !== undefined) plans[pIdx].is_active = Boolean(is_active);
+          await savePersistedPlans(plans);
+          debouncedSave();
+        }
+      } catch {}
+
       return res.json({
         success: true,
         message: `${plan.name} প্ল্যানের লিমিট সফলভাবে আপডেট করা হয়েছে।`,
@@ -395,6 +429,23 @@ const generateRedeemCodes = async (req, res) => {
         });
         createdCodes.push(codeDoc);
       }
+
+      try {
+        const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
+        let currentCodes = await getPersistedRedeemCodes();
+        currentCodes = [...currentCodes, ...createdCodes.map(c => ({
+          _id: String(c._id),
+          code: c.code,
+          plan_name: c.plan_name,
+          duration_days: c.duration_days,
+          is_used: false,
+          used_by: null,
+          used_at: null,
+          createdAt: c.createdAt
+        }))];
+        await savePersistedRedeemCodes(currentCodes);
+        debouncedSave();
+      } catch {}
     } else {
       const { getPersistedRedeemCodes, savePersistedRedeemCodes } = require('../../utils/getModelConfig');
       let currentCodes = await getPersistedRedeemCodes();
@@ -439,7 +490,9 @@ const generateRedeemCodes = async (req, res) => {
 const getRedeemCodes = async (req, res) => {
   try {
     if (getIsMongoConnected()) {
-      const codes = await RedeemCode.find().populate('used_by', 'name email').sort({ createdAt: -1 });
+      const codes = await RedeemCode.find()
+        .populate({ path: 'used_by', model: 'User', select: 'name email', strictPopulate: false })
+        .sort({ createdAt: -1 });
       return res.json({ success: true, count: codes.length, codes });
     } else {
       const { getPersistedRedeemCodes, getPersistedUsers } = require('../../utils/getModelConfig');
@@ -547,12 +600,13 @@ const updateModel = async (req, res) => {
     const { premium, efficient, name, base_url, api_key, clear_api_key } = req.body;
 
     const hasValidKey = typeof api_key === 'string' && api_key.trim().length > 0;
+    const shouldClearKey = clear_api_key === true || (typeof api_key === 'string' && api_key.trim() === '');
     const cleanBaseUrl = base_url !== undefined ? normalizeBaseUrl(base_url) : undefined;
 
     // 1. Save api_key in Supabase api_keys table only if non-empty or explicitly requested to clear
     if (hasValidKey) {
       await upsertApiKeyToSupabase(modelId, api_key.trim());
-    } else if (clear_api_key === true) {
+    } else if (shouldClearKey) {
       await upsertApiKeyToSupabase(modelId, '');
     }
 
@@ -565,7 +619,7 @@ const updateModel = async (req, res) => {
         if (name !== undefined) mongoModel.name = name;
         if (cleanBaseUrl !== undefined) mongoModel.base_url = cleanBaseUrl;
         if (hasValidKey) mongoModel.api_key = api_key.trim();
-        else if (clear_api_key === true) mongoModel.api_key = '';
+        else if (shouldClearKey) mongoModel.api_key = '';
         await mongoModel.save();
       }
     }
@@ -599,7 +653,7 @@ const updateModel = async (req, res) => {
       if (cleanBaseUrl !== undefined) model.base_url = cleanBaseUrl;
       if (hasValidKey) {
         model.api_key = api_key.trim();
-      } else if (clear_api_key === true) {
+      } else if (shouldClearKey) {
         model.api_key = '';
       } else if (!model.api_key) {
         // preserve from db if missing

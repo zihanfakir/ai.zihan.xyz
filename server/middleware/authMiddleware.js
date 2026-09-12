@@ -32,8 +32,8 @@ const protect = async (req, res, next) => {
     if (getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         user = await User.findById(userId);
-      } else {
-        user = await User.findOne({ $or: [{ _id: userId }, { email: decoded.email }] });
+      } else if (decoded.email) {
+        user = await User.findOne({ email: decoded.email.toLowerCase().trim() });
       }
     }
     
@@ -97,8 +97,8 @@ const optionalProtect = async (req, res, next) => {
     if (getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         user = await User.findById(userId);
-      } else {
-        user = await User.findOne({ $or: [{ _id: userId }, { email: decoded.email }] });
+      } else if (decoded.email) {
+        user = await User.findOne({ email: decoded.email.toLowerCase().trim() });
       }
     }
     

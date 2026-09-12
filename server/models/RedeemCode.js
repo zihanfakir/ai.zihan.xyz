@@ -23,6 +23,7 @@ const RedeemCodeSchema = new mongoose.Schema({
   },
   used_by: {
     type: mongoose.Schema.Types.Mixed,
+    ref: 'User',
     default: null
   },
   used_at: {
