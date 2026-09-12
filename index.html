@@ -155,15 +155,30 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
+    html {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      overscroll-behavior: none;
+      -webkit-text-size-adjust: 100%;
+    }
+
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
-      height: 100vh;
+      height: 100%;
       height: 100dvh;
-      height: calc(var(--app-height, 100vh));
+      height: calc(var(--app-height, 100dvh));
+      max-height: 100%;
+      width: 100%;
+      position: fixed;
+      inset: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      overscroll-behavior: none;
       transition: background-color 0.3s ease;
     }
 
@@ -1133,6 +1148,12 @@
       background: linear-gradient(0deg, var(--bg-main) 60%, transparent 100%);
       flex-shrink: 0;
       z-index: 10;
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+
+    .input-card, .chat-textarea, .attach-menu, .image-preview-row, .file-preview-row {
+      touch-action: pan-y;
     }
 
     .input-card {
@@ -1855,6 +1876,8 @@
       }
       .input-wrapper {
         padding: 0 8px max(12px, env(safe-area-inset-bottom, 12px));
+        touch-action: none;
+        overscroll-behavior: none;
       }
       .input-card {
         padding: 8px 10px;
@@ -2137,7 +2160,6 @@
 
   <nav class="navbar">
     <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
-      <img src="app_logo.png" alt="Alo AI" class="brand-logo-img">
       <span class="brand-name">Alokpoth AI</span>
     </button>
     <div class="navbar-right">
@@ -2152,10 +2174,7 @@
   <div class="modal-overlay" id="brandMenuOverlay">
     <div class="modal-sheet brand-menu-sheet">
       <div class="modal-header">
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <img src="app_logo.png" alt="Alo AI" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;">
-          <span>Alokpoth AI</span>
-        </div>
+        <span>Alokpoth AI</span>
         <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close">&times;</button>
       </div>
       <div class="brand-menu-list">
@@ -2440,7 +2459,6 @@
   <div class="chat-container" id="scrollContainer">
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        <img src="app_logo.png" alt="Alo AI" class="empty-state-logo">
         <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
         <span>যেকোনো প্রশ্ন লিখুন</span>
         <div class="quick-prompts-row">
@@ -2901,21 +2919,35 @@
       appHeightRaf = requestAnimationFrame(() => {
         const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
         document.documentElement.style.setProperty("--app-height", `${h}px`);
+        if (window.scrollY !== 0 || window.scrollX !== 0) {
+          window.scrollTo(0, 0);
+        }
       });
     }
     setAppHeight();
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", () => {
         setAppHeight();
-        if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) {
-          setTimeout(() => {
-            try { document.activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch(e) {}
-          }, 120);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          if (typeof scrollToBottom === "function") scrollToBottom(false);
+        }, 60);
+      });
+      window.visualViewport.addEventListener("scroll", () => {
+        if (window.scrollY !== 0 || window.scrollX !== 0) {
+          window.scrollTo(0, 0);
         }
       });
     }
     window.addEventListener("resize", setAppHeight);
-    window.addEventListener("orientationchange", setAppHeight);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(setAppHeight, 150);
+    });
+    window.addEventListener("scroll", () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+      }
+    }, { passive: true });
 
     const COPY_ALLOWED_SELECTOR = "input, textarea, .chat-textarea, .user-bubble, .ai-bubble, pre, code, [contenteditable='true']";
 
@@ -2934,10 +2966,7 @@
     function updateSelectedModelUI() {
       const current = MODELS.find(m => m.id === selectedModelId);
       if (current && modelTriggerLabel) {
-        let badgeHtml = "";
-        if (current.efficient) badgeHtml = ` <span class="badge-tag badge-max" style="font-size: 0.65rem; padding: 1px 6px;">MAX</span>`;
-        else if (current.premium) badgeHtml = ` <span class="badge-tag badge-pro" style="font-size: 0.65rem; padding: 1px 6px;">PRO</span>`;
-        modelTriggerLabel.innerHTML = escapeHtml(current.name) + badgeHtml;
+        modelTriggerLabel.textContent = current.name;
       }
     }
 
@@ -3125,7 +3154,7 @@
         card.addEventListener("click", () => {
           selectedModelId = m.id;
           try { localStorage.setItem("alokpoth_selected_model", m.id); } catch {}
-          modelTriggerLabel.innerHTML = escapeHtml(m.name) + badgeHtml;
+          modelTriggerLabel.textContent = m.name;
           if (messagesHistory[0] && messagesHistory[0].role === "system") {
             messagesHistory[0].content = buildSystemPrompt(m.name, true, true);
           }
@@ -4234,7 +4263,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       messagesHistory = [{ role: "system", content: messagesHistory[0].content }];
       chatStream.innerHTML = `
         <div class="empty-state" id="emptyState">
-          <img src="app_logo.png" alt="Alo AI" class="empty-state-logo">
           <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
           <span>যেকোনো প্রশ্ন লিখুন</span>
           <div class="quick-prompts-row">

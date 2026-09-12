@@ -169,6 +169,10 @@ public class MainActivity extends AppCompatActivity {
             cookieManager.setAcceptThirdPartyCookies(mWebView, true);
         }
 
+        mWebView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        mWebView.setVerticalScrollBarEnabled(false);
+        mWebView.setHorizontalScrollBarEnabled(false);
+
         mWebView.addJavascriptInterface(new WebAppInterface(this), "AloAndroid");
 
         mWebView.setWebChromeClient(new WebChromeClient() {

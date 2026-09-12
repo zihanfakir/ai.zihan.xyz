@@ -6,9 +6,9 @@
 
 Alo AI এখন অ্যান্ড্রয়েডে সরাসরি নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
 
-- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download v1.0.4)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.4/AloAI.apk)
-- 🏷️ **GitHub Releases:** [Latest Release v1.0.4](https://github.com/zihanfakir/ai.zihan.xyz/releases/latest)
-- ⚡ **ফিচারসমূহ:** নতুন অফিসিয়াল অ্যাপ লোগো (অ্যান্ড্রয়েড ও ওয়েব), মডেলের আসল ত্রুটি গোপন রেখে নিরাপদ মেসেজ প্রদর্শন, আউটপুট ব্যর্থ হলে সহজে "আবার চেষ্টা করুন" (Regenerate) বাটন, ব্র্যান্ডেড Interwind স্প্ল্যাশ লোডার, ক্যামেরা ও ফাইল আপলোড, ভয়েস চ্যাট ও মাইক্রোফোন সাপোর্ট।
+- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download v1.0.5)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.5/AloAI.apk)
+- 🏷️ **GitHub Releases:** [Latest Release v1.0.5](https://github.com/zihanfakir/ai.zihan.xyz/releases/latest)
+- ⚡ **ফিচারসমূহ:** মোবাইল কিবোর্ড স্ক্রোল ফিক্স (টাইপ বারের নিচে স্ক্রোল করলে পেজ সরে যাওয়ার সমস্যার সমাধান), ইন-অ্যাপ লোগো অপসারণ করে ক্লিন ইন্টারফেস, শুধুমাত্র মডেল চয়েস ডায়ালগে PRO/MAX ব্যাজ প্রদর্শন, নিরাপদ এরর হ্যান্ডলিং ও রিট্রাই সাপোর্ট।
 
 ## Features
 
