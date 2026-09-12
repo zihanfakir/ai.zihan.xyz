@@ -49,6 +49,12 @@ index_recovered.html
 *.jpeg
 account_limits_view_*.png
 
+# Whitelist App Logo & Android Res Icons
+!app logo.png
+!app_logo.png
+!favicon.png
+!android/app/src/main/res/**/*.png
+
 # Android build outputs & caches
 android/.gradle/
 android/build/

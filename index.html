@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#09090b">
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="shortcut icon" type="image/png" href="app_logo.png">
+  <link rel="apple-touch-icon" href="app_logo.png">
   <title>Alokpoth AI</title>
   
   <script>
@@ -193,15 +196,31 @@
     }
 
     .brand-menu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       border: none;
       cursor: pointer;
-      padding: 8px 14px;
+      padding: 6px 14px 6px 10px;
       border-radius: 999px;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.15s;
     }
 
     .brand-menu-btn:hover {
       background-color: rgba(128, 128, 128, 0.15);
+    }
+    .brand-menu-btn:active {
+      transform: scale(0.97);
+    }
+
+    .brand-logo-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
     .brand-menu-sheet {
@@ -1032,6 +1051,64 @@
 
     .status-indicator.status-error {
       color: #ef4444;
+    }
+
+    .ai-error-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      border-radius: 12px;
+      color: #f87171;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .ai-error-box svg {
+      flex-shrink: 0;
+      fill: currentColor;
+    }
+
+    .generation-error-note, .generation-stopped-note {
+      margin-top: 12px;
+      padding: 6px 12px;
+      background: rgba(128, 128, 128, 0.08);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      display: inline-block;
+    }
+
+    .action-icon-btn.regen-btn-highlight {
+      border-color: rgba(59, 130, 246, 0.4);
+      color: var(--accent-color);
+      background: rgba(59, 130, 246, 0.08);
+      font-weight: 600;
+    }
+
+    .action-icon-btn.regen-btn-highlight:hover {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: var(--accent-color);
+      color: var(--text-main);
+    }
+
+    .empty-state-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      margin-bottom: 8px;
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      animation: emptyStateLogoPulse 3.5s ease-in-out infinite;
+    }
+
+    @keyframes emptyStateLogoPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .ai-bubble.streaming > *:last-child::after,
@@ -2060,6 +2137,7 @@
 
   <nav class="navbar">
     <button class="brand-menu-btn sheen-surface" id="brandMenuBtn" type="button" aria-label="মেনু">
+      <img src="app_logo.png" alt="Alo AI" class="brand-logo-img">
       <span class="brand-name">Alokpoth AI</span>
     </button>
     <div class="navbar-right">
@@ -2074,7 +2152,10 @@
   <div class="modal-overlay" id="brandMenuOverlay">
     <div class="modal-sheet brand-menu-sheet">
       <div class="modal-header">
-        <span>Alokpoth AI</span>
+        <div style="display: inline-flex; align-items: center; gap: 8px;">
+          <img src="app_logo.png" alt="Alo AI" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;">
+          <span>Alokpoth AI</span>
+        </div>
         <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close">&times;</button>
       </div>
       <div class="brand-menu-list">
@@ -2359,7 +2440,8 @@
   <div class="chat-container" id="scrollContainer">
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        আমি আপনাকে কীভাবে সাহায্য করতে পারি?
+        <img src="app_logo.png" alt="Alo AI" class="empty-state-logo">
+        <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
         <span>যেকোনো প্রশ্ন লিখুন</span>
         <div class="quick-prompts-row">
           <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">💻 ফুল ওয়েবসাইট কোড</button>
@@ -4152,7 +4234,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       messagesHistory = [{ role: "system", content: messagesHistory[0].content }];
       chatStream.innerHTML = `
         <div class="empty-state" id="emptyState">
-          আমি আপনাকে কীভাবে সাহায্য করতে পারি?
+          <img src="app_logo.png" alt="Alo AI" class="empty-state-logo">
+          <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
           <span>যেকোনো প্রশ্ন লিখুন</span>
           <div class="quick-prompts-row">
             <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">💻 ফুল ওয়েবসাইট কোড</button>
@@ -4222,16 +4305,41 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const targetRow = regenBtn.closest(".message-row");
       if (!targetRow) return;
 
-      const allMessageRows = Array.from(chatStream.querySelectorAll(".message-row"));
-      const rowIndex = allMessageRows.indexOf(targetRow);
-      if (rowIndex !== -1) {
-        messagesHistory = messagesHistory.slice(0, rowIndex + 1);
+      // Count how many user message rows appear before this assistant row
+      const allRows = Array.from(chatStream.children);
+      const targetIndex = allRows.indexOf(targetRow);
+      
+      let userCount = 0;
+      for (let i = 0; i <= (targetIndex !== -1 ? targetIndex : allRows.length - 1); i++) {
+        if (allRows[i] && allRows[i].classList && allRows[i].classList.contains("user")) {
+          userCount++;
+        }
+      }
+
+      // Truncate messagesHistory so that the corresponding user message is the last element
+      if (userCount > 0) {
+        let seenUsers = 0;
+        let cutIndex = -1;
+        for (let i = 0; i < messagesHistory.length; i++) {
+          if (messagesHistory[i].role === "user") {
+            seenUsers++;
+            if (seenUsers === userCount) {
+              cutIndex = i;
+              break;
+            }
+          }
+        }
+        if (cutIndex !== -1) {
+          messagesHistory = messagesHistory.slice(0, cutIndex + 1);
+        }
       } else {
-        if (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
+        // Fallback: pop last assistant message if any exists
+        while (messagesHistory.length > 0 && messagesHistory[messagesHistory.length - 1].role === "assistant") {
           messagesHistory.pop();
         }
       }
 
+      // Remove the targetRow and all subsequent rows from DOM
       let node = targetRow;
       while (node) {
         const next = node.nextSibling;
@@ -4621,20 +4729,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
       });
 
       if (!response.ok) {
-        let errText = "";
-        try {
-          const json = await response.json();
-          errText = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : (json.error || json.message);
-        } catch {
-          errText = await response.text().catch(() => "");
-        }
         if (response.status === 401 || response.status === 403) {
-          throw new Error(errText || "এই মডেল ব্যবহারের জন্য লগইন অথবা প্ল্যান আপগ্রেড প্রয়োজন।");
+          throw new Error("এই মডেল ব্যবহারের জন্য লগইন অথবা প্ল্যান আপগ্রেড প্রয়োজন।");
         }
         if (response.status === 429) {
-          throw new Error(errText || "মেসেজ পাঠানোর সীমা শেষ হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।");
+          throw new Error("মেসেজ পাঠানোর সীমা শেষ হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।");
         }
-        throw new Error(errText || `সার্ভার ত্রুটি (Status ${response.status})`);
+        throw new Error("সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।");
       }
 
       if (!response.body) {
@@ -4664,8 +4765,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
           try {
             const json = JSON.parse(payload);
             if (json.error) {
-              const errMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
-              throw new Error(errMsg);
+              const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
+              const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("Error") && !rawErrMsg.includes("/"))
+                ? rawErrMsg
+                : "সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।";
+              throw new Error(safeMsg);
             }
             const delta = json.choices?.[0]?.delta?.content || json.choices?.[0]?.text || json.text || "";
             if (delta) {
@@ -4855,7 +4959,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
             scrollToBottom(); resolve();
           } catch (err) {
             aiTextElement.classList.remove("streaming", "no-children");
-            aiTextElement.innerHTML = `<span class="status-indicator status-error">ছবি তৈরি করা যায়নি: ${(err.message || "অজানা সমস্যা")}</span>`;
+            aiTextElement.innerHTML = `
+              <div class="ai-error-box">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>ছবি তৈরি করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>
+              </div>
+            `;
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
+            regenBtn.classList.add("regen-btn-highlight");
             regenBtn.style.display = "inline-flex";
             scrollToBottom(); resolve();
           }
@@ -4957,6 +5068,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
               
               copyBtn.dataset.text = renderedStream;
               copyBtn.style.display = "inline-flex";
+              regenBtn.classList.remove("regen-btn-highlight");
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
               regenBtn.style.display = "inline-flex";
               
               messagesHistory.push({ role: "assistant", content: renderedStream });
@@ -4992,7 +5105,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (!started) {
             clearInterval(statusIntervalId);
             aiTextElement.classList.remove("streaming", "no-children");
-            aiTextElement.innerHTML = `<span class="status-indicator status-error">কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>`;
+            aiTextElement.innerHTML = `
+              <div class="ai-error-box">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>দুঃখিত, কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>
+              </div>
+            `;
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
+            regenBtn.classList.add("regen-btn-highlight");
             regenBtn.style.display = "inline-flex";
             copyBtn.style.display = "none";
             finishUp();
@@ -5009,12 +5129,58 @@ Capabilities & Code Generation Instructions (CRITICAL):
           clearInterval(statusIntervalId);
           aiTextElement.classList.remove("streaming", "no-children");
           aiTextElement.style.whiteSpace = "";
-          if (err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"))) {
-            aiTextElement.textContent = renderedStream ? (renderedStream + "\n\n(উত্তর তৈরি থামানো হয়েছে)") : "উত্তর তৈরি থামানো হয়েছে।";
+
+          const isAbort = err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"));
+
+          if (isAbort) {
+            if (renderedStream) {
+              try {
+                aiTextElement.innerHTML = safeMarkdown(renderedStream) + `<div class="generation-stopped-note">⏹ উত্তর তৈরি থামানো হয়েছে</div>`;
+                enhanceCodeBlocks(aiTextElement);
+              } catch {
+                aiTextElement.textContent = renderedStream + "\n\n(উত্তর তৈরি থামানো হয়েছে)";
+              }
+            } else {
+              aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
+            }
           } else {
-            aiTextElement.textContent = `সমস্যা হয়েছে: ${err.message}`;
+            // NEVER reveal internal model names or technical error stack traces
+            let userFriendlyMsg = "দুঃখিত, এই মুহূর্তে কোনো উত্তর পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।";
+            if (!navigator.onLine) {
+              userFriendlyMsg = "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে। আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
+            } else if (err.message && (err.message.includes("সীমা") || err.message.includes("429"))) {
+              userFriendlyMsg = "মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।";
+            } else if (err.message && (err.message.includes("লগইন") || err.message.includes("প্ল্যান") || err.message.includes("অনুমোদন"))) {
+              userFriendlyMsg = err.message;
+            }
+
+            if (renderedStream && renderedStream.trim().length > 0) {
+              try {
+                aiTextElement.innerHTML = safeMarkdown(renderedStream) + `<div class="generation-error-note">⚠️ সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।</div>`;
+                enhanceCodeBlocks(aiTextElement);
+              } catch {
+                aiTextElement.textContent = renderedStream;
+              }
+            } else {
+              aiTextElement.innerHTML = `
+                <div class="ai-error-box">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <span>${userFriendlyMsg}</span>
+                </div>
+              `;
+            }
           }
+
+          regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
+          regenBtn.classList.add("regen-btn-highlight");
           regenBtn.style.display = "inline-flex";
+
+          if (renderedStream && renderedStream.trim().length > 0) {
+            copyBtn.dataset.text = renderedStream;
+            copyBtn.style.display = "inline-flex";
+          } else {
+            copyBtn.style.display = "none";
+          }
           finishUp();
         }
       });

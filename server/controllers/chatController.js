@@ -114,7 +114,14 @@ const streamChatCompletions = async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      res.write(`data: ${JSON.stringify({ error: `[Server API Error] (${response.status}): ${errText}` })}\n\n`);
+      console.error(`[Upstream API Error] Status ${response.status}:`, errText);
+      let userSafeError = 'সার্ভার থেকে কোনো উত্তর পাওয়া যায়নি।';
+      if (response.status === 429) {
+        userSafeError = 'মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
+      } else if (response.status === 401 || response.status === 403) {
+        userSafeError = 'এই মডেল ব্যবহারের জন্য অনুমোদন প্রয়োজন।';
+      }
+      res.write(`data: ${JSON.stringify({ error: userSafeError })}\n\n`);
       res.write('data: [DONE]\n\n');
       return res.end();
     }
