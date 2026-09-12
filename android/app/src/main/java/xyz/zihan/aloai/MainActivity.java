@@ -317,8 +317,8 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefresh.setColorSchemeResources(R.color.primary);
         mSwipeRefresh.setProgressBackgroundColorSchemeResource(R.color.surface);
 
-        // Only allow swipe refresh when at the very top of the WebView
-        mSwipeRefresh.setOnChildScrollUpCallback((parent, child) -> mWebView.getScrollY() > 0);
+        // Disable pull-to-refresh on chat view to prevent accidental reloads when scrolling up through messages
+        mSwipeRefresh.setEnabled(false);
 
         mSwipeRefresh.setOnRefreshListener(() -> {
             if (isNetworkAvailable()) {
@@ -328,6 +328,13 @@ public class MainActivity extends AppCompatActivity {
                 showOfflineView(true);
             }
         });
+    }
+
+    public void reloadWebView() {
+        if (mWebView != null && isNetworkAvailable()) {
+            showOfflineView(false);
+            mWebView.reload();
+        }
     }
 
     private void setupBackNavigation() {
@@ -362,6 +369,8 @@ public class MainActivity extends AppCompatActivity {
     private void showOfflineView(boolean show) {
         mOfflineView.setVisibility(show ? View.VISIBLE : View.GONE);
         mWebView.setVisibility(show ? View.GONE : View.VISIBLE);
+        // Only enable swipe refresh on offline error view so user can pull down to retry
+        mSwipeRefresh.setEnabled(show);
         if (show) {
             mProgressBar.setVisibility(View.GONE);
             mInitialSpinner.setVisibility(View.GONE);

@@ -8,16 +8,16 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 public class WebAppInterface {
-    private final Context mContext;
+    private final MainActivity mActivity;
 
-    public WebAppInterface(Context context) {
-        this.mContext = context;
+    public WebAppInterface(MainActivity activity) {
+        this.mActivity = activity;
     }
 
     @JavascriptInterface
     public void vibrate(long milliseconds) {
         try {
-            Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            Vibrator v = (Vibrator) mActivity.getSystemService(Context.VIBRATOR_SERVICE);
             if (v != null && v.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     v.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -32,8 +32,13 @@ public class WebAppInterface {
     @JavascriptInterface
     public void showToast(String message) {
         if (message != null && !message.trim().isEmpty()) {
-            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+            mActivity.runOnUiThread(() -> Toast.makeText(mActivity, message, Toast.LENGTH_SHORT).show());
         }
+    }
+
+    @JavascriptInterface
+    public void reload() {
+        mActivity.runOnUiThread(mActivity::reloadWebView);
     }
 
     @JavascriptInterface
@@ -43,6 +48,6 @@ public class WebAppInterface {
 
     @JavascriptInterface
     public String getAppVersion() {
-        return "1.0.0";
+        return "1.0.1";
     }
 }
