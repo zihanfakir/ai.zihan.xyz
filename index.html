@@ -7908,7 +7908,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function startDynamicStatusSequence(element) {
       element.style.whiteSpace = "";
       setBubbleStatus(element, "thinking", "চিন্তা করছি...");
-      return null;
+      
+      let step = 0;
+      const intervalId = setInterval(() => {
+        step++;
+        if (step % 2 === 1) {
+          setBubbleStatus(element, "working", "অপেক্ষা করুন...");
+        } else {
+          setBubbleStatus(element, "thinking", "চিন্তা করছি...");
+        }
+      }, 3500);
+      
+      return intervalId;
     }
 
     function setBubbleGeneratingImage(element) {
