@@ -8270,7 +8270,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             } else if (err.name === "AbortError" || err === "timeout" || (err.message && err.message.toLowerCase().includes("timeout"))) {
               userFriendlyMsg = `AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
               errorDetail = "মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য কোনো মডেল নির্বাচন করে চেষ্টা করুন।";
-            } else if (err.message && (err.message.includes("বার্তা সীমা শেষ") || err.message.includes("গেস্ট বার্তা সীমা"))) {
+            } else if (err.message && err.message.includes("বার্তা সীমা শেষ")) {
               userFriendlyMsg = err.message;
               errorDetail = "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && (err.message.includes("মডেল প্রোভাইডার") || err.message.includes("429"))) {

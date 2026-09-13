@@ -49,12 +49,12 @@ const checkRateLimit = async (req, res, next) => {
         res.setHeader('Retry-After', Math.max(1, Math.ceil((usageDetails.resetInMinutes || 180) * 60)));
         return res.status(429).json({
           success: false,
-          error: `গেস্ট বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন।`
+          error: `বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা লগইন করুন।`
         });
       }
 
       req.guestId = guestId;
-      req.currentPlan = { name: 'Free', displayName: 'গেস্ট প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['*'] };
+      req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['*'] };
       return next();
     }
 
