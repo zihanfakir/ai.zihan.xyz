@@ -8273,9 +8273,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
             } else if (err.message && (err.message.includes("সীমা") || err.message.includes("429"))) {
               userFriendlyMsg = "মেসেজ পাঠানোর সীমা শেষ হয়েছে।";
               errorDetail = "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
-            } else if (err.message && (err.message.includes("লগইন") || err.message.includes("প্ল্যান") || err.message.includes("অনুমোদন"))) {
+            } else if (err.message && (err.message.includes("প্ল্যান প্রয়োজন") || err.message.includes("লগইন করুন এবং") || err.message.includes("প্ল্যান সক্রিয় করুন"))) {
               userFriendlyMsg = err.message;
-              errorDetail = "অনুমোদিত মডেল নির্বাচন করুন অথবা লগইন করুন।";
+              errorDetail = "অনুমোদিত মডেল নির্বাচন করুন অথবা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && err.message.length > 5 && !err.message.includes("fetch") && !err.message.includes("Object") && !err.message.includes("JSON")) {
               userFriendlyMsg = err.message;
               errorDetail = "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিয়ে পুনরায় চেষ্টা করতে পারেন।";

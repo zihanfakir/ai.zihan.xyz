@@ -161,11 +161,10 @@ const streamChatCompletions = async (req, res) => {
     if (!response || !response.ok) {
       const status = response ? response.status : 504;
       const modelDisplayName = (aiModelConfig && (aiModelConfig.name || aiModelConfig.id)) || model || 'AI Model';
-      let userSafeError = `নির্বাচিত AI মডেলটি (${modelDisplayName}) এই মুহূর্তে সাড়া দিচ্ছে না। অনুগ্রহ করে অন্য কোনো মডেল নির্বাচন করুন।`;
       if (status === 429) {
-        userSafeError = 'মেসেজ পাঠানোর সীমা শেষ হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।';
+        userSafeError = `মডেল প্রোভাইডার সার্ভারের অনুরোধের সীমা শেষ হয়েছে (${modelDisplayName})। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা অন্য কোনো মডেল নির্বাচন করুন।`;
       } else if (status === 401 || status === 403) {
-        userSafeError = 'এই মডেল ব্যবহারের জন্য অনুমোদন প্রয়োজন।';
+        userSafeError = `AI মডেল প্রোভাইডারের কী বা সার্ভার সংযোগে সমস্যা দেখা দিয়েছে (${modelDisplayName})। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন অথবা অন্য মডেল নির্বাচন করুন।`;
       } else if (status === 502 || status === 503 || status === 504) {
         userSafeError = `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
       }
