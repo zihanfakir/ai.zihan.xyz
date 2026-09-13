@@ -5061,6 +5061,7 @@
     async function fetchModelsFromServer() {
       try {
         const res = await fetch(`${API_BASE}/chat/models`);
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.models) && data.models.length > 0) {
           const statusMap = new Map();
@@ -7306,9 +7307,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       isGenerating = true;
+      deductCredit(1);
       updateSendAvailability();
       try {
         await generateAIReply();
+      } catch (err) {
+        refundCredit();
       } finally {
         isGenerating = false;
         updateSendAvailability();

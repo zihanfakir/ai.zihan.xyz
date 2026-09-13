@@ -844,9 +844,9 @@ const updateModel = async (req, res) => {
       await upsertApiKeyToSupabase(modelId, '');
     }
 
-    // 2. If Mongo connected, update Mongo document with fields
+    // 2. If Mongo connected, update or create Mongo document with fields
     if (getIsMongoConnected()) {
-      const mongoModel = await AiModel.findOne({ $or: [{ model_id: modelId }, { id: modelId }] });
+      let mongoModel = await AiModel.findOne({ $or: [{ model_id: modelId }, { id: modelId }] });
       if (mongoModel) {
         if (premium !== undefined) mongoModel.premium = Boolean(premium);
         if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
@@ -855,6 +855,18 @@ const updateModel = async (req, res) => {
         if (hasValidKey) mongoModel.api_key = api_key.trim();
         else if (shouldClearKey) mongoModel.api_key = '';
         await mongoModel.save();
+      } else {
+        await AiModel.create({
+          model_id: modelId,
+          name: name || modelId,
+          base_url: cleanBaseUrl || '',
+          api_key: hasValidKey ? api_key.trim() : '',
+          premium: Boolean(premium),
+          efficient: Boolean(efficient),
+          provider: 'Alokpoth',
+          type: 'custom',
+          order: 99
+        }).catch(() => {});
       }
     }
 
@@ -1133,9 +1145,10 @@ const reorderModels = async (req, res) => {
     }
 
     if (modelIds && Array.isArray(modelIds) && modelIds.length > 0) {
+      const uniqueModelIds = [...new Set(modelIds)];
       const reordered = [];
-      for (let i = 0; i < modelIds.length; i++) {
-        const id = modelIds[i];
+      for (let i = 0; i < uniqueModelIds.length; i++) {
+        const id = uniqueModelIds[i];
         const m = models.find(x => (x.id === id || x.model_id === id));
         if (m) {
           m.order = i + 1;

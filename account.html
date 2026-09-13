@@ -1097,7 +1097,9 @@
             if (card) {
               const quotaDiv = card.querySelector(".plan-card-quota");
               if (quotaDiv) {
-                quotaDiv.innerHTML = `${toBengaliDigits(p.message_limit)} <span>বার্তা / ${toBengaliDigits(p.window_hours)} ঘণ্টা</span>`;
+                const safeLimit = escapeHtml(String(p.message_limit));
+                const safeHours = escapeHtml(String(p.window_hours));
+                quotaDiv.innerHTML = `${toBengaliDigits(safeLimit)} <span>বার্তা / ${toBengaliDigits(safeHours)} ঘণ্টা</span>`;
               }
             }
           });
@@ -1162,7 +1164,7 @@
         document.getElementById("editNameInput").value = user.name || "";
         document.getElementById("avatarLetter").textContent = (user.name || user.email || "অ").charAt(0).toUpperCase();
 
-        const isAdmin = (user.role === "admin" || (user.email && user.email.toLowerCase() === "zihanfakir@gmail.com"));
+        const isAdmin = (user.role === "admin" || (user.email && user.email.toLowerCase().trim() === "zihanfakir@gmail.com"));
         document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : "সদস্য";
 
         const currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");

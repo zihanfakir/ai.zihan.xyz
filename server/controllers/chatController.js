@@ -70,7 +70,9 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
 
 const streamChatCompletions = async (req, res) => {
   try {
-    const { model, messages } = req.body;
+    const { messages } = req.body;
+    const cleanModel = (typeof req.body.model === 'string' && req.body.model.trim()) ? req.body.model.trim() : 'openrouter/free';
+    const model = cleanModel;
     const user = req.user;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -90,18 +92,18 @@ const streamChatCompletions = async (req, res) => {
     // Load model configuration with API key
     let aiModelConfig = null;
     if (getIsMongoConnected()) {
-      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: model }, { id: model }] });
+      aiModelConfig = await AiModel.findOne({ $or: [{ model_id: cleanModel }, { id: cleanModel }] });
       if (aiModelConfig && !aiModelConfig.api_key) {
-        const supabaseConfig = await getModelConfig(model);
+        const supabaseConfig = await getModelConfig(cleanModel);
         if (supabaseConfig && supabaseConfig.api_key) {
           aiModelConfig = { ...aiModelConfig.toObject(), api_key: supabaseConfig.api_key };
         }
       }
     } else {
-      aiModelConfig = await getModelConfig(model);
+      aiModelConfig = await getModelConfig(cleanModel);
     }
 
-    const { targetUrl, targetKey, actualModel } = await resolveModelTarget(model, aiModelConfig);
+    const { targetUrl, targetKey, actualModel } = await resolveModelTarget(cleanModel, aiModelConfig);
 
     // Upstream abort controller: triggered ONLY if client terminates response stream early
     const abortController = new AbortController();
@@ -198,7 +200,7 @@ const streamChatCompletions = async (req, res) => {
     const resetStreamIdleWatchdog = () => {
       if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
       streamIdleTimeout = setTimeout(() => {
-        console.warn('[Stream Watchdog]: Inactivity timeout reached (60s), terminating stream.');
+        console.warn('[Stream Watchdog]: Inactivity timeout reached (45s), terminating stream.');
         if (response && response.body && typeof response.body.destroy === 'function') {
           try { response.body.destroy(); } catch {}
         }
@@ -207,8 +209,11 @@ const streamChatCompletions = async (req, res) => {
           res.write('data: [DONE]\n\n');
           res.end();
         }
-      }, 60000);
+      }, 45000);
     };
+
+    // Arm watchdog immediately so hanging connections timeout even before first byte
+    resetStreamIdleWatchdog();
 
     return new Promise((resolve) => {
       let isResolved = false;
@@ -240,10 +245,10 @@ const streamChatCompletions = async (req, res) => {
           if (hasContentTokens) {
             const userId = user ? String(user._id || user.id) : req.guestId;
             if (userId) {
-              if (user && getIsMongoConnected()) {
+              if (getIsMongoConnected()) {
                 UsageLog.create({
                   user_id: userId,
-                  model_id: effectiveModel || model || 'gemini-3.5-flash-lite',
+                  model_id: effectiveModel || cleanModel || 'gemini-3.5-flash-lite',
                   timestamp: new Date()
                 }).catch(err => console.error('[UsageLog Write Error]:', err.message));
                 incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});

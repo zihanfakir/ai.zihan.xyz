@@ -255,7 +255,47 @@ const claimRedeemCode = async (req, res) => {
       const expiresAt = new Date(baseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
       const subscriptionData = { plan_name: finalPlanName, starts_at: now, expires_at: expiresAt, is_active: true };
 
-      // Mark code as used
+      // 1. Update user subscription in Supabase FIRST
+      let users = await getPersistedUsers();
+      users = [...users];
+      const userEmail = (user.email || '').toLowerCase().trim();
+      const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
+      if (uIdx !== -1) {
+        users[uIdx].subscription = subscriptionData;
+      } else {
+        // Auto-provision user into persisted users array so their upgrade is never lost
+        users.push({
+          _id: String(userId),
+          id: String(userId),
+          name: user.name || 'User',
+          email: user.email || '',
+          role: user.role || 'user',
+          is_blocked: false,
+          subscription: subscriptionData,
+          createdAt: new Date()
+        });
+      }
+      await savePersistedUsers(users);
+
+      if (memoryStore.users) {
+        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
+        if (mUser) mUser.subscription = subscriptionData;
+        else {
+          memoryStore.users.push({
+            _id: String(userId),
+            id: String(userId),
+            name: user.name || 'User',
+            email: user.email || '',
+            role: user.role || 'user',
+            is_blocked: false,
+            subscription: subscriptionData,
+            createdAt: new Date()
+          });
+        }
+      }
+      user.subscription = subscriptionData;
+
+      // 2. Mark code as used only after user subscription is guaranteed saved
       if (redeemCode.is_custom) {
         redeemCode.use_count = (redeemCode.use_count || 0) + 1;
         if (!Array.isArray(redeemCode.used_by_list)) redeemCode.used_by_list = [];
@@ -266,23 +306,6 @@ const claimRedeemCode = async (req, res) => {
         redeemCode.used_by = userId;
         redeemCode.used_at = now;
       }
-
-      // Update user subscription in Supabase
-      let users = await getPersistedUsers();
-      users = [...users];
-      const userEmail = (user.email || '').toLowerCase().trim();
-      const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
-      if (uIdx !== -1) {
-        users[uIdx].subscription = subscriptionData;
-        await savePersistedUsers(users);
-      } else {
-        console.warn('[Redeem] User not found in persisted users array, userId:', userId);
-      }
-      if (memoryStore.users) {
-        const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(userId) || (userEmail && u.email && u.email.toLowerCase().trim() === userEmail));
-        if (mUser) mUser.subscription = subscriptionData;
-      }
-      user.subscription = subscriptionData;
 
       await savePersistedRedeemCodes(codes);
       debouncedSave();
