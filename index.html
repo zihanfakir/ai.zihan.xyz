@@ -7430,7 +7430,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       contentCol.className = "ai-content-col";
       const textDiv = document.createElement("div");
       textDiv.className = "ai-bubble";
-      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">Thinking...</span></span>`;
+      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">চিন্তা করছি...</span></span>`;
       
       const actionRow = document.createElement("div");
       actionRow.className = "msg-actions";
@@ -7907,7 +7907,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function startDynamicStatusSequence(element) {
       element.style.whiteSpace = "";
-      setBubbleStatus(element, "thinking", "Thinking...");
+      setBubbleStatus(element, "thinking", "চিন্তা করছি...");
       return null;
     }
 
