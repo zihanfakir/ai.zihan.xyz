@@ -1184,11 +1184,36 @@
           }
         }
 
-        // Highlight active plan card
+        // Highlight active plan card and update button text/state
         ["Free", "Pro", "Max"].forEach(p => {
           const c = document.getElementById("cardPlan" + p);
           if (c) {
-            c.classList.toggle("active-plan", p === currentPlan);
+            const isActive = (p === currentPlan);
+            c.classList.toggle("active-plan", isActive);
+            const btn = c.querySelector("button");
+            if (btn) {
+              if (isActive) {
+                btn.disabled = true;
+                btn.textContent = "বর্তমান প্ল্যান";
+                btn.style.background = "rgba(255,255,255,0.08)";
+                btn.style.boxShadow = "none";
+              } else {
+                btn.disabled = false;
+                if (p === "Free") {
+                  btn.textContent = "ফ্রি প্ল্যান";
+                  btn.style.background = "rgba(255,255,255,0.12)";
+                  btn.onclick = () => {};
+                } else if (p === "Pro") {
+                  btn.textContent = "প্রো আনলক করুন";
+                  btn.style.background = "var(--accent-gradient)";
+                  btn.onclick = () => switchToTab('tabSecurity');
+                } else if (p === "Max") {
+                  btn.textContent = "ম্যাক্স আনলক করুন";
+                  btn.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
+                  btn.onclick = () => switchToTab('tabSecurity');
+                }
+              }
+            }
           }
         });
 

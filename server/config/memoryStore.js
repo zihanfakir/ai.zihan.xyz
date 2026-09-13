@@ -68,11 +68,11 @@ const seedDefaultAdmin = async () => {
   if (fs.existsSync(BACKUP_FILE)) {
     try {
       const data = JSON.parse(fs.readFileSync(BACKUP_FILE, 'utf8'));
-      if (data.users && data.users.length) memoryStore.users = data.users;
-      if (data.plans && data.plans.length) memoryStore.plans = data.plans;
-      if (data.redeemCodes && data.redeemCodes.length) memoryStore.redeemCodes = data.redeemCodes;
-      if (data.models && data.models.length) memoryStore.models = data.models;
-      if (data.settings) memoryStore.settings = data.settings;
+      if (Array.isArray(data.users)) memoryStore.users = data.users;
+      if (Array.isArray(data.plans)) memoryStore.plans = data.plans;
+      if (Array.isArray(data.redeemCodes)) memoryStore.redeemCodes = data.redeemCodes;
+      if (Array.isArray(data.models)) memoryStore.models = data.models;
+      if (data.settings && typeof data.settings === 'object') memoryStore.settings = data.settings;
       console.log('[Memory DB] Restored data from local backup file.');
     } catch (e) {
       console.error('[Memory DB] Backup file read error:', e.message);

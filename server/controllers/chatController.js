@@ -161,6 +161,7 @@ const streamChatCompletions = async (req, res) => {
     if (!response || !response.ok) {
       const status = response ? response.status : 504;
       const modelDisplayName = (aiModelConfig && (aiModelConfig.name || aiModelConfig.id)) || model || 'AI Model';
+      let userSafeError = `AI মডেল প্রোভাইডার সার্ভারে ত্রুটি হয়েছে (${modelDisplayName})। অনুগ্রহ করে আবার চেষ্টা করুন।`;
       if (status === 429) {
         userSafeError = `মডেল প্রোভাইডার সার্ভারের অনুরোধের সীমা শেষ হয়েছে (${modelDisplayName})। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা অন্য কোনো মডেল নির্বাচন করুন।`;
       } else if (status === 401 || status === 403) {
@@ -178,6 +179,15 @@ const streamChatCompletions = async (req, res) => {
     res.setHeader('X-Accel-Buffering', 'no');
     if (res.flushHeaders) res.flushHeaders();
     res.write(': keepalive\n\n');
+
+    const keepAliveInterval = setInterval(() => {
+      if (!res.writableEnded) {
+        try {
+          res.write(': keepalive\n\n');
+          if (typeof res.flush === 'function') res.flush();
+        } catch {}
+      }
+    }, 15000);
 
     let hasStreamedData = false;
     let hasContentTokens = false;
@@ -203,6 +213,7 @@ const streamChatCompletions = async (req, res) => {
       const safeResolve = () => {
         if (!isResolved) {
           isResolved = true;
+          if (keepAliveInterval) clearInterval(keepAliveInterval);
           if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
           res.removeListener('close', onClientClose);
           resolve();
@@ -256,7 +267,10 @@ const streamChatCompletions = async (req, res) => {
         } catch (streamErr) {
           console.error('[Stream End Callback Error]:', streamErr.message);
         } finally {
-          if (!res.writableEnded) res.end();
+          if (!res.writableEnded) {
+            res.write('data: [DONE]\n\n');
+            res.end();
+          }
           safeResolve();
         }
       });

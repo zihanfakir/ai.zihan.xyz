@@ -46,7 +46,7 @@ const checkRateLimit = async (req, res, next) => {
 
       const usageDetails = await getUserUsageDetails(guestId, 3);
       if (usageDetails.count >= 10) {
-        res.setHeader('Retry-After', Math.max(1, (usageDetails.resetInMinutes || 180) * 60));
+        res.setHeader('Retry-After', Math.max(1, Math.ceil((usageDetails.resetInMinutes || 180) * 60)));
         return res.status(429).json({
           success: false,
           error: `গেস্ট বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন।`
@@ -187,13 +187,13 @@ const checkRateLimit = async (req, res, next) => {
       }
     } else {
       const usageDetails = await getUserUsageDetails(userId, plan.window_hours);
-      const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
+      const memCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
       messageCount = Math.max(usageDetails.count, memCount);
       resetTimeMinutes = usageDetails.resetInMinutes;
     }
 
     if (messageCount >= plan.message_limit) {
-      res.setHeader('Retry-After', Math.max(1, resetTimeMinutes * 60));
+      res.setHeader('Retry-After', Math.max(1, Math.ceil(resetTimeMinutes * 60)));
       return res.status(429).json({
         success: false,
         error: `বার্তা সীমা শেষ! ${plan.displayName}-এ প্রতি ${plan.window_hours} ঘণ্টায় সর্বোচ্চ ${plan.message_limit}টি বার্তা পাঠানো যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।`

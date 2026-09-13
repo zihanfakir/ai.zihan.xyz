@@ -1,7 +1,7 @@
 // utils/getModelConfig.js
 // Supabase থেকে api_key নিয়ে আসে। পাওয়া না গেলে memoryStore fallback।
 const supabase = require('../server/config/supabase');
-const { memoryStore } = require('../server/config/memoryStore');
+const { memoryStore, debouncedSave } = require('../server/config/memoryStore');
 
 // Cache: avoid repeated DB hits per request cycle (1 min TTL)
 const keyCache = new Map(); // model_id -> { api_key, ts }
@@ -132,6 +132,7 @@ async function savePersistedModels(models) {
 
   // Also update memoryStore so it's in sync locally
   memoryStore.models = models;
+  debouncedSave();
 
   if (!supabase) return;
 
@@ -266,6 +267,7 @@ async function savePersistedPlans(plans) {
   plansCache = plans;
   plansCacheTs = Date.now();
   memoryStore.plans = plans;
+  debouncedSave();
 
   if (!supabase) return;
 
@@ -336,6 +338,7 @@ async function savePersistedRedeemCodes(codes) {
   memoryStore.redeemCodes = cleanCodes;
   redeemCodesCache = cleanCodes;
   redeemCodesCacheTs = Date.now();
+  debouncedSave();
 
   if (!supabase) return;
   try {
@@ -409,6 +412,7 @@ async function savePersistedUsers(users) {
   memoryStore.users = cleanUsers;
   usersCache = cleanUsers;
   usersCacheTs = Date.now();
+  debouncedSave();
 
   if (!supabase) return;
   try {

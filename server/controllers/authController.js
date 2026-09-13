@@ -433,9 +433,12 @@ const updateProfile = async (req, res) => {
       }
       debouncedSave();
     }
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'ব্যবহারকারী পাওয়া যায়নি' });
+    }
     res.json({
       success: true,
-      user: { _id: user._id, id: user._id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
+      user: { _id: user._id || user.id, id: user._id || user.id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

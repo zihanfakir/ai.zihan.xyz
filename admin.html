@@ -1478,10 +1478,9 @@
           <td>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <select class="user-plan-select" data-user-id="${escapeHtml(uId)}" style="padding: 4px 8px; font-size: 0.8rem;">
-                <option value="">প্ল্যান সেট করুন</option>
-                <option value="Free">Free (অনন্তকাল)</option>
-                <option value="Pro">Pro (কাস্টম মেয়াদ)</option>
-                <option value="Max">Max (কাস্টম মেয়াদ)</option>
+                <option value="Free" ${plan === 'Free' ? 'selected' : ''}>Free (অনন্তকাল)</option>
+                <option value="Pro" ${plan === 'Pro' ? 'selected' : ''}>Pro (কাস্টম মেয়াদ)</option>
+                <option value="Max" ${plan === 'Max' ? 'selected' : ''}>Max (কাস্টম মেয়াদ)</option>
               </select>
               <button type="button" class="btn ${u.is_blocked ? 'btn-success' : 'btn-danger'} btn-toggle-block" data-user-id="${escapeHtml(uId)}" data-blocked="${!u.is_blocked}">
                 ${u.is_blocked ? 'আনব্লক' : 'ব্লক'}

@@ -8,6 +8,8 @@ const { JWT_SECRET } = require('../config/jwtSecret');
 const PLAN_HIERARCHY = { 'Free': 1, 'Pro': 2, 'Max': 3 };
 
 const claimRedeemCode = async (req, res) => {
+  let claimedCodeId = null;
+  let userId = null;
   try {
     const { code } = req.body;
     const user = req.user;
@@ -21,13 +23,12 @@ const claimRedeemCode = async (req, res) => {
 
     const cleanCode = code.trim().toUpperCase();
     const now = new Date();
-    const userId = user._id || user.id;
+    userId = user._id || user.id;
 
     // Lifetime plan detection
     const isLifetime = user.subscription && user.subscription.is_active && user.subscription.expires_at === null && user.subscription.plan_name !== 'Free';
     const currentTier = (user.subscription && user.subscription.plan_name) ? (PLAN_HIERARCHY[user.subscription.plan_name] || 1) : 1;
 
-    let claimedCodeId = null;
     let isCustomCode = false;
 
     if (getIsMongoConnected()) {

@@ -50,6 +50,10 @@ router.get('/models', async (req, res) => {
 
 const pingCache = new Map();
 const PING_CACHE_TTL_MS = 60000; // 60s cache
+const setPingCache = (key, data) => {
+  if (pingCache.size > 200) pingCache.clear();
+  pingCache.set(key, { timestamp: Date.now(), data });
+};
 
 router.get('/ping', async (req, res) => {
   try {
@@ -80,7 +84,7 @@ router.get('/ping', async (req, res) => {
 
     if (!aiModelConfig) {
       const respData = { success: true, latency: null, status: 'offline' };
-      pingCache.set(cleanModel, { timestamp: Date.now(), data: respData });
+      setPingCache(cleanModel, respData);
       return res.json(respData);
     }
 
@@ -148,7 +152,7 @@ router.get('/ping', async (req, res) => {
       } else {
         respData = { success: true, latency: null, status: 'offline' }; 
       }
-      pingCache.set(cleanModel, { timestamp: Date.now(), data: respData });
+      setPingCache(cleanModel, respData);
       return res.json(respData);
     } catch(err) {
       clearTimeout(timeoutId);
@@ -159,7 +163,7 @@ router.get('/ping', async (req, res) => {
       } else {
         respData = { success: true, latency: null, status: 'offline' };
       }
-      pingCache.set(cleanModel, { timestamp: Date.now(), data: respData });
+      setPingCache(cleanModel, respData);
       return res.json(respData);
     }
 
