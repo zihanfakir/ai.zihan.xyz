@@ -59,6 +59,36 @@
       --text-primary: var(--text-main);
     }
 
+    *, *::before, *::after {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    ::selection {
+      background: transparent !important;
+      color: inherit !important;
+    }
+    ::-moz-selection {
+      background: transparent !important;
+      color: inherit !important;
+    }
+
+    input, textarea, [contenteditable="true"] {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+      -webkit-touch-callout: default !important;
+    }
+    input::selection, textarea::selection {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: inherit !important;
+    }
+
     * {
       scrollbar-width: thin;
       scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
@@ -4968,14 +4998,30 @@
       }
     }, { passive: true });
 
-    const COPY_ALLOWED_SELECTOR = "input, textarea, .chat-textarea, .user-bubble, .ai-bubble, pre, code, [contenteditable='true'], .modal-box, .account-modal, .auth-modal, .code-chip, .toast, .account-credit-warning, .ai-error-box, .custom-dialog-box";
+    const COPY_ALLOWED_SELECTOR = "input, textarea, [contenteditable='true']";
 
+    // Block text selection highlight across the app so text does not turn blue
+    document.addEventListener("selectstart", (e) => {
+      if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
+        e.preventDefault();
+      }
+    });
+
+    // Block drag selection that triggers blue highlights
+    document.addEventListener("dragstart", (e) => {
+      if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
+        e.preventDefault();
+      }
+    });
+
+    // Block manual copy shortcuts (Ctrl+C, Cmd+C) unless inside an input
     document.addEventListener("copy", (e) => {
       if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
         e.preventDefault();
       }
     });
 
+    // Block right-click / long-press context menu on web & mobile app unless inside an input
     document.addEventListener("contextmenu", (e) => {
       if (!e.target.closest(COPY_ALLOWED_SELECTOR)) {
         e.preventDefault();
