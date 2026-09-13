@@ -5036,16 +5036,14 @@
     }
 
     let MODELS = [
-      { id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", latency: null, status: "checking", type: "gemini" },
-      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq" },
-      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai" },
-      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", latency: null, status: "checking", premium: true },
-      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter" },
-      { id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", latency: null, status: "checking", premium: true },
-      { id: "nemotron-vision", name: "Alo Vision", provider: "Alokpoth", latency: null, status: "checking", premium: true },
-      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: true },
-      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "offline", type: "bai", premium: true },
-      { id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", latency: null, status: "checking", type: "bai" }
+      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter", premium: false, efficient: false },
+      { id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", latency: null, status: "checking", type: "gemini", premium: false, efficient: false },
+      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
+      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
+      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq", premium: true, efficient: false },
+      { id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: false },
+      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: false },
+      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: true }
     ];
 
     async function fetchModelsFromServer() {
@@ -7432,7 +7430,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       contentCol.className = "ai-content-col";
       const textDiv = document.createElement("div");
       textDiv.className = "ai-bubble";
-      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">চিন্তা করছি...</span></span>`;
+      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">Thinking...</span></span>`;
       
       const actionRow = document.createElement("div");
       actionRow.className = "msg-actions";
@@ -7907,24 +7905,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
       element.innerHTML = `<span class="status-indicator status-${kind}"><span class="status-icon">${STATUS_ICONS[kind] || STATUS_ICONS.thinking}</span><span class="status-label">${label}</span></span>`;
     }
 
-    function startDynamicStatusSequence(element, modelName = "") {
+    function startDynamicStatusSequence(element) {
       element.style.whiteSpace = "";
-      const prefix = modelName ? `${modelName}: ` : "";
-      
-      // Stage 1: Immediate thinking state
-      setBubbleStatus(element, "thinking", `${prefix}চিন্তা করছি...`);
-      
-      const startTime = Date.now();
-      const intervalId = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        if (elapsed >= 7) {
-          setBubbleStatus(element, "working", `${prefix}উত্তর আসতে দেরি হচ্ছে, অপেক্ষা করুন...`);
-        } else if (elapsed >= 3) {
-          setBubbleStatus(element, "thinking", `${prefix}মডেলের সাথে সংযোগ স্থাপন হচ্ছে...`);
-        }
-      }, 1000);
-      
-      return intervalId;
+      setBubbleStatus(element, "thinking", "Thinking...");
+      return null;
     }
 
     function setBubbleGeneratingImage(element) {
@@ -8105,9 +8089,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         const inputTokensForThisCall = activeHistory.reduce((sum, m) => sum + estimateTokens(m.content || ""), 0);
 
-        const curModelObj = MODELS.find(m => m.id === selectedModelId);
-        const curModelName = curModelObj ? curModelObj.name : "";
-        const statusIntervalId = startDynamicStatusSequence(aiTextElement, curModelName);
+        const statusIntervalId = startDynamicStatusSequence(aiTextElement);
 
         let started = false;
         let streamQueue = "";
