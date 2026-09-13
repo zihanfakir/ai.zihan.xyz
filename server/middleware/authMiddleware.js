@@ -42,8 +42,23 @@ const protect = async (req, res, next) => {
       user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
+    if (user) {
+      const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+      if (!user.subscription || typeof user.subscription !== 'object') {
+        user.subscription = {
+          plan_name: isVerifiedAdmin ? 'Max' : (['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free'),
+          starts_at: new Date(),
+          expires_at: decoded.expires_at || null,
+          is_active: true
+        };
+      } else if (isVerifiedAdmin && user.subscription.plan_name !== 'Max') {
+        user.subscription.plan_name = 'Max';
+      }
+    }
+
     if (!user && decoded && userId) {
-      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
+      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase().trim() === 'zihanfakir@gmail.com';
+      const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
       user = {
         _id: String(userId),
         id: String(userId),
@@ -52,7 +67,7 @@ const protect = async (req, res, next) => {
         role: isVerifiedAdminEmail ? 'admin' : 'user', // NEVER allow arbitrary admin escalation
         is_blocked: false,
         subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : 'Free',
+          plan_name: isVerifiedAdminEmail ? 'Max' : validPlan,
           expires_at: decoded.expires_at || null,
           is_active: true
         }
@@ -107,17 +122,32 @@ const optionalProtect = async (req, res, next) => {
       user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
+    if (user) {
+      const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+      if (!user.subscription || typeof user.subscription !== 'object') {
+        user.subscription = {
+          plan_name: isVerifiedAdmin ? 'Max' : (['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free'),
+          starts_at: new Date(),
+          expires_at: decoded.expires_at || null,
+          is_active: true
+        };
+      } else if (isVerifiedAdmin && user.subscription.plan_name !== 'Max') {
+        user.subscription.plan_name = 'Max';
+      }
+    }
+
     if (!user && decoded && userId) {
-      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase() === 'zihanfakir@gmail.com';
+      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase().trim() === 'zihanfakir@gmail.com';
+      const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
       user = {
         _id: String(userId),
         id: String(userId),
         name: decoded.name || 'User',
         email: decoded.email || '',
-        role: isVerifiedAdminEmail ? 'admin' : 'user',
+        role: isVerifiedAdminEmail ? 'admin' : (decoded.role === 'admin' && isVerifiedAdminEmail ? 'admin' : 'user'),
         is_blocked: false,
         subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : 'Free',
+          plan_name: isVerifiedAdminEmail ? 'Max' : validPlan,
           expires_at: decoded.expires_at || null,
           is_active: true
         }

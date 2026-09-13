@@ -4638,6 +4638,18 @@
       recordWindowMessage();
     }
 
+    function refundCredit() {
+      try {
+        const usage = getWindowUsage();
+        if (usage && usage.count > 0) {
+          usage.count = Math.max(0, usage.count - 1);
+          localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage));
+          renderCreditBalance();
+          updateNavbarCreditBadge();
+        }
+      } catch {}
+    }
+
     const PLAN_LIMIT_DETAILS = {
       Free: {
         shortLimit: "১০ বার্তা / ৩ ঘণ্টা",
@@ -5072,7 +5084,7 @@
           MODELS.sort((a, b) => (a.order || 0) - (b.order || 0));
 
           const savedModel = localStorage.getItem("alokpoth_selected_model");
-          if (savedModel && savedModel !== "mimo-v2.5" && MODELS.some(m => m.id === savedModel)) {
+          if (savedModel && MODELS.some(m => m.id === savedModel)) {
             selectedModelId = savedModel;
           } else {
             selectedModelId = MODELS[0]?.id || "gemini-3.5-flash-lite";
@@ -5090,7 +5102,7 @@
     }
 
     let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
-    if (!initialSavedModel || initialSavedModel === "mimo-v2.5" || initialSavedModel === "openrouter/free") {
+    if (!initialSavedModel) {
       initialSavedModel = "gemini-3.5-flash-lite";
       try { localStorage.setItem("alokpoth_selected_model", "gemini-3.5-flash-lite"); } catch (e) {}
     }
@@ -5231,8 +5243,7 @@
 
         card.addEventListener("click", () => {
           if (isOffline) {
-            showToast(`'${m.name}' মডেলটি বর্তমানে অফলাইন রয়েছে। অনুগ্রহ করে সক্রিয় মডেল বেছে নিন।`, "warning");
-            return;
+            showToast(`'${m.name}' মডেলটিতে সাময়িক সংযোগ সমস্যা হতে পারে।`, "warning");
           }
           selectedModelId = m.id;
           try { localStorage.setItem("alokpoth_selected_model", m.id); } catch {}
@@ -8259,6 +8270,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
               aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
             }
           } else {
+            if (!renderedStream || renderedStream.trim().length === 0) {
+              refundCredit();
+            }
             soundEngine.playError();
             triggerHaptic("error");
 

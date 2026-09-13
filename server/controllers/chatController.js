@@ -34,7 +34,7 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'nemotron-ultra-550b') {
     targetUrl = 'https://vyceai.com/v1/chat/completions';
-    actualModel = targetModelId;
+    actualModel = 'deepseek-v4-flash-lr';
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'mimo-v2.5' || targetModelId === 'hy3') {
     targetUrl = 'https://api.b.ai/v1/chat/completions';
@@ -167,7 +167,9 @@ const streamChatCompletions = async (req, res) => {
       } else if (status === 401 || status === 403) {
         userSafeError = `AI মডেল প্রোভাইডারের কী বা সার্ভার সংযোগে সমস্যা দেখা দিয়েছে (${modelDisplayName})। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন অথবা অন্য মডেল নির্বাচন করুন।`;
       } else if (status === 502 || status === 503 || status === 504) {
-        userSafeError = `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
+        userSafeError = (model === 'gpt-5.6' || modelDisplayName.includes('Max'))
+          ? `${modelDisplayName} মডেলটির প্রোভাইডার সার্ভার বর্তমানে মেইনটেনেন্সে রয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা Alo Elite (Claude) ব্যবহার করুন।`
+          : `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
       }
       return res.status(status >= 400 && status < 600 ? status : 503).json({ success: false, error: userSafeError });
     }
