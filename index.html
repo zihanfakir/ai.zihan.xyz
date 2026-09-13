@@ -6730,11 +6730,8 @@
       "claude-sonnet-4-6": { in: 3.00, out: 15.00 },
       "nemotron-ultra-550b": { in: 1.00, out: 2.00 },
       "gpt-5.6": { in: 0.20, out: 1.20 },
-      "nemotron-vision": { in: 0.50, out: 1.50, imageFlat: 0.99 },
       "mimo-v2.5": { in: 0.10, out: 0.30 },
-      "hy3": { in: 0.15, out: 0.50 },
-      "deepseek-v4-flash": { in: 0.08, out: 0.25 },
-      "deepseek-v4-flash-vision-exp": { in: 0.20, out: 0.60 }
+      "hy3": { in: 0.15, out: 0.50 }
     };
 
     const CODE_GEN_MULTIPLIER = 1.35;
@@ -8014,12 +8011,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const isOpenRouter = currentModel?.type === "openrouter";
         const isBai = currentModel?.type === "bai";
         const isVyceaiModel = !currentModel?.type;
-        const isAloVision = selectedModelId === "nemotron-vision";
 
         const lastUserMsg = [...messagesHistory].reverse().find((m) => m.role === "user");
 
         // Image Generation Logic based on Button or Text
-        const wantImage = isImageGenEnabled || (isAloVision && lastUserMsg && detectImageGenRequest(lastUserMsg.content));
+        const wantImage = isImageGenEnabled || (lastUserMsg && detectImageGenRequest(lastUserMsg.content));
         
         if (wantImage && lastUserMsg) {
           setBubbleGeneratingImage(aiTextElement);

@@ -427,7 +427,7 @@ const updatePlanLimits = async (req, res) => {
           displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
           message_limit: validLimit !== undefined ? validLimit : 10,
           window_hours: validWindow !== undefined ? validWindow : 3,
-          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*'],
           is_active: true
         });
       }
@@ -486,7 +486,7 @@ const updatePlanLimits = async (req, res) => {
           displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
           message_limit: validLimit !== undefined ? validLimit : 10,
           window_hours: validWindow !== undefined ? validWindow : 3,
-          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'] : ['*'],
+          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*'],
           is_active: true
         };
         plans.push(plan);
@@ -1064,7 +1064,8 @@ const deleteModel = async (req, res) => {
     }
     invalidateModelKeyCache(cleanModelId);
     invalidateModelKeyCache(cleanDecoded);
-    debouncedSave(); // Persist memoryStore backup to disk
+    saveBackup(); // Immediately sync memory backup to disk (critical for serverless)
+    debouncedSave();
 
     // 6. Clean up allowed_models in Plans if this model was explicitly listed
     try {

@@ -20,14 +20,10 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'qwen/qwen3.8-27b';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY;
-  } else if (targetModelId === 'gemini-1.5-flash' || targetModelId === 'gemini-3.5-flash-lite' || targetModelId === 'openrouter/free' || !targetModelId) {
+  } else if (targetModelId === 'gemini-3.5-flash-lite' || targetModelId === 'openrouter/free' || !targetModelId) {
     targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
     actualModel = 'google/gemini-2.5-flash';
     if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY;
-  } else if (targetModelId === 'deepseek-v4-flash' || targetModelId === 'deepseek-v4-flash-vision-exp') {
-    targetUrl = 'https://vyceai.com/v1/chat/completions';
-    actualModel = targetModelId === 'deepseek-v4-flash-vision-exp' ? 'deepseek-v4-flash-lr' : 'deepseek-v4-flash';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'claude-sonnet-4-6') {
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'claude-sonnet-4-6';
@@ -36,7 +32,7 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'gpt-5.6-new';
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
-  } else if (targetModelId === 'nemotron-ultra-550b' || targetModelId === 'nemotron-vision') {
+  } else if (targetModelId === 'nemotron-ultra-550b') {
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = targetModelId;
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;

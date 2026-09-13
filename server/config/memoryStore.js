@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const memoryStore = {
   users: [],
   plans: [
-    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['openrouter/free', 'gemini-3.5-flash-lite', 'gemini-1.5-flash', 'mimo-v2.5', 'hy3', 'deepseek-v4-flash'], is_active: true },
+    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'], is_active: true },
     { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, allowed_models: ['*'], is_active: true },
     { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, allowed_models: ['*'], is_active: true }
   ],
@@ -13,15 +13,12 @@ const memoryStore = {
   models: [
       { id: "openrouter/free", model_id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 1, type: "openrouter" },
       { id: "gemini-3.5-flash-lite", model_id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 2, type: "gemini" },
-      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 3, type: "groq" },
-      { id: "claude-sonnet-4-6", model_id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 4, type: "vyce" },
-      { id: "nemotron-ultra-550b", model_id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 5, type: "vyce" },
-      { id: "nemotron-vision", model_id: "nemotron-vision", name: "Alo Vision", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 6, type: "vyce" },
-      { id: "gpt-5.6", model_id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: true, order: 7, type: "vyce" },
-      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 8, type: "bai" },
-      { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 9, type: "bai" },
-      { id: "deepseek-v4-flash", model_id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: false, efficient: false, order: 10, type: "vyce" },
-      { id: "deepseek-v4-flash-vision-exp", model_id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 11, type: "vyce" }
+      { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 3, type: "bai" },
+      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 4, type: "bai" },
+      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 5, type: "groq" },
+      { id: "nemotron-ultra-550b", model_id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 6, type: "vyce" },
+      { id: "claude-sonnet-4-6", model_id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 7, type: "vyce" },
+      { id: "gpt-5.6", model_id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: true, order: 8, type: "vyce" }
   ],
   settings: {}
 };

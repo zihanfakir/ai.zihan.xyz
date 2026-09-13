@@ -20,15 +20,12 @@ AiModelSchema.statics.seedDefaultModels = async function() {
     await this.create([
       { model_id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", type: "openrouter", premium: false, efficient: false, order: 1 },
       { model_id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", type: "gemini", premium: false, efficient: false, order: 2 },
-      { model_id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", type: "groq", premium: true, efficient: false, order: 3 },
-      { model_id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 4 },
-      { model_id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 5 },
-      { model_id: "nemotron-vision", name: "Alo Vision", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 6 },
-      { model_id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", type: "vyce", premium: true, efficient: true, order: 7 },
-      { model_id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", type: "bai", premium: false, efficient: false, order: 8 },
-      { model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", type: "bai", premium: false, efficient: false, order: 9 },
-      { model_id: "deepseek-v4-flash", name: "Alo DeepSeek Flash", provider: "Alokpoth", type: "vyce", premium: false, efficient: false, order: 10 },
-      { model_id: "deepseek-v4-flash-vision-exp", name: "Alo DeepSeek Vision", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 11 }
+      { model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", type: "bai", premium: false, efficient: false, order: 3 },
+      { model_id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", type: "bai", premium: false, efficient: false, order: 4 },
+      { model_id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", type: "groq", premium: true, efficient: false, order: 5 },
+      { model_id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 6 },
+      { model_id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", type: "vyce", premium: true, efficient: false, order: 7 },
+      { model_id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", type: "vyce", premium: true, efficient: true, order: 8 }
     ]);
     console.log('[Database Seed] Default AI Models created.');
   }
