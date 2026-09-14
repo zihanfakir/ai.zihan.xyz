@@ -1758,6 +1758,147 @@
       line-height: 1.4;
     }
 
+    /* ===== Settings Multi-Page / Sub-View System ===== */
+    .settings-subview {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      animation: subviewSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .settings-subview.active {
+      display: flex;
+    }
+    @keyframes subviewSlideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .settings-subview-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .settings-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .settings-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .settings-field-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-sub);
+    }
+    .settings-field-input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .settings-field-input:focus {
+      border-color: var(--accent-color);
+    }
+    .settings-btn-primary {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent-color);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .settings-btn-primary:active {
+      transform: scale(0.98);
+    }
+    .settings-select-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
+      background: transparent;
+      border-top: none; border-left: none; border-right: none;
+      width: 100%;
+      color: var(--text-main);
+      font-size: 1rem;
+      font-family: inherit;
+      text-align: left;
+    }
+    .settings-select-item:last-child {
+      border-bottom: none;
+    }
+    .settings-select-item.selected .settings-check {
+      display: block;
+      color: var(--accent-color);
+    }
+    .settings-check {
+      display: none;
+      width: 20px;
+      height: 20px;
+    }
+    .settings-version-hero {
+      text-align: center;
+      padding: 24px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .settings-version-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      margin-bottom: 6px;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    }
+    .settings-version-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
     .account-credit-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       background: var(--download-btn-bg); border-radius: 20px; padding: 14px 18px;
@@ -3652,98 +3793,304 @@
 
   <!-- Account & Settings Page Screen -->
   <div class="modal-overlay page-modal" id="accountModalOverlay">
-    <div class="modal-sheet">
-      <div class="page-header-bar">
-        <button class="page-back-btn" id="accountModalClose" type="button" aria-label="ফিরে যান">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          <span>ফিরে যান</span>
-        </button>
-        <span class="page-nav-title">একাউন্ট ও সেটিংস</span>
-        <div class="page-header-spacer"></div>
+    <div class="modal-sheet" style="position: relative; overflow: hidden; display: flex; flex-direction: column;">
+      
+      <!-- SUBPAGE 0: Main Settings View -->
+      <div class="settings-subview active" id="settingsMainView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" id="accountModalClose" type="button" aria-label="ফিরে যান">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backBtn">ফিরে যান</span>
+          </button>
+          <span class="page-nav-title" data-i18n="settingsTitle">একাউন্ট ও সেটিংস</span>
+          <div class="page-header-spacer"></div>
+        </div>
+
+        <div class="account-panel">
+          <div class="settings-group-label" data-i18n="profile">প্রোফাইল</div>
+          <div class="settings-group">
+            <button class="settings-row" type="button" id="setMenuProfile" onclick="showSettingsView('settingsAccountView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span data-i18n="accountSettings">অ্যাকাউন্ট সেটিংস</span>
+              </div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            </button>
+            <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans.html'">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
+              </div>
+              <div class="settings-row-right">
+                <span id="setMenuPlanName">Free</span>
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </button>
+            <button class="settings-row" type="button" id="setMenuRedeem" onclick="showSettingsView('settingsRedeemView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span data-i18n="redeemCode">রিডিম কোড</span>
+              </div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            </button>
+          </div>
+
+          <div class="settings-group-label" style="margin-top: 10px;" data-i18n="app">অ্যাপ</div>
+          <div class="settings-group">
+            <button class="settings-row" type="button" id="setMenuLanguage" onclick="showSettingsView('settingsLanguageView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span data-i18n="language">ভাষা</span>
+              </div>
+              <div class="settings-row-right">
+                <span id="setMenuLangName">বাংলা</span>
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </button>
+            <button class="settings-row" type="button" id="setMenuTheme" onclick="showSettingsView('settingsThemeView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span data-i18n="theme">চেহারা (থিম)</span>
+              </div>
+              <div class="settings-row-right">
+                <span id="setMenuThemeName">ডার্ক</span>
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </button>
+          </div>
+
+          <div class="settings-group-label" style="margin-top: 10px;" data-i18n="about">সম্পর্কে</div>
+          <div class="settings-group">
+            <button class="settings-row" type="button" id="setMenuUpdates" onclick="showSettingsView('settingsUpdatesView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span data-i18n="checkUpdates">আপডেটের জন্য চেক করুন</span>
+              </div>
+              <div class="settings-row-right">
+                <span>v1.0.7</span>
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </button>
+            <button class="settings-row" type="button" id="setMenuFeedback" onclick="showSettingsView('settingsFeedbackView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span data-i18n="helpFeedback">সাহায্য ও প্রতিক্রিয়া</span>
+              </div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            </button>
+          </div>
+
+          <div class="settings-group" style="margin-top: 10px;">
+            <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="if(localStorage.getItem('alokpoth_token')){performAccountLogout();}else{openAuthModal('login');}">
+              <div class="settings-row-left" style="color: #ef4444;">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span id="setMenuLogoutLabel" data-i18n="logoutLogin">লগ আউট / লগইন</span>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="account-panel">
-        <div class="settings-group-label">প্রোফাইল</div>
-        <div class="settings-group">
-          <button class="settings-row" type="button" id="setMenuProfile">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>অ্যাকাউন্ট সেটিংস</span>
-            </div>
-            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+
+      <!-- SUBPAGE 1: Account Settings Sub-view -->
+      <div class="settings-subview" id="settingsAccountView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
           </button>
-          <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans.html'">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span>প্ল্যান ও আপগ্রেড</span>
-            </div>
-            <div class="settings-row-right">
-              <span id="setMenuPlanName">Free</span>
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-          </button>
-          <button class="settings-row" type="button" id="setMenuRedeem" onclick="const p = prompt('রিডিম কোড লিখুন:'); if(p) redeemPromoCode(p);">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span>রিডিম কোড</span>
-            </div>
-            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-          </button>
+          <span class="page-nav-title" data-i18n="accountSettings">অ্যাকাউন্ট সেটিংস</span>
+          <div class="page-header-spacer"></div>
         </div>
+        <div class="settings-subview-content">
+          <div class="settings-card">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div id="subAccountAvatar" style="width: 52px; height: 52px; border-radius: 50%; background: var(--accent-color); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;">অ</div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span id="subAccountDisplayName" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">অতিথি</span>
+                <span id="subAccountEmailDisplay" style="font-size: 0.85rem; color: var(--text-sub);">লগইন করা নেই</span>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label" data-i18n="nameLabel">আপনার নাম</label>
+              <input type="text" class="settings-field-input" id="subAccountNameInput" placeholder="আপনার নাম লিখুন..." maxlength="50" autocomplete="name">
+            </div>
+            <button type="button" class="settings-btn-primary" id="subAccountSaveBtn">
+              <span data-i18n="saveName">নাম পরিবর্তন সংরক্ষণ করুন</span>
+            </button>
+          </div>
 
-        <div class="settings-group-label" style="margin-top: 10px;">অ্যাপ</div>
-        <div class="settings-group">
-          <button class="settings-row" type="button">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span>ভাষা</span>
+          <!-- Password Change Card (Logged in users only) -->
+          <div class="settings-card" id="subPasswordCard">
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="changePassTitle">পাসওয়ার্ড পরিবর্তন</div>
+            <div class="settings-field">
+              <label class="settings-field-label">বর্তমান পাসওয়ার্ড</label>
+              <input type="password" class="settings-field-input" id="subAccountOldPass" placeholder="বর্তমান পাসওয়ার্ড লিখুন" autocomplete="current-password">
             </div>
-            <div class="settings-row-right">
-              <span>বাংলা</span>
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            <div class="settings-field">
+              <label class="settings-field-label">নতুন পাসওয়ার্ড</label>
+              <input type="password" class="settings-field-input" id="subAccountNewPass" placeholder="নতুন পাসওয়ার্ড (ন্যূনতম ৬ অক্ষর)" autocomplete="new-password">
             </div>
-          </button>
-          <button class="settings-row" type="button" id="setMenuTheme" onclick="if(typeof cycleTheme === 'function') cycleTheme();">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-              <span>চেহারা (থিম)</span>
+            <div class="settings-field">
+              <label class="settings-field-label">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
+              <input type="password" class="settings-field-input" id="subAccountConfirmPass" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
             </div>
-            <div class="settings-row-right">
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-          </button>
+            <div id="subAccountPassMsg" style="font-size: 0.85rem; min-height: 18px;"></div>
+            <button type="button" class="settings-btn-primary" id="subAccountPassSubmitBtn">
+              <span data-i18n="savePassBtn">পাসওয়ার্ড আপডেট করুন</span>
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div class="settings-group-label" style="margin-top: 10px;">সম্পর্কে</div>
-        <div class="settings-group">
-          <button class="settings-row" type="button">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span>আপডেটের জন্য চেক করুন</span>
-            </div>
-            <div class="settings-row-right">
-              <span>v1.0.7</span>
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
+      <!-- SUBPAGE 2: Redeem Code Sub-view -->
+      <div class="settings-subview" id="settingsRedeemView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
           </button>
-          <button class="settings-row" type="button">
-            <div class="settings-row-left">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span>সাহায্য ও প্রতিক্রিয়া</span>
-            </div>
-            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-          </button>
+          <span class="page-nav-title" data-i18n="redeemCode">রিডিম কোড</span>
+          <div class="page-header-spacer"></div>
         </div>
-
-        <div class="settings-group" style="margin-top: 10px;">
-          <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="if(localStorage.getItem('alokpoth_token')){performAccountLogout();}else{openAuthModal('login');}">
-            <div class="settings-row-left" style="color: #ef4444;">
-              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              <span>লগ আউট / লগইন</span>
+        <div class="settings-subview-content">
+          <div class="settings-card">
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="redeemCode">প্রোমো কোড ব্যবহার করুন</div>
+            <div class="settings-field">
+              <label class="settings-field-label">ভাউচার বা রিডিম কোড</label>
+              <input type="text" class="settings-field-input" id="subRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX বা কোড" maxlength="50" style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;" autocomplete="off" spellcheck="false">
             </div>
-          </button>
+            <div id="subRedeemMsg" style="font-size: 0.85rem; min-height: 18px;"></div>
+            <button type="button" class="settings-btn-primary" id="subRedeemSubmitBtn">
+              <span data-i18n="redeemBtn">কোড রিডিম করুন</span>
+            </button>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5; padding: 0 4px;" data-i18n="redeemHint">
+            যেকোনো প্রোমো কোড বা ভাউচার কোড ব্যবহার করে আপনার একাউন্ট প্রো বা ম্যাক্স প্ল্যানে তাৎক্ষণিক আপগ্রেড করতে পারবেন।
+          </div>
+        </div>
+      </div>
 
-        </div> <!-- closes settings-group -->
-      </div> <!-- closes account-panel -->
+      <!-- SUBPAGE 3: Language Sub-view (English & Bengali) -->
+      <div class="settings-subview" id="settingsLanguageView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
+          </button>
+          <span class="page-nav-title" data-i18n="language">ভাষা / Language</span>
+          <div class="page-header-spacer"></div>
+        </div>
+        <div class="settings-subview-content">
+          <div class="settings-group">
+            <button class="settings-select-item" id="langOptBn" type="button" onclick="selectAppLanguage('bn')">
+              <span>বাংলা (Bengali)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="langOptEn" type="button" onclick="selectAppLanguage('en')">
+              <span>English</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPAGE 4: Appearance (Theme) Sub-view -->
+      <div class="settings-subview" id="settingsThemeView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
+          </button>
+          <span class="page-nav-title" data-i18n="theme">চেহারা (থিম)</span>
+          <div class="page-header-spacer"></div>
+        </div>
+        <div class="settings-subview-content">
+          <div class="settings-group">
+            <button class="settings-select-item" id="themeOptDark" type="button" onclick="selectAppTheme('dark')">
+              <span data-i18n="themeDark">ডার্ক (Dark - ডিফল্ট)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptLight" type="button" onclick="selectAppTheme('light')">
+              <span data-i18n="themeLight">লাইট (Light)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptEyecare" type="button" onclick="selectAppTheme('eyecare')">
+              <span data-i18n="themeEyecare">আইকেয়ার (Eye Care - সেপিয়া)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptOled" type="button" onclick="selectAppTheme('oled')">
+              <span data-i18n="themeOled">ওলেড (OLED - খাঁটি কালো)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPAGE 5: Check for Updates Sub-view -->
+      <div class="settings-subview" id="settingsUpdatesView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
+          </button>
+          <span class="page-nav-title" data-i18n="checkUpdates">আপডেটের জন্য চেক করুন</span>
+          <div class="page-header-spacer"></div>
+        </div>
+        <div class="settings-subview-content">
+          <div class="settings-card" style="align-items: center; text-align: center;">
+            <div class="settings-version-icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Alokpoth AI</div>
+            <div class="settings-version-tag">Version 1.0.7 (Latest)</div>
+            <div style="font-size: 0.9rem; color: var(--text-sub); margin-top: 4px;" data-i18n="versionStatus">আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।</div>
+            <div style="width: 100%; margin-top: 12px;">
+              <a href="https://github.com/zihanfakir/ai.zihan.xyz/releases" target="_blank" class="settings-btn-primary" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span data-i18n="downloadApk">নতুন APK ডাউনলোড করুন</span>
+              </a>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.7):</div>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.6;">
+              <li>🚀 DeepSeek মিনিমালিস্ট মোবাইল UI রিডিজাইন</li>
+              <li>⚡ 144Hz ও 60fps লো-এন্ড ডিভাইস GPU অপ্টিমাইজেশন</li>
+              <li>🌐 সম্পূর্ণ ইংরেজি ও বাংলা ভাষা সাপোর্ট</li>
+              <li>🔒 চ্যাট ডাটাবেজে নয়—১০০% ডিভাইসে সুরক্ষিত</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBPAGE 6: Help & Feedback Sub-view -->
+      <div class="settings-subview" id="settingsFeedbackView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
+          </button>
+          <span class="page-nav-title" data-i18n="helpFeedback">সাহায্য ও প্রতিক্রিয়া</span>
+          <div class="page-header-spacer"></div>
+        </div>
+        <div class="settings-subview-content">
+          <div class="settings-card">
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="feedbackLabel">আপনার মতামত বা প্রতিক্রিয়া</div>
+            <textarea class="settings-field-input" id="subFeedbackInput" rows="4" placeholder="আপনার মূল্যবান পরামর্শ বা সমস্যা লিখুন..." style="resize: vertical;"></textarea>
+            <button type="button" class="settings-btn-primary" id="subFeedbackSubmitBtn">
+              <span data-i18n="feedbackSubmit">প্রতিক্রিয়া পাঠান</span>
+            </button>
+          </div>
+          <div class="settings-card">
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">সরাসরি যোগাযোগ:</div>
+            <div style="font-size: 0.88rem; color: var(--text-sub); display: flex; flex-direction: column; gap: 8px;">
+              <div>📧 ইমেইল: <a href="mailto:zihanfakir@gmail.com" style="color: var(--accent-color); text-decoration: none;">zihanfakir@gmail.com</a></div>
+              <div>🌐 ওয়েবসাইট: <a href="https://ai.zihan.xyz" target="_blank" style="color: var(--accent-color); text-decoration: none;">ai.zihan.xyz</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div> <!-- closes modal-sheet -->
   </div> <!-- closes #accountModalOverlay -->
 
@@ -5838,17 +6185,202 @@
       });
     }
 
+    /* ===== Settings Subview Navigation & i18n Engine ===== */
+    function showSettingsView(viewId) {
+      const views = document.querySelectorAll("#accountModalOverlay .settings-subview");
+      views.forEach(v => {
+        v.classList.toggle("active", v.id === viewId);
+      });
+      const target = document.getElementById(viewId);
+      if (target) target.scrollTop = 0;
+      
+      if (viewId === 'settingsAccountView') {
+        refreshAccountSubpageUI();
+      } else if (viewId === 'settingsLanguageView') {
+        refreshLanguageSubpageUI();
+      } else if (viewId === 'settingsThemeView') {
+        refreshThemeSubpageUI();
+      }
+    }
+    window.showSettingsView = showSettingsView;
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+
+    const I18N = {
+      bn: {
+        backBtn: "ফিরে যান",
+        backToSettings: "সেটিংস",
+        settingsTitle: "একাউন্ট ও সেটিংস",
+        profile: "প্রোফাইল",
+        accountSettings: "অ্যাকাউন্ট সেটিংস",
+        planAndUpgrade: "প্ল্যান ও আপগ্রেড",
+        redeemCode: "রিডিম কোড",
+        app: "অ্যাপ",
+        language: "ভাষা",
+        theme: "চেহারা (থিম)",
+        about: "সম্পর্কে",
+        checkUpdates: "আপডেটের জন্য চেক করুন",
+        helpFeedback: "সাহায্য ও প্রতিক্রিয়া",
+        logoutLogin: "লগ আউট / লগইন",
+        nameLabel: "আপনার নাম",
+        saveName: "নাম পরিবর্তন সংরক্ষণ করুন",
+        changePassTitle: "পাসওয়ার্ড পরিবর্তন",
+        savePassBtn: "পাসওয়ার্ড আপডেট করুন",
+        redeemBtn: "কোড রিডিম করুন",
+        redeemHint: "যেকোনো প্রোমো কোড বা ভাউচার কোড ব্যবহার করে আপনার একাউন্ট প্রো বা ম্যাক্স প্ল্যানে তাৎক্ষণিক আপগ্রেড করতে পারবেন।",
+        themeDark: "ডার্ক (Dark - ডিফল্ট)",
+        themeLight: "লাইট (Light)",
+        themeEyecare: "আইকেয়ার (Eye Care - সেপিয়া)",
+        themeOled: "ওলেড (OLED - খাঁটি কালো)",
+        versionStatus: "আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।",
+        downloadApk: "নতুন APK ডাউনলোড করুন",
+        feedbackLabel: "আপনার মতামত বা প্রতিক্রিয়া",
+        feedbackSubmit: "প্রতিক্রিয়া পাঠান",
+        inputPlaceholder: "আলোকপথ AI-কে জিজ্ঞাসা করুন..."
+      },
+      en: {
+        backBtn: "Back",
+        backToSettings: "Settings",
+        settingsTitle: "Account & Settings",
+        profile: "Profile",
+        accountSettings: "Account Settings",
+        planAndUpgrade: "Plans & Upgrade",
+        redeemCode: "Redeem Code",
+        app: "App",
+        language: "Language",
+        theme: "Appearance (Theme)",
+        about: "About",
+        checkUpdates: "Check for Updates",
+        helpFeedback: "Help & Feedback",
+        logoutLogin: "Log Out / Log In",
+        nameLabel: "Your Name",
+        saveName: "Save Changes",
+        changePassTitle: "Change Password",
+        savePassBtn: "Update Password",
+        redeemBtn: "Claim Code",
+        redeemHint: "Upgrade your account instantly with any voucher or promo code.",
+        themeDark: "Dark (Default)",
+        themeLight: "Light",
+        themeEyecare: "Eye Care (Sepia)",
+        themeOled: "OLED (Pure Black)",
+        versionStatus: "You are on the latest version.",
+        downloadApk: "Download Android APK",
+        feedbackLabel: "Your Feedback or Suggestion",
+        feedbackSubmit: "Submit Feedback",
+        inputPlaceholder: "Ask Alo AI anything..."
+      }
+    };
+
+    function selectAppLanguage(lang) {
+      currentLanguage = lang;
+      try { localStorage.setItem("alokpoth_lang", lang); } catch {}
+      document.documentElement.setAttribute("lang", lang);
+      applyI18n();
+      refreshLanguageSubpageUI();
+      refreshThemeSubpageUI();
+      showToast(lang === 'en' ? "Language set to English" : "ভাষা বাংলায় পরিবর্তন করা হয়েছে", "success");
+    }
+    window.selectAppLanguage = selectAppLanguage;
+
+    function applyI18n() {
+      const dict = I18N[currentLanguage] || I18N.bn;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+      const uInput = document.getElementById("userInput");
+      if (uInput && dict.inputPlaceholder) {
+        uInput.placeholder = dict.inputPlaceholder;
+      }
+      const langNameBadge = document.getElementById("setMenuLangName");
+      if (langNameBadge) {
+        langNameBadge.textContent = currentLanguage === 'en' ? "English" : "বাংলা";
+      }
+    }
+    window.applyI18n = applyI18n;
+
+    function refreshLanguageSubpageUI() {
+      const bnRow = document.getElementById("langOptBn");
+      const enRow = document.getElementById("langOptEn");
+      if (bnRow) bnRow.classList.toggle("selected", currentLanguage === 'bn');
+      if (enRow) enRow.classList.toggle("selected", currentLanguage === 'en');
+      const langNameBadge = document.getElementById("setMenuLangName");
+      if (langNameBadge) {
+        langNameBadge.textContent = currentLanguage === 'en' ? "English" : "বাংলা";
+      }
+    }
+    window.refreshLanguageSubpageUI = refreshLanguageSubpageUI;
+
+    function selectAppTheme(theme) {
+      if (typeof setTheme === "function") setTheme(theme, true);
+      refreshThemeSubpageUI();
+    }
+    window.selectAppTheme = selectAppTheme;
+
+    function refreshThemeSubpageUI() {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const themeItems = {
+        dark: document.getElementById("themeOptDark"),
+        light: document.getElementById("themeOptLight"),
+        eyecare: document.getElementById("themeOptEyecare"),
+        oled: document.getElementById("themeOptOled")
+      };
+      Object.keys(themeItems).forEach(t => {
+        if (themeItems[t]) {
+          themeItems[t].classList.toggle("selected", current === t);
+        }
+      });
+      const themeNameBadge = document.getElementById("setMenuThemeName");
+      if (themeNameBadge) {
+        const namesBn = { dark: "ডার্ক", light: "লাইট", eyecare: "আইকেয়ার", oled: "ওলেড", sapphire: "স্যাফায়ার" };
+        const namesEn = { dark: "Dark", light: "Light", eyecare: "Eye Care", oled: "OLED", sapphire: "Sapphire" };
+        themeNameBadge.textContent = currentLanguage === 'en' ? (namesEn[current] || current) : (namesBn[current] || current);
+      }
+    }
+    window.refreshThemeSubpageUI = refreshThemeSubpageUI;
+
+    function refreshAccountSubpageUI() {
+      const token = localStorage.getItem("alokpoth_token");
+      const nameInput = document.getElementById("subAccountNameInput");
+      const nameDisplay = document.getElementById("subAccountDisplayName");
+      const emailDisplay = document.getElementById("subAccountEmailDisplay");
+      const avatarEl = document.getElementById("subAccountAvatar");
+      const passCard = document.getElementById("subPasswordCard");
+
+      const currentName = localStorage.getItem("alokpoth_account_name") || "";
+      let userObj = null;
+      try {
+        userObj = JSON.parse(localStorage.getItem("alokpoth_user") || "null");
+      } catch {}
+
+      const displayName = currentName || (userObj && userObj.name) || (token ? "ব্যবহারকারী" : (currentLanguage === 'en' ? "Guest" : "অতিথি"));
+      const displayEmail = (userObj && userObj.email) || (token ? "লগইন করা আছে" : (currentLanguage === 'en' ? "Not logged in" : "লগইন করা নেই"));
+      const initial = displayName.trim().charAt(0).toUpperCase() || "অ";
+
+      if (nameInput) nameInput.value = currentName || (userObj && userObj.name) || "";
+      if (nameDisplay) nameDisplay.textContent = displayName;
+      if (emailDisplay) emailDisplay.textContent = displayEmail;
+      if (avatarEl) avatarEl.textContent = initial;
+
+      if (passCard) {
+        passCard.style.display = token ? "flex" : "none";
+      }
+    }
+    window.refreshAccountSubpageUI = refreshAccountSubpageUI;
+
     function openAccountModal(targetTab = "") {
       if (accountModalOverlay) {
+        showSettingsView("settingsMainView");
         accountModalOverlay.classList.add("open");
         pushPageState("account");
-        if (targetTab && typeof switchAccountTab === "function") {
-          switchAccountTab(targetTab);
-        }
         syncUserProfileFromServer();
         syncPlanLimitsFromServer();
         renderCreditBalance();
-        startQuotaCountdownTimer();
+        refreshLanguageSubpageUI();
+        refreshThemeSubpageUI();
+        applyI18n();
       } else {
         const url = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
         window.location.href = url;
@@ -6041,22 +6573,23 @@
       }
     };
 
-    const setMenuProfile = document.getElementById("setMenuProfile");
-    if (setMenuProfile) {
-      setMenuProfile.addEventListener("click", async () => {
-        const token = localStorage.getItem("alokpoth_token");
-        if (!token) {
-          openAuthModal("login");
+    // --- Settings Subpage Event Handlers ---
+    const subAccountSaveBtn = document.getElementById("subAccountSaveBtn");
+    if (subAccountSaveBtn) {
+      subAccountSaveBtn.addEventListener("click", async () => {
+        const input = document.getElementById("subAccountNameInput");
+        if (!input) return;
+        const cleanName = input.value.trim();
+        if (!cleanName) {
+          showToast(currentLanguage === 'en' ? "Please enter a valid name" : "দয়া করে একটি নাম লিখুন", "error");
           return;
         }
-        const currentName = localStorage.getItem("alokpoth_account_name") || "";
-        const name = prompt("আপনার নতুন নাম লিখুন:", currentName);
-        if (name === null) return; // cancelled
-        const cleanName = name.trim();
         try { localStorage.setItem("alokpoth_account_name", cleanName); } catch {}
         applyAccountName(cleanName);
+        refreshAccountSubpageUI();
 
-        if (cleanName) {
+        const token = localStorage.getItem("alokpoth_token");
+        if (token) {
           try {
             const res = await fetch(`${API_BASE}/auth/me`, {
               method: "PUT",
@@ -6068,11 +6601,134 @@
             });
             const data = await res.json();
             if (data.success && data.user) {
-              localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
+              try { localStorage.setItem("alokpoth_user", JSON.stringify(data.user)); } catch {}
             }
           } catch (e) {}
         }
-        showToast("নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
+        showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
+      });
+    }
+
+    const subAccountPassSubmitBtn = document.getElementById("subAccountPassSubmitBtn");
+    if (subAccountPassSubmitBtn) {
+      subAccountPassSubmitBtn.addEventListener("click", async () => {
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) {
+          showToast("দয়া করে প্রথমে লগইন করুন", "error");
+          return;
+        }
+        const oldPass = (document.getElementById("subAccountOldPass")?.value || "").trim();
+        const newPass = (document.getElementById("subAccountNewPass")?.value || "").trim();
+        const cnfPass = (document.getElementById("subAccountConfirmPass")?.value || "").trim();
+        const msgEl = document.getElementById("subAccountPassMsg");
+
+        if (!oldPass || !newPass || !cnfPass) {
+          if (msgEl) { msgEl.textContent = "সবগুলো ফিল্ড পূরণ করুন"; msgEl.style.color = "#ef4444"; }
+          return;
+        }
+        if (newPass.length < 6) {
+          if (msgEl) { msgEl.textContent = "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে"; msgEl.style.color = "#ef4444"; }
+          return;
+        }
+        if (newPass !== cnfPass) {
+          if (msgEl) { msgEl.textContent = "নিশ্চিতকরণ পাসওয়ার্ড মেলেনি"; msgEl.style.color = "#ef4444"; }
+          return;
+        }
+
+        subAccountPassSubmitBtn.disabled = true;
+        subAccountPassSubmitBtn.textContent = "আপডেট হচ্ছে...";
+        try {
+          const res = await fetch(`${API_BASE}/auth/change-password`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ current_password: oldPass, new_password: newPass, confirm_password: cnfPass })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (msgEl) { msgEl.textContent = "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"; msgEl.style.color = "#10b981"; }
+            showToast("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+            document.getElementById("subAccountOldPass").value = "";
+            document.getElementById("subAccountNewPass").value = "";
+            document.getElementById("subAccountConfirmPass").value = "";
+          } else {
+            const err = data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে";
+            if (msgEl) { msgEl.textContent = err; msgEl.style.color = "#ef4444"; }
+            showToast(err, "error");
+          }
+        } catch (e) {
+          if (msgEl) { msgEl.textContent = "সার্ভার এরর"; msgEl.style.color = "#ef4444"; }
+        } finally {
+          subAccountPassSubmitBtn.disabled = false;
+          subAccountPassSubmitBtn.textContent = currentLanguage === 'en' ? "Update Password" : "পাসওয়ার্ড আপডেট করুন";
+        }
+      });
+    }
+
+    const subRedeemSubmitBtn = document.getElementById("subRedeemSubmitBtn");
+    if (subRedeemSubmitBtn) {
+      subRedeemSubmitBtn.addEventListener("click", async () => {
+        const input = document.getElementById("subRedeemInput");
+        const msgEl = document.getElementById("subRedeemMsg");
+        if (!input) return;
+        const rawCode = input.value.trim().toUpperCase();
+        if (!rawCode) {
+          if (msgEl) { msgEl.textContent = "অনুগ্রহ করে একটি কোড লিখুন"; msgEl.style.color = "#ef4444"; }
+          return;
+        }
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) {
+          showToast("রিডিম কোড ব্যবহারের জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
+          openAuthModal("login");
+          return;
+        }
+
+        subRedeemSubmitBtn.disabled = true;
+        subRedeemSubmitBtn.textContent = "যাচাই হচ্ছে...";
+        try {
+          const res = await fetch(`${API_BASE}/redeem/claim`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ code: rawCode })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
+            const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
+            if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+            currentPlan = newPlan;
+            saveCurrentPlan(newPlan);
+            if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
+            renderCreditBalance();
+            if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
+            if (typeof updateAuthUIState === "function") updateAuthUIState();
+            if (msgEl) { msgEl.textContent = data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`; msgEl.style.color = "#10b981"; }
+            showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+            if (typeof triggerConfetti === "function") triggerConfetti();
+            input.value = "";
+          } else {
+            const errMsg = data.error || "রিডিম করতে ব্যর্থ হয়েছে! কোডটি পুনরায় পরীক্ষা করুন।";
+            if (msgEl) { msgEl.textContent = errMsg; msgEl.style.color = "#ef4444"; }
+            showToast(errMsg, "error");
+          }
+        } catch (e) {
+          if (msgEl) { msgEl.textContent = "সার্ভারের সাথে যোগাযোগ করা যায়নি।"; msgEl.style.color = "#ef4444"; }
+        } finally {
+          subRedeemSubmitBtn.disabled = false;
+          subRedeemSubmitBtn.textContent = currentLanguage === 'en' ? "Claim Code" : "কোড রিডিম করুন";
+        }
+      });
+    }
+
+    const subFeedbackSubmitBtn = document.getElementById("subFeedbackSubmitBtn");
+    if (subFeedbackSubmitBtn) {
+      subFeedbackSubmitBtn.addEventListener("click", () => {
+        const input = document.getElementById("subFeedbackInput");
+        if (!input || !input.value.trim()) {
+          showToast(currentLanguage === 'en' ? "Please write your feedback first" : "দয়া করে আপনার মতামত লিখুন", "info");
+          return;
+        }
+        input.value = "";
+        showToast(currentLanguage === 'en' ? "Thank you for your valuable feedback!" : "আপনার মূল্যবান মতামতের জন্য ধন্যবাদ!", "success");
       });
     }
 
@@ -6705,9 +7361,12 @@
       themeToggleBtn.addEventListener("click", () => cycleTheme(true));
     }
 
-    // Initial theme sync
+    // Initial theme & language sync
     const initialTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     setTheme(initialTheme, false);
+    if (typeof applyI18n === "function") applyI18n();
+    if (typeof refreshLanguageSubpageUI === "function") refreshLanguageSubpageUI();
+    if (typeof refreshThemeSubpageUI === "function") refreshThemeSubpageUI();
 
     function updateOnlineStatus() {
       if (!navigator.onLine) {
