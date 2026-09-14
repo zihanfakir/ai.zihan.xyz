@@ -3492,6 +3492,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 </head>
 <body>
+<script>
+// Early Android detection — runs before any deferred scripts
+// Hides all app-download UI instantly so it never flashes inside the native app
+(function(){
+  var ua = (navigator.userAgent || '');
+  var isApp = (typeof window.AloAndroid !== 'undefined') || ua.indexOf('AloAI-Android') !== -1;
+  window.isAndroidApp = isApp;
+  if (!isApp) return;
+  var style = document.createElement('style');
+  style.textContent = '#heroAppDownloadBanner,#drawerDownloadAppWrap,#brandMenuDownloadAppBtn,#appDownloadModalOverlay{display:none!important}';
+  document.head.appendChild(style);
+})();
+</script>
+
 
 <div class="toast-container" id="toastContainer"></div>
 
@@ -3685,9 +3699,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div style="padding: 10px 16px 4px 16px;">
-        <input type="text" id="modelSearchInput" placeholder="মডেল খুঁজুন..." style="width: 100%; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-size: 0.86rem; outline: none; box-sizing: border-box; transition: border-color 0.2s;">
-      </div>
+
       <div class="model-list" id="modelList"></div>
     </div>
   </div>
@@ -4640,12 +4652,24 @@
       }
 
       micBtn.addEventListener("click", () => {
+        if (!requireAuth()) return;
         if (isSpeechRecording) {
           resetMicBtn();
         } else {
           startListening();
         }
       });
+    }
+
+    function requireAuth() {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        showToast(isEn ? "Please log in or sign up to start chatting." : "চ্যাট করতে অনুগ্রহ করে প্রথমে লগইন বা সাইন-আপ করুন।", "warning");
+        openAuthModal("login");
+        return false;
+      }
+      return true;
     }
 
     function stopGeneration() {
@@ -4723,6 +4747,7 @@
     document.addEventListener("click", (e) => {
       const chip = e.target.closest(".quick-prompt-chip");
       if (chip) {
+        if (!requireAuth()) return;
         const promptText = chip.getAttribute("data-prompt");
         if (promptText) {
           userInput.value = promptText;
@@ -4961,6 +4986,7 @@
 
         if (oldPlan !== safeVal) {
           localStorage.removeItem(USAGE_WINDOW_KEY);
+          localStorage.removeItem(IMAGE_WINDOW_KEY);
         }
       } catch {}
     }
@@ -5054,6 +5080,51 @@
       try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
       renderCreditBalance();
     }
+
+    const IMAGE_WINDOW_KEY = "alokpoth_image_window_usage";
+
+    function getImagePlanLimit() {
+      const plan = currentPlan || "Free";
+      if (DYNAMIC_PLAN_LIMITS[plan] && DYNAMIC_PLAN_LIMITS[plan].image_limit !== undefined) {
+        return { limit: DYNAMIC_PLAN_LIMITS[plan].image_limit, hours: DYNAMIC_PLAN_LIMITS[plan].hours || 3 };
+      }
+      if (plan === "Max") return { limit: 100, hours: 1 };
+      if (plan === "Pro") return { limit: 20, hours: 3 };
+      return { limit: 3, hours: 3 };
+    }
+
+    function getImageWindowUsage() {
+      const { hours } = getImagePlanLimit();
+      const windowMs = hours * 60 * 60 * 1000;
+      const now = Date.now();
+      try {
+        const stored = JSON.parse(localStorage.getItem(IMAGE_WINDOW_KEY) || "null");
+        if (stored && stored.start && (now - stored.start) < windowMs) {
+          return stored;
+        }
+      } catch {}
+      return { count: 0, start: now };
+    }
+
+    function hasImageCredit() {
+      try {
+        const u = getTrustedUser();
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+          return true;
+        }
+      } catch {}
+      const { limit } = getImagePlanLimit();
+      const usage = getImageWindowUsage();
+      return (usage.count || 0) < limit;
+    }
+
+    function recordImageWindowUsage() {
+      const usage = getImageWindowUsage();
+      usage.count = (usage.count || 0) + 1;
+      try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
+    }
+
 
     function hasCredit() {
       try {
@@ -5150,9 +5221,12 @@
         const data = await res.json();
         if (data.success && Array.isArray(data.plans)) {
           data.plans.forEach(p => {
-            const lim = Number(p.message_limit) || 10;
-            const hrs = Number(p.window_hours) || 3;
-            const imgLim = Number(p.image_limit) || (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
+            const lim = (p.message_limit !== undefined && p.message_limit !== null && !isNaN(Number(p.message_limit)))
+              ? Number(p.message_limit) : (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50));
+            const hrs = (p.window_hours !== undefined && p.window_hours !== null && !isNaN(Number(p.window_hours)))
+              ? Number(p.window_hours) : (p.name === 'Max' ? 1 : 3);
+            const imgLim = (p.image_limit !== undefined && p.image_limit !== null && !isNaN(Number(p.image_limit)))
+              ? Number(p.image_limit) : (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
             DYNAMIC_PLAN_LIMITS[p.name] = { limit: lim, hours: hrs, image_limit: imgLim };
 
             if (PLAN_LIMIT_DETAILS.bn[p.name]) {
@@ -5736,26 +5810,14 @@
       return `${m.latency}ms`;
     }
 
-    const modelSearchInput = document.getElementById("modelSearchInput");
-    if (modelSearchInput) {
-      modelSearchInput.addEventListener("input", () => {
-        renderModelList();
-      });
-    }
-
     function renderModelList() {
       modelList.innerHTML = "";
-      const q = (modelSearchInput?.value || "").toLowerCase().trim();
-      const filtered = q ? MODELS.filter(m => 
-        (m.name && m.name.toLowerCase().includes(q))
-      ) : MODELS;
-
-      if (!filtered.length) {
+      if (!MODELS.length) {
         modelList.innerHTML = `<div style="text-align:center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;">কোনো মডেল পাওয়া যায়নি</div>`;
         return;
       }
 
-      filtered.forEach((m) => {
+      MODELS.forEach((m) => {
         const card = document.createElement("button");
         card.type = "button";
         card.className = "model-card" + (m.id === selectedModelId ? " selected" : "");
@@ -6350,12 +6412,46 @@
       if (typeof renderDailyUsage === "function") renderDailyUsage();
     }
 
+    function purgeLocalUserData() {
+      const keys = [
+        "alokpoth_token", "alokpoth_user", "alokpoth_account_name",
+        "alokpoth_chat_sessions", "alokpoth_current_session_id",
+        "alokpoth_message_count", "alokpoth_daily_usage",
+        "alokpoth_window_usage", "alokpoth_image_window_usage",
+        "alokpoth_plan_expiry", "alokpoth_plan_expires_at",
+        "alokpoth_current_plan", "alokpoth_user_plan", "alokpoth_plan",
+        "alokpoth_usage_window"
+      ];
+      keys.forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+      currentPlan = "Free";
+      try {
+        localStorage.setItem("alokpoth_current_plan", "Free");
+        localStorage.setItem("alokpoth_plan", "Free");
+        localStorage.setItem("alokpoth_user_plan", "Free");
+      } catch (e) {}
+      messageCount = 0;
+      currentSessionId = null;
+      messagesHistory = [{ role: "system", content: typeof SYSTEM_PROMPT !== "undefined" ? SYSTEM_PROMPT : "" }];
+      if (typeof clearComposerState === "function") clearComposerState();
+      if (typeof renderChatHistoryList === "function") renderChatHistoryList();
+      if (typeof renderDrawerHistoryList === "function") renderDrawerHistoryList();
+      if (chatStream && typeof getEmptyStateHtml === "function") {
+        chatStream.innerHTML = getEmptyStateHtml();
+        emptyState = document.getElementById("emptyState");
+      }
+      applyAccountName("");
+      renderCreditBalance();
+      if (typeof updateAuthUIState === "function") updateAuthUIState();
+      if (typeof updateNavbarCreditBadge === "function") updateNavbarCreditBadge();
+    }
+
     async function syncUserProfileFromServer() {
       const token = localStorage.getItem("alokpoth_token");
       if (!token) return;
       try {
-        const res = await fetch(`${API_BASE}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}`, "Cache-Control": "no-cache" }
         });
         if (res.status === 403) {
           showToast("আপনার অ্যাকাউন্টটি অ্যাডমিন দ্বারা ব্লক করা হয়েছে!", "error");
@@ -6363,16 +6459,7 @@
           return;
         }
         if (res.status === 401) {
-          try {
-            localStorage.removeItem("alokpoth_token");
-            localStorage.removeItem("alokpoth_user");
-            localStorage.removeItem(PLAN_EXPIRY_KEY);
-            localStorage.removeItem("alokpoth_plan_expiry");
-          } catch (e) {}
-          currentPlan = "Free";
-          saveCurrentPlan("Free");
-          renderCreditBalance();
-          if (typeof updateAuthUIState === "function") updateAuthUIState();
+          purgeLocalUserData();
           return;
         }
         const data = await res.json();
@@ -6429,7 +6516,15 @@
           if (u.rateLimit || u.usage) {
             const lim = u.rateLimit || u.usage;
             if (lim.limit && lim.windowHours && currentPlan) {
-              DYNAMIC_PLAN_LIMITS[currentPlan] = { limit: Number(lim.limit), hours: Number(lim.windowHours) };
+              const existingImg = DYNAMIC_PLAN_LIMITS[currentPlan]?.image_limit;
+              const imgLim = (lim.image_limit !== undefined || lim.imageLimit !== undefined)
+                ? Number(lim.image_limit ?? lim.imageLimit)
+                : (existingImg !== undefined ? existingImg : (currentPlan === 'Max' ? 100 : (currentPlan === 'Pro' ? 20 : 3)));
+              DYNAMIC_PLAN_LIMITS[currentPlan] = {
+                limit: Number(lim.limit),
+                hours: Number(lim.windowHours),
+                image_limit: imgLim
+              };
             }
             try {
               const startTimestamp = lim.start || (lim.resetAt ? (new Date(lim.resetAt).getTime() - (lim.windowHours * 60 * 60 * 1000)) : Date.now());
@@ -7320,21 +7415,7 @@
 
     function performAccountLogout(force = false) {
       const doLogout = () => {
-        try {
-          localStorage.removeItem("alokpoth_account_name");
-          localStorage.removeItem("alokpoth_token");
-          localStorage.removeItem("alokpoth_user");
-          localStorage.removeItem(PLAN_EXPIRY_KEY);
-          localStorage.removeItem("alokpoth_plan_expiry");
-          localStorage.removeItem(USAGE_WINDOW_KEY);
-          localStorage.setItem("alokpoth_user_plan", "Free");
-          localStorage.setItem(PLAN_STORAGE_KEY, "Free");
-          localStorage.setItem("alokpoth_plan", "Free");
-        } catch (e) {}
-
-        currentPlan = "Free";
-        saveCurrentPlan("Free");
-        applyAccountName("");
+        purgeLocalUserData();
 
         const subName = document.getElementById("subAccountNameInput");
         const subOldP = document.getElementById("subAccountOldPass");
@@ -7350,12 +7431,6 @@
         if (subPMsg) { subPMsg.textContent = ""; subPMsg.style.color = ""; }
         if (subRedIn) subRedIn.value = "";
         if (subRedMsg) { subRedMsg.textContent = ""; subRedMsg.style.color = ""; }
-
-        renderCreditBalance();
-
-        if (typeof startNewChat === "function") {
-          startNewChat();
-        }
 
         closeAccountModal();
         closeBrandMenu();
@@ -7572,6 +7647,9 @@
             throw new Error(data.error || "অথেন্টিকেশন ব্যর্থ হয়েছে!");
           }
 
+          if (authMode === "register") {
+            purgeLocalUserData();
+          }
           localStorage.setItem("alokpoth_token", data.token);
           if (data.user) {
             localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
@@ -7614,13 +7692,11 @@
        App Download & PWA Controller (Website Only)
        ======================================================== */
     function isRunningInApp() {
-      if (typeof window.AloAndroid !== "undefined" || (window.AloAndroid && window.AloAndroid.isNativeApp())) {
-        return true;
-      }
-      if (navigator.userAgent && navigator.userAgent.includes("AloAI-Android")) {
-        return true;
-      }
-      return false;
+      const inApp = (typeof window.AloAndroid !== "undefined" && (window.AloAndroid.isNativeApp ? window.AloAndroid.isNativeApp() : true)) ||
+        (navigator.userAgent && navigator.userAgent.includes("AloAI-Android")) ||
+        (window.isAndroidApp === true);
+      window.isAndroidApp = inApp;
+      return inApp;
     }
 
     const drawerDownloadAppWrap = document.getElementById("drawerDownloadAppWrap");
@@ -8352,7 +8428,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const d = (typeof I18N !== "undefined" && I18N[currentLanguage]) ? I18N[currentLanguage] : (typeof I18N !== "undefined" ? I18N.bn : {});
       const greeting = d.welcomeGreeting || (isEn ? "How can I help you today?" : "আমি আপনাকে কীভাবে সাহায্য করতে পারি?");
-      const isAndroid = (typeof window.isAndroidApp !== "undefined" && window.isAndroidApp);
+      const isAndroid = (typeof isRunningInApp === "function" ? isRunningInApp() : (typeof window.isAndroidApp !== "undefined" && window.isAndroidApp));
       
       const bannerHtml = isAndroid ? '' : `
         <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 0;">
@@ -8426,7 +8502,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     async function handleRegenerateFromBtn(regenBtn) {
       if (isGenerating) return;
-      // Guest users are allowed to chat freely within their quota
+      if (!requireAuth()) return;
       if (!hasCredit()) {
         openAccountModal();
         return;
@@ -9029,7 +9105,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         if (response.status === 401 || response.status === 403) {
           if (serverError.includes("অকার্যকর") || serverError.includes("লগইন") || serverError.includes("অননুমোদিত") || serverError.includes("ব্লক")) {
-            handleLogout();
+            performAccountLogout(true);
           }
         }
         if (serverError) {
@@ -9195,8 +9271,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function detectImageGenRequest(text) {
       if (!text) return null;
       const patterns = [
-        /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র)/i,
-        /\b(draw|generate|create)\b.*\b(image|picture|art|logo|wallpaper|photo)\b/i,
+        /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন)/i,
+        /(একটি|একটা|কিছু|আমাকে)?\s*(ছবি|ইমেজ|আর্ট|চিত্র|পেইন্টিং)\s*(এঁকে|বানিয়ে|তৈরি করে|জেনারেট করে)/i,
+        /^\s*(draw|paint|sketch|generate|create)\s+([a-z0-9_\-\s]{2,})\s*(image|picture|photo|illustration|art|painting|drawing|wallpaper|logo|icon)?/i,
+        /\b(draw|generate|create|paint)\b.*\b(image|picture|art|logo|wallpaper|photo|painting|drawing)\b/i,
         /\bimage\s*of\b/i
       ];
       return patterns.some((p) => p.test(text));
@@ -9273,6 +9351,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     async function generateAIReply() {
       return new Promise(async (resolve) => {
+        if (!requireAuth()) {
+          resolve();
+          return;
+        }
         const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
         const currentModel = MODELS.find((m) => m.id === selectedModelId);
         const isGemini = currentModel?.type === "gemini";
@@ -9287,6 +9369,24 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const wantImage = isImageGenEnabled || (lastUserMsg && detectImageGenRequest(lastUserMsg.content));
         
         if (wantImage && lastUserMsg) {
+          // Check image generation limit for current plan
+          if (!hasImageCredit()) {
+            const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            const { limit, hours } = getImagePlanLimit();
+            const planName = currentPlan || "Free";
+            const limitMsg = isEnNow
+              ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for the reset or upgrade your plan.`
+              : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
+            aiTextElement.classList.remove("streaming", "no-children");
+            aiTextElement.innerHTML = `<div class="ai-error-box" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
+              <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <span style="font-weight:600;font-size:0.92rem;color:var(--text-main);">${escapeHtml(limitMsg)}</span></div>
+              <button type="button" class="btn btn-primary" onclick="openAccountModal()" style="align-self:flex-start;margin-top:4px;">${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}</button>
+            </div>`;
+            refundCredit();
+            scrollToBottom(); resolve(); return;
+          }
+
           setBubbleGeneratingImage(aiTextElement);
           
           // Auto turn off toggle
@@ -9300,13 +9400,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
           
           try {
             let imgPrompt = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
-            if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
+            if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
             const imageUrl = await generateImageForVyceaiModel(imgPrompt);
             renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);
             copyBtn.style.display = "none";
             regenBtn.style.display = "inline-flex";
             messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });
             addImageUsage(selectedModelId);
+            recordImageWindowUsage();
             persistCurrentSession();
             scrollToBottom(); resolve();
           } catch (err) {
@@ -9737,17 +9838,39 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       
       if (!navigator.onLine) { updateOnlineStatus(); return; }
-      if (!hasCredit()) {
-        if (!token) {
-          showToast(isEn ? "Free message limit reached! Please log in or register to continue." : "ফ্রি মেসেজ সীমা শেষ! চ্যাট চালিয়ে যেতে লগইন অথবা সাইন-আপ করুন।", "warning");
-          openAuthModal("login");
-        } else {
-          showToast(isEn ? "Message limit reached! Please upgrade your plan or wait for reset." : "আপনার প্ল্যানের বার্তা সীমা শেষ হয়েছে! দয়া করে আপগ্রেড করুন।", "warning");
-          openAccountModal();
-        }
+
+      // Require login to send any message
+      if (!token) {
+        showToast(isEn ? "Please log in or sign up to start chatting." : "চ্যাট করতে লগইন বা সাইন-আপ করুন।", "warning");
+        openAuthModal("login");
+        chatForm._isSubmitting = false;
         return;
       }
+
       const text = userInput.value.trim();
+      const isImgReq = isImageGenEnabled || detectImageGenRequest(text);
+
+      if (isImgReq) {
+        if (!hasImageCredit()) {
+          const { limit, hours } = getImagePlanLimit();
+          const planName = currentPlan || "Free";
+          const limitMsg = isEn
+            ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for reset or upgrade.`
+            : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
+          showToast(limitMsg, "warning");
+          openAccountModal();
+          chatForm._isSubmitting = false;
+          return;
+        }
+      } else {
+        if (!hasCredit()) {
+          showToast(isEn ? "Message limit reached! Please upgrade your plan or wait for reset." : "আপনার প্ল্যানের বার্তা সীমা শেষ হয়েছে! দয়া করে আপগ্রেড করুন।", "warning");
+          openAccountModal();
+          chatForm._isSubmitting = false;
+          return;
+        }
+      }
+
       const imagesForThisMessage = pendingImages.slice();
       const filesForThisMessage = pendingFiles.filter((f) => !f.loading).slice();
       if (!text && !imagesForThisMessage.length && !filesForThisMessage.length) return;
@@ -9760,10 +9883,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       soundEngine.playSend();
       triggerHaptic("medium");
 
-      messageCount++;
-      try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch {}
-      deductCredit(1);
-      updateNavbarCreditBadge();
+      if (!isImgReq) {
+        messageCount++;
+        try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch {}
+        deductCredit(1);
+        updateNavbarCreditBadge();
+      }
 
       let fileContext = "";
       if (filesForThisMessage.length) {

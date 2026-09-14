@@ -21,7 +21,11 @@ const PlanSchema = new mongoose.Schema({
   },
   image_limit: {
     type: Number,
-    default: 3
+    default: function() {
+      if (this.name === 'Pro') return 20;
+      if (this.name === 'Max') return 100;
+      return 3;
+    }
   },
   allowed_models: [{
     type: String

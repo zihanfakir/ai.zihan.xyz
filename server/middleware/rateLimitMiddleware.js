@@ -30,82 +30,14 @@ const checkRateLimit = async (req, res, next) => {
     const cleanIp = String(resolvedIp).replace(/^::ffff:/, '').replace(/[^a-zA-Z0-9]/g, '_');
     const guestId = `guest_${cleanIp}`;
 
-    // 0. Guest User (Not logged in)
+    // 0. Guest User (Not logged in) — Strict Login Required
     if (!user) {
-      if (isImageRoute) {
-        // Enforce Guest Image Rate Limit: 3 images per 3 hours
-        const guestWindowHours = 3;
-        const guestImageLimit = 3;
-        const windowStart = new Date(Date.now() - guestWindowHours * 60 * 60 * 1000);
-        let imageCount = 0;
-        let resetTimeMinutes = guestWindowHours * 60;
-
-        if (getIsMongoConnected()) {
-          imageCount = await UsageLog.countDocuments({
-            user_id: guestId,
-            model_id: 'image-generation',
-            timestamp: { $gte: windowStart }
-          });
-          if (imageCount >= guestImageLimit) {
-            const oldest = await UsageLog.findOne({ user_id: guestId, model_id: 'image-generation', timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
-            if (oldest) {
-              resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldest.timestamp).getTime() + guestWindowHours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
-            }
-          }
-        } else {
-          const imgUsage = await getUserImageUsageDetails(guestId, guestWindowHours);
-          const memLogs = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === guestId && l.model_id === 'image-generation' && new Date(l.timestamp) >= windowStart);
-          imageCount = Math.max(imgUsage.count, memLogs.length);
-          resetTimeMinutes = imgUsage.resetInMinutes || 180;
-        }
-
-        if (imageCount >= guestImageLimit) {
-          res.setHeader('Retry-After', resetTimeMinutes * 60);
-          return res.status(429).json({
-            success: false,
-            error: `ছবি তৈরির সীমা শেষ! ফ্রি প্ল্যানে প্রতি ${guestWindowHours} ঘণ্টায় সর্বোচ্চ ${guestImageLimit}টি ছবি তৈরি করা যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন অথবা লগইন করে প্ল্যান আপগ্রেড করুন।`
-          });
-        }
-
-        req.guestId = guestId;
-        req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, image_limit: guestImageLimit, window_hours: guestWindowHours, allowed_models: ['*'] };
-        return next();
-      }
-
-      // Guest text message rate limit
-      const model_id = req.body.model || 'openrouter/free';
-
-      let aiModel = null;
-      if (getIsMongoConnected()) {
-        aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] });
-      } else {
-        aiModel = await getModelConfig(model_id);
-      }
-
-      const isMax = Boolean(aiModel && aiModel.efficient) || model_id === 'gpt-5.6';
-      const isPro = Boolean(aiModel && aiModel.premium) && !isMax;
-      const isFree = !isMax && !isPro;
-
-      if (!isFree) {
-        const requiredTier = isMax ? 'ম্যাক্স (Max)' : 'প্রো (Pro) বা ম্যাক্স (Max)';
-        return res.status(403).json({
-          success: false,
-          error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য অনুগ্রহ করে লগইন করুন এবং ${requiredTier} প্ল্যান সক্রিয় করুন।`
-        });
-      }
-
-      const usageDetails = await getUserUsageDetails(guestId, 3);
-      if (usageDetails.count >= 10) {
-        res.setHeader('Retry-After', Math.max(1, Math.ceil((usageDetails.resetInMinutes || 180) * 60)));
-        return res.status(429).json({
-          success: false,
-          error: `বার্তা সীমা শেষ! আপনি ৩ ঘণ্টায় সর্বোচ্চ ১০টি ফ্রি বার্তা পাঠাতে পারেন। আবার ${usageDetails.resetInMinutes} মিনিট পর চেষ্টা করুন অথবা লগইন করুন।`
-        });
-      }
-
-      req.guestId = guestId;
-      req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, image_limit: 3, window_hours: 3, allowed_models: ['*'] };
-      return next();
+      return res.status(401).json({
+        success: false,
+        error: isImageRoute 
+          ? 'ছবি তৈরি করতে অনুগ্রহ করে প্রথমে লগইন বা সাইন-আপ করুন।' 
+          : 'চ্যাট করতে অনুগ্রহ করে প্রথমে লগইন বা সাইন-আপ করুন।'
+      });
     }
 
     // 1. Check & Auto-Downgrade Expired Subscriptions

@@ -59,22 +59,19 @@ const protect = async (req, res, next) => {
 
     if (!user && decoded && userId) {
       const isVerifiedAdminEmail = decoded.email && adminEmails.includes(decoded.email.toLowerCase().trim());
-      const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
-      user = {
-        _id: String(userId),
-        id: String(userId),
-        name: decoded.name || 'User',
-        email: decoded.email || '',
-        role: isVerifiedAdminEmail ? 'admin' : 'user', // NEVER allow arbitrary admin escalation
-        is_blocked: false,
-        subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : validPlan,
-          expires_at: decoded.expires_at || null,
-          is_active: true
+      if (isVerifiedAdminEmail) {
+        user = {
+          _id: String(userId),
+          id: String(userId),
+          name: decoded.name || 'Zihan Fakir',
+          email: decoded.email,
+          role: 'admin',
+          is_blocked: false,
+          subscription: { plan_name: 'Max', expires_at: null, is_active: true }
+        };
+        if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
+          memoryStore.users.push(user);
         }
-      };
-      if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
-        memoryStore.users.push(user);
       }
     }
 
@@ -140,22 +137,19 @@ const optionalProtect = async (req, res, next) => {
 
     if (!user && decoded && userId) {
       const isVerifiedAdminEmail = decoded.email && adminEmails.includes(decoded.email.toLowerCase().trim());
-      const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
-      user = {
-        _id: String(userId),
-        id: String(userId),
-        name: decoded.name || 'User',
-        email: decoded.email || '',
-        role: isVerifiedAdminEmail ? 'admin' : (decoded.role === 'admin' && isVerifiedAdminEmail ? 'admin' : 'user'),
-        is_blocked: false,
-        subscription: {
-          plan_name: isVerifiedAdminEmail ? 'Max' : validPlan,
-          expires_at: decoded.expires_at || null,
-          is_active: true
+      if (isVerifiedAdminEmail) {
+        user = {
+          _id: String(userId),
+          id: String(userId),
+          name: decoded.name || 'Zihan Fakir',
+          email: decoded.email,
+          role: 'admin',
+          is_blocked: false,
+          subscription: { plan_name: 'Max', expires_at: null, is_active: true }
+        };
+        if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
+          memoryStore.users.push(user);
         }
-      };
-      if (!memoryStore.users.some(u => String(u._id || u.id) === String(userId))) {
-        memoryStore.users.push(user);
       }
     }
 

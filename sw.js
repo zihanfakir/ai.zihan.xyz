@@ -1,5 +1,5 @@
-/* Alokpoth AI - Progressive Web App Service Worker (v1.1.2) */
-const CACHE_NAME = 'alokpoth-ai-v1.1.2';
+/* Alokpoth AI - Progressive Web App Service Worker (v1.1.3) */
+const CACHE_NAME = 'alokpoth-ai-v1.1.3';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -42,8 +42,8 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Skip non-GET-requests and API calls
-  if (req.method !== 'GET' || url.pathname.startsWith('/api/')) {
+  // Skip non-GET-requests, API calls, and anti-cache timestamped requests
+  if (req.method !== 'GET' || url.pathname.includes('/api/') || url.searchParams.has('_t')) {
     return;
   }
 

@@ -351,12 +351,21 @@ const deleteUser = async (req, res) => {
     await savePersistedUsers(users);
     invalidateUsersCache();
 
-    // 3. Purge user usage quota row from Supabase api_keys table
+    // 3. Purge user usage quota rows from Supabase api_keys table (by userId AND targetId AND email)
     if (supabase) {
       try {
         await supabase.from('api_keys').delete().eq('model_id', `__usage_${userId}__`);
+        await supabase.from('api_keys').delete().eq('model_id', `__img_usage_${userId}__`);
         if (targetId !== userId) {
           await supabase.from('api_keys').delete().eq('model_id', `__usage_${targetId}__`);
+          await supabase.from('api_keys').delete().eq('model_id', `__img_usage_${targetId}__`);
+        }
+        // Also purge by email-based key patterns in case new registrations would match
+        if (targetEmail) {
+          await supabase.from('api_keys').delete().eq('model_id', `__usage_${targetEmail}__`);
+          await supabase.from('api_keys').delete().eq('model_id', `__img_usage_${targetEmail}__`);
+          // Purge any profile or quota rows with email as key
+          await supabase.from('api_keys').delete().eq('model_id', `__profile_${targetEmail}__`);
         }
       } catch (e) {
         console.warn('[Supabase] Usage row purge warning:', e.message);
@@ -383,14 +392,21 @@ const deleteUser = async (req, res) => {
 
 const getPlans = async (req, res) => {
   try {
+    let rawPlans;
     if (getIsMongoConnected()) {
-      const plans = await Plan.find();
-      return res.json({ success: true, count: plans.length, plans });
+      rawPlans = await Plan.find().lean();
     } else {
       const { getPersistedPlans } = require('../../utils/getModelConfig');
-      const plans = await getPersistedPlans();
-      return res.json({ success: true, count: plans.length, plans });
+      rawPlans = await getPersistedPlans();
     }
+    const plans = (rawPlans || []).map(p => {
+      const obj = { ...p };
+      obj.image_limit = (obj.image_limit !== undefined && obj.image_limit !== null && !isNaN(Number(obj.image_limit)))
+        ? Number(obj.image_limit)
+        : (obj.name === 'Free' ? 3 : (obj.name === 'Pro' ? 20 : 100));
+      return obj;
+    });
+    return res.json({ success: true, count: plans.length, plans });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

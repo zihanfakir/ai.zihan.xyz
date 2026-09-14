@@ -64,7 +64,14 @@ connectDB().then(async () => {
   }
 }).catch(err => console.error('[DB Connection Error]:', err.message));
 
-// API Routes with Rate Limiting
+// API Routes with Rate Limiting & Anti-Cache Headers (fixes login/logout stale cache)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/chat', chatRoutes);
@@ -82,6 +89,17 @@ app.get('/api/plans', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
+
+    const normalizePlan = (p) => {
+      const plain = (p && typeof p.toObject === 'function') ? p.toObject() : { ...p };
+      plain.message_limit = Number(plain.message_limit) || 10;
+      plain.window_hours = Number(plain.window_hours) || 3;
+      plain.image_limit = (plain.image_limit !== undefined && plain.image_limit !== null && !isNaN(Number(plain.image_limit)))
+        ? Number(plain.image_limit)
+        : (plain.name === 'Free' ? 3 : (plain.name === 'Pro' ? 20 : 100));
+      return plain;
+    };
+
     if (getIsMongoConnected()) {
       const Plan = require('./models/Plan');
       let plans = await Plan.find({ is_active: true });
@@ -89,11 +107,11 @@ app.get('/api/plans', async (req, res) => {
         const { getPersistedPlans } = require('../utils/getModelConfig');
         plans = await getPersistedPlans();
       }
-      return res.json({ success: true, plans });
+      return res.json({ success: true, plans: plans.map(normalizePlan) });
     } else {
       const { getPersistedPlans } = require('../utils/getModelConfig');
       const plans = await getPersistedPlans();
-      return res.json({ success: true, plans: plans.filter(p => p.is_active !== false) });
+      return res.json({ success: true, plans: plans.filter(p => p.is_active !== false).map(normalizePlan) });
     }
   } catch (e) {
     res.status(500).json({ success: false, error: 'প্ল্যানের তথ্য লোড করতে সমস্যা হয়েছে।' });

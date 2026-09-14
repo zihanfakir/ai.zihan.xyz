@@ -323,8 +323,8 @@ const getMe = async (req, res) => {
       let windowStartTs = windowStart.getTime();
       
       if (getIsMongoConnected()) {
-        messageCount = await UsageLog.countDocuments({ user_id: userId, timestamp: { $gte: windowStart } });
-        const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        messageCount = await UsageLog.countDocuments({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } });
+        const oldestLog = await UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           const resetMs = new Date(oldestLog.timestamp).getTime() + planWindow * 60 * 60 * 1000;
           resetTimeMinutes = Math.max(1, Math.ceil((resetMs - Date.now()) / (60 * 1000)));
@@ -336,7 +336,7 @@ const getMe = async (req, res) => {
       } else {
         const { getUserUsageDetails } = require('../../utils/getModelConfig');
         const usageDetails = await getUserUsageDetails(userId, planWindow);
-        const memCount = memoryStore.usageLogs.filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
+        const memCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && l.model_id !== 'image-generation' && new Date(l.timestamp) >= windowStart).length;
         messageCount = Math.max(usageDetails.count, memCount);
         resetTimeMinutes = usageDetails.resetInMinutes;
         if (usageDetails.resetAt) {
@@ -346,10 +346,16 @@ const getMe = async (req, res) => {
           resetAt = new Date(Date.now() + resetTimeMinutes * 60 * 1000).toISOString();
         }
       }
+
+      const planImageLimit = (plan.image_limit !== undefined && !isNaN(Number(plan.image_limit)))
+        ? Number(plan.image_limit)
+        : (currentPlanName === 'Free' ? 3 : (currentPlanName === 'Pro' ? 20 : 100));
       
       rateLimit = {
         used: messageCount,
         limit: planLimit,
+        imageLimit: planImageLimit,
+        image_limit: planImageLimit,
         remaining: Math.max(0, planLimit - messageCount),
         resetInMinutes: Math.max(1, resetTimeMinutes || 1),
         windowHours: planWindow,
@@ -360,6 +366,8 @@ const getMe = async (req, res) => {
       usage = {
         count: messageCount,
         limit: planLimit,
+        imageLimit: planImageLimit,
+        image_limit: planImageLimit,
         remaining: Math.max(0, planLimit - messageCount),
         resetInMinutes: Math.max(1, resetTimeMinutes || 1),
         windowHours: planWindow,
@@ -372,6 +380,8 @@ const getMe = async (req, res) => {
         unlimited: true,
         used: 0,
         limit: 999999,
+        imageLimit: 999999,
+        image_limit: 999999,
         remaining: 999999,
         resetInMinutes: 0,
         windowHours: 1,
@@ -383,6 +393,8 @@ const getMe = async (req, res) => {
         unlimited: true,
         count: 0,
         limit: 999999,
+        imageLimit: 999999,
+        image_limit: 999999,
         remaining: 999999,
         resetInMinutes: 0,
         windowHours: 1,

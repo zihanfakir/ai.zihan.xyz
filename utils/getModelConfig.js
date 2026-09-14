@@ -705,19 +705,21 @@ async function autoPurgeOrphanedDatabaseCaches() {
     console.warn('[AutoPurge] Redeem code cleanup warning:', e.message);
   }
 
-  // 4. Purge orphaned usage rows from Supabase
+  // 4. Purge orphaned usage and image usage rows from Supabase
   if (supabase) {
     try {
       const currentUsers = await getPersistedUsers();
       const validUserIds = new Set(currentUsers.map(u => String(u._id || u.id)));
+      const validEmails = new Set(currentUsers.filter(u => u.email).map(u => u.email.toLowerCase().trim()));
+
       const { data: usageRows } = await supabase
         .from('api_keys')
         .select('model_id')
-        .like('model_id', '__usage_%');
+        .or('model_id.like.__usage_%,model_id.like.__img_usage_%');
       if (usageRows && usageRows.length > 0) {
         for (const row of usageRows) {
-          const uId = row.model_id.replace(/^__usage_/, '').replace(/__$/, '');
-          if (!validUserIds.has(uId)) {
+          const uId = row.model_id.replace(/^__(usage|img_usage)_/, '').replace(/__$/, '');
+          if (!validUserIds.has(uId) && !validEmails.has(uId.toLowerCase())) {
             await supabase.from('api_keys').delete().eq('model_id', row.model_id);
           }
         }
