@@ -283,11 +283,43 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                val hideAppBannerJs = """
+                    (function(){
+                        window.isAndroidApp = true;
+                        if (document.documentElement) document.documentElement.classList.add('is-android-app');
+                        if (document.body) document.body.classList.add('is-android-app');
+                        var s = document.getElementById('alo-android-early-style');
+                        if (!s) {
+                            s = document.createElement('style');
+                            s.id = 'alo-android-early-style';
+                            s.textContent = '#heroAppDownloadBanner,#drawerDownloadAppWrap,#brandMenuDownloadAppBtn,#appDownloadModalOverlay,.hero-app-banner,#modelSearchInput,.model-search-wrap{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;}';
+                            (document.head || document.documentElement).appendChild(s);
+                        }
+                        var b = document.getElementById('heroAppDownloadBanner');
+                        if (b) b.remove();
+                        var search = document.getElementById('modelSearchInput');
+                        if (search) { var w = search.closest('.model-search-wrap'); if (w) w.remove(); else search.remove(); }
+                    })();
+                """.trimIndent()
+                view.evaluateJavascript(hideAppBannerJs, null)
             }
 
             override fun onPageFinished(view: WebView, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
+
+                val cleanupJs = """
+                    (function(){
+                        window.isAndroidApp = true;
+                        if (document.documentElement) document.documentElement.classList.add('is-android-app');
+                        if (document.body) document.body.classList.add('is-android-app');
+                        var b = document.getElementById('heroAppDownloadBanner');
+                        if (b) b.remove();
+                        var search = document.getElementById('modelSearchInput');
+                        if (search) { var w = search.closest('.model-search-wrap'); if (w) w.remove(); else search.remove(); }
+                    })();
+                """.trimIndent()
+                view.evaluateJavascript(cleanupJs, null)
                 
                 // Inject Native Auth Token and User Info
                 val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)

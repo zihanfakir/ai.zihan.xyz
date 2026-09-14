@@ -3486,6 +3486,20 @@
       opacity: 0.9;
       transform: translateY(-1px);
     }
+    .is-android-app #heroAppDownloadBanner,
+    .is-android-app #drawerDownloadAppWrap,
+    .is-android-app #brandMenuDownloadAppBtn,
+    .is-android-app #appDownloadModalOverlay,
+    .is-android-app .hero-app-banner,
+    #modelSearchInput,
+    .model-search-wrap {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
@@ -3500,8 +3514,9 @@
   var isApp = (typeof window.AloAndroid !== 'undefined') || ua.indexOf('AloAI-Android') !== -1;
   window.isAndroidApp = isApp;
   if (!isApp) return;
+  if (document.documentElement) document.documentElement.classList.add('is-android-app');
   var style = document.createElement('style');
-  style.textContent = '#heroAppDownloadBanner,#drawerDownloadAppWrap,#brandMenuDownloadAppBtn,#appDownloadModalOverlay{display:none!important}';
+  style.textContent = '#heroAppDownloadBanner,#drawerDownloadAppWrap,#brandMenuDownloadAppBtn,#appDownloadModalOverlay,.hero-app-banner,#modelSearchInput,.model-search-wrap{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;}';
   document.head.appendChild(style);
 })();
 </script>
