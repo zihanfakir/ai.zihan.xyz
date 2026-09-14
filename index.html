@@ -2252,6 +2252,19 @@
     button, .brand-menu-item, .quick-prompt-chip, .icon-btn { -webkit-user-select: none; user-select: none; }
 
     /* ===== Custom UI Popup ===== */
+    #customDialogOverlay {
+      z-index: 10000 !important;
+    }
+    #customDialogOverlay.open {
+      display: flex !important;
+      opacity: 1 !important;
+    }
+    #modelModalOverlay {
+      z-index: 600 !important;
+    }
+    #brandMenuOverlay {
+      z-index: 600 !important;
+    }
     .custom-dialog-box {
       background-color: var(--bg-input);
       border: 1px solid var(--border-color);
@@ -2259,7 +2272,7 @@
       padding: 24px;
       width: 90%;
       max-width: 340px;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -4227,15 +4240,28 @@
       }
     }
 
-    document.getElementById("customDialogCancelBtn").addEventListener("click", () => closeCustomUI(false));
-    document.getElementById("customDialogOkBtn").addEventListener("click", () => {
-      const inputEl = document.getElementById("customDialogInput");
-      if (inputEl.style.display === 'block') {
-        closeCustomUI(inputEl.value);
-      } else {
-        closeCustomUI(true);
-      }
-    });
+    const customDialogCancelBtn = document.getElementById("customDialogCancelBtn");
+    const customDialogOkBtn = document.getElementById("customDialogOkBtn");
+    const customDialogOverlayEl = document.getElementById("customDialogOverlay");
+
+    if (customDialogCancelBtn) customDialogCancelBtn.addEventListener("click", () => closeCustomUI(false));
+    if (customDialogOkBtn) {
+      customDialogOkBtn.addEventListener("click", () => {
+        const inputEl = document.getElementById("customDialogInput");
+        if (inputEl && inputEl.style.display === 'block') {
+          closeCustomUI(inputEl.value);
+        } else {
+          closeCustomUI(true);
+        }
+      });
+    }
+    if (customDialogOverlayEl) {
+      customDialogOverlayEl.addEventListener("click", (e) => {
+        if (e.target === customDialogOverlayEl) {
+          closeCustomUI(false);
+        }
+      });
+    }
 
     document.addEventListener("click", (e) => {
       const chip = e.target.closest(".quick-prompt-chip");
