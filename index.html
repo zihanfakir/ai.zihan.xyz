@@ -1456,6 +1456,40 @@
       50% { opacity: 0; }
     }
 
+    .scroll-bottom-fab {
+      position: fixed;
+      right: 20px;
+      bottom: 95px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-surface, #1e2538);
+      border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+      color: var(--text-main, #f8fafc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px) scale(0.9);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+      z-index: 50;
+    }
+    .scroll-bottom-fab.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+    .scroll-bottom-fab:hover {
+      background: var(--bg-card-hover, rgba(255,255,255,0.15));
+      transform: translateY(-2px) scale(1.05);
+    }
+    .scroll-bottom-fab:active {
+      transform: translateY(0) scale(0.95);
+    }
+
     .input-wrapper {
       padding: 0 16px 24px;
       background: linear-gradient(0deg, var(--bg-main) 60%, transparent 100%);
@@ -3660,8 +3694,8 @@
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
       </button>
       <button class="model-selector" id="modelTrigger" type="button" style="background: transparent; border: none; font-size: 1.15rem; font-weight: 700; padding: 0; box-shadow: none; color: var(--text-main);">
-        <span id="triggerStatusDot" class="trigger-status-dot status-dot checking" style="display:none;"></span>
-        <span id="modelTriggerLabel" class="trigger-label">Alo Go</span>
+        <span id="triggerStatusDot" class="trigger-status-dot status-dot online" style="display:inline-block;"></span>
+        <span id="modelTriggerLabel" class="trigger-label">Alo Flash</span>
         <svg class="chevron" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M7 10l5 5 5-5z"/></svg>
       </button>
     </div>
@@ -4185,8 +4219,11 @@
           <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">অ্যান্ড্রয়েড অ্যাপ ব্যবহার করুন — <strong style="color: #60a5fa; text-decoration: underline;">APK ডাউনলোড করুন</strong></span>
         </div>
       </div>
-    </div>
   </div>
+
+  <button id="scrollToBottomBtn" class="scroll-bottom-fab" aria-label="নিচে স্ক্রোল করুন" type="button" title="নিচে স্ক্রোল করুন">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+  </button>
 
   <div class="input-wrapper">
     <div class="image-preview-row" id="imagePreviewRow"></div>
@@ -4413,15 +4450,17 @@
       requestAnimationFrame(render);
     }
 
-    // ===== Bengali Text-to-Speech (TTS) =====
+    // ===== Bilingual Text-to-Speech (TTS) =====
     function speakBengaliText(text) {
       if (!("speechSynthesis" in window)) {
-        showToast("আপনার ব্রাউজারে স্পিচ সাপোর্ট নেই", "error");
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        showToast(isEn ? "Speech synthesis is not supported in this browser" : "আপনার ব্রাউজারে স্পিচ সাপোর্ট নেই", "error");
         return;
       }
       window.speechSynthesis.cancel();
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const clean = text
-        .replace(/```[\s\S]*?```/g, "কোড ব্লক বাদ দেওয়া হয়েছে।")
+        .replace(/```[\s\S]*?```/g, isEn ? "Code block omitted." : "কোড ব্লক বাদ দেওয়া হয়েছে।")
         .replace(/`[^`]+`/g, "")
         .replace(/[*_#>`~]/g, "")
         .replace(/\[.*?\]\(.*?\)/g, "")
@@ -4429,16 +4468,21 @@
       if (!clean) return;
 
       const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = "bn-BD";
+      utter.lang = isEn ? "en-US" : "bn-BD";
       utter.rate = 1.0;
       utter.pitch = 1.0;
 
       const voices = window.speechSynthesis.getVoices();
-      const bnVoice = voices.find((v) => v.lang && (v.lang.includes("bn") || v.lang.includes("Bengali")));
-      if (bnVoice) utter.voice = bnVoice;
+      let voice = null;
+      if (isEn) {
+        voice = voices.find((v) => v.lang && (v.lang.startsWith("en-") || v.lang.startsWith("en_")));
+      } else {
+        voice = voices.find((v) => v.lang && (v.lang.includes("bn") || v.lang.includes("Bengali")));
+      }
+      if (voice) utter.voice = voice;
 
       window.speechSynthesis.speak(utter);
-      showToast("ভয়েস অডিও প্লে হচ্ছে...", "success");
+      showToast(isEn ? "Playing voice audio..." : "ভয়েস অডিও প্লে হচ্ছে...", "success");
     }
 
     // ===== Speech-to-Text Voice Input =====
@@ -4456,14 +4500,18 @@
       }
 
       speechRecognitionInstance = new SpeechRec();
-      speechRecognitionInstance.lang = "bn-BD";
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      speechRecognitionInstance.lang = isEn ? "en-US" : "bn-BD";
       speechRecognitionInstance.continuous = false;
       speechRecognitionInstance.interimResults = true;
 
+      let baseTextBeforeVoice = "";
+
       speechRecognitionInstance.onstart = () => {
         isSpeechRecording = true;
+        const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
         micBtn.classList.add("recording");
-        micBtn.setAttribute("title", "রেকর্ডিং বন্ধ করতে চাপুন");
+        micBtn.setAttribute("title", isCurrentEn ? "Click to stop recording" : "রেকর্ডিং বন্ধ করতে চাপুন");
         micBtn.innerHTML = `
           <div class="voice-wave-container">
             <span class="voice-wave-bar"></span>
@@ -4471,26 +4519,39 @@
             <span class="voice-wave-bar"></span>
             <span class="voice-wave-bar"></span>
           </div>
-          <span class="mic-rec-text">রেকর্ড হচ্ছে</span>
+          <span class="mic-rec-text">${isCurrentEn ? "Listening" : "রেকর্ড হচ্ছে"}</span>
         `;
         const userInputEl = document.getElementById("userInput");
+        baseTextBeforeVoice = userInputEl ? userInputEl.value : "";
         if (userInputEl && !userInputEl.value.trim()) {
           userInputEl.setAttribute("data-orig-placeholder", userInputEl.placeholder || "");
-          userInputEl.placeholder = "শুনছি... কথা বলুন...";
+          userInputEl.placeholder = isCurrentEn ? "Listening... Speak now..." : "শুনছি... কথা বলুন...";
         }
         triggerHaptic("medium");
-        showToast("কথা বলুন... (বাংলা ও ইংরেজি)", "success");
+        showToast(isCurrentEn ? "Listening... (Microphone active)" : "কথা বলুন... (বাংলা ও ইংরেজি)", "success");
       };
 
       speechRecognitionInstance.onresult = (event) => {
-        let transcript = "";
+        let finalTranscript = "";
+        let interimTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
         }
-        if (transcript) {
+        const currentTranscript = (finalTranscript || interimTranscript).trim();
+        if (currentTranscript) {
           const input = document.getElementById("userInput");
-          input.value = (input.value ? input.value + " " : "") + transcript;
-          input.dispatchEvent(new Event("input"));
+          if (input) {
+            const prefix = baseTextBeforeVoice.trim();
+            input.value = prefix ? (prefix + " " + currentTranscript) : currentTranscript;
+            input.dispatchEvent(new Event("input"));
+            if (finalTranscript) {
+              baseTextBeforeVoice = input.value;
+            }
+          }
         }
       };
 
@@ -4498,7 +4559,8 @@
         isSpeechRecording = false;
         resetMicBtn();
         if (e.error !== "no-speech") {
-          showToast("মাইক্রোফোনে সমস্যা হয়েছে", "error");
+          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          showToast(isCurrentEn ? "Microphone error encountered" : "মাইক্রোফোনে সমস্যা হয়েছে", "error");
         }
       };
 
@@ -4508,8 +4570,10 @@
       };
 
       function resetMicBtn() {
+        isSpeechRecording = false;
         micBtn.classList.remove("recording");
-        micBtn.setAttribute("title", "কথা বলে লিখুন");
+        const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        micBtn.setAttribute("title", isCurrentEn ? "Voice typing (Speak)" : "কথা বলে লিখুন");
         micBtn.innerHTML = `
           <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         `;
@@ -4519,8 +4583,8 @@
           if (orig) {
             userInputEl.placeholder = orig;
             userInputEl.removeAttribute("data-orig-placeholder");
-          } else if (userInputEl.placeholder && userInputEl.placeholder.includes("শুনছি")) {
-            userInputEl.placeholder = "আলোকপথ AI-কে জিজ্ঞাসা করুন...";
+          } else if (userInputEl.placeholder && (userInputEl.placeholder.includes("শুনছি") || userInputEl.placeholder.includes("Listening"))) {
+            userInputEl.placeholder = isCurrentEn ? "Ask Alo AI anything..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...";
           }
         }
       }
@@ -5371,14 +5435,14 @@
     }
 
     let MODELS = [
-      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", latency: null, status: "checking", type: "openrouter", premium: false, efficient: false },
-      { id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", latency: null, status: "checking", type: "gemini", premium: false, efficient: false },
-      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
-      { id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
-      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", latency: null, status: "checking", type: "groq", premium: true, efficient: false },
-      { id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: false },
-      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: false },
-      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", latency: null, status: "checking", premium: true, efficient: true }
+      { id: "gemini-3.6-flash", name: "Alo Flash", provider: "Google Gemini", latency: null, status: "checking", type: "gemini", premium: false, efficient: false },
+      { id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Groq", latency: null, status: "checking", type: "groq", premium: false, efficient: false },
+      { id: "qwen/qwen3.8-27b", name: "Alo Qwen", provider: "Groq", latency: null, status: "checking", type: "groq", premium: false, efficient: false },
+      { id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Google Gemini", latency: null, status: "checking", type: "gemini", premium: false, efficient: false },
+      { id: "openrouter/free", name: "Alo Go", provider: "OpenRouter", latency: null, status: "checking", type: "openrouter", premium: false, efficient: false },
+      { id: "hy3", name: "Alo HY3", provider: "B.AI", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
+      { id: "mimo-v2.5", name: "Alo Mimo", provider: "B.AI", latency: null, status: "checking", type: "bai", premium: false, efficient: false },
+      { id: "openai/gpt-oss-20b", name: "Alo Turbo", provider: "Groq", latency: null, status: "checking", type: "groq", premium: true, efficient: true }
     ];
 
     async function fetchModelsFromServer() {
@@ -5411,7 +5475,7 @@
           if (savedModel && MODELS.some(m => m.id === savedModel)) {
             selectedModelId = savedModel;
           } else {
-            selectedModelId = MODELS[0]?.id || "gemini-3.5-flash-lite";
+            selectedModelId = MODELS[0]?.id || "gemini-3.6-flash";
             try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
           }
 
@@ -5426,9 +5490,9 @@
     }
 
     let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
-    if (!initialSavedModel) {
-      initialSavedModel = "gemini-3.5-flash-lite";
-      try { localStorage.setItem("alokpoth_selected_model", "gemini-3.5-flash-lite"); } catch (e) {}
+    if (!initialSavedModel || !MODELS.some(m => m.id === initialSavedModel)) {
+      initialSavedModel = "gemini-3.6-flash";
+      try { localStorage.setItem("alokpoth_selected_model", "gemini-3.6-flash"); } catch (e) {}
     }
     let selectedModelId = initialSavedModel;
 
@@ -6235,6 +6299,102 @@
 
     const I18N = {
       bn: {
+        // App & Navigation
+        appBrand: "Alokpoth AI",
+        appTagline: "বাংলা ও ইংরেজিতে স্মার্ট সহকারী",
+        modelSelectorAria: "AI মডেল নির্বাচন",
+        newChatAria: "নতুন চ্যাট",
+        menuAria: "প্রধান মেনু",
+        sendBtnAria: "মেসেজ পাঠান",
+        stopBtnAria: "থামুন",
+        micBtnAria: "ভয়েস রেকর্ড করুন",
+        attachBtnAria: "ছবি বা ফাইল যুক্ত করুন",
+
+        // Drawer
+        drawerSearchPlaceholder: "চ্যাটের বিষয়বস্তু অনুসন্ধান করুন...",
+        drawerNoChatsTitle: "কোনো চ্যাট নেই",
+        drawerNoChatsSub: "আপনার Alokpoth-এর সাথে চ্যাট এখানে প্রদর্শিত হবে।",
+        drawerEmptyNewChatBtn: "নতুন চ্যাট",
+        drawerDownloadApp: "অ্যাপ ডাউনলোড",
+        drawerUserLoggedOut: "লগইন করা নেই",
+        drawerSettings: "সেটিংস",
+        drawerPlans: "প্ল্যান ও আপগ্রেড",
+        drawerLogin: "লগইন করুন",
+        drawerLogout: "লগআউট",
+        recentChatsHeader: "সাম্প্রতিক চ্যাট",
+        pinChat: "পিন করুন",
+        unpinChat: "আনপিন করুন",
+        renameChat: "নাম পরিবর্তন",
+        deleteChat: "মুছে ফেলুন",
+
+        // Welcome Hero & Empty State
+        welcomeGreeting: "আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
+        welcomeSubtitle: "যেকোনো প্রশ্ন লিখুন, কোডিং করুন বা নতুন কিছু জানুন",
+        heroDownloadBannerText: "অ্যান্ড্রয়েড অ্যাপ ব্যবহার করুন — ",
+        heroDownloadBannerBtn: "APK ডাউনলোড করুন",
+        quickPromptWebCode: "ফুল ওয়েবসাইট কোড",
+        quickPromptTranslate: "অনুবাদ করুন",
+        quickPromptSummary: "সারাংশ তৈরি",
+        quickPromptStory: "গল্প লিখুন",
+
+        // Composer
+        inputPlaceholder: "আলোকপথ AI-কে জিজ্ঞাসা করুন...",
+        micTitle: "কথা বলে লিখুন",
+        micRecordingTitle: "রেকর্ডিং বন্ধ করতে চাপুন",
+        micRecordingText: "রেকর্ড হচ্ছে",
+        micListeningPlaceholder: "শুনছি... কথা বলুন...",
+        micErrorToast: "মাইক্রোফোনে সমস্যা হয়েছে",
+        micActiveToast: "কথা বলুন... (বাংলা ও ইংরেজি)",
+        attachImageText: "ছবি যুক্ত করুন",
+        attachFileText: "ফাইল যুক্ত করুন (PDF/TXT/HTML/CSS/JS)",
+        webSearchOn: "ওয়েব সার্চ: চালু",
+        webSearchOff: "ওয়েব সার্চ: বন্ধ",
+        imageGenOn: "ছবি তৈরি: চালু",
+        imageGenOff: "ছবি তৈরি: বন্ধ",
+        footerDisclaimer: "আলোকপথ AI ভুল করতে পারে। গুরুত্বপূর্ণ তথ্যাদি যাচাই করে নিন।",
+        dropOverlayTitle: "ফাইল বা ছবি এখানে ড্রপ করুন",
+        dropOverlaySub: "ছবি, পিডিএফ বা টেক্সট ফাইল সরাসরি যুক্ত হবে",
+        filesAttachedToast: "টি ফাইল যুক্ত করা হয়েছে",
+
+        // Message Actions
+        copyBtnText: "কপি",
+        copiedBtnText: "কপি হয়েছে!",
+        ttsBtnText: "শুনুন",
+        ttsStopText: "থামুন",
+        shareBtnText: "শেয়ার",
+        regenBtnText: "আবার লিখুন",
+        thinkingText: "চিন্তা করছে...",
+        searchingWebText: "ওয়েবে অনুসন্ধান করা হচ্ছে...",
+        codeCopyBtnText: "কোড কপি",
+        codeCopiedBtnText: "কপি হয়েছে!",
+
+        // Model Picker Modal
+        modelModalTitle: "AI মডেল নির্বাচন করুন",
+        modelSearchPlaceholder: "মডেলের নাম বা প্রোভাইডার দিয়ে খুঁজুন...",
+        modelCardSelect: "নির্বাচন করুন",
+        modelStatusOnline: "অনলাইন",
+        modelStatusChecking: "যাচাই হচ্ছে...",
+        modelStatusOffline: "অফলাইন",
+        modelStatusSlow: "ধীরগতি",
+
+        // Download Modal
+        appModalTitle: "অ্যান্ড্রয়েড অ্যাপ ডাউনলোড",
+        appModalDesc: "স্মার্টফোনে আরও দ্রুত ও স্মুথ অভিজ্ঞতার জন্য ইনস্টল করুন।",
+        appModalFeature1: "সুপারফাস্ট 144Hz পারফরম্যান্স",
+        appModalFeature2: "অফলাইন হিস্ট্রি ও ব্যাকআপ",
+        appModalFeature3: "ভয়েস টাইপিং ও ডার্ক মোড",
+        appModalDownloadBtn: "APK ডাউনলোড করুন (v1.0)",
+
+        // Custom Dialogs & Alerts
+        dialogConfirmDeleteTitle: "চ্যাট মুছে ফেলা",
+        dialogConfirmDeleteMsg: "আপনি কি নিশ্চিত এই কথোপকথনটি স্থায়ীভাবে মুছে ফেলতে চান?",
+        dialogRenameTitle: "চ্যাটের নাম পরিবর্তন",
+        dialogRenamePlaceholder: "নতুন নাম লিখুন...",
+        dialogOk: "ঠিক আছে",
+        dialogCancel: "বাতিল",
+        dialogConfirm: "নিশ্চিত করুন",
+
+        // Settings Subpages
         backBtn: "ফিরে যান",
         backToSettings: "সেটিংস",
         settingsTitle: "একাউন্ট ও সেটিংস",
@@ -6264,10 +6424,105 @@
         versionStatus: "আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।",
         downloadApk: "নতুন APK ডাউনলোড করুন",
         feedbackLabel: "আপনার মতামত বা প্রতিক্রিয়া",
-        feedbackSubmit: "প্রতিক্রিয়া পাঠান",
-        inputPlaceholder: "আলোকপথ AI-কে জিজ্ঞাসা করুন..."
+        feedbackSubmit: "প্রতিক্রিয়া পাঠান"
       },
       en: {
+        // App & Navigation
+        appBrand: "Alokpoth AI",
+        appTagline: "Smart Bilingual AI Assistant",
+        modelSelectorAria: "Select AI Model",
+        newChatAria: "New Chat",
+        menuAria: "Main Menu",
+        sendBtnAria: "Send Message",
+        stopBtnAria: "Stop",
+        micBtnAria: "Voice Typing",
+        attachBtnAria: "Attach photos or files",
+
+        // Drawer
+        drawerSearchPlaceholder: "Search conversation history...",
+        drawerNoChatsTitle: "No chats yet",
+        drawerNoChatsSub: "Your conversations with Alokpoth will appear here.",
+        drawerEmptyNewChatBtn: "New Chat",
+        drawerDownloadApp: "Download App",
+        drawerUserLoggedOut: "Not Logged In",
+        drawerSettings: "Settings",
+        drawerPlans: "Plans & Upgrade",
+        drawerLogin: "Log In",
+        drawerLogout: "Log Out",
+        recentChatsHeader: "Recent Chats",
+        pinChat: "Pin Chat",
+        unpinChat: "Unpin Chat",
+        renameChat: "Rename",
+        deleteChat: "Delete",
+
+        // Welcome Hero & Empty State
+        welcomeGreeting: "How can I help you today?",
+        welcomeSubtitle: "Ask any question, brainstorm, or write code with AI",
+        heroDownloadBannerText: "Get the Android App — ",
+        heroDownloadBannerBtn: "Download APK",
+        quickPromptWebCode: "Full Website Code",
+        quickPromptTranslate: "Translate Text",
+        quickPromptSummary: "Summarize Text",
+        quickPromptStory: "Write a Story",
+
+        // Composer
+        inputPlaceholder: "Ask Alo AI anything...",
+        micTitle: "Voice Typing (Speak)",
+        micRecordingTitle: "Click to stop recording",
+        micRecordingText: "Recording",
+        micListeningPlaceholder: "Listening... Speak now...",
+        micErrorToast: "Microphone error encountered",
+        micActiveToast: "Listening... (Microphone active)",
+        attachImageText: "Upload Image",
+        attachFileText: "Upload File (PDF/TXT/HTML/CSS/JS)",
+        webSearchOn: "Web Search: ON",
+        webSearchOff: "Web Search: OFF",
+        imageGenOn: "Image Generation: ON",
+        imageGenOff: "Image Generation: OFF",
+        footerDisclaimer: "Alokpoth AI can make mistakes. Please verify important info.",
+        dropOverlayTitle: "Drop files or images here",
+        dropOverlaySub: "Images, PDFs, and code files will be attached instantly",
+        filesAttachedToast: "file(s) attached successfully",
+
+        // Message Actions
+        copyBtnText: "Copy",
+        copiedBtnText: "Copied!",
+        ttsBtnText: "Listen",
+        ttsStopText: "Stop",
+        shareBtnText: "Share",
+        regenBtnText: "Regenerate",
+        thinkingText: "Thinking...",
+        searchingWebText: "Searching the web...",
+        codeCopyBtnText: "Copy Code",
+        codeCopiedBtnText: "Copied!",
+
+        // Model Picker Modal
+        modelModalTitle: "Select AI Model",
+        modelSearchPlaceholder: "Search by model name or provider...",
+        modelCardSelect: "Select",
+        modelStatusOnline: "Online",
+        modelStatusChecking: "Checking...",
+        modelStatusOffline: "Offline",
+        modelStatusSlow: "Slow",
+
+        // Download Modal
+        appModalTitle: "Download Android App",
+        appModalDesc: "Enjoy a faster, smoother 144Hz experience on your Android smartphone.",
+        appModalFeature1: "Ultra-smooth 144Hz performance",
+        appModalFeature2: "Local chat privacy & offline backup",
+        appModalFeature3: "Voice typing & beautiful dark mode",
+        appModalDownloadBtn: "Download APK (v1.0)",
+
+        // Custom Dialogs & Alerts
+        dialogConfirmDeleteTitle: "Delete Conversation",
+        dialogConfirmDeleteMsg: "Are you sure you want to permanently delete this chat?",
+        dialogRenameTitle: "Rename Conversation",
+        dialogRenamePlaceholder: "Enter new title...",
+        dialogOk: "OK",
+        dialogCancel: "Cancel",
+        dialogConfirm: "Confirm",
+
+        // Settings Subpages
         backBtn: "Back",
         backToSettings: "Settings",
         settingsTitle: "Account & Settings",
@@ -6297,8 +6552,7 @@
         versionStatus: "You are on the latest version.",
         downloadApk: "Download Android APK",
         feedbackLabel: "Your Feedback or Suggestion",
-        feedbackSubmit: "Submit Feedback",
-        inputPlaceholder: "Ask Alo AI anything..."
+        feedbackSubmit: "Submit Feedback"
       }
     };
 
@@ -6309,25 +6563,137 @@
       applyI18n();
       refreshLanguageSubpageUI();
       refreshThemeSubpageUI();
-      showToast(lang === 'en' ? "Language set to English" : "ভাষা বাংলায় পরিবর্তন করা হয়েছে", "success");
+
+      // Update active system prompt to match language
+      if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
+        const curMod = (typeof MODELS !== "undefined" && Array.isArray(MODELS)) ? MODELS.find(m => m.id === selectedModelId) : null;
+        const modName = curMod ? curMod.name : "Alo Go";
+        messagesHistory[0].content = buildSystemPrompt(modName, true, true);
+      }
+
+      // If we are on the welcome screen with no active chat, re-render it in new language
+      const emptyStateEl = document.getElementById("emptyState");
+      if (emptyStateEl && (!messagesHistory || messagesHistory.length <= 1)) {
+        if (typeof startNewChat === "function") startNewChat();
+      }
+
+      showToast(lang === 'en' ? "Language switched to English" : "ভাষা বাংলায় পরিবর্তন করা হয়েছে", "success");
     }
     window.selectAppLanguage = selectAppLanguage;
 
     function applyI18n() {
+      const isEn = (currentLanguage === 'en');
       const dict = I18N[currentLanguage] || I18N.bn;
+
+      // 1. Data-i18n elements
       document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
-        if (dict[key]) {
-          el.textContent = dict[key];
-        }
+        if (dict[key]) el.textContent = dict[key];
       });
+
+      // 2. Data-i18n-placeholder
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (dict[key]) el.placeholder = dict[key];
+      });
+
+      // 3. Main user input
       const uInput = document.getElementById("userInput");
       if (uInput && dict.inputPlaceholder) {
         uInput.placeholder = dict.inputPlaceholder;
       }
+
+      // 4. Drawer elements
+      const dSearch = document.getElementById("drawerSearchInput");
+      if (dSearch) dSearch.placeholder = dict.drawerSearchPlaceholder;
+
+      const dEmptyState = document.getElementById("drawerEmptyState");
+      if (dEmptyState) {
+        const dEmptyTitle = dEmptyState.querySelector("div:first-child");
+        if (dEmptyTitle) dEmptyTitle.textContent = dict.drawerNoChatsTitle;
+        const dEmptySub = dEmptyState.querySelector("div:nth-child(2)");
+        if (dEmptySub) dEmptySub.textContent = dict.drawerNoChatsSub;
+      }
+
+      const dEmptyBtn = document.getElementById("drawerEmptyNewChatBtn");
+      if (dEmptyBtn) dEmptyBtn.textContent = dict.drawerEmptyNewChatBtn;
+
+      const dDownloadBtnSpan = document.querySelector("#drawerDownloadAppBtn span span:last-child");
+      if (dDownloadBtnSpan) dDownloadBtnSpan.textContent = dict.drawerDownloadApp;
+
+      // 5. Navigation buttons
+      const brandBtn = document.getElementById("brandMenuBtn");
+      if (brandBtn) {
+        brandBtn.title = dict.menuAria;
+        brandBtn.setAttribute("aria-label", dict.menuAria);
+      }
+      const quickNewChatBtn = document.getElementById("quickNewChatNavBtn");
+      if (quickNewChatBtn) {
+        quickNewChatBtn.title = dict.newChatAria;
+        quickNewChatBtn.setAttribute("aria-label", dict.newChatAria);
+      }
+
+      // 6. Composer buttons & tooltips
+      const attachBtnEl = document.getElementById("attachBtn");
+      if (attachBtnEl) {
+        attachBtnEl.title = dict.attachBtnAria;
+        attachBtnEl.setAttribute("aria-label", dict.attachBtnAria);
+      }
+
+      const attachImgSpan = document.querySelector("#attachImageOption span");
+      if (attachImgSpan) attachImgSpan.textContent = dict.attachImageText;
+
+      const attachDocSpan = document.querySelector("#attachFileOption span");
+      if (attachDocSpan) attachDocSpan.textContent = dict.attachFileText;
+
+      const webSearchSpan = document.getElementById("webSearchText");
+      if (webSearchSpan) webSearchSpan.textContent = isWebSearchEnabled ? dict.webSearchOn : dict.webSearchOff;
+
+      const imgGenSpan = document.getElementById("imageGenText");
+      if (imgGenSpan) imgGenSpan.textContent = isImageGenEnabled ? dict.imageGenOn : dict.imageGenOff;
+
+      const micBtnEl = document.getElementById("micBtn");
+      if (micBtnEl && !isSpeechRecording) {
+        micBtnEl.title = dict.micTitle;
+        micBtnEl.setAttribute("aria-label", dict.micBtnAria);
+      }
+
+      const sendBtnEl = document.getElementById("sendBtn");
+      if (sendBtnEl) {
+        sendBtnEl.setAttribute("aria-label", isGenerating ? dict.stopBtnAria : dict.sendBtnAria);
+      }
+
+      const footerNote = document.querySelector(".footer-note");
+      if (footerNote) footerNote.textContent = dict.footerDisclaimer;
+
+      // 7. Model picker modal
+      const mSearch = document.getElementById("modelSearchInput");
+      if (mSearch) mSearch.placeholder = dict.modelSearchPlaceholder;
+
+      const mTitle = document.querySelector(".model-modal-header h3");
+      if (mTitle) mTitle.textContent = dict.modelModalTitle;
+
+      // 8. Settings badge
       const langNameBadge = document.getElementById("setMenuLangName");
       if (langNameBadge) {
-        langNameBadge.textContent = currentLanguage === 'en' ? "English" : "বাংলা";
+        langNameBadge.textContent = isEn ? "English" : "বাংলা";
+      }
+
+      // 9. Hero greeting & quick prompt pills if rendered
+      const heroGreeting = document.getElementById("heroGreetingText");
+      if (heroGreeting) heroGreeting.textContent = dict.welcomeGreeting;
+
+      const heroBanner = document.getElementById("heroAppDownloadBanner");
+      if (heroBanner) {
+        const textSpan = heroBanner.querySelector("span:last-child");
+        if (textSpan) {
+          textSpan.innerHTML = dict.heroDownloadBannerText + '<strong style="color: #60a5fa; text-decoration: underline;">' + dict.heroDownloadBannerBtn + '</strong>';
+        }
+      }
+
+      // 10. Update Speech Recognition language dynamically
+      if (speechRecognitionInstance) {
+        speechRecognitionInstance.lang = isEn ? "en-US" : "bn-BD";
       }
     }
     window.applyI18n = applyI18n;
@@ -7616,6 +7982,24 @@
     });
 
     function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      if (isEn) {
+        return `You are ${modelDisplayName}, an intelligent, versatile AI assistant built by Alokpoth.
+=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
+You must respond fluently and naturally in English, unless the user explicitly asks you to switch to Bengali or another language.
+- Provide clear, well-structured, polite, and comprehensive explanations in English.
+- If the user writes in Bengali or requests Bengali, seamlessly adapt and respond in Bengali. Otherwise, default to English.
+
+Identity rules:
+- Your name is "${modelDisplayName}". Built by Alokpoth.
+- All models available in this app are Alokpoth's own in-house models.
+
+Capabilities & Code Generation Instructions (CRITICAL):
+- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
+- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
+- Use proper code blocks (triple backticks with language specifier) to format code clearly.
+- You ARE able to generate and create images when requested.`;
+      }
       return `You are ${modelDisplayName}, an AI model built by Alokpoth.
 === LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
 You must respond ENTIRELY in Bengali (Bangla script), unless the user explicitly asks you to switch to a different language for that reply. This means:
@@ -7720,49 +8104,53 @@ Capabilities & Code Generation Instructions (CRITICAL):
       saveAllSessions(sessions);
     }
 
-    function startNewChat() {
-      persistCurrentSession();
-      currentSessionId = null;
-      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch {}
-      messagesHistory = [{ role: "system", content: messagesHistory[0]?.content || SYSTEM_PROMPT }];
-      if (pendingImages && pendingImages.length > 0) {
-        pendingImages.forEach(img => {
-          if (img.previewUrl && img.previewUrl.startsWith("blob:")) {
-            try { URL.revokeObjectURL(img.previewUrl); } catch {}
-          }
-        });
-        pendingImages = [];
-        if (typeof renderImagePreviews === "function") renderImagePreviews();
-      }
-      if (pendingFiles && pendingFiles.length > 0) {
-        pendingFiles = [];
-        if (typeof renderFilePreviews === "function") renderFilePreviews();
-      }
-      if (typeof updateSendAvailability === "function") updateSendAvailability();
-      chatStream.innerHTML = `
+    function getEmptyStateHtml() {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const d = (typeof I18N !== "undefined" && I18N[currentLanguage]) ? I18N[currentLanguage] : (typeof I18N !== "undefined" ? I18N.bn : {});
+      const greeting = d.welcomeGreeting || (isEn ? "How can I help you today?" : "আমি আপনাকে কীভাবে সাহায্য করতে পারি?");
+      const subtitle = d.welcomeSubtitle || (isEn ? "Ask any question, brainstorm, or write code with AI" : "যেকোনো প্রশ্ন লিখুন, কোডিং করুন বা নতুন কিছু জানুন");
+      const qCode = d.quickPromptWebCode || (isEn ? "Full Website Code" : "ফুল ওয়েবসাইট কোড");
+      const qTrans = d.quickPromptTranslate || (isEn ? "Translate Text" : "অনুবাদ করুন");
+      const qSum = d.quickPromptSummary || (isEn ? "Summarize Text" : "সারাংশ তৈরি");
+      const qStory = d.quickPromptStory || (isEn ? "Write a Story" : "গল্প লিখুন");
+      
+      const pCode = isEn ? "Write complete full-stack website code (HTML, CSS, JS): " : "একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন";
+      const pTrans = isEn ? "Translate this text into English: " : "এই লেখাটি বাংলায় অনুবাদ করুন: ";
+      const pSum = isEn ? "Summarize this topic clearly and concisely: " : "এই বিষয়টির একটি সংক্ষিপ্ত সারাংশ তৈরি করে দিন: ";
+      const pStory = isEn ? "Write a creative, engaging story about: " : "একটি সৃজনশীল গল্প লিখে দিন";
+
+      return `
         <div class="empty-state" id="emptyState">
-          <div>আমি আপনাকে কীভাবে সাহায্য করতে পারি?</div>
-          <span>যেকোনো প্রশ্ন লিখুন</span>
+          <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.01em;">${greeting}</div>
+          <span style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 24px;">${subtitle}</span>
           <div class="quick-prompts-row">
-            <button type="button" class="quick-prompt-chip" data-prompt="একটি ফুল ওয়েবসাইট কোড (HTML, CSS, JS সহ) লিখে দিন">
+            <button type="button" class="quick-prompt-chip" data-prompt="${pCode}">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              <span>ফুল ওয়েবসাইট কোড</span>
+              <span>${qCode}</span>
             </button>
-            <button type="button" class="quick-prompt-chip" data-prompt="এই লেখাটি বাংলায় অনুবাদ করুন: ">
+            <button type="button" class="quick-prompt-chip" data-prompt="${pTrans}">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span>অনুবাদ করুন</span>
+              <span>${qTrans}</span>
             </button>
-            <button type="button" class="quick-prompt-chip" data-prompt="এই বিষয়টির একটি সংক্ষিপ্ত সারাংশ তৈরি করে দিন: ">
+            <button type="button" class="quick-prompt-chip" data-prompt="${pSum}">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              <span>সারাংশ তৈরি</span>
+              <span>${qSum}</span>
             </button>
-            <button type="button" class="quick-prompt-chip" data-prompt="একটি সৃজনশীল গল্প লিখে দিন">
+            <button type="button" class="quick-prompt-chip" data-prompt="${pStory}">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              <span>গল্প লিখুন</span>
+              <span>${qStory}</span>
             </button>
           </div>
         </div>
       `;
+    }
+
+    function startNewChat() {
+      currentSessionId = null;
+      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch {}
+      clearComposerState();
+      if (typeof updateSendAvailability === "function") updateSendAvailability();
+      chatStream.innerHTML = getEmptyStateHtml();
       emptyState = document.getElementById("emptyState");
       closeBrandMenu();
     }
@@ -7899,10 +8287,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
       messagesHistory.forEach((m) => {
         if (m.role === "user") {
           let userText = typeof m.content === "string" ? m.content : "";
-          userText = userText.replace(/\n\n\[অনুস্মারক:[\s\S]*\]$/, "").replace(/\n\n\[সংযুক্ত ফাইলের বিষয়বস্তু\][\s\S]*$/, "");
+          userText = userText.replace(/\n\n\[(অনুস্মারক|System Note):[\s\S]*\]$/, "").replace(/\n\n\[(সংযুক্ত ফাইলের বিষয়বস্তু|Attached File Context)\][\s\S]*$/, "");
           createUserBubble(userText, m.images || [], m.files || []);
         } else if (m.role === "assistant") {
-          const { textDiv, copyBtn, regenBtn } = createAIBubble();
+          const { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
           textDiv.classList.remove("streaming", "no-children");
           const rawText = typeof m.content === "string" ? m.content : "";
           
@@ -7949,6 +8337,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (copyBtn) {
             copyBtn.dataset.text = finalContent || rawText;
             copyBtn.style.display = "inline-flex";
+          }
+          if (ttsBtn) {
+            ttsBtn.style.display = "inline-flex";
+          }
+          if (shareBtn) {
+            shareBtn.style.display = "inline-flex";
           }
           if (regenBtn) {
             regenBtn.style.display = "inline-flex";
@@ -8041,6 +8435,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
     };
 
     function createAIBubble() {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const dCopy = isEn ? "Copy" : "কপি";
+      const dTTS = isEn ? "Listen" : "শুনুন";
+      const dShare = isEn ? "Share" : "শেয়ার";
+      const dRegen = isEn ? "Regenerate" : "আবার লিখুন";
+      const dThinking = isEn ? "Thinking..." : "চিন্তা করছি...";
+
       const row = document.createElement("div");
       row.className = "message-row ai";
       const container = document.createElement("div");
@@ -8050,7 +8451,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       contentCol.className = "ai-content-col";
       const textDiv = document.createElement("div");
       textDiv.className = "ai-bubble";
-      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">চিন্তা করছি...</span></span>`;
+      textDiv.innerHTML = `<span class="status-indicator status-thinking"><span class="status-icon">${STATUS_ICONS ? STATUS_ICONS.thinking : ""}</span><span class="status-label">${dThinking}</span></span>`;
       
       const actionRow = document.createElement("div");
       actionRow.className = "msg-actions";
@@ -8059,14 +8460,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.type = "button";
       copyBtn.className = "action-icon-btn";
       copyBtn.style.display = "none";
-      copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
+      copyBtn.title = isEn ? "Copy response" : "উত্তর কপি করুন";
+      copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span>${dCopy}</span>`;
       copyBtn.addEventListener("click", () => {
         const textToCopy = copyBtn.dataset.text || "";
         copyTextToClipboard(textToCopy).then((ok) => {
           triggerHaptic("light");
           const label = copyBtn.querySelector("span");
-          const original = label ? label.textContent : "কপি";
-          if (label) label.textContent = ok ? "কপি হয়েছে" : "কপি ব্যর্থ হয়েছে";
+          const original = label ? label.textContent : dCopy;
+          if (label) label.textContent = ok ? (isEn ? "Copied!" : "কপি হয়েছে") : (isEn ? "Failed" : "কপি ব্যর্থ হয়েছে");
           setTimeout(() => { if (label) label.textContent = original; }, 1500);
         });
       });
@@ -8075,8 +8477,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       ttsBtn.type = "button";
       ttsBtn.className = "action-icon-btn";
       ttsBtn.style.display = "none";
-      ttsBtn.title = "বাংলায় ভয়েস শুনুন";
-      ttsBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span>শুনুন</span>`;
+      ttsBtn.title = isEn ? "Listen to response" : "ভয়েস শুনুন";
+      ttsBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span>${dTTS}</span>`;
       ttsBtn.addEventListener("click", () => {
         const textToRead = copyBtn.dataset.text || textDiv.textContent || "";
         speakBengaliText(textToRead);
@@ -8087,14 +8489,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
       shareBtn.type = "button";
       shareBtn.className = "action-icon-btn";
       shareBtn.style.display = "none";
-      shareBtn.title = "উত্তর শেয়ার করুন";
-      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span>শেয়ার</span>`;
+      shareBtn.title = isEn ? "Share response" : "উত্তর শেয়ার করুন";
+      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span>${dShare}</span>`;
       shareBtn.addEventListener("click", () => {
         const textToShare = copyBtn.dataset.text || textDiv.textContent || "";
         if (navigator.share) {
           navigator.share({ title: "Alokpoth AI", text: textToShare }).catch(() => {});
         } else {
-          copyTextToClipboard(textToShare).then(() => showToast("শেয়ারের জন্য টেক্সট কপি হয়েছে", "success"));
+          copyTextToClipboard(textToShare).then(() => showToast(isEn ? "Text copied for sharing" : "শেয়ারের জন্য টেক্সট কপি হয়েছে", "success"));
         }
       });
 
@@ -8102,7 +8504,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       regenBtn.type = "button";
       regenBtn.className = "action-icon-btn";
       regenBtn.style.display = "none";
-      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
+      regenBtn.title = isEn ? "Regenerate response" : "পুনরায় লিখুন";
+      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${dRegen}</span>`;
       regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
       
       actionRow.appendChild(copyBtn);
@@ -8161,17 +8564,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
         actionsBar.className = "code-header-actions";
 
         // Copy button
+        const isEnCode = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.className = "code-header-btn";
-        copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>কপি</span>`;
+        copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>${isEnCode ? "Copy" : "কপি"}</span>`;
         copyBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           copyTextToClipboard(currentCode).then((ok) => {
             triggerHaptic("light");
             const span = copyBtn.querySelector("span");
-            const old = span ? span.textContent : "কপি";
-            if (span) span.textContent = ok ? "কপি হয়েছে!" : "ব্যর্থ!";
+            const old = span ? span.textContent : (isEnCode ? "Copy" : "কপি");
+            if (span) span.textContent = ok ? (isEnCode ? "Copied!" : "কপি হয়েছে!") : (isEnCode ? "Failed!" : "ব্যর্থ!");
             setTimeout(() => { if (span) span.textContent = old; }, 1500);
           });
         });
@@ -8180,7 +8584,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const dlBtn = document.createElement("button");
         dlBtn.type = "button";
         dlBtn.className = "code-header-btn";
-        dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ডাউনলোড</span>`;
+        dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>${isEnCode ? "Download" : "ডাউনলোড"}</span>`;
         dlBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           const blob = new Blob([currentCode], { type: "text/plain;charset=utf-8" });
@@ -8188,7 +8592,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           const a = document.createElement("a");
           a.href = url; a.download = `code.${ext}`;
           document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-          showToast(`code.${ext} ডাউনলোড হয়েছে`, "success");
+          showToast(isEnCode ? `code.${ext} downloaded successfully` : `code.${ext} ডাউনলোড হয়েছে`, "success");
         });
         
         actionsBar.appendChild(copyBtn);
@@ -8648,7 +9052,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     async function generateAIReply() {
       return new Promise(async (resolve) => {
-        const { textDiv: aiTextElement, copyBtn, regenBtn } = createAIBubble();
+        const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
         const currentModel = MODELS.find((m) => m.id === selectedModelId);
         const isGemini = currentModel?.type === "gemini";
         const isGroq = currentModel?.type === "groq";
@@ -8889,8 +9293,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
               
               copyBtn.dataset.text = extracted.cleanContent || finalSavedContent;
               copyBtn.style.display = "inline-flex";
+              if (ttsBtn) ttsBtn.style.display = "inline-flex";
+              if (shareBtn) shareBtn.style.display = "inline-flex";
+              const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
               regenBtn.classList.remove("regen-btn-highlight");
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Regenerate" : "আবার লিখুন"}</span>`;
               regenBtn.style.display = "inline-flex";
               
               messagesHistory.push({ role: "assistant", content: finalSavedContent });
@@ -9109,7 +9516,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       isGenerating = true;
       updateSendAvailability();
 
-      createUserBubble(text || (imagesForThisMessage.length ? "ছবি সংযুক্ত করা হয়েছে" : "ফাইল সংযুক্ত করা হয়েছে"), imagesForThisMessage, filesForThisMessage);
+      createUserBubble(text || (imagesForThisMessage.length ? (currentLanguage === "en" ? "Image attached" : "ছবি সংযুক্ত করা হয়েছে") : (currentLanguage === "en" ? "File attached" : "ফাইল সংযুক্ত করা হয়েছে")), imagesForThisMessage, filesForThisMessage);
 
       soundEngine.playSend();
       triggerHaptic("medium");
@@ -9121,13 +9528,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       let fileContext = "";
       if (filesForThisMessage.length) {
-        fileContext = "\n\n[সংযুক্ত ফাইলের বিষয়বস্তু]\n" + filesForThisMessage
-          .map((f) => `--- ${f.name} ---\n${f.text || "(ফাইলটি পড়া যায়নি)"}`).join("\n\n");
+        fileContext = "\n\n[" + (currentLanguage === "en" ? "Attached File Context" : "সংযুক্ত ফাইলের বিষয়বস্তু") + "]\n" + filesForThisMessage
+          .map((f) => `--- ${f.name} ---\n${f.text || (currentLanguage === "en" ? "(File could not be read)" : "(ফাইলটি পড়া যায়নি)")}`).join("\n\n");
       }
+
+      const langReminder = (typeof currentLanguage !== "undefined" && currentLanguage === "en")
+        ? "\n\n[System Note: Please respond fluently in English unless the user explicitly asks in another language]"
+        : "\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]";
 
       messagesHistory.push({
         role: "user",
-        content: `${text}${fileContext}\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]`,
+        content: `${text}${fileContext}${langReminder}`,
         images: imagesForThisMessage.length ? imagesForThisMessage.map((img) => ({ base64: img.base64, mimeType: img.mimeType })) : undefined,
         files: filesForThisMessage.length ? filesForThisMessage.map((f) => ({ name: f.name })) : undefined
       });

@@ -9,48 +9,71 @@ const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('.
 const resolveModelTarget = async (targetModelId, targetModelConfig) => {
   let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
   let targetKey = (targetModelConfig && targetModelConfig.api_key) || null;
-  let actualModel = targetModelId || 'gemini-3.5-flash-lite';
+  let actualModel = targetModelId || 'gemini-3.6-flash';
+  let providerType = 'openrouter';
+
+  const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
 
   // 1. Model ID Normalization & Provider Resolution
-  if (targetModelId === 'openai/gpt-oss-120b') {
+  if (targetModelId.startsWith('gemini-') || targetModelId.includes('gemini') || targetModelConfig?.type === 'gemini') {
+    providerType = 'gemini';
+    let gMod = targetModelId;
+    if (gMod === 'gemini-3.5-flash-lite' || gMod === 'gemini-flash' || gMod === 'gemini-1.5-flash') {
+      gMod = 'gemini-3.5-flash-lite';
+    } else if (gMod === 'gemini-3.6-flash' || gMod === 'gemini-2.5-flash' || gMod === 'gemini-pro') {
+      gMod = 'gemini-3.6-flash';
+    }
+    actualModel = gMod;
+    if (!targetKey) targetKey = geminiKey;
+    targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${actualModel}:streamGenerateContent?key=${targetKey}&alt=sse`;
+  } else if (targetModelId === 'openai/gpt-oss-120b' || targetModelId === 'llama-3.3-70b-versatile' || targetModelId === 'alo-pro') {
+    providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'openai/gpt-oss-120b';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY;
-  } else if (targetModelId === 'llama-3.3-70b-versatile') {
-    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'llama-3.3-70b-versatile';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
   } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b') {
+    providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'qwen/qwen3.8-27b';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY;
-  } else if (targetModelId === 'gemini-3.5-flash-lite' || targetModelId === 'openrouter/free' || !targetModelId) {
+  } else if (targetModelId === 'openai/gpt-oss-20b') {
+    providerType = 'groq';
+    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    actualModel = 'openai/gpt-oss-20b';
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+  } else if (targetModelId === 'openrouter/free' || !targetModelId) {
+    providerType = 'openrouter';
     targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    actualModel = 'google/gemini-2.5-flash';
+    actualModel = 'openrouter/free';
     if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY;
   } else if (targetModelId === 'claude-sonnet-4-6') {
+    providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'claude-sonnet-4-6';
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'gpt-5.6') {
+    providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'gpt-5.6-new';
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'nemotron-ultra-550b') {
+    providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'deepseek-v4-flash-lr';
     if (!targetKey) targetKey = process.env.VYCE_API_KEY;
   } else if (targetModelId === 'mimo-v2.5' || targetModelId === 'hy3') {
+    providerType = 'bai';
     targetUrl = 'https://api.b.ai/v1/chat/completions';
     actualModel = targetModelId;
     if (!targetKey) targetKey = process.env.BAI_API_KEY;
   } else if (targetModelConfig && targetModelConfig.base_url) {
     let bUrl = targetModelConfig.base_url.trim();
-    if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions')) {
+    if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions') && !bUrl.includes('streamGenerateContent')) {
       bUrl = bUrl.replace(/\/+$/, '') + '/chat/completions';
     }
     targetUrl = bUrl;
     actualModel = targetModelConfig.id || targetModelId;
+    providerType = targetModelConfig.type || 'custom';
   }
 
   // 2. Global Key Fallback from Supabase if not found
@@ -63,19 +86,20 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
 
   // 3. Provider Default Key Fallback
   if (!targetKey) {
-    if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
-    else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
-    else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
-    else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
+    if (providerType === 'gemini' || targetUrl.includes('googleapis.com')) targetKey = geminiKey;
+    else if (providerType === 'groq' || targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
+    else if (providerType === 'bai' || targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
+    else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
+    else if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
   }
 
-  return { targetUrl, targetKey, actualModel };
+  return { targetUrl, targetKey, actualModel, providerType };
 };
 
 const streamChatCompletions = async (req, res) => {
   try {
     const { messages } = req.body;
-    const cleanModel = (typeof req.body.model === 'string' && req.body.model.trim()) ? req.body.model.trim() : 'openrouter/free';
+    const cleanModel = (typeof req.body.model === 'string' && req.body.model.trim()) ? req.body.model.trim() : 'gemini-3.6-flash';
     const model = cleanModel;
     const user = req.user;
 
@@ -107,7 +131,7 @@ const streamChatCompletions = async (req, res) => {
       aiModelConfig = await getModelConfig(cleanModel);
     }
 
-    const { targetUrl, targetKey, actualModel } = await resolveModelTarget(cleanModel, aiModelConfig);
+    let { targetUrl, targetKey, actualModel, providerType } = await resolveModelTarget(cleanModel, aiModelConfig);
 
     // Upstream abort controller: triggered ONLY if client terminates response stream early
     const abortController = new AbortController();
@@ -118,8 +142,8 @@ const streamChatCompletions = async (req, res) => {
     };
     res.on('close', onClientClose);
 
-    // Helper to attempt completion fetch with timeout
-    const tryFetchCompletion = async (url, key, modName, timeoutMs = 25000) => {
+    // Helper to attempt completion fetch with timeout (handles both OpenAI format & Google Gemini SSE format)
+    const tryFetchTarget = async (pType, url, key, modName, timeoutMs = 25000) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
@@ -127,33 +151,86 @@ const streamChatCompletions = async (req, res) => {
       abortController.signal.addEventListener('abort', onAbort);
 
       try {
-        const h = { 'Content-Type': 'application/json' };
-        if (key) h['Authorization'] = `Bearer ${key}`;
+        if (pType === 'gemini') {
+          const geminiContents = [];
+          let systemInstructionText = '';
+          for (const m of safeMessages) {
+            if (m.role === 'system') {
+              systemInstructionText += (systemInstructionText ? '\n' : '') + (typeof m.content === 'string' ? m.content : '');
+            } else {
+              let parts = [];
+              if (typeof m.content === 'string') {
+                parts = [{ text: m.content }];
+              } else if (Array.isArray(m.content)) {
+                for (const item of m.content) {
+                  if (item.type === 'text' && item.text) parts.push({ text: item.text });
+                  else if (item.type === 'image_url' && item.image_url?.url) {
+                    const u = item.image_url.url;
+                    const match = u.match(/^data:([^;]+);base64,(.*)$/);
+                    if (match) {
+                      parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+                    }
+                  }
+                }
+              }
+              if (parts.length > 0) {
+                geminiContents.push({
+                  role: m.role === 'assistant' ? 'model' : 'user',
+                  parts
+                });
+              }
+            }
+          }
 
-        const p = {
-          model: modName,
-          messages: safeMessages,
-          stream: true
-        };
-        
-        // Pass maximum safe tokens to avoid cutoff. 
-        // GPT limits to 4096, others support 8192+.
-        const lowerMod = modName.toLowerCase();
-        if (lowerMod.includes('gpt')) {
-          p.max_tokens = 4096;
+          if (geminiContents.length === 0) {
+            geminiContents.push({ role: 'user', parts: [{ text: 'Hello' }] });
+          }
+
+          const geminiBody = {
+            contents: geminiContents,
+            ...(systemInstructionText ? { systemInstruction: { parts: [{ text: systemInstructionText }] } } : {}),
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 8192
+            }
+          };
+
+          const r = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(geminiBody),
+            signal: fetchController.signal
+          });
+          clearTimeout(timeoutId);
+          abortController.signal.removeEventListener('abort', onAbort);
+          return r;
         } else {
-          p.max_tokens = 8192;
-        }
+          const h = { 'Content-Type': 'application/json' };
+          if (key) h['Authorization'] = `Bearer ${key}`;
 
-        const r = await fetch(url, {
-          method: 'POST',
-          headers: h,
-          body: JSON.stringify(p),
-          signal: fetchController.signal
-        });
-        clearTimeout(timeoutId);
-        abortController.signal.removeEventListener('abort', onAbort);
-        return r;
+          const p = {
+            model: modName,
+            messages: safeMessages,
+            stream: true
+          };
+
+          const lowerMod = modName.toLowerCase();
+          if (lowerMod.includes('gpt')) {
+            p.max_tokens = 4096;
+          } else {
+            p.max_tokens = 8192;
+          }
+
+          const r = await fetch(url, {
+            method: 'POST',
+            headers: h,
+            body: JSON.stringify(p),
+            signal: fetchController.signal
+          });
+          clearTimeout(timeoutId);
+          abortController.signal.removeEventListener('abort', onAbort);
+          return r;
+        }
       } catch (err) {
         clearTimeout(timeoutId);
         abortController.signal.removeEventListener('abort', onAbort);
@@ -163,15 +240,65 @@ const streamChatCompletions = async (req, res) => {
     };
 
     // Primary model attempt
-    let response = await tryFetchCompletion(targetUrl, targetKey, actualModel, 25000);
-    let effectiveModel = model || 'gemini-3.5-flash-lite';
+    let response = await tryFetchTarget(providerType, targetUrl, targetKey, actualModel, 25000);
+    let effectiveModel = cleanModel || 'gemini-3.6-flash';
+    let isGeminiStream = (providerType === 'gemini');
+
+    // Multi-provider fallback chain if primary fails or runs out of quota
+    if (!response || !response.ok) {
+      console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying multi-provider fallback chain...`);
+
+      const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
+      const fallbacks = [
+        {
+          id: 'gemini-3.6-flash',
+          type: 'gemini',
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?key=${geminiKey}&alt=sse`,
+          key: geminiKey,
+          model: 'gemini-3.6-flash'
+        },
+        {
+          id: 'openai/gpt-oss-120b',
+          type: 'groq',
+          url: 'https://api.groq.com/openai/v1/chat/completions',
+          key: process.env.GROQ_API_KEY,
+          model: 'openai/gpt-oss-120b'
+        },
+        {
+          id: 'qwen/qwen3.8-27b',
+          type: 'groq',
+          url: 'https://api.groq.com/openai/v1/chat/completions',
+          key: process.env.GROQ_API_KEY,
+          model: 'qwen/qwen3.8-27b'
+        },
+        {
+          id: 'openrouter/free',
+          type: 'openrouter',
+          url: 'https://openrouter.ai/api/v1/chat/completions',
+          key: process.env.OPENROUTER_API_KEY,
+          model: 'openrouter/free'
+        }
+      ].filter(fb => fb.id !== cleanModel);
+
+      for (const fb of fallbacks) {
+        if (res.writableEnded || res.destroyed) break;
+        const fbResp = await tryFetchTarget(fb.type, fb.url, fb.key, fb.model, 20000);
+        if (fbResp && fbResp.ok) {
+          console.log(`[Chat Fallback Success] Switched cleanly to ${fb.id}`);
+          response = fbResp;
+          effectiveModel = fb.id;
+          isGeminiStream = (fb.type === 'gemini');
+          break;
+        }
+      }
+    }
 
     // Guard against client socket abort / closure
     if (res.writableEnded || res.destroyed) {
       return;
     }
 
-    // If model failed or timed out, send proper HTTP error JSON before headers are locked
+    // If all providers and fallbacks failed, send user-safe error
     if (!response || !response.ok) {
       const status = response ? response.status : 504;
       const modelDisplayName = (aiModelConfig && (aiModelConfig.name || aiModelConfig.id)) || model || 'AI Model';
@@ -181,9 +308,7 @@ const streamChatCompletions = async (req, res) => {
       } else if (status === 401 || status === 403) {
         userSafeError = `AI মডেল প্রোভাইডারের কী বা সার্ভার সংযোগে সমস্যা দেখা দিয়েছে (${modelDisplayName})। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন অথবা অন্য মডেল নির্বাচন করুন।`;
       } else if (status === 502 || status === 503 || status === 504) {
-        userSafeError = (model === 'gpt-5.6' || modelDisplayName.includes('Max'))
-          ? `${modelDisplayName} মডেলটির প্রোভাইডার সার্ভার বর্তমানে মেইনটেনেন্সে রয়েছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা Alo Elite (Claude) ব্যবহার করুন।`
-          : `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
+        userSafeError = `AI মডেল প্রোভাইডার সার্ভার (${modelDisplayName}) সাময়িকভাবে ডাউন বা রেসপন্স করতে ব্যর্থ হয়েছে।`;
       }
       return res.status(status >= 400 && status < 600 ? status : 503).json({ success: false, error: userSafeError });
     }
@@ -242,18 +367,57 @@ const streamChatCompletions = async (req, res) => {
           isResolved = true;
           if (keepAliveInterval) clearInterval(keepAliveInterval);
           if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
-          res.removeListener('close', onClientClose);
+          if (typeof res.removeListener === 'function') {
+            res.removeListener('close', onClientClose);
+          }
           resolve();
         }
       };
 
+      let geminiLineBuffer = '';
+
       response.body.on('data', (chunk) => {
         hasStreamedData = true;
-        if (!hasContentTokens) { try { const s = chunk.toString(); if (s.includes('"delta"') || s.includes('"content"')) hasContentTokens = true; } catch {} }
         resetStreamIdleWatchdog();
+
         try {
-          res.write(chunk);
-          if (typeof res.flush === 'function') res.flush();
+          if (isGeminiStream) {
+            // Translate Gemini SSE events to OpenAI SSE standard
+            geminiLineBuffer += chunk.toString();
+            const lines = geminiLineBuffer.split('\n');
+            geminiLineBuffer = lines.pop(); // save remainder
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data:')) {
+                const dataStr = trimmed.slice(5).trim();
+                if (!dataStr || dataStr === '[DONE]') continue;
+                try {
+                  const json = JSON.parse(dataStr);
+                  const parts = json?.candidates?.[0]?.content?.parts;
+                  if (Array.isArray(parts)) {
+                    for (const p of parts) {
+                      if (p && p.text) {
+                        hasContentTokens = true;
+                        res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: p.text } }] })}\n\n`);
+                        if (typeof res.flush === 'function') res.flush();
+                      }
+                    }
+                  }
+                } catch (pe) {}
+              }
+            }
+          } else {
+            // Standard OpenAI SSE format
+            if (!hasContentTokens) {
+              try {
+                const s = chunk.toString();
+                if (s.includes('"delta"') || s.includes('"content"')) hasContentTokens = true;
+              } catch {}
+            }
+            res.write(chunk);
+            if (typeof res.flush === 'function') res.flush();
+          }
         } catch (e) {
           safeResolve();
         }

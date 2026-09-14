@@ -4,21 +4,21 @@ const bcrypt = require('bcryptjs');
 const memoryStore = {
   users: [],
   plans: [
-    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'], is_active: true },
+    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['gemini-3.6-flash', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'openrouter/free', 'mimo-v2.5', 'hy3'], is_active: true },
     { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, allowed_models: ['*'], is_active: true },
     { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, allowed_models: ['*'], is_active: true }
   ],
   redeemCodes: [],
   usageLogs: [],
   models: [
-      { id: "openrouter/free", model_id: "openrouter/free", name: "Alo Go", provider: "Alokpoth", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 1, type: "openrouter" },
-      { id: "gemini-3.5-flash-lite", model_id: "gemini-3.5-flash-lite", name: "Alo Flash", provider: "Alokpoth", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 2, type: "gemini" },
-      { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 3, type: "bai" },
-      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Mimo", provider: "Alokpoth", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 4, type: "bai" },
-      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo Pro", provider: "Alokpoth", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 5, type: "groq" },
-      { id: "nemotron-ultra-550b", model_id: "nemotron-ultra-550b", name: "Alo Ultra", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 6, type: "vyce" },
-      { id: "claude-sonnet-4-6", model_id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: false, order: 7, type: "vyce" },
-      { id: "gpt-5.6", model_id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth", base_url: "https://vyceai.com/v1/chat/completions", api_key: process.env.VYCE_API_KEY, premium: true, efficient: true, order: 8, type: "vyce" }
+      { id: "gemini-3.6-flash", model_id: "gemini-3.6-flash", name: "Alo Flash", provider: "Google Gemini", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 1, type: "gemini" },
+      { id: "llama-3.3-70b-versatile", model_id: "llama-3.3-70b-versatile", name: "Alo Pro", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 2, type: "groq" },
+      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo OSS 120B", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 3, type: "groq" },
+      { id: "qwen/qwen3.8-27b", model_id: "qwen/qwen3.8-27b", name: "Alo Qwen", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 4, type: "groq" },
+      { id: "gemini-3.5-flash-lite", model_id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Google Gemini", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 5, type: "gemini" },
+      { id: "openrouter/free", model_id: "openrouter/free", name: "Alo Go", provider: "OpenRouter", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 6, type: "openrouter" },
+      { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "B.AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 7, type: "bai" },
+      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Mimo", provider: "B.AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 8, type: "bai" }
   ],
   settings: {}
 };

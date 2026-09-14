@@ -122,7 +122,7 @@ router.get('/ping', async (req, res) => {
     }
     
     // Gemini specific logic (GET models list)
-    if (aiModelConfig.type === 'gemini' && targetUrl.includes('generativelanguage.googleapis.com')) {
+    if ((aiModelConfig.type === 'gemini' || cleanModel.startsWith('gemini') || cleanModel.includes('gemini')) && (targetUrl.includes('generativelanguage.googleapis.com') || targetUrl.includes('openrouter.ai') || !targetUrl)) {
       const gKey = targetKey || process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
       pingUrl = "https://generativelanguage.googleapis.com/v1beta/models" + (gKey ? ("?key=" + gKey) : "");
       delete headers['Authorization'];

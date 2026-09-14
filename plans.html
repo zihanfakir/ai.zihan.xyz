@@ -219,6 +219,24 @@
       transition: all 0.2s;
     }
 
+    .lang-toggle-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .lang-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-primary);
+    }
+    
     .theme-toggle-btn:hover {
       background: var(--bg-surface-hover);
     }
@@ -593,12 +611,15 @@
       <span>Alokpoth AI</span>
     </a>
     <div class="top-actions">
+      <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
+        <span id="langBtnText">EN</span>
+      </button>
       <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
       </button>
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span>চ্যাটে ফিরে যান</span>
+        <span id="backToChatText">চ্যাটে ফিরে যান</span>
       </a>
     </div>
   </header>
@@ -609,98 +630,98 @@
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;margin-right:4px;vertical-align:-2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span>Alokpoth AI Plans</span>
       </div>
-      <h1 class="hero-title">আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন</h1>
-      <p class="hero-subtitle">দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা</p>
+      <h1 class="hero-title" id="heroTitle">আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন</h1>
+      <p class="hero-subtitle" id="heroSubtitle">দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা</p>
     </div>
 
     <!-- Plans Grid -->
     <div class="plans-grid">
       <!-- Free Plan -->
       <div class="plan-card">
-        <div class="plan-name">ফ্রি (Free)</div>
-        <div class="plan-desc">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
+        <div class="plan-name" id="planNameFree">ফ্রি (Free)</div>
+        <div class="plan-desc" id="planDescFree">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
-          <div class="quota-num">১০</div>
-          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+          <div class="quota-num" id="quotaNumFree">১০</div>
+          <div class="quota-unit" id="quotaUnitFree">বার্তা / ৩ ঘণ্টা</div>
         </div>
         <ul class="features-list">
-          <li>
+          <li id="featFree1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            ১০টি বার্তা প্রতি ৩ ঘণ্টায়
+            <span>১০টি বার্তা প্রতি ৩ ঘণ্টায়</span>
           </li>
-          <li>
+          <li id="featFree2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            সাধারণ এআই মডেল অ্যাক্সেস
+            <span>সাধারণ এআই মডেল অ্যাক্সেস</span>
           </li>
-          <li>
+          <li id="featFree3">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            স্ট্যান্ডার্ড স্ট্রিমিং গতি
+            <span>স্ট্যান্ডার্ড স্ট্রিমিং গতি</span>
           </li>
-          <li>
+          <li id="featFree4">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            আজীবন মেয়াদহীন সুবিধা
+            <span>আজীবন মেয়াদহীন সুবিধা</span>
           </li>
         </ul>
-        <a href="index.html" class="btn-plan">বর্তমান প্ল্যান ব্যবহার করুন</a>
+        <a href="index.html" class="btn-plan" id="btnFree">বর্তমান প্ল্যান ব্যবহার করুন</a>
       </div>
 
       <!-- Pro Plan -->
       <div class="plan-card featured">
-        <div class="popular-tag">সর্বাধিক জনপ্রিয়</div>
-        <div class="plan-name">প্রো (Pro)</div>
-        <div class="plan-desc">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
+        <div class="popular-tag" id="popularTag">সর্বাধিক জনপ্রিয়</div>
+        <div class="plan-name" id="planNamePro">প্রো (Pro)</div>
+        <div class="plan-desc" id="planDescPro">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
-          <div class="quota-num" style="color:#8b5cf6;">৩০</div>
-          <div class="quota-unit">বার্তা / ৩ ঘণ্টা</div>
+          <div class="quota-num" id="quotaNumPro" style="color:#8b5cf6;">৩০</div>
+          <div class="quota-unit" id="quotaUnitPro">বার্তা / ৩ ঘণ্টা</div>
         </div>
         <ul class="features-list">
-          <li>
+          <li id="featPro1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            ৩০টি বার্তা প্রতি ৩ ঘণ্টায়
+            <span>৩০টি বার্তা প্রতি ৩ ঘণ্টায়</span>
           </li>
-          <li>
+          <li id="featPro2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস
+            <span>সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস</span>
           </li>
-          <li>
+          <li id="featPro3">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স
+            <span>আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স</span>
           </li>
-          <li>
+          <li id="featPro4">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            কোড জেন ও লাইভ ওয়েব সার্চ
+            <span>কোড জেন ও লাইভ ওয়েব সার্চ</span>
           </li>
         </ul>
-        <button type="button" class="btn-plan primary" onclick="scrollToRedeem()">রিডিম কোড দিয়ে আনলক করুন</button>
+        <button type="button" class="btn-plan primary" id="btnPro" onclick="scrollToRedeem()">রিডিম কোড দিয়ে আনলক করুন</button>
       </div>
 
       <!-- Max Plan -->
       <div class="plan-card">
-        <div class="plan-name">ম্যাক্স (Max)</div>
-        <div class="plan-desc">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
+        <div class="plan-name" id="planNameMax">ম্যাক্স (Max)</div>
+        <div class="plan-desc" id="planDescMax">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
         <div class="plan-quota">
-          <div class="quota-num" style="color:#f59e0b;">৫০</div>
-          <div class="quota-unit">বার্তা / ১ ঘণ্টা</div>
+          <div class="quota-num" id="quotaNumMax" style="color:#f59e0b;">৫০</div>
+          <div class="quota-unit" id="quotaUnitMax">বার্তা / ১ ঘণ্টা</div>
         </div>
         <ul class="features-list">
-          <li>
+          <li id="featMax1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            ৫০টি বার্তা প্রতি ১ ঘণ্টায়
+            <span>৫০টি বার্তা প্রতি ১ ঘণ্টায়</span>
           </li>
-          <li>
+          <li id="featMax2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ
+            <span>সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ</span>
           </li>
-          <li>
+          <li id="featMax3">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            বৃহত্তম কনটেক্সট মেমোরি সাপোর্ট
+            <span>বৃহত্তম কনটেক্সট মেমোরি সাপোর্ট</span>
           </li>
-          <li>
+          <li id="featMax4">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            সকল এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস
+            <span>সকল এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস</span>
           </li>
         </ul>
-        <button type="button" class="btn-plan" style="background:linear-gradient(135deg, #ec4899, #f59e0b); color:#fff; border:none;" onclick="scrollToRedeem()">ম্যাক্স কোড রিডিম করুন</button>
+        <button type="button" class="btn-plan" id="btnMax" style="background:linear-gradient(135deg, #ec4899, #f59e0b); color:#fff; border:none;" onclick="scrollToRedeem()">ম্যাক্স কোড রিডিম করুন</button>
       </div>
     </div>
 
@@ -711,10 +732,10 @@
           <svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
         </div>
         <div>
-          <h2 class="redeem-title">রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!</h2>
+          <h2 class="redeem-title" id="redeemTitle">রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!</h2>
         </div>
       </div>
-      <p class="redeem-desc">
+      <p class="redeem-desc" id="redeemDesc">
         আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।
       </p>
       <div class="redeem-form">
@@ -725,25 +746,249 @@
 
     <!-- FAQ -->
     <div class="faq-section">
-      <h2 class="faq-title">সাধারণ জিজ্ঞাসা (FAQ)</h2>
+      <h2 class="faq-title" id="faqTitle">সাধারণ জিজ্ঞাসা (FAQ)</h2>
       <div class="faq-grid">
         <div class="faq-card">
-          <div class="faq-q">৩ ঘণ্টার উইন্ডো কিভাবে কাজ করে?</div>
-          <div class="faq-a">আপনার পাঠানো প্রথম মেসেজ থেকে ৩ ঘণ্টার একটি সেশন শুরু হয়। ৩ ঘণ্টা শেষ হওয়ার সাথে সাথেই আপনার মেসেজ লিমিট পুনরায় স্বয়ংক্রিয়ভাবে রিচার্জ হয়ে যায়।</div>
+          <div class="faq-q" id="faqQ1">৩ ঘণ্টার উইন্ডো কিভাবে কাজ করে?</div>
+          <div class="faq-a" id="faqA1">আপনার পাঠানো প্রথম মেসেজ থেকে ৩ ঘণ্টার একটি সেশন শুরু হয়। ৩ ঘণ্টা শেষ হওয়ার সাথে সাথেই আপনার মেসেজ লিমিট পুনরায় স্বয়ংক্রিয়ভাবে রিচার্জ হয়ে যায়।</div>
         </div>
         <div class="faq-card">
-          <div class="faq-q">রিডিম কোড কিভাবে সংগ্রহ করব?</div>
-          <div class="faq-a">অফিসিয়াল প্রোমো ক্যাম্পেইন, বিশেষ অফার অথবা অ্যাডমিনের কাছ থেকে উপহারস্বরূপ রিডিম কোড সংগ্রহ করতে পারেন।</div>
+          <div class="faq-q" id="faqQ2">রিডিম কোড কিভাবে সংগ্রহ করব?</div>
+          <div class="faq-a" id="faqA2">অফিসিয়াল প্রোমো ক্যাম্পেইন, বিশেষ অফার অথবা অ্যাডমিনের কাছ থেকে উপহারস্বরূপ রিডিম কোড সংগ্রহ করতে পারেন।</div>
         </div>
         <div class="faq-card">
-          <div class="faq-q">রিডিম করলে কি সাথে সাথে সক্রিয় হয়?</div>
-          <div class="faq-a">হ্যাঁ! কোডটি দেওয়ার সাথে সাথেই আপনার একাউন্ট নতুন প্ল্যানে আপগ্রেড হয়ে যায় এবং কোনো বিলম্ব ছাড়াই সব প্রিমিয়াম ফিচার আনলক হয়ে যায়।</div>
+          <div class="faq-q" id="faqQ3">রিডিম করলে কি সাথে সাথে সক্রিয় হয়?</div>
+          <div class="faq-a" id="faqA3">হ্যাঁ! কোডটি দেওয়ার সাথে সাথেই আপনার একাউন্ট নতুন প্ল্যানে আপগ্রেড হয়ে যায় এবং কোনো বিলম্ব ছাড়াই সব প্রিমিয়াম ফিচার আনলক হয়ে যায়।</div>
         </div>
       </div>
     </div>
   </main>
 
   <script>
+    // i18n Dictionary
+    const I18N_PLANS = {
+      bn: {
+        pageTitle: "প্ল্যান ও মূল্য তালিকা — Alokpoth AI",
+        backToChat: "চ্যাটে ফিরে যান",
+        themeToggle: "থিম পরিবর্তন",
+        heroTitle: "আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন",
+        heroSubtitle: "দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা",
+        planNameFree: "ফ্রি (Free)",
+        planDescFree: "দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।",
+        quotaNumFree: "১০",
+        quotaUnitFree: "বার্তা / ৩ ঘণ্টা",
+        featFree1: "১০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featFree2: "সাধারণ এআই মডেল অ্যাক্সেস",
+        featFree3: "স্ট্যান্ডার্ড স্ট্রিমিং গতি",
+        featFree4: "আজীবন মেয়াদহীন সুবিধা",
+        btnFree: "বর্তমান প্ল্যান ব্যবহার করুন",
+        popularTag: "সর্বাধিক জনপ্রিয়",
+        planNamePro: "প্রো (Pro)",
+        planDescPro: "পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।",
+        quotaNumPro: "৩০",
+        quotaUnitPro: "বার্তা / ৩ ঘণ্টা",
+        featPro1: "৩০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featPro2: "সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস",
+        featPro3: "আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স",
+        featPro4: "কোড জেন ও লাইভ ওয়েব সার্চ",
+        btnPro: "রিডিম কোড দিয়ে আনলক করুন",
+        planNameMax: "ম্যাক্স (Max)",
+        planDescMax: "সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।",
+        quotaNumMax: "৫০",
+        quotaUnitMax: "বার্তা / ১ ঘণ্টা",
+        featMax1: "৫০টি বার্তা প্রতি ১ ঘণ্টায়",
+        featMax2: "সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ",
+        featMax3: "বৃহত্তম কনটেক্সট মেমোরি সাপোর্ট",
+        featMax4: "সকল এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস",
+        btnMax: "ম্যাক্স কোড রিডিম করুন",
+        redeemTitle: "রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!",
+        redeemDesc: "আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।",
+        redeemPlaceholder: "কোড লিখুন (যেমন: ALOAI2026 বা ABCD-EFGH-IJKL)",
+        claimBtn: "আপগ্রেড করুন",
+        claimVerifying: "যাচাই হচ্ছে...",
+        faqTitle: "সাধারণ জিজ্ঞাসা (FAQ)",
+        faqQ1: "৩ ঘণ্টার উইন্ডো কিভাবে কাজ করে?",
+        faqA1: "আপনার পাঠানো প্রথম মেসেজ থেকে ৩ ঘণ্টার একটি সেশন শুরু হয়। ৩ ঘণ্টা শেষ হওয়ার সাথে সাথেই আপনার মেসেজ লিমিট পুনরায় স্বয়ংক্রিয়ভাবে রিচার্জ হয়ে যায়।",
+        faqQ2: "রিডিম কোড কিভাবে সংগ্রহ করব?",
+        faqA2: "অফিসিয়াল প্রোমো ক্যাম্পেইন, বিশেষ অফার অথবা অ্যাডমিনের কাছ থেকে উপহারস্বরূপ রিডিম কোড সংগ্রহ করতে পারেন।",
+        faqQ3: "রিডিম করলে কি সাথে সাথে সক্রিয় হয়?",
+        faqA3: "হ্যাঁ! কোডটি দেওয়ার সাথে সাথেই আপনার একাউন্ট নতুন প্ল্যানে আপগ্রেড হয়ে যায় এবং কোনো বিলম্ব ছাড়াই সব প্রিমিয়াম ফিচার আনলক হয়ে যায়।",
+        loginRequired: "রিডিম কোড ব্যবহারের জন্য অনুগ্রহ করে প্রথমে লগইন করুন!",
+        codeEmpty: "রিডিম কোড লিখুন",
+        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
+      },
+      en: {
+        pageTitle: "Plans & Pricing — Alokpoth AI",
+        backToChat: "Back to Chat",
+        themeToggle: "Change Theme",
+        heroTitle: "Choose the Perfect Plan for Your Needs",
+        heroSubtitle: "Fastest AI for everyday questions, deep coding, and extensive research",
+        planNameFree: "Free",
+        planDescFree: "Perfect for everyday questions and quick research.",
+        quotaNumFree: "10",
+        quotaUnitFree: "msgs / 3 hrs",
+        featFree1: "10 messages per 3 hours",
+        featFree2: "Access to standard AI models",
+        featFree3: "Standard streaming speed",
+        featFree4: "Lifetime free access",
+        btnFree: "Use Current Plan",
+        popularTag: "Most Popular",
+        planNamePro: "Pro",
+        planDescPro: "Designed for developers, students, and regular creators.",
+        quotaNumPro: "30",
+        quotaUnitPro: "msgs / 3 hrs",
+        featPro1: "30 messages per 3 hours",
+        featPro2: "Access to all premium models",
+        featPro3: "Ultrafast streaming & low latency",
+        featPro4: "Code generation & live web search",
+        btnPro: "Unlock with Redeem Code",
+        planNameMax: "Max",
+        planDescMax: "Ultimate performance for heavy-duty coding and projects.",
+        quotaNumMax: "50",
+        quotaUnitMax: "msgs / 1 hr",
+        featMax1: "50 messages per 1 hour",
+        featMax2: "Highest priority bandwidth",
+        featMax3: "Largest context window & memory",
+        featMax4: "All exclusive features & early access",
+        btnMax: "Claim Max with Code",
+        redeemTitle: "Have a promo code? Upgrade immediately!",
+        redeemDesc: "Paste your voucher or promo code below to instantly activate your Pro or Max subscription.",
+        redeemPlaceholder: "Enter code (e.g. ALOAI2026 or ABCD-EFGH-IJKL)",
+        claimBtn: "Upgrade Now",
+        claimVerifying: "Verifying...",
+        faqTitle: "Frequently Asked Questions (FAQ)",
+        faqQ1: "How does the message quota window work?",
+        faqA1: "A rolling session window begins from your very first message. Once the period expires, your message quota is automatically refreshed in full.",
+        faqQ2: "How can I obtain a redeem code?",
+        faqA2: "Redeem codes can be obtained through promotional campaigns, community giveaways, or directly from the system administrator.",
+        faqQ3: "Is activation immediate upon redemption?",
+        faqA3: "Yes! The moment you submit a valid code, your account tier upgrades instantly with zero downtime and unlocks all premium models.",
+        loginRequired: "Please log in first to use a redeem code!",
+        codeEmpty: "Please enter a redeem code",
+        serverErr: "Could not connect to the server"
+      }
+    };
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    document.documentElement.setAttribute("lang", currentLanguage);
+
+    function applyPlansI18n() {
+      const d = I18N_PLANS[currentLanguage] || I18N_PLANS.bn;
+      const isEn = (currentLanguage === "en");
+
+      document.title = d.pageTitle;
+      document.documentElement.setAttribute("lang", currentLanguage);
+
+      const langBtnText = document.getElementById("langBtnText");
+      if (langBtnText) langBtnText.textContent = isEn ? "বাংলা" : "English";
+
+      const backToChatText = document.getElementById("backToChatText");
+      if (backToChatText) backToChatText.textContent = d.backToChat;
+
+      const heroTitle = document.getElementById("heroTitle");
+      if (heroTitle) heroTitle.textContent = d.heroTitle;
+
+      const heroSubtitle = document.getElementById("heroSubtitle");
+      if (heroSubtitle) heroSubtitle.textContent = d.heroSubtitle;
+
+      // Free
+      const planNameFree = document.getElementById("planNameFree");
+      if (planNameFree) planNameFree.textContent = d.planNameFree;
+      const planDescFree = document.getElementById("planDescFree");
+      if (planDescFree) planDescFree.textContent = d.planDescFree;
+      const quotaNumFree = document.getElementById("quotaNumFree");
+      if (quotaNumFree) quotaNumFree.textContent = d.quotaNumFree;
+      const quotaUnitFree = document.getElementById("quotaUnitFree");
+      if (quotaUnitFree) quotaUnitFree.textContent = d.quotaUnitFree;
+      const featFree1 = document.querySelector("#featFree1 span");
+      if (featFree1) featFree1.textContent = d.featFree1;
+      const featFree2 = document.querySelector("#featFree2 span");
+      if (featFree2) featFree2.textContent = d.featFree2;
+      const featFree3 = document.querySelector("#featFree3 span");
+      if (featFree3) featFree3.textContent = d.featFree3;
+      const featFree4 = document.querySelector("#featFree4 span");
+      if (featFree4) featFree4.textContent = d.featFree4;
+      const btnFree = document.getElementById("btnFree");
+      if (btnFree) btnFree.textContent = d.btnFree;
+
+      // Pro
+      const popularTag = document.getElementById("popularTag");
+      if (popularTag) popularTag.textContent = d.popularTag;
+      const planNamePro = document.getElementById("planNamePro");
+      if (planNamePro) planNamePro.textContent = d.planNamePro;
+      const planDescPro = document.getElementById("planDescPro");
+      if (planDescPro) planDescPro.textContent = d.planDescPro;
+      const quotaNumPro = document.getElementById("quotaNumPro");
+      if (quotaNumPro) quotaNumPro.textContent = d.quotaNumPro;
+      const quotaUnitPro = document.getElementById("quotaUnitPro");
+      if (quotaUnitPro) quotaUnitPro.textContent = d.quotaUnitPro;
+      const featPro1 = document.querySelector("#featPro1 span");
+      if (featPro1) featPro1.textContent = d.featPro1;
+      const featPro2 = document.querySelector("#featPro2 span");
+      if (featPro2) featPro2.textContent = d.featPro2;
+      const featPro3 = document.querySelector("#featPro3 span");
+      if (featPro3) featPro3.textContent = d.featPro3;
+      const featPro4 = document.querySelector("#featPro4 span");
+      if (featPro4) featPro4.textContent = d.featPro4;
+      const btnPro = document.getElementById("btnPro");
+      if (btnPro) btnPro.textContent = d.btnPro;
+
+      // Max
+      const planNameMax = document.getElementById("planNameMax");
+      if (planNameMax) planNameMax.textContent = d.planNameMax;
+      const planDescMax = document.getElementById("planDescMax");
+      if (planDescMax) planDescMax.textContent = d.planDescMax;
+      const quotaNumMax = document.getElementById("quotaNumMax");
+      if (quotaNumMax) quotaNumMax.textContent = d.quotaNumMax;
+      const quotaUnitMax = document.getElementById("quotaUnitMax");
+      if (quotaUnitMax) quotaUnitMax.textContent = d.quotaUnitMax;
+      const featMax1 = document.querySelector("#featMax1 span");
+      if (featMax1) featMax1.textContent = d.featMax1;
+      const featMax2 = document.querySelector("#featMax2 span");
+      if (featMax2) featMax2.textContent = d.featMax2;
+      const featMax3 = document.querySelector("#featMax3 span");
+      if (featMax3) featMax3.textContent = d.featMax3;
+      const featMax4 = document.querySelector("#featMax4 span");
+      if (featMax4) featMax4.textContent = d.featMax4;
+      const btnMax = document.getElementById("btnMax");
+      if (btnMax) btnMax.textContent = d.btnMax;
+
+      // Redeem
+      const redeemTitle = document.getElementById("redeemTitle");
+      if (redeemTitle) redeemTitle.textContent = d.redeemTitle;
+      const redeemDesc = document.getElementById("redeemDesc");
+      if (redeemDesc) redeemDesc.textContent = d.redeemDesc;
+      const redeemInput = document.getElementById("redeemInput");
+      if (redeemInput) redeemInput.placeholder = d.redeemPlaceholder;
+      const claimBtn = document.getElementById("claimBtn");
+      if (claimBtn && !claimBtn.disabled) claimBtn.textContent = d.claimBtn;
+
+      // FAQ
+      const faqTitle = document.getElementById("faqTitle");
+      if (faqTitle) faqTitle.textContent = d.faqTitle;
+      const faqQ1 = document.getElementById("faqQ1");
+      if (faqQ1) faqQ1.textContent = d.faqQ1;
+      const faqA1 = document.getElementById("faqA1");
+      if (faqA1) faqA1.textContent = d.faqA1;
+      const faqQ2 = document.getElementById("faqQ2");
+      if (faqQ2) faqQ2.textContent = d.faqQ2;
+      const faqA2 = document.getElementById("faqA2");
+      if (faqA2) faqA2.textContent = d.faqA2;
+      const faqQ3 = document.getElementById("faqQ3");
+      if (faqQ3) faqQ3.textContent = d.faqQ3;
+      const faqA3 = document.getElementById("faqA3");
+      if (faqA3) faqA3.textContent = d.faqA3;
+    }
+
+    const langToggleBtn = document.getElementById("langToggleBtn");
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener("click", () => {
+        currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+        try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+        applyPlansI18n();
+      });
+    }
+
     // Theme sync
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -777,8 +1022,12 @@
         localStorage.setItem("alokpoth_theme", next);
         localStorage.setItem("alokpoth-theme", next);
         updateThemeMetaColor(next);
-        const labels = { dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম" };
-        showToast(`${labels[next] || next} সক্রিয় করা হয়েছে`);
+        const labels = currentLanguage === "en" ? {
+          dark: "Dark theme", sapphire: "Sapphire theme", oled: "OLED Black theme", eyecare: "Eye Care theme", light: "Light theme"
+        } : {
+          dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম"
+        };
+        showToast(currentLanguage === "en" ? `${labels[next] || next} activated` : `${labels[next] || next} সক্রিয় করা হয়েছে`);
       });
     }
 
@@ -863,9 +1112,10 @@
 
     // Claim handler
     document.getElementById("claimBtn").addEventListener("click", async () => {
+      const d = I18N_PLANS[currentLanguage] || I18N_PLANS.bn;
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
-        showToast("রিডিম কোড ব্যবহারের জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
+        showToast(d.loginRequired, "error");
         setTimeout(() => { window.location.href = "login.html"; }, 1000);
         return;
       }
@@ -873,14 +1123,14 @@
       const input = document.getElementById("redeemInput");
       const rawCode = input.value.trim().toUpperCase();
       if (!rawCode) {
-        showToast("রিডিম কোড লিখুন", "error");
+        showToast(d.codeEmpty, "error");
         input.focus();
         return;
       }
 
       const btn = document.getElementById("claimBtn");
       btn.disabled = true;
-      btn.textContent = "যাচাই হচ্ছে...";
+      btn.textContent = d.claimVerifying;
 
       try {
         const res = await fetch(`${API_BASE}/redeem/claim`, {
@@ -922,20 +1172,24 @@
 
           input.value = "";
           triggerConfetti();
-          showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+          const successMsg = currentLanguage === "en" 
+            ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
+            : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
+          showToast(successMsg, "success");
           setTimeout(() => { window.location.href = "account.html?tab=tabPlan"; }, 1500);
         } else {
-          showToast(data.error || "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!", "error");
+          showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
         }
       } catch {
-        showToast("সার্ভারের সাথে যোগাযোগ করা যায়নি", "error");
+        showToast(d.serverErr, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "আপগ্রেড করুন";
+        btn.textContent = d.claimBtn;
       }
     });
 
-
+    // Run initial i18n
+    applyPlansI18n();
   </script>
 </body>
 </html>

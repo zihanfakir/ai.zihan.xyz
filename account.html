@@ -229,6 +229,24 @@
       transition: all 0.2s;
     }
 
+    .lang-toggle-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .lang-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-primary);
+    }
+    
     .theme-toggle-btn:hover {
       background: var(--bg-surface-hover);
     }
@@ -671,41 +689,47 @@
     <a href="index.html" class="brand-link">
       <span>Alokpoth AI</span>
     </a>
-      <a href="AloAI.apk" download="AloAI.apk" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; padding:7px 12px; font-size:0.82rem; text-decoration:none; background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.38); color:#60a5fa; border-radius:var(--radius-md);">
+    <div class="top-actions">
+      <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
+        <span id="langBtnText">EN</span>
+      </button>
+      <a href="AloAI.apk" download="AloAI.apk" id="downloadAppTopBtn" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; padding:7px 12px; font-size:0.82rem; text-decoration:none; background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.38); color:#60a5fa; border-radius:var(--radius-md);">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>অ্যাপ ডাউনলোড</span>
+        <span id="topDownloadText">অ্যাপ ডাউনলোড</span>
       </a>
       <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
       </button>
-      <a href="index.html" class="back-btn">
+      <a href="index.html" class="back-btn" id="backToChatBtn">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span>চ্যাটে ফিরে যান</span>
+        <span id="backToChatText">চ্যাটে ফিরে যান</span>
       </a>
-      <button type="button" class="btn-danger" id="logoutBtn" style="padding:8px 14px; font-size:0.88rem;">লগআউট</button>
+      <button type="button" class="btn-danger" id="logoutBtn" style="padding:8px 14px; font-size:0.88rem;">
+        <span id="logoutBtnText">লগআউট</span>
+      </button>
     </div>
   </header>
 
   <main class="account-layout">
     <div class="page-header">
-      <h1 class="page-title">অ্যাকাউন্ট ও সেটিংস</h1>
-      <p class="page-subtitle">আপনার প্রোফাইল, সাবস্ক্রিপশন প্ল্যান, ব্যবহার পরিসংখ্যান ও নিরাপত্তা পরিচালনা করুন</p>
+      <h1 class="page-title" id="pageTitle">অ্যাকাউন্ট ও সেটিংস</h1>
+      <p class="page-subtitle" id="pageSubtitle">আপনার প্রোফাইল, সাবস্ক্রিপশন প্ল্যান, ব্যবহার পরিসংখ্যান ও নিরাপত্তা পরিচালনা করুন</p>
     </div>
 
     <div class="account-tabs-nav" id="tabsNav">
-      <button type="button" class="tab-btn active" data-tab="tabProfile">
+      <button type="button" class="tab-btn active" data-tab="tabProfile" id="tabBtnProfile">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>আমার প্রোফাইল</span>
       </button>
-      <button type="button" class="tab-btn" data-tab="tabPlan">
+      <button type="button" class="tab-btn" data-tab="tabPlan" id="tabBtnPlan">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span>প্ল্যান ও সাবস্ক্রিপশন</span>
       </button>
-      <button type="button" class="tab-btn" data-tab="tabUsage">
+      <button type="button" class="tab-btn" data-tab="tabUsage" id="tabBtnUsage">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>ব্যবহার ও পরিসংখ্যান</span>
       </button>
-      <button type="button" class="tab-btn" data-tab="tabSecurity">
+      <button type="button" class="tab-btn" data-tab="tabSecurity" id="tabBtnSecurity">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span>সিকিউরিটি ও রিডিম কোড</span>
       </button>
@@ -726,10 +750,10 @@
       </div>
 
       <div class="card">
-        <div class="card-title">নাম পরিবর্তন করুন</div>
+        <div class="card-title" id="changeNameTitle">নাম পরিবর্তন করুন</div>
         <form id="profileUpdateForm">
           <div class="form-group">
-            <label class="form-label" for="editNameInput">পূর্ণ নাম</label>
+            <label class="form-label" id="editNameLabel" for="editNameInput">পূর্ণ নাম</label>
             <input type="text" class="form-input" id="editNameInput" placeholder="আপনার নাম লিখুন">
           </div>
           <button type="submit" class="btn-primary" id="saveNameBtn">নাম সংরক্ষণ করুন</button>
@@ -761,13 +785,13 @@
       <div class="card" style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.05));">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
           <div>
-            <div style="font-size:0.9rem; color:var(--text-sub);">বর্তমান সক্রিয় সাবস্ক্রিপশন:</div>
+            <div style="font-size:0.9rem; color:var(--text-sub);" id="currentPlanLabel">বর্তমান সক্রিয় সাবস্ক্রিপশন:</div>
             <div style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:2px;" id="currentPlanTitle">Free Plan</div>
             <div style="font-size:0.9rem; color:var(--accent-primary); margin-top:4px;" id="currentPlanExpiry">মেয়াদ: আজীবন / মেয়াদহীন</div>
           </div>
           <button type="button" class="btn-primary" onclick="switchToTab('tabSecurity')">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-2px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-            <span>রিডিম কোড দিয়ে আনলক করুন</span>
+            <span id="unlockCodeBtnText">রিডিম কোড দিয়ে আনলক করুন</span>
           </button>
         </div>
       </div>
@@ -779,7 +803,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-primary);">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            <span style="font-weight:700; font-size:1rem; color:var(--text-main);">বার্তা কোটা ও লাইভ রিসেট উইন্ডো</span>
+            <span style="font-weight:700; font-size:1rem; color:var(--text-main);" id="quotaCardTitle">বার্তা কোটা ও লাইভ রিসেট উইন্ডো</span>
           </div>
           <span class="account-quota-count" id="quotaCountDisplay" style="font-size:0.9rem; color:var(--text-sub);">
             <strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">১০</strong> / <span id="quotaTotalDigits">১০</span> বার্তা বাকি
@@ -798,7 +822,7 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>রিসেট হতে বাকি:</span>
+            <span id="quotaResetLabel">রিসেট হতে বাকি:</span>
             <span class="quota-timer-value" id="quotaLiveCountdown" style="color:var(--text-main); font-weight:700;">০৩ ঘণ্টা ০০ মিনিট</span>
           </div>
           <span class="quota-window-subtext" id="quotaWindowSubtext" style="color:var(--text-muted); font-size:0.82rem;">প্রতি ৩ ঘণ্টায় কোটা স্বয়ংক্রিয়ভাবে নবায়ন হয়</span>
@@ -855,25 +879,25 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-val" id="usageCountVal">০</div>
-          <div class="stat-label">এই উইন্ডোতে পাঠানো বার্তা</div>
+          <div class="stat-label" id="labelUsageSent">এই উইন্ডোতে পাঠানো বার্তা</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="usageRemainingVal">১০</div>
-          <div class="stat-label">অবশিষ্ট বার্তা সংখ্যা</div>
+          <div class="stat-label" id="labelUsageRemaining">অবশিষ্ট বার্তা সংখ্যা</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="usageResetVal">৩ ঘণ্টা</div>
-          <div class="stat-label">কোটা রিসেট হতে বাকি সময়</div>
+          <div class="stat-label" id="labelUsageReset">কোটা রিসেট হতে বাকি সময়</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="totalMessagesSent">০</div>
-          <div class="stat-label">মোট চ্যাট সেশন</div>
+          <div class="stat-label" id="labelUsageSessions">মোট চ্যাট সেশন</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">কোটা উইন্ডো পলিসি</div>
-        <p style="font-size:0.92rem; color:var(--text-sub); line-height:1.6;">
+        <div class="card-title" id="policyTitle">কোটা উইন্ডো পলিসি</div>
+        <p style="font-size:0.92rem; color:var(--text-sub); line-height:1.6;" id="policyDesc">
           Alokpoth AI প্রতিটি ব্যবহারকারীর ন্যায্য ব্যবহারের সুবিধার্থে একটি রোলিং উইন্ডো রেট লিমিট পরিচালনা করে। আপনার প্ল্যান অনুযায়ী নির্দিষ্ট সময় পর পর কোটা স্বয়ংক্রিয়ভাবে পূর্ণ হয়ে যায়। আপনার কাজের পরিধি বৃদ্ধি করতে আপনি যেকোনো সময় রিডিম কোডের মাধ্যমে Pro বা Max প্ল্যানে আপগ্রেড করে নিতে পারেন।
         </p>
       </div>
@@ -885,9 +909,9 @@
       <div class="card" style="border: 1px dashed rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.04);">
         <div class="card-title" style="color:#c084fc;">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-3px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-          <span>রিডিম কোড দাবি করুন (Plan Upgrade)</span>
+          <span id="redeemCardTitle">রিডিম কোড দাবি করুন (Plan Upgrade)</span>
         </div>
-        <p style="font-size:0.92rem; color:var(--text-sub); margin-bottom:12px;">
+        <p style="font-size:0.92rem; color:var(--text-sub); margin-bottom:12px;" id="redeemCardDesc">
           আপনার ১২-অক্ষরের প্রমো কোড অথবা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি প্রবেশ করিয়ে Pro বা Max প্ল্যান আনলক করুন।
         </p>
         <div class="redeem-box">
@@ -900,19 +924,19 @@
       <div class="card">
         <div class="card-title">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-3px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>পাসওয়ার্ড পরিবর্তন করুন</span>
+          <span id="changePassTitle">পাসওয়ার্ড পরিবর্তন করুন</span>
         </div>
         <form id="changePassForm">
           <div class="form-group">
-            <label class="form-label" for="curPassInput">বর্তমান পাসওয়ার্ড</label>
+            <label class="form-label" id="curPassLabel" for="curPassInput">বর্তমান পাসওয়ার্ড</label>
             <input type="password" class="form-input" id="curPassInput" placeholder="আপনার বর্তমান পাসওয়ার্ড" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="newPassInput">নতুন পাসওয়ার্ড</label>
+            <label class="form-label" id="newPassLabel" for="newPassInput">নতুন পাসওয়ার্ড</label>
             <input type="password" class="form-input" id="newPassInput" placeholder="কমপক্ষে ৬ অক্ষরের নতুন পাসওয়ার্ড" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="cnfPassInput">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
+            <label class="form-label" id="cnfPassLabel" for="cnfPassInput">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
             <input type="password" class="form-input" id="cnfPassInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" required>
           </div>
           <button type="submit" class="btn-primary" id="changePassSubmitBtn">পাসওয়ার্ড আপডেট করুন</button>
@@ -922,6 +946,222 @@
   </main>
 
   <script>
+    // i18n Dictionary for Account Page
+    const I18N_ACCOUNT = {
+      bn: {
+        pageTitle: "অ্যাকাউন্ট ও সেটিংস — Alokpoth AI",
+        pageHeading: "অ্যাকাউন্ট ও সেটিংস",
+        pageSubheading: "আপনার প্রোফাইল, সাবস্ক্রিপশন প্ল্যান, ব্যবহার পরিসংখ্যান ও নিরাপত্তা পরিচালনা করুন",
+        backToChat: "চ্যাটে ফিরে যান",
+        topDownload: "অ্যাপ ডাউনলোড",
+        logout: "লগআউট",
+        tabProfile: "আমার প্রোফাইল",
+        tabPlan: "প্ল্যান ও সাবস্ক্রিপশন",
+        tabUsage: "ব্যবহার ও পরিসংখ্যান",
+        tabSecurity: "সিকিউরিটি ও রিডিম কোড",
+        changeNameTitle: "নাম পরিবর্তন করুন",
+        editNameLabel: "পূর্ণ নাম",
+        editNamePlaceholder: "আপনার নাম লিখুন",
+        saveNameBtn: "নাম সংরক্ষণ করুন",
+        savingName: "সংরক্ষণ হচ্ছে...",
+        currentPlanLabel: "বর্তমান সক্রিয় সাবস্ক্রিপশন:",
+        lifetimeExpiry: "মেয়াদ: আজীবন / মেয়াদহীন",
+        unlockCodeBtn: "রিডিম কোড দিয়ে আনলক করুন",
+        quotaCardTitle: "বার্তা কোটা ও লাইভ রিসেট উইন্ডো",
+        quotaResetLabel: "রিসেট হতে বাকি:",
+        labelUsageSent: "এই উইন্ডোতে পাঠানো বার্তা",
+        labelUsageRemaining: "অবশিষ্ট বার্তা সংখ্যা",
+        labelUsageReset: "কোটা রিসেট হতে বাকি সময়",
+        labelUsageSessions: "মোট চ্যাট সেশন",
+        policyTitle: "কোটা উইন্ডো পলিসি",
+        policyDesc: "Alokpoth AI প্রতিটি ব্যবহারকারীর ন্যায্য ব্যবহারের সুবিধার্থে একটি রোলিং উইন্ডো রেট লিমিট পরিচালনা করে। আপনার প্ল্যান অনুযায়ী নির্দিষ্ট সময় পর পর কোটা স্বয়ংক্রিয়ভাবে পূর্ণ হয়ে যায়। আপনার কাজের পরিধি বৃদ্ধি করতে আপনি যেকোনো সময় রিডিম কোডের মাধ্যমে Pro বা Max প্ল্যানে আপগ্রেড করে নিতে পারেন।",
+        redeemCardTitle: "রিডিম কোড দাবি করুন (Plan Upgrade)",
+        redeemCardDesc: "আপনার ১২-অক্ষরের প্রমো কোড অথবা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি প্রবেশ করিয়ে Pro বা Max প্ল্যান আনলক করুন।",
+        redeemPlaceholder: "যেমন: ALOAI2026 বা ABCD-EFGH-IJKL",
+        claimBtn: "ক্লেইম করুন",
+        claimVerifying: "যাচাই হচ্ছে...",
+        changePassTitle: "পাসওয়ার্ড পরিবর্তন করুন",
+        curPassLabel: "বর্তমান পাসওয়ার্ড",
+        curPassPlaceholder: "আপনার বর্তমান পাসওয়ার্ড",
+        newPassLabel: "নতুন পাসওয়ার্ড",
+        newPassPlaceholder: "কমপক্ষে ৬ অক্ষরের নতুন পাসওয়ার্ড",
+        cnfPassLabel: "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+        cnfPassPlaceholder: "পুনরায় নতুন পাসওয়ার্ড লিখুন",
+        changePassSubmitBtn: "পাসওয়ার্ড আপডেট করুন",
+        passUpdating: "পাসওয়ার্ড আপডেট হচ্ছে...",
+        logoutSuccess: "লগআউট সফল হয়েছে!",
+        nameUpdated: "আপনার নাম সফলভাবে আপডেট হয়েছে!",
+        nameEmpty: "নাম ফাঁকা রাখা যাবে না",
+        passSuccess: "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!",
+        passEmpty: "সবগুলো ঘর পূরণ করুন",
+        passMismatch: "নতুন পাসওয়ার্ড দুটি মিলছে না",
+        passShort: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+        codeEmpty: "অনুগ্রহ করে রিডিম কোডটি লিখুন",
+        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
+      },
+      en: {
+        pageTitle: "Account & Settings — Alokpoth AI",
+        pageHeading: "Account & Settings",
+        pageSubheading: "Manage your profile, subscription plans, usage analytics, and account security",
+        backToChat: "Back to Chat",
+        topDownload: "Download App",
+        logout: "Log Out",
+        tabProfile: "My Profile",
+        tabPlan: "Plans & Subscription",
+        tabUsage: "Usage & Analytics",
+        tabSecurity: "Security & Redeem",
+        changeNameTitle: "Change Name",
+        editNameLabel: "Full Name",
+        editNamePlaceholder: "Enter your full name",
+        saveNameBtn: "Save Name",
+        savingName: "Saving...",
+        currentPlanLabel: "Current Active Subscription:",
+        lifetimeExpiry: "Validity: Lifetime / No Expiry",
+        unlockCodeBtn: "Unlock with Redeem Code",
+        quotaCardTitle: "Message Quota & Live Reset Window",
+        quotaResetLabel: "Reset in:",
+        labelUsageSent: "Messages Sent This Window",
+        labelUsageRemaining: "Remaining Message Quota",
+        labelUsageReset: "Time Until Quota Reset",
+        labelUsageSessions: "Total Chat Sessions",
+        policyTitle: "Quota Window Policy",
+        policyDesc: "Alokpoth AI operates a fair-use rolling window rate limit. Your message quota refreshes automatically after each window period. You can upgrade to Pro or Max anytime using a valid redeem code.",
+        redeemCardTitle: "Claim Redeem Code (Plan Upgrade)",
+        redeemCardDesc: "Enter your 12-character promo code or custom administrative voucher to upgrade to Pro or Max.",
+        redeemPlaceholder: "e.g. ALOAI2026 or ABCD-EFGH-IJKL",
+        claimBtn: "Claim Code",
+        claimVerifying: "Verifying...",
+        changePassTitle: "Change Password",
+        curPassLabel: "Current Password",
+        curPassPlaceholder: "Your current password",
+        newPassLabel: "New Password",
+        newPassPlaceholder: "At least 6 characters",
+        cnfPassLabel: "Confirm New Password",
+        cnfPassPlaceholder: "Re-enter new password",
+        changePassSubmitBtn: "Update Password",
+        passUpdating: "Updating password...",
+        logoutSuccess: "Logged out successfully!",
+        nameUpdated: "Your name has been updated successfully!",
+        nameEmpty: "Name cannot be empty",
+        passSuccess: "Password changed successfully!",
+        passEmpty: "Please fill out all password fields",
+        passMismatch: "New passwords do not match",
+        passShort: "New password must be at least 6 characters",
+        codeEmpty: "Please enter a redeem code",
+        serverErr: "Could not connect to server"
+      }
+    };
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    document.documentElement.setAttribute("lang", currentLanguage);
+
+    function applyAccountI18n() {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+      const isEn = (currentLanguage === "en");
+
+      document.title = d.pageTitle;
+      document.documentElement.setAttribute("lang", currentLanguage);
+
+      const langBtnText = document.getElementById("langBtnText");
+      if (langBtnText) langBtnText.textContent = isEn ? "বাংলা" : "English";
+
+      const topDownloadText = document.getElementById("topDownloadText");
+      if (topDownloadText) topDownloadText.textContent = d.topDownload;
+
+      const backToChatText = document.getElementById("backToChatText");
+      if (backToChatText) backToChatText.textContent = d.backToChat;
+
+      const logoutBtnText = document.getElementById("logoutBtnText");
+      if (logoutBtnText) logoutBtnText.textContent = d.logout;
+
+      const pageTitle = document.getElementById("pageTitle");
+      if (pageTitle) pageTitle.textContent = d.pageHeading;
+
+      const pageSubtitle = document.getElementById("pageSubtitle");
+      if (pageSubtitle) pageSubtitle.textContent = d.pageSubheading;
+
+      // Nav Tabs
+      const tabBtnProfile = document.querySelector("#tabBtnProfile span");
+      if (tabBtnProfile) tabBtnProfile.textContent = d.tabProfile;
+      const tabBtnPlan = document.querySelector("#tabBtnPlan span");
+      if (tabBtnPlan) tabBtnPlan.textContent = d.tabPlan;
+      const tabBtnUsage = document.querySelector("#tabBtnUsage span");
+      if (tabBtnUsage) tabBtnUsage.textContent = d.tabUsage;
+      const tabBtnSecurity = document.querySelector("#tabBtnSecurity span");
+      if (tabBtnSecurity) tabBtnSecurity.textContent = d.tabSecurity;
+
+      // Profile
+      const changeNameTitle = document.getElementById("changeNameTitle");
+      if (changeNameTitle) changeNameTitle.textContent = d.changeNameTitle;
+      const editNameLabel = document.getElementById("editNameLabel");
+      if (editNameLabel) editNameLabel.textContent = d.editNameLabel;
+      const editNameInput = document.getElementById("editNameInput");
+      if (editNameInput) editNameInput.placeholder = d.editNamePlaceholder;
+      const saveNameBtn = document.getElementById("saveNameBtn");
+      if (saveNameBtn && !saveNameBtn.disabled) saveNameBtn.textContent = d.saveNameBtn;
+
+      // Plan
+      const currentPlanLabel = document.getElementById("currentPlanLabel");
+      if (currentPlanLabel) currentPlanLabel.textContent = d.currentPlanLabel;
+      const unlockCodeBtnText = document.getElementById("unlockCodeBtnText");
+      if (unlockCodeBtnText) unlockCodeBtnText.textContent = d.unlockCodeBtn;
+      const quotaCardTitle = document.getElementById("quotaCardTitle");
+      if (quotaCardTitle) quotaCardTitle.textContent = d.quotaCardTitle;
+      const quotaResetLabel = document.getElementById("quotaResetLabel");
+      if (quotaResetLabel) quotaResetLabel.textContent = d.quotaResetLabel;
+
+      // Usage
+      const labelUsageSent = document.getElementById("labelUsageSent");
+      if (labelUsageSent) labelUsageSent.textContent = d.labelUsageSent;
+      const labelUsageRemaining = document.getElementById("labelUsageRemaining");
+      if (labelUsageRemaining) labelUsageRemaining.textContent = d.labelUsageRemaining;
+      const labelUsageReset = document.getElementById("labelUsageReset");
+      if (labelUsageReset) labelUsageReset.textContent = d.labelUsageReset;
+      const labelUsageSessions = document.getElementById("labelUsageSessions");
+      if (labelUsageSessions) labelUsageSessions.textContent = d.labelUsageSessions;
+      const policyTitle = document.getElementById("policyTitle");
+      if (policyTitle) policyTitle.textContent = d.policyTitle;
+      const policyDesc = document.getElementById("policyDesc");
+      if (policyDesc) policyDesc.textContent = d.policyDesc;
+
+      // Security
+      const redeemCardTitle = document.getElementById("redeemCardTitle");
+      if (redeemCardTitle) redeemCardTitle.textContent = d.redeemCardTitle;
+      const redeemCardDesc = document.getElementById("redeemCardDesc");
+      if (redeemCardDesc) redeemCardDesc.textContent = d.redeemCardDesc;
+      const redeemCodeInput = document.getElementById("redeemCodeInput");
+      if (redeemCodeInput) redeemCodeInput.placeholder = d.redeemPlaceholder;
+      const claimRedeemBtn = document.getElementById("claimRedeemBtn");
+      if (claimRedeemBtn && !claimRedeemBtn.disabled) claimRedeemBtn.textContent = d.claimBtn;
+
+      const changePassTitle = document.getElementById("changePassTitle");
+      if (changePassTitle) changePassTitle.textContent = d.changePassTitle;
+      const curPassLabel = document.getElementById("curPassLabel");
+      if (curPassLabel) curPassLabel.textContent = d.curPassLabel;
+      const curPassInput = document.getElementById("curPassInput");
+      if (curPassInput) curPassInput.placeholder = d.curPassPlaceholder;
+      const newPassLabel = document.getElementById("newPassLabel");
+      if (newPassLabel) newPassLabel.textContent = d.newPassLabel;
+      const newPassInput = document.getElementById("newPassInput");
+      if (newPassInput) newPassInput.placeholder = d.newPassPlaceholder;
+      const cnfPassLabel = document.getElementById("cnfPassLabel");
+      if (cnfPassLabel) cnfPassLabel.textContent = d.cnfPassLabel;
+      const cnfPassInput = document.getElementById("cnfPassInput");
+      if (cnfPassInput) cnfPassInput.placeholder = d.cnfPassPlaceholder;
+      const changePassSubmitBtn = document.getElementById("changePassSubmitBtn");
+      if (changePassSubmitBtn && !changePassSubmitBtn.disabled) changePassSubmitBtn.textContent = d.changePassSubmitBtn;
+    }
+
+    const langToggleBtn = document.getElementById("langToggleBtn");
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener("click", () => {
+        currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+        try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+        applyAccountI18n();
+        renderUserData();
+      });
+    }
+
     // Theme sync
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -946,17 +1186,23 @@
     updateThemeMetaColor(savedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
-    themeToggleBtn.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("alokpoth_theme", next);
-      localStorage.setItem("alokpoth-theme", next);
-      updateThemeMetaColor(next);
-      const labels = { dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম" };
-      showToast(`${labels[next] || next} সক্রিয় করা হয়েছে`);
-    });
+    if (themeToggleBtn) {
+      const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
+      themeToggleBtn.addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("alokpoth_theme", next);
+        localStorage.setItem("alokpoth-theme", next);
+        updateThemeMetaColor(next);
+        const labels = currentLanguage === "en" ? {
+          dark: "Dark theme", sapphire: "Sapphire theme", oled: "OLED Black theme", eyecare: "Eye Care theme", light: "Light theme"
+        } : {
+          dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম"
+        };
+        showToast(currentLanguage === "en" ? `${labels[next] || next} activated` : `${labels[next] || next} সক্রিয় করা হয়েছে`);
+      });
+    }
 
     // Smart API Base
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -1070,10 +1316,15 @@
       switchToTab(targetTab);
     }
 
-    // Convert digits to Bengali
-    function toBengaliDigits(num) {
+    // Convert digits based on language
+    function formatDigits(num) {
+      if (currentLanguage === "en") return String(num);
       const bn = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
       return String(num).replace(/\d/g, (d) => bn[parseInt(d, 10)]);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     let dynamicPlanLimits = {
@@ -1100,7 +1351,8 @@
               if (quotaDiv) {
                 const safeLimit = escapeHtml(String(p.message_limit));
                 const safeHours = escapeHtml(String(p.window_hours));
-                quotaDiv.innerHTML = `${toBengaliDigits(safeLimit)} <span>বার্তা / ${toBengaliDigits(safeHours)} ঘণ্টা</span>`;
+                const unit = currentLanguage === "en" ? `msgs / ${safeHours} hrs` : `বার্তা / ${formatDigits(safeHours)} ঘণ্টা`;
+                quotaDiv.innerHTML = `${formatDigits(safeLimit)} <span>${unit}</span>`;
               }
             }
           });
@@ -1158,19 +1410,20 @@
     function renderUserData() {
       const userStr = localStorage.getItem("alokpoth_user");
       if (!userStr) return;
+      const isEn = (currentLanguage === "en");
       try {
         const user = JSON.parse(userStr);
-        document.getElementById("profileNameDisplay").textContent = user.name || "ব্যবহারকারী";
+        document.getElementById("profileNameDisplay").textContent = user.name || (isEn ? "User" : "ব্যবহারকারী");
         document.getElementById("profileEmailDisplay").textContent = user.email || "";
         document.getElementById("editNameInput").value = user.name || "";
-        document.getElementById("avatarLetter").textContent = (user.name || user.email || "অ").charAt(0).toUpperCase();
+        document.getElementById("avatarLetter").textContent = (user.name || user.email || "U").charAt(0).toUpperCase();
 
         const isAdmin = (user.role === "admin" || (user.email && user.email.toLowerCase().trim() === "zihanfakir@gmail.com"));
-        document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : "সদস্য";
+        document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
 
         const currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");
         const badge = document.getElementById("profilePlanBadge");
-        badge.textContent = `${currentPlan} প্ল্যান`;
+        badge.textContent = isEn ? `${currentPlan} Plan` : `${currentPlan} প্ল্যান`;
         badge.className = `badge-pill plan-${currentPlan}`;
 
         document.getElementById("currentPlanTitle").textContent = `${currentPlan} Plan`;
@@ -1178,12 +1431,14 @@
         const expiryStr = localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (user.subscription && user.subscription.expires_at);
         const expiryEl = document.getElementById("currentPlanExpiry");
         if (currentPlan === "Free") {
-          expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+          expiryEl.textContent = isEn ? "Validity: Lifetime / No Expiry" : "মেয়াদ: আজীবন / মেয়াদহীন";
         } else if (expiryStr) {
           const expDate = new Date(expiryStr);
           if (!isNaN(expDate.getTime())) {
             const daysLeft = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-            expiryEl.textContent = `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${toBengaliDigits(daysLeft)} দিন)`;
+            expiryEl.textContent = isEn 
+              ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
+              : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
           }
         }
 
@@ -1197,21 +1452,21 @@
             if (btn) {
               if (isActive) {
                 btn.disabled = true;
-                btn.textContent = "বর্তমান প্ল্যান";
+                btn.textContent = isEn ? "Current Plan" : "বর্তমান প্ল্যান";
                 btn.style.background = "rgba(255,255,255,0.08)";
                 btn.style.boxShadow = "none";
               } else {
                 btn.disabled = false;
                 if (p === "Free") {
-                  btn.textContent = "ফ্রি প্ল্যান";
+                  btn.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
                   btn.style.background = "rgba(255,255,255,0.12)";
                   btn.onclick = () => {};
                 } else if (p === "Pro") {
-                  btn.textContent = "প্রো আনলক করুন";
+                  btn.textContent = isEn ? "Unlock Pro" : "প্রো আনলক করুন";
                   btn.style.background = "var(--accent-gradient)";
                   btn.onclick = () => switchToTab('tabSecurity');
                 } else if (p === "Max") {
-                  btn.textContent = "ম্যাক্স আনলক করুন";
+                  btn.textContent = isEn ? "Unlock Max" : "ম্যাক্স আনলক করুন";
                   btn.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
                   btn.onclick = () => switchToTab('tabSecurity');
                 }
@@ -1233,8 +1488,8 @@
         } catch {}
 
         const remaining = Math.max(0, limit - used);
-        document.getElementById("usageCountVal").textContent = toBengaliDigits(used);
-        document.getElementById("usageRemainingVal").textContent = toBengaliDigits(remaining);
+        document.getElementById("usageCountVal").textContent = formatDigits(used);
+        document.getElementById("usageRemainingVal").textContent = formatDigits(remaining);
 
         // Progress bar & countdown meter in Tab 2
         const fillEl = document.getElementById("accountQuotaFill");
@@ -1271,22 +1526,28 @@
 
         let timeLeftStr = "";
         if (used === 0) {
-          timeLeftStr = "কোটা সম্পূর্ণ পূর্ণ";
+          timeLeftStr = isEn ? "Full quota available" : "কোটা সম্পূর্ণ পূর্ণ";
         } else if (hLeft > 0) {
-          timeLeftStr = `${toBengaliDigits(hLeft)} ঘণ্টা ${toBengaliDigits(mLeft)} মিনিট ${toBengaliDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn 
+            ? `${hLeft}h ${mLeft}m ${sLeft}s`
+            : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
         } else if (mLeft > 0) {
-          timeLeftStr = `${toBengaliDigits(mLeft)} মিনিট ${toBengaliDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn
+            ? `${mLeft}m ${sLeft}s`
+            : `${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
         } else {
-          timeLeftStr = `${toBengaliDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn
+            ? `${sLeft}s`
+            : `${formatDigits(sLeft)} সেকেন্ড`;
         }
 
         if (isAdmin) {
-          if (remDigitsEl) remDigitsEl.textContent = "আনলিমিটেড";
+          if (remDigitsEl) remDigitsEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
           if (totDigitsEl) totDigitsEl.textContent = "∞";
-          if (countWrapEl) countWrapEl.innerHTML = "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
+          if (countWrapEl) countWrapEl.innerHTML = isEn ? "<strong>Unlimited</strong> messages (Admin)" : "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
           if (fillEl) { fillEl.style.width = "100%"; fillEl.style.background = "linear-gradient(90deg, #2563eb, #38bdf8)"; }
-          if (timerEl) timerEl.textContent = "সীমাহীন এক্সেস";
-          if (subtextEl) subtextEl.textContent = "কোনো রেট লিমিট প্রযোজ্য নয়";
+          if (timerEl) timerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
+          if (subtextEl) subtextEl.textContent = isEn ? "No rate limit applied" : "কোনো রেট লিমিট প্রযোজ্য নয়";
         } else {
           const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
           if (fillEl) {
@@ -1302,14 +1563,18 @@
               fillEl.style.boxShadow = "0 0 12px rgba(56, 189, 248, 0.45)";
             }
           }
-          if (remDigitsEl) remDigitsEl.textContent = toBengaliDigits(remaining);
-          if (totDigitsEl) totDigitsEl.textContent = toBengaliDigits(limit);
+          if (remDigitsEl) remDigitsEl.textContent = formatDigits(remaining);
+          if (totDigitsEl) totDigitsEl.textContent = formatDigits(limit);
           if (countWrapEl) {
-            countWrapEl.innerHTML = `<strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">${toBengaliDigits(remaining)}</strong> / <span id="quotaTotalDigits">${toBengaliDigits(limit)}</span> বার্তা বাকি`;
+            countWrapEl.innerHTML = isEn 
+              ? `<strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> msgs left`
+              : `<strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> বার্তা বাকি`;
           }
           if (timerEl) timerEl.textContent = timeLeftStr;
           if (subtextEl) {
-            subtextEl.textContent = `প্রতি ${toBengaliDigits(hours)} ঘণ্টায় ${toBengaliDigits(limit)}টি বার্তা নবায়ন হয়`;
+            subtextEl.textContent = isEn 
+              ? `${formatDigits(limit)} messages refresh every ${formatDigits(hours)} hours`
+              : `প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা নবায়ন হয়`;
           }
         }
 
@@ -1318,12 +1583,13 @@
         if (allSessions) {
           try { sessionCount = JSON.parse(allSessions).length || 1; } catch {}
         }
-        document.getElementById("totalMessagesSent").textContent = toBengaliDigits(sessionCount);
+        document.getElementById("totalMessagesSent").textContent = formatDigits(sessionCount);
       } catch (e) {
         console.error(e);
       }
     }
 
+    applyAccountI18n();
     renderUserData();
     syncDynamicPlans();
     syncUserDataFromServer();
@@ -1335,6 +1601,7 @@
 
     // Logout
     document.getElementById("logoutBtn").addEventListener("click", () => {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
       localStorage.removeItem("alokpoth_token");
       localStorage.removeItem("alokpoth_user");
       localStorage.removeItem("alokpoth_account_name");
@@ -1345,21 +1612,22 @@
       localStorage.removeItem("alokpoth_plan_expires_at");
       localStorage.removeItem("alokpoth_window_usage");
       localStorage.removeItem("alokpoth_usage_window");
-      showToast("লগআউট সফল হয়েছে!", "success");
+      showToast(d.logoutSuccess, "success");
       setTimeout(() => { window.location.href = "login.html"; }, 500);
     });
 
     // Profile Name Save
     document.getElementById("profileUpdateForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
       const newName = document.getElementById("editNameInput").value.trim();
       if (!newName) {
-        showToast("নাম ফাঁকা রাখা যাবে না", "error");
+        showToast(d.nameEmpty, "error");
         return;
       }
       const saveBtn = document.getElementById("saveNameBtn");
       saveBtn.disabled = true;
-      saveBtn.textContent = "সংরক্ষণ হচ্ছে...";
+      saveBtn.textContent = d.savingName;
 
       try {
         const res = await fetch(`${API_BASE}/auth/profile`, {
@@ -1379,31 +1647,32 @@
             localStorage.setItem("alokpoth_user", JSON.stringify(user));
           }
           renderUserData();
-          showToast("আপনার নাম সফলভাবে আপডেট হয়েছে!", "success");
+          showToast(d.nameUpdated, "success");
         } else {
-          showToast(data.error || "নাম পরিবর্তন করতে সমস্যা হয়েছে", "error");
+          showToast(data.error || (currentLanguage === "en" ? "Failed to update name" : "নাম পরিবর্তন করতে সমস্যা হয়েছে"), "error");
         }
       } catch {
-        showToast("সার্ভারে সমস্যা হয়েছে", "error");
+        showToast(d.serverErr, "error");
       } finally {
         saveBtn.disabled = false;
-        saveBtn.textContent = "নাম সংরক্ষণ করুন";
+        saveBtn.textContent = d.saveNameBtn;
       }
     });
 
     // Redeem Code Claim
     document.getElementById("claimRedeemBtn").addEventListener("click", async () => {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
       const codeInput = document.getElementById("redeemCodeInput");
       const rawCode = codeInput.value.trim().toUpperCase();
       if (!rawCode) {
-        showToast("অনুগ্রহ করে রিডিম কোডটি লিখুন", "error");
+        showToast(d.codeEmpty, "error");
         codeInput.focus();
         return;
       }
 
       const claimBtn = document.getElementById("claimRedeemBtn");
       claimBtn.disabled = true;
-      claimBtn.textContent = "যাচাই হচ্ছে...";
+      claimBtn.textContent = d.claimVerifying;
 
       try {
         const res = await fetch(`${API_BASE}/redeem/claim`, {
@@ -1449,43 +1718,47 @@
           renderUserData();
           triggerConfetti();
           soundEngine.playSuccess();
-          showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+          const succMsg = currentLanguage === "en"
+            ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
+            : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
+          showToast(succMsg, "success");
         } else {
           soundEngine.playError();
-          showToast(data.error || "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!", "error");
+          showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
         }
       } catch {
         soundEngine.playError();
-        showToast("সার্ভারের সাথে যোগাযোগ করা যায়নি", "error");
+        showToast(d.serverErr, "error");
       } finally {
         claimBtn.disabled = false;
-        claimBtn.textContent = "ক্লেইম করুন";
+        claimBtn.textContent = d.claimBtn;
       }
     });
 
     // Password Change
     document.getElementById("changePassForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
       const current_password = document.getElementById("curPassInput").value;
       const new_password = document.getElementById("newPassInput").value;
       const confirm_password = document.getElementById("cnfPassInput").value;
 
       if (!current_password || !new_password || !confirm_password) {
-        showToast("সবগুলো ঘর পূরণ করুন", "error");
+        showToast(d.passEmpty, "error");
         return;
       }
       if (new_password !== confirm_password) {
-        showToast("নতুন পাসওয়ার্ড দুটি মিলছে না", "error");
+        showToast(d.passMismatch, "error");
         return;
       }
       if (new_password.length < 6) {
-        showToast("নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে", "error");
+        showToast(d.passShort, "error");
         return;
       }
 
       const submitBtn = document.getElementById("changePassSubmitBtn");
       submitBtn.disabled = true;
-      submitBtn.textContent = "পাসওয়ার্ড আপডেট হচ্ছে...";
+      submitBtn.textContent = d.passUpdating;
 
       try {
         const res = await fetch(`${API_BASE}/auth/change-password`, {
@@ -1502,21 +1775,19 @@
           document.getElementById("newPassInput").value = "";
           document.getElementById("cnfPassInput").value = "";
           soundEngine.playSuccess();
-          showToast(data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+          showToast(data.message || d.passSuccess, "success");
         } else {
           soundEngine.playError();
-          showToast(data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে", "error");
+          showToast(data.error || (currentLanguage === "en" ? "Password update failed" : "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে"), "error");
         }
       } catch {
         soundEngine.playError();
-        showToast("সার্ভারের সাথে যোগাযোগ করা যায়নি", "error");
+        showToast(d.serverErr, "error");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "পাসওয়ার্ড আপডেট করুন";
+        submitBtn.textContent = d.changePassSubmitBtn;
       }
     });
-
-
   </script>
 </body>
 </html>

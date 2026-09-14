@@ -213,6 +213,24 @@
       transition: all 0.2s;
     }
 
+    .lang-toggle-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .lang-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-primary);
+    }
+    
     .theme-toggle-btn:hover {
       background: var(--bg-surface-hover);
     }
@@ -547,12 +565,15 @@
       <span>Alokpoth AI</span>
     </a>
     <div class="top-actions">
+      <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
+        <span id="langBtnText">EN</span>
+      </button>
       <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
       </button>
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span>চ্যাটে ফিরে যান</span>
+        <span id="backToChatText">চ্যাটে ফিরে যান</span>
       </a>
     </div>
   </header>
@@ -573,8 +594,8 @@
         <div class="logged-name" id="loggedName">ব্যবহারকারীর নাম</div>
         <div class="logged-email" id="loggedEmail">user@example.com</div>
         <div class="action-links">
-          <a href="index.html" class="submit-btn" style="text-decoration:none;">চ্যাটে যান</a>
-          <a href="account.html" class="btn-secondary">অ্যাকাউন্ট ও প্ল্যান দেখুন</a>
+          <a href="index.html" class="submit-btn" id="goToChatBtn" style="text-decoration:none;">চ্যাটে যান</a>
+          <a href="account.html" class="btn-secondary" id="viewAccountBtn">অ্যাকাউন্ট ও প্ল্যান দেখুন</a>
           <button type="button" class="btn-danger-outline" id="logoutBtn">লগআউট করুন</button>
         </div>
       </div>
@@ -590,21 +611,21 @@
 
         <form id="authForm">
           <div class="form-group" id="nameGroup" style="display:none;">
-            <label class="form-label" for="userNameInput">আপনার পূর্ণ নাম</label>
+            <label class="form-label" id="nameLabel" for="userNameInput">আপনার পূর্ণ নাম</label>
             <div class="input-wrap">
               <input type="text" class="form-input" id="userNameInput" placeholder="যেমন: রিফাত হোসেন" autocomplete="name">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="userEmailInput">ইমেইল ঠিকানা</label>
+            <label class="form-label" id="emailLabel" for="userEmailInput">ইমেইল ঠিকানা</label>
             <div class="input-wrap">
               <input type="email" class="form-input" id="userEmailInput" placeholder="name@example.com" required autocomplete="email">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="userPassInput">পাসওয়ার্ড</label>
+            <label class="form-label" id="passLabel" for="userPassInput">পাসওয়ার্ড</label>
             <div class="input-wrap">
               <input type="password" class="form-input" id="userPassInput" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড" required autocomplete="current-password">
               <button type="button" class="password-toggle" id="passToggleBtn" aria-label="পাসওয়ার্ড দেখুন">
@@ -619,13 +640,154 @@
         </form>
 
         <div class="auth-footer-note">
-          <span>পাসওয়ার্ড ভুলে গেছেন? এডমিনের সাথে যোগাযোগ করুন।</span>
+          <span id="forgotPassText">পাসওয়ার্ড ভুলে গেছেন? এডমিনের সাথে যোগাযোগ করুন।</span>
         </div>
       </div>
     </div>
   </main>
 
   <script>
+    // Language i18n dictionary
+    const I18N_LOGIN = {
+      bn: {
+        pageTitle: "লগইন ও সাইন-আপ — Alokpoth AI",
+        backToChat: "চ্যাটে ফিরে যান",
+        themeToggle: "থিম পরিবর্তন",
+        welcomeTitle: "স্বাগতম!",
+        welcomeSub: "Alokpoth AI-তে প্রবেশ করতে লগইন করুন",
+        registerTitle: "নতুন অ্যাকাউন্ট তৈরি",
+        registerSub: "Alokpoth AI-এর সাথে শুরু করুন",
+        tabLogin: "লগইন",
+        tabRegister: "নতুন অ্যাকাউন্ট",
+        nameLabel: "আপনার পূর্ণ নাম",
+        namePlaceholder: "যেমন: রিফাত হোসেন",
+        emailLabel: "ইমেইল ঠিকানা",
+        emailPlaceholder: "name@example.com",
+        passLabel: "পাসওয়ার্ড",
+        passPlaceholder: "কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড",
+        submitLogin: "লগইন করুন",
+        submitRegister: "অ্যাকাউন্ট তৈরি করুন",
+        submittingLogin: "যাচাই করা হচ্ছে...",
+        submittingRegister: "অ্যাকাউন্ট তৈরি হচ্ছে...",
+        forgotPass: "পাসওয়ার্ড ভুলে গেছেন? এডমিনের সাথে যোগাযোগ করুন।",
+        loggedInTitle: "আপনি লগইন অবস্থায় আছেন",
+        loggedInSub: "Alokpoth AI প্রফাইল ও চ্যাট অ্যাক্সেস করুন",
+        defaultUser: "ব্যবহারকারী",
+        goToChat: "চ্যাটে যান",
+        viewAccount: "অ্যাকাউন্ট ও প্ল্যান দেখুন",
+        logoutBtn: "লগআউট করুন",
+        logoutSuccess: "লগআউট সফল হয়েছে!",
+        errEmailPass: "অনুগ্রহ করে ইমেইল এবং পাসওয়ার্ড প্রদান করুন।",
+        errName: "অনুগ্রহ করে আপনার নাম প্রদান করুন।",
+        errServer: "সার্ভারের সাথে যোগাযোগ করা যায়নি। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন।",
+        loginSuccess: "লগইন সফল হয়েছে! চ্যাটে নিয়ে যাওয়া হচ্ছে...",
+        registerSuccess: "অ্যাকাউন্ট তৈরি সফল হয়েছে! চ্যাটে নিয়ে যাওয়া হচ্ছে..."
+      },
+      en: {
+        pageTitle: "Log In & Sign Up — Alokpoth AI",
+        backToChat: "Back to Chat",
+        themeToggle: "Change Theme",
+        welcomeTitle: "Welcome Back!",
+        welcomeSub: "Sign in to access Alokpoth AI",
+        registerTitle: "Create an Account",
+        registerSub: "Get started with Alokpoth AI",
+        tabLogin: "Log In",
+        tabRegister: "Create Account",
+        nameLabel: "Your Full Name",
+        namePlaceholder: "e.g. John Doe",
+        emailLabel: "Email Address",
+        emailPlaceholder: "name@example.com",
+        passLabel: "Password",
+        passPlaceholder: "At least 6 characters",
+        submitLogin: "Log In",
+        submitRegister: "Create Account",
+        submittingLogin: "Authenticating...",
+        submittingRegister: "Creating account...",
+        forgotPass: "Forgot password? Contact the administrator.",
+        loggedInTitle: "You are currently logged in",
+        loggedInSub: "Access your Alokpoth AI profile and chats",
+        defaultUser: "User",
+        goToChat: "Go to Chat",
+        viewAccount: "View Account & Plans",
+        logoutBtn: "Log Out",
+        logoutSuccess: "Logged out successfully!",
+        errEmailPass: "Please provide both email and password.",
+        errName: "Please enter your full name.",
+        errServer: "Could not connect to server. Please check your connection.",
+        loginSuccess: "Login successful! Redirecting to chat...",
+        registerSuccess: "Account created successfully! Redirecting to chat..."
+      }
+    };
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    document.documentElement.setAttribute("lang", currentLanguage);
+
+    function applyLoginI18n() {
+      const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
+      const isEn = (currentLanguage === "en");
+
+      document.title = d.pageTitle;
+      document.documentElement.setAttribute("lang", currentLanguage);
+
+      const langBtnText = document.getElementById("langBtnText");
+      if (langBtnText) langBtnText.textContent = isEn ? "বাংলা" : "English";
+
+      const backToChatText = document.getElementById("backToChatText");
+      if (backToChatText) backToChatText.textContent = d.backToChat;
+
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+      if (themeToggleBtn) themeToggleBtn.title = d.themeToggle;
+
+      const tabLoginBtn = document.getElementById("tabLoginBtn");
+      if (tabLoginBtn) tabLoginBtn.textContent = d.tabLogin;
+
+      const tabRegisterBtn = document.getElementById("tabRegisterBtn");
+      if (tabRegisterBtn) tabRegisterBtn.textContent = d.tabRegister;
+
+      const nameLabel = document.getElementById("nameLabel");
+      if (nameLabel) nameLabel.textContent = d.nameLabel;
+
+      const userNameInput = document.getElementById("userNameInput");
+      if (userNameInput) userNameInput.placeholder = d.namePlaceholder;
+
+      const emailLabel = document.getElementById("emailLabel");
+      if (emailLabel) emailLabel.textContent = d.emailLabel;
+
+      const userEmailInput = document.getElementById("userEmailInput");
+      if (userEmailInput) userEmailInput.placeholder = d.emailPlaceholder;
+
+      const passLabel = document.getElementById("passLabel");
+      if (passLabel) passLabel.textContent = d.passLabel;
+
+      const userPassInput = document.getElementById("userPassInput");
+      if (userPassInput) userPassInput.placeholder = d.passPlaceholder;
+
+      const forgotPassText = document.getElementById("forgotPassText");
+      if (forgotPassText) forgotPassText.textContent = d.forgotPass;
+
+      const goToChatBtn = document.getElementById("goToChatBtn");
+      if (goToChatBtn) goToChatBtn.textContent = d.goToChat;
+
+      const viewAccountBtn = document.getElementById("viewAccountBtn");
+      if (viewAccountBtn) viewAccountBtn.textContent = d.viewAccount;
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) logoutBtn.textContent = d.logoutBtn;
+
+      if (typeof setMode === "function") {
+        setMode(currentMode);
+      }
+    }
+
+    const langToggleBtn = document.getElementById("langToggleBtn");
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener("click", () => {
+        currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+        try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+        applyLoginI18n();
+      });
+    }
+
     // Theme sync
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -697,6 +859,7 @@
 
     // Check if user is already logged in
     function checkLoggedInState() {
+      const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
       const token = localStorage.getItem("alokpoth_token");
       const userStr = localStorage.getItem("alokpoth_user");
       if (token && userStr) {
@@ -705,11 +868,11 @@
           if (user && user.email) {
             authFormContainer.style.display = "none";
             loggedInBox.style.display = "block";
-            cardTitle.textContent = "আপনি লগইন অবস্থায় আছেন";
-            cardSubtitle.textContent = "Alokpoth AI প্রফাইল ও চ্যাট অ্যাক্সেস করুন";
-            loggedName.textContent = user.name || "ব্যবহারকারী";
+            cardTitle.textContent = d.loggedInTitle;
+            cardSubtitle.textContent = d.loggedInSub;
+            loggedName.textContent = user.name || d.defaultUser;
             loggedEmail.textContent = user.email;
-            loggedAvatar.textContent = (user.name || user.email || "অ").charAt(0).toUpperCase();
+            loggedAvatar.textContent = (user.name || user.email || "U").charAt(0).toUpperCase();
             return true;
           }
         } catch {}
@@ -719,10 +882,9 @@
       return false;
     }
 
-    checkLoggedInState();
-
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
+        const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
         try {
           localStorage.removeItem("alokpoth_token");
           localStorage.removeItem("alokpoth_user");
@@ -734,7 +896,7 @@
           localStorage.setItem("alokpoth_plan", "Free");
           localStorage.setItem("alokpoth_user_plan", "Free");
         } catch (e) {}
-        showAlert("লগআউট সফল হয়েছে!", "success");
+        showAlert(d.logoutSuccess, "success");
         setTimeout(() => {
           window.location.reload();
         }, 500);
@@ -743,25 +905,24 @@
 
     function setMode(mode) {
       currentMode = mode;
+      const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
       alertBox.style.display = "none";
       if (mode === "login") {
         tabLoginBtn.classList.add("active");
         tabRegisterBtn.classList.remove("active");
         nameGroup.style.display = "none";
-        cardTitle.textContent = "স্বাগতম!";
-        cardSubtitle.textContent = "Alokpoth AI-তে প্রবেশ করতে লগইন করুন";
-        submitBtnText.textContent = "লগইন করুন";
+        cardTitle.textContent = d.welcomeTitle;
+        cardSubtitle.textContent = d.welcomeSub;
+        submitBtnText.textContent = d.submitLogin;
       } else {
         tabRegisterBtn.classList.add("active");
         tabLoginBtn.classList.remove("active");
         nameGroup.style.display = "block";
-        cardTitle.textContent = "নতুন অ্যাকাউন্ট তৈরি";
-        cardSubtitle.textContent = "Alokpoth AI-এর সাথে শুরু করুন";
-        submitBtnText.textContent = "অ্যাকাউন্ট তৈরি করুন";
+        cardTitle.textContent = d.registerTitle;
+        cardSubtitle.textContent = d.registerSub;
+        submitBtnText.textContent = d.submitRegister;
       }
     }
-
-    setMode(currentMode);
 
     tabLoginBtn.addEventListener("click", () => setMode("login"));
     tabRegisterBtn.addEventListener("click", () => setMode("register"));
@@ -784,23 +945,24 @@
     authForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       alertBox.style.display = "none";
+      const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
 
       const email = userEmailInput.value.trim().toLowerCase();
       const password = userPassInput.value;
       const name = userNameInput.value.trim();
 
       if (!email || !password) {
-        showAlert("অনুগ্রহ করে ইমেইল এবং পাসওয়ার্ড প্রদান করুন।", "error");
+        showAlert(d.errEmailPass, "error");
         return;
       }
 
       if (currentMode === "register" && !name) {
-        showAlert("অনুগ্রহ করে আপনার নাম প্রদান করুন।", "error");
+        showAlert(d.errName, "error");
         return;
       }
 
       submitAuthBtn.disabled = true;
-      submitBtnText.textContent = currentMode === "login" ? "যাচাই করা হচ্ছে..." : "অ্যাকাউন্ট তৈরি হচ্ছে...";
+      submitBtnText.textContent = currentMode === "login" ? d.submittingLogin : d.submittingRegister;
 
       try {
         const endpoint = currentMode === "login" ? `${API_BASE}/auth/login` : `${API_BASE}/auth/register`;
@@ -833,25 +995,27 @@
             }
           }
 
-          showAlert(currentMode === "login" ? "লগইন সফল হয়েছে! চ্যাটে নিয়ে যাওয়া হচ্ছে..." : "অ্যাকাউন্ট তৈরি সফল হয়েছে! চ্যাটে নিয়ে যাওয়া হচ্ছে...", "success");
+          showAlert(currentMode === "login" ? d.loginSuccess : d.registerSuccess, "success");
 
           setTimeout(() => {
             const redirect = urlParams.get("redirect") || "index.html";
             window.location.href = redirect;
           }, 800);
         } else {
-          showAlert(data.error || "কার্য সম্পন্ন করা সম্ভব হয়নি। অনুগ্রহ করে তথ্য যাচাই করুন।", "error");
+          showAlert(data.error || (currentLanguage === "en" ? "Request failed. Please verify your details." : "কার্য সম্পন্ন করা সম্ভব হয়নি। অনুগ্রহ করে তথ্য যাচাই করুন।"), "error");
           submitAuthBtn.disabled = false;
-          submitBtnText.textContent = currentMode === "login" ? "লগইন করুন" : "অ্যাকাউন্ট তৈরি করুন";
+          submitBtnText.textContent = currentMode === "login" ? d.submitLogin : d.submitRegister;
         }
       } catch (err) {
-        showAlert("সার্ভারের সাথে যোগাযোগ করা যায়নি। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন।", "error");
+        showAlert(d.errServer, "error");
         submitAuthBtn.disabled = false;
-        submitBtnText.textContent = currentMode === "login" ? "লগইন করুন" : "অ্যাকাউন্ট তৈরি করুন";
+        submitBtnText.textContent = currentMode === "login" ? d.submitLogin : d.submitRegister;
       }
     });
 
-
+    // Run initial state and i18n
+    applyLoginI18n();
+    checkLoggedInState();
   </script>
 </body>
 </html>
