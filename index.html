@@ -5813,19 +5813,10 @@
     }
 
     function openAccountModal(targetTab = "") {
-      const token = localStorage.getItem("alokpoth_token");
-      if (!token) {
-        if (typeof openAuthModal === "function") {
-          openAuthModal();
-        } else {
-          window.location.href = "login.html";
-        }
-        return;
-      }
       if (accountModalOverlay) {
         accountModalOverlay.classList.add("open");
         pushPageState("account");
-        if (targetTab) {
+        if (targetTab && typeof switchAccountTab === "function") {
           switchAccountTab(targetTab);
         }
         syncUserProfileFromServer();
@@ -5839,7 +5830,7 @@
     }
 
     function closeAccountModal() {
-      accountModalOverlay.classList.remove("open");
+      if (accountModalOverlay) accountModalOverlay.classList.remove("open");
       if (history.state && history.state.page === "account") {
         try { history.back(); } catch(e) {}
       }
@@ -5862,11 +5853,13 @@
       if (icnP) icnP.style.transform = "rotate(0deg)";
     }
 
-    accountMenuBtn.addEventListener("click", openAccountModal);
-    accountModalClose.addEventListener("click", closeAccountModal);
-    accountModalOverlay.addEventListener("click", (e) => {
-      if (e.target === accountModalOverlay) closeAccountModal();
-    });
+    if (accountMenuBtn) accountMenuBtn.addEventListener("click", openAccountModal);
+    if (accountModalClose) accountModalClose.addEventListener("click", closeAccountModal);
+    if (accountModalOverlay) {
+      accountModalOverlay.addEventListener("click", (e) => {
+        if (e.target === accountModalOverlay) closeAccountModal();
+      });
+    }
 
     const accountLimitsToggleBtn = document.getElementById("accountLimitsToggleBtn");
     const accountAllPlansGrid = document.getElementById("accountAllPlansGrid");
