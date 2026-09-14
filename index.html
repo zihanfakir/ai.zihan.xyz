@@ -3700,7 +3700,6 @@
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
       </button>
       <button class="model-selector" id="modelTrigger" type="button" style="background: transparent; border: none; font-size: 1.15rem; font-weight: 700; padding: 0; box-shadow: none; color: var(--text-main);">
-        <span id="triggerStatusDot" class="trigger-status-dot status-dot online" style="display:inline-block;"></span>
         <span id="modelTriggerLabel" class="trigger-label">Alo Flash</span>
         <svg class="chevron" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M7 10l5 5 5-5z"/></svg>
       </button>
@@ -4136,11 +4135,13 @@
           <div class="settings-card">
             <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">সরাসরি যোগাযোগ:</div>
             <div style="font-size: 0.88rem; color: var(--text-sub); display: flex; flex-direction: column; gap: 8px;">
-              <div>📧 ইমেইল: <a href="mailto:zihanfakir@gmail.com" style="color: var(--accent-color); text-decoration: none;">zihanfakir@gmail.com</a></div>
+              <div>📧 ইমেইল: <a href="mailto:x@zihan.uk" style="color: var(--accent-color); text-decoration: none;">x@zihan.uk</a></div>
               <div>🌐 ওয়েবসাইট: <a href="https://ai.zihan.xyz" target="_blank" style="color: var(--accent-color); text-decoration: none;">ai.zihan.xyz</a></div>
             </div>
           </div>
         </div>
+      </div>
+
       <!-- SUBPAGE 7: Usage Limits & Quota Sub-view -->
       <div class="settings-subview" id="settingsLimitsView">
         <div class="page-header-bar">
@@ -5725,9 +5726,7 @@
       modelList.innerHTML = "";
       const q = (modelSearchInput?.value || "").toLowerCase().trim();
       const filtered = q ? MODELS.filter(m => 
-        (m.name && m.name.toLowerCase().includes(q)) || 
-        (m.provider && m.provider.toLowerCase().includes(q)) ||
-        (m.id && m.id.toLowerCase().includes(q))
+        (m.name && m.name.toLowerCase().includes(q))
       ) : MODELS;
 
       if (!filtered.length) {
@@ -5750,11 +5749,9 @@
         card.innerHTML = `
           <div class="model-card-left">
             <div class="model-card-name">${escapeHtml(m.name)}${badgeHtml}</div>
-            <div class="model-card-provider">${escapeHtml(m.provider)}</div>
           </div>
           <div class="model-card-right">
             <span class="model-latency">${latencyLabel(m)}</span>
-            <span class="status-dot ${m.status}" title="${statusLabel(m.status)}"></span>
           </div>
         `;
 
