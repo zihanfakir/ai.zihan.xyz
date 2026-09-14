@@ -52,11 +52,14 @@ connectDB().then(async () => {
   if (getIsMongoConnected()) {
     await Plan.seedDefaultPlans();
     await AiModel.seedDefaultModels();
-    const adminUser = await User.findOne({ email: 'zihanfakir@gmail.com' });
-    if (adminUser && adminUser.role !== 'admin') {
-      adminUser.role = 'admin';
-      await adminUser.save();
-      console.log('[Auth] Promoted zihanfakir@gmail.com to Admin.');
+    const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+    for (const email of adminEmails) {
+      const adminUser = await User.findOne({ email });
+      if (adminUser && adminUser.role !== 'admin') {
+        adminUser.role = 'admin';
+        await adminUser.save();
+        console.log(`[Auth] Promoted ${email} to Admin.`);
+      }
     }
   }
 }).catch(err => console.error('[DB Connection Error]:', err.message));

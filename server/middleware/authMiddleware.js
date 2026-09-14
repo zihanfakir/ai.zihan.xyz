@@ -42,8 +42,9 @@ const protect = async (req, res, next) => {
       user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
+    const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
     if (user) {
-      const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+      const isVerifiedAdmin = user.role === 'admin' || (user.email && adminEmails.includes(user.email.toLowerCase().trim()));
       if (!user.subscription || typeof user.subscription !== 'object') {
         user.subscription = {
           plan_name: isVerifiedAdmin ? 'Max' : (['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free'),
@@ -57,7 +58,7 @@ const protect = async (req, res, next) => {
     }
 
     if (!user && decoded && userId) {
-      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase().trim() === 'zihanfakir@gmail.com';
+      const isVerifiedAdminEmail = decoded.email && adminEmails.includes(decoded.email.toLowerCase().trim());
       const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
       user = {
         _id: String(userId),
@@ -122,8 +123,9 @@ const optionalProtect = async (req, res, next) => {
       user = users.find(u => String(u._id || u.id) === String(userId) || (decoded.email && u.email && u.email.toLowerCase().trim() === decoded.email.toLowerCase().trim()));
     }
 
+    const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
     if (user) {
-      const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+      const isVerifiedAdmin = user.role === 'admin' || (user.email && adminEmails.includes(user.email.toLowerCase().trim()));
       if (!user.subscription || typeof user.subscription !== 'object') {
         user.subscription = {
           plan_name: isVerifiedAdmin ? 'Max' : (['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free'),
@@ -137,7 +139,7 @@ const optionalProtect = async (req, res, next) => {
     }
 
     if (!user && decoded && userId) {
-      const isVerifiedAdminEmail = decoded.email && decoded.email.toLowerCase().trim() === 'zihanfakir@gmail.com';
+      const isVerifiedAdminEmail = decoded.email && adminEmails.includes(decoded.email.toLowerCase().trim());
       const validPlan = ['Free', 'Pro', 'Max'].includes(decoded.plan) ? decoded.plan : 'Free';
       user = {
         _id: String(userId),

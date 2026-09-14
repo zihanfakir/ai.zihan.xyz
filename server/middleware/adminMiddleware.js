@@ -1,5 +1,6 @@
 const adminOnly = (req, res, next) => {
-  const isVerifiedAdmin = (req.user && req.user.role === 'admin') || (req.user && req.user.email && req.user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+  const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+  const isVerifiedAdmin = (req.user && req.user.role === 'admin') || (req.user && req.user.email && adminEmails.includes(req.user.email.toLowerCase().trim()));
   if (isVerifiedAdmin) {
     next();
   } else {

@@ -43,7 +43,9 @@ const registerUser = async (req, res) => {
     if (cleanName.length < 2) {
       return res.status(400).json({ success: false, error: 'নাম কমপক্ষে ২ অক্ষরের হতে হবে' });
     }
-    const isAdminEmail = cleanEmail === 'zihanfakir@gmail.com';
+    const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+    const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+    const isAdminEmail = isSuperAdminEmail(cleanEmail);
 
     if (getIsMongoConnected()) {
       const userExists = await User.findOne({ email: cleanEmail });
@@ -153,7 +155,10 @@ const loginUser = async (req, res) => {
       let isMatch = (user.password && typeof user.password === 'string')
         ? await bcrypt.compare(password, user.password).catch(() => false)
         : false;
-      if (!isMatch && cleanEmail === 'zihanfakir@gmail.com' && (!user.password || password === '123456')) {
+      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+
+      if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || password === '123456')) {
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
         isMatch = true;
@@ -164,8 +169,8 @@ const loginUser = async (req, res) => {
       if (user.is_blocked) {
         return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হয়েছে।' });
       }
-      // Ensure zihanfakir@gmail.com is always admin and Max plan
-      if (cleanEmail === 'zihanfakir@gmail.com') {
+      // Ensure super admin is always admin and Max plan
+      if (isSuperAdminEmail(cleanEmail)) {
         user.role = 'admin';
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
         await user.save();
@@ -188,8 +193,11 @@ const loginUser = async (req, res) => {
         ? await bcrypt.compare(password, user.password).catch(() => false)
         : false;
 
+      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+
       // Auto-heal admin password if missing in Supabase or if default 123456 is used
-      if (!isMatch && cleanEmail === 'zihanfakir@gmail.com' && (!user.password || password === '123456')) {
+      if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || password === '123456')) {
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
         isMatch = true;
@@ -201,7 +209,7 @@ const loginUser = async (req, res) => {
       if (user.is_blocked) {
         return res.status(403).json({ success: false, error: 'আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত করা হয়েছে।' });
       }
-      if (cleanEmail === 'zihanfakir@gmail.com') {
+      if (isSuperAdminEmail(cleanEmail)) {
         user.role = 'admin';
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
         await savePersistedUsers(users);
@@ -225,7 +233,9 @@ const getMe = async (req, res) => {
     let rateLimit = null;
     let usage = null;
     
-    const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+    const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+    const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+    const isVerifiedAdmin = user.role === 'admin' || isSuperAdminEmail(user.email);
     if (isVerifiedAdmin) {
       if (!user.subscription || user.subscription.plan_name !== 'Max' || user.subscription.expires_at !== null) {
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };

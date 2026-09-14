@@ -11,14 +11,14 @@ const memoryStore = {
   redeemCodes: [],
   usageLogs: [],
   models: [
-      { id: "gemini-3.6-flash", model_id: "gemini-3.6-flash", name: "Alo Flash", provider: "Google Gemini", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 1, type: "gemini" },
-      { id: "llama-3.3-70b-versatile", model_id: "llama-3.3-70b-versatile", name: "Alo Pro", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 2, type: "groq" },
-      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo OSS 120B", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 3, type: "groq" },
-      { id: "qwen/qwen3.8-27b", model_id: "qwen/qwen3.8-27b", name: "Alo Qwen", provider: "Groq", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 4, type: "groq" },
-      { id: "gemini-3.5-flash-lite", model_id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Google Gemini", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 5, type: "gemini" },
-      { id: "openrouter/free", model_id: "openrouter/free", name: "Alo Go", provider: "OpenRouter", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 6, type: "openrouter" },
-      { id: "hy3", model_id: "hy3", name: "Alo HY3", provider: "B.AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 7, type: "bai" },
-      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Mimo", provider: "B.AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 8, type: "bai" }
+      { id: "gemini-3.6-flash", model_id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 1, type: "gemini" },
+      { id: "llama-3.3-70b-versatile", model_id: "llama-3.3-70b-versatile", name: "Alo Pro", provider: "Alokpoth AI", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 2, type: "groq" },
+      { id: "openai/gpt-oss-120b", model_id: "openai/gpt-oss-120b", name: "Alo Ultra", provider: "Alokpoth AI", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: true, efficient: false, order: 3, type: "groq" },
+      { id: "qwen/qwen3.8-27b", model_id: "qwen/qwen3.8-27b", name: "Alo Plus", provider: "Alokpoth AI", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 4, type: "groq" },
+      { id: "gemini-3.5-flash-lite", model_id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Alokpoth AI", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 5, type: "gemini" },
+      { id: "openrouter/free", model_id: "openrouter/free", name: "Alo Core", provider: "Alokpoth AI", base_url: "https://openrouter.ai/api/v1/chat/completions", api_key: process.env.OPENROUTER_API_KEY, premium: false, efficient: false, order: 6, type: "openrouter" },
+      { id: "hy3", model_id: "hy3", name: "Alo Vision", provider: "Alokpoth AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 7, type: "bai" },
+      { id: "mimo-v2.5", model_id: "mimo-v2.5", name: "Alo Swift", provider: "Alokpoth AI", base_url: "https://api.b.ai/v1/chat/completions", api_key: process.env.BAI_API_KEY, premium: false, efficient: false, order: 8, type: "bai" }
   ],
   settings: {}
 };
@@ -91,23 +91,28 @@ const seedDefaultAdmin = async () => {
     }
   }
 
-  const adminEmail = 'zihanfakir@gmail.com';
-  let admin = memoryStore.users.find(u => u.email === adminEmail);
-  if (!admin) {
-    const hashedPassword = await bcrypt.hash('123456', 10);
-    admin = {
-      _id: 'user_admin_zihan',
-      name: 'Zihan Fakir',
-      email: adminEmail,
-      password: hashedPassword,
-      role: 'admin',
-      is_blocked: false,
-      subscription: { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true },
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    memoryStore.users.push(admin);
-    console.log('[Memory DB] Created default Admin (zihanfakir@gmail.com / Pass: 123456)');
+  const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+  for (const adminEmail of adminEmails) {
+    let admin = memoryStore.users.find(u => u.email && u.email.toLowerCase().trim() === adminEmail);
+    if (!admin) {
+      const hashedPassword = await bcrypt.hash('123456', 10);
+      admin = {
+        _id: 'user_admin_' + adminEmail.split('@')[0],
+        name: adminEmail === 'x@zihan.uk' ? 'Zihan' : 'Zihan Fakir',
+        email: adminEmail,
+        password: hashedPassword,
+        role: 'admin',
+        is_blocked: false,
+        subscription: { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      memoryStore.users.push(admin);
+      console.log(`[Memory DB] Created default Admin (${adminEmail} / Pass: 123456)`);
+    } else {
+      admin.role = 'admin';
+      admin.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
+    }
   }
   saveBackup();
 };

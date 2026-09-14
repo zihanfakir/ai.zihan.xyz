@@ -10,7 +10,8 @@ const checkRateLimit = async (req, res, next) => {
     const user = req.user;
 
     // Admin users are never rate-limited
-    const isVerifiedAdmin = (user && user.role === 'admin') || (user && user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+    const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+    const isVerifiedAdmin = (user && user.role === 'admin') || (user && user.email && adminEmails.includes(user.email.toLowerCase().trim()));
     if (isVerifiedAdmin) {
       req.currentPlan = { name: 'Admin', displayName: 'অ্যাডমিন', message_limit: 999999, window_hours: 1, allowed_models: ['*'] };
       return next();

@@ -1373,7 +1373,8 @@
           if (data.success && data.user) {
             const u = data.user;
             localStorage.setItem("alokpoth_user", JSON.stringify(u));
-            const isAdminUser = u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com");
+            const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+            const isAdminUser = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
             const planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
             localStorage.setItem("alokpoth_current_plan", planName);
             localStorage.setItem("alokpoth_user_plan", planName);
@@ -1418,7 +1419,8 @@
         document.getElementById("editNameInput").value = user.name || "";
         document.getElementById("avatarLetter").textContent = (user.name || user.email || "U").charAt(0).toUpperCase();
 
-        const isAdmin = (user.role === "admin" || (user.email && user.email.toLowerCase().trim() === "zihanfakir@gmail.com"));
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
         document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
 
         const currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");

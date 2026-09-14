@@ -15,31 +15,39 @@ const { getIsMongoConnected } = require('../config/db');
 const { memoryStore } = require('../config/memoryStore');
 router.get('/models', async (req, res) => {
   try {
+    const sanitizeModel = (m) => {
+      let cleanName = m.name || 'Alo AI';
+      cleanName = cleanName
+        .replace(/OSS\s*120B/gi, 'Ultra')
+        .replace(/120B/gi, 'Ultra')
+        .replace(/Qwen/gi, 'Plus')
+        .replace(/Gemini/gi, 'Flash')
+        .replace(/Groq/gi, 'Pro')
+        .replace(/HY3/gi, 'Vision')
+        .replace(/Mimo/gi, 'Swift')
+        .replace(/Llama/gi, 'Pro')
+        .trim();
+
+      return {
+        id: m.id || m.model_id,
+        name: cleanName,
+        provider: "Alokpoth AI",
+        type: m.type,
+        premium: !!m.premium,
+        efficient: !!m.efficient,
+        order: m.order
+      };
+    };
+
     let result = [];
     if (getIsMongoConnected()) {
       const models = await AiModel.find().sort({ order: 1, createdAt: 1 });
-      result = models.map(m => ({
-        id: m.model_id,
-        name: m.name,
-        provider: m.provider,
-        type: m.type,
-        premium: m.premium,
-        efficient: m.efficient,
-        order: m.order
-      }));
+      result = models.map(sanitizeModel);
     } else {
       const { getPersistedModels } = require('../../utils/getModelConfig');
       const models = await getPersistedModels();
       const sorted = [...models].sort((a, b) => (a.order || 0) - (b.order || 0));
-      result = sorted.map(m => ({
-        id: m.id || m.model_id,
-        name: m.name,
-        provider: m.provider,
-        type: m.type,
-        premium: m.premium,
-        efficient: m.efficient,
-        order: m.order
-      }));
+      result = sorted.map(sanitizeModel);
     }
 
     res.json({ success: true, models: result });
