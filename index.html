@@ -937,25 +937,26 @@
       padding: 0 10px;
     }
     .quick-prompt-chip {
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-main);
       padding: 10px 18px;
       border-radius: 999px;
       font-size: 0.88rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .quick-prompt-chip:hover {
-      background-color: rgba(128, 128, 128, 0.15);
+      background-color: rgba(255, 255, 255, 0.08);
       border-color: var(--accent-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
     }
 
     .message-row {
@@ -974,17 +975,18 @@
     }
 
     .user-bubble {
-      background: var(--bubble-user-bg);
-      color: var(--text-main);
+      background: linear-gradient(145deg, #2a2d36 0%, #1c1e24 100%);
+      color: #ffffff;
       padding: 14px 22px;
-      border-radius: 32px 32px 6px 32px;
+      border-radius: 26px 26px 6px 26px;
       max-width: 85%;
       font-size: 0.98rem;
-      line-height: 1.5;
+      line-height: 1.55;
       word-break: break-word;
       white-space: pre-wrap;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
     }
 
     .user-bubble-col {
@@ -1098,19 +1100,32 @@
 
     .code-block-wrapper { 
       position: relative; 
-      margin: 12px 0 16px; 
+      margin: 16px 0; 
       max-width: 100%; 
       min-width: 0; 
       overflow: hidden; 
-      border-radius: 20px; 
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px; 
+      border: 1px solid rgba(255, 255, 255, 0.1);
       background-color: #0f111a;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .code-block-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #ff5f56;
+      box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+      z-index: 2;
     }
 
     .ai-bubble pre {
       background-color: transparent;
-      padding: 18px;
+      padding: 44px 18px 18px 18px; /* Extra top padding for mac dots */
       overflow-x: auto;
       overflow-y: auto;
       max-height: 480px;
@@ -1121,10 +1136,6 @@
       box-sizing: border-box;
       border: none;
       box-shadow: none;
-    }
-
-    .code-block-wrapper pre {
-      padding-top: 52px;
     }
 
     .ai-bubble pre::-webkit-scrollbar {
@@ -1256,25 +1267,28 @@
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
-      background: transparent;
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 999px;
       color: var(--text-sub);
       font-size: 0.85rem;
       font-family: inherit;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .action-icon-btn:hover {
-      background-color: rgba(128, 128, 128, 0.1);
-      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .action-icon-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       fill: currentColor;
     }
 
@@ -1463,6 +1477,11 @@
       border: 1px solid var(--border-color);
       box-shadow: 0 10px 40px rgba(0,0,0,0.2);
       transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .input-card:focus-within {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 10px 40px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
     }
 
     .composer-tools {
