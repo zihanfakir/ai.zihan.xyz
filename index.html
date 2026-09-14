@@ -7488,6 +7488,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
           // }
           if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
+          } else if (!finalContent && finalReasoning) {
+             html += `<div class="content-block" style="opacity: 0.8; font-style: italic;">
+               <strong>মডেলের চিন্তা:</strong><br><br>
+               ${safeMarkdown(finalReasoning)}
+             </div>`;
           }
 
           try {
@@ -8348,9 +8353,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
            if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
            } else if (!apiFinished && finalReasoning) {
-              html += `<div style="font-size: 0.9rem; color: var(--text-sub); font-style: italic; display: flex; align-items: center; gap: 8px;">
+             html += `<div style="font-size: 0.9rem; color: var(--text-sub); font-style: italic; display: flex; align-items: center; gap: 8px;">
                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
                <span>মডেলটি চিন্তা করছে... <span class="streaming-cursor"></span></span>
+             </div>`;
+           } else if (apiFinished && !finalContent && finalReasoning) {
+             // Fallback: If the model ONLY outputted reasoning and no answer, show the reasoning so the message isn't blank
+             html += `<div class="content-block" style="opacity: 0.8; font-style: italic;">
+               <strong>মডেলের চিন্তা:</strong><br><br>
+               ${safeMarkdown(finalReasoning)}
              </div>`;
            }
            try { aiTextElement.innerHTML = html; } 
