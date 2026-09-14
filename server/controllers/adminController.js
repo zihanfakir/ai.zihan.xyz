@@ -81,7 +81,8 @@ const getAdminStats = async (req, res) => {
         used_redeem_codes: usedRedeemCodes,
         availableRedeemCodes: totalRedeemCodes - usedRedeemCodes,
         totalMessages,
-        total_messages: totalMessages
+        total_messages: totalMessages,
+        total_messages_capped: totalMessages >= 5000
       };
       return res.json({ success: true, stats });
     }
@@ -911,7 +912,7 @@ const updateModel = async (req, res) => {
     await savePersistedModels(models);
     invalidateModelsCache();
     invalidateModelKeyCache(modelId);
-    saveBackup();
+    await saveBackup();
 
     return res.json({ success: true, message: 'মডেল ও API Key সফলভাবে আপডেট হয়েছে', model });
   } catch (error) {
@@ -986,7 +987,7 @@ const addModel = async (req, res) => {
     await savePersistedModels(models);
     invalidateModelsCache();
     invalidateModelKeyCache(cleanModelId);
-    saveBackup();
+    await saveBackup();
 
     return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
   } catch (error) {
@@ -1076,7 +1077,7 @@ const deleteModel = async (req, res) => {
     }
     invalidateModelKeyCache(cleanModelId);
     invalidateModelKeyCache(cleanDecoded);
-    saveBackup(); // Immediately sync memory backup to disk (critical for serverless)
+    await saveBackup(); // Immediately sync memory backup to disk (critical for serverless)
     debouncedSave();
 
     // 6. Clean up allowed_models in Plans if this model was explicitly listed
@@ -1172,7 +1173,7 @@ const reorderModels = async (req, res) => {
       await savePersistedModels(reordered);
       invalidateModelsCache();
       invalidateModelKeyCache();
-      saveBackup();
+      await saveBackup();
       return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: reordered });
     }
 
@@ -1199,7 +1200,7 @@ const reorderModels = async (req, res) => {
         await savePersistedModels(models);
         invalidateModelsCache();
         invalidateModelKeyCache();
-        saveBackup();
+        await saveBackup();
         return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models });
       }
       return res.json({ success: true, models });

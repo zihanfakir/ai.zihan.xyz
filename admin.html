@@ -1275,14 +1275,24 @@
       });
     }
 
+    let isMovingModel = false;
     async function moveModel(modelId, direction) {
+      if (isMovingModel) return;
       try {
+        isMovingModel = true;
+        
+        // Disable all reorder buttons visually
+        document.querySelectorAll('.btn-move').forEach(btn => {
+          btn.style.opacity = '0.5';
+          btn.style.pointerEvents = 'none';
+        });
+
         const list = getCurrentTableData();
         const idx = list.findIndex(m => (m.id === modelId || m.model_id === modelId));
-        if (idx === -1) return;
+        if (idx === -1) { isMovingModel = false; return; }
 
         const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (targetIdx < 0 || targetIdx >= list.length) return;
+        if (targetIdx < 0 || targetIdx >= list.length) { isMovingModel = false; return; }
 
         // Instant optimistic swap so UI is responsive
         const [item] = list.splice(idx, 1);
@@ -1308,6 +1318,12 @@
       } catch (err) {
         showToast("সার্ভারে সংযোগ করা যায়নি", "error");
         loadModels();
+      } finally {
+        isMovingModel = false;
+        document.querySelectorAll('.btn-move').forEach(btn => {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+        });
       }
     }
 
@@ -1475,7 +1491,10 @@
         return;
       }
       tbody.innerHTML = "";
-      users.forEach(u => {
+      
+      const displayUsers = users.slice(0, 200);
+      
+      displayUsers.forEach(u => {
         const uId = u._id || u.id;
         const plan = u.subscription?.plan_name || 'Free';
         const planBadge = plan === "Max" ? '<span class="tag tag-max">Max</span>' : (plan === "Pro" ? '<span class="tag tag-pro">Pro</span>' : '<span class="tag tag-free">Free</span>');
@@ -1512,6 +1531,12 @@
           if (this.value) updateUserPlan(this.dataset.userId, this.value);
         });
       });
+
+      if (users.length > 200) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="6" style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">আরো ${users.length - 200} জন ইউজার আছে। দেখতে সার্চ ব্যবহার করুন।</td>`;
+        tbody.appendChild(tr);
+      }
 
       tbody.querySelectorAll(".btn-toggle-block").forEach(btn => {
         btn.addEventListener("click", function() {
@@ -1905,19 +1930,7 @@
       }
     });
 
-    // Block text selection highlight & copy across page
-    document.addEventListener("selectstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("dragstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("copy", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("contextmenu", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
+
   </script>
 </body>
 </html>

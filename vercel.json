@@ -1,8 +1,15 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60
     }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/auth/(.*)", "destination": "/api/index.js" },
+    { "source": "/chat/(.*)", "destination": "/api/index.js" },
+    { "source": "/redeem/(.*)", "destination": "/api/index.js" },
+    { "source": "/admin/(.*)", "destination": "/api/index.js" },
+    { "source": "/search/(.*)", "destination": "/api/index.js" }
   ]
 }

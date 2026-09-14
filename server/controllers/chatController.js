@@ -91,7 +91,7 @@ const streamChatCompletions = async (req, res) => {
 
     // Load model configuration with API key
     let aiModelConfig = null;
-    if (getIsMongoConnected()) {
+    if (getIsMongoConnected() && cleanModel) {
       aiModelConfig = await AiModel.findOne({ $or: [{ model_id: cleanModel }, { id: cleanModel }] });
       if (aiModelConfig && !aiModelConfig.api_key) {
         const supabaseConfig = await getModelConfig(cleanModel);
@@ -130,7 +130,8 @@ const streamChatCompletions = async (req, res) => {
           model: modName,
           messages: safeMessages,
           max_tokens: 4096,
-          stream: true
+          stream: true,
+          include_reasoning: true
         };
 
         const r = await fetch(url, {
@@ -200,7 +201,7 @@ const streamChatCompletions = async (req, res) => {
     const resetStreamIdleWatchdog = () => {
       if (streamIdleTimeout) clearTimeout(streamIdleTimeout);
       streamIdleTimeout = setTimeout(() => {
-        console.warn('[Stream Watchdog]: Inactivity timeout reached (45s), terminating stream.');
+        console.warn('[Stream Watchdog]: Inactivity timeout reached (300s), terminating stream.');
         if (response && response.body && typeof response.body.destroy === 'function') {
           try { response.body.destroy(); } catch {}
         }
@@ -209,7 +210,7 @@ const streamChatCompletions = async (req, res) => {
           res.write('data: [DONE]\n\n');
           res.end();
         }
-      }, 45000);
+      }, 300000);
     };
 
     // Arm watchdog immediately so hanging connections timeout even before first byte

@@ -26,7 +26,9 @@ const memoryStore = {
 const fs = require('fs');
 const path = require('path');
 
-const BACKUP_DIR = path.join(__dirname, '../data');
+const BACKUP_DIR = (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) 
+  ? require('os').tmpdir() 
+  : path.join(__dirname, '../data');
 const BACKUP_FILE = path.join(BACKUP_DIR, 'memory_backup.json');
 
 // Ensure backup directory exists
@@ -34,7 +36,13 @@ if (!fs.existsSync(BACKUP_DIR)) {
   try { fs.mkdirSync(BACKUP_DIR, { recursive: true }); } catch (e) {}
 }
 
-const saveBackup = () => {
+let isSaving = false;
+const saveBackup = async () => {
+  if (isSaving) {
+    debouncedSave();
+    return;
+  }
+  isSaving = true;
   try {
     if (memoryStore.usageLogs && memoryStore.usageLogs.length > 5000) {
       memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
@@ -46,13 +54,17 @@ const saveBackup = () => {
       usageLogs: memoryStore.usageLogs || [],
       models: memoryStore.models || [],
       settings: memoryStore.settings || {}
-      // chatSessions purposefully excluded: chat privacy is client-side only
+      // chatSessions purposefully excluded
     };
     const tmpFile = BACKUP_FILE + '.tmp';
-    fs.writeFileSync(tmpFile, JSON.stringify(backupData, null, 2), 'utf8');
-    fs.renameSync(tmpFile, BACKUP_FILE);
+    await fs.promises.writeFile(tmpFile, JSON.stringify(backupData, null, 2), 'utf8');
+    await fs.promises.rename(tmpFile, BACKUP_FILE);
   } catch (err) {
-    console.error('[MemoryStore Backup Error]:', err.message);
+    if (err.code !== 'EROFS' && err.code !== 'ENOENT') {
+      console.error('[MemoryStore Backup Error]:', err.message);
+    }
+  } finally {
+    isSaving = false;
   }
 };
 

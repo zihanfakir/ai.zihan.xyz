@@ -14,6 +14,7 @@ const authRoutes   = require('../server/routes/authRoutes');
 const chatRoutes   = require('../server/routes/chatRoutes');
 const redeemRoutes = require('../server/routes/redeemRoutes');
 const adminRoutes  = require('../server/routes/adminRoutes');
+const searchRoutes = require('../server/routes/searchRoutes');
 
 const app = express();
 
@@ -98,6 +99,9 @@ app.use('/redeem',     redeemLimiter, redeemRoutes);
 
 app.use('/api/admin',  adminRoutes);
 app.use('/admin',      adminRoutes);
+
+app.use('/api/search', searchRoutes);
+app.use('/search',     searchRoutes);
 
 // 404 handler
 app.use((req, res) => {

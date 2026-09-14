@@ -982,9 +982,11 @@
     };
 
     // Confetti Engine
+    let confettiAnimId = null;
     function triggerConfetti() {
       const canvas = document.getElementById("confettiCanvas");
       if (!canvas) return;
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
       const ctx = canvas.getContext("2d");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -1006,7 +1008,6 @@
         });
       }
 
-      let animId;
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let alive = false;
@@ -1028,7 +1029,7 @@
           }
         });
         if (alive) {
-          animId = requestAnimationFrame(animate);
+          confettiAnimId = requestAnimationFrame(animate);
         } else {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
@@ -1515,19 +1516,7 @@
       }
     });
 
-    // Block text selection highlight & copy across page
-    document.addEventListener("selectstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("dragstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("copy", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("contextmenu", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
+
   </script>
 </body>
 </html>

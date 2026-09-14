@@ -1345,13 +1345,50 @@
     }
 
     .generation-error-note, .generation-stopped-note {
-      margin-top: 12px;
-      padding: 6px 12px;
-      background: rgba(128, 128, 128, 0.08);
-      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #ef4444;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .thought-block {
+      margin-bottom: 12px;
+    }
+    .thought-block summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px 6px 10px;
       font-size: 0.85rem;
+      font-weight: 600;
       color: var(--text-sub);
-      display: inline-block;
+      cursor: pointer;
+      user-select: none;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .thought-block summary:hover {
+      background: rgba(128, 128, 128, 0.1);
+      color: var(--text-main);
+    }
+    .thought-block summary::-webkit-details-marker {
+      display: none;
+    }
+    .thought-content {
+      margin-top: 10px;
+      padding-left: 14px;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      border-left: 2px solid rgba(128, 128, 128, 0.2);
+      opacity: 0.85;
+    }
+    .thought-content p:last-child {
+      margin-bottom: 0;
+    }
+    .thought-block[open] .thought-chevron {
+      transform: rotate(180deg);
     }
 
     .action-icon-btn.regen-btn-highlight {
@@ -4521,29 +4558,60 @@
       return false;
     }
 
+    function decodeJWT(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) { return null; }
+    }
+
+    function getTrustedUser() {
+      try {
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (!userStr) return null;
+        let u = JSON.parse(userStr);
+        if (!u) return null;
+        const token = localStorage.getItem("alokpoth_token");
+        const tokenData = token ? decodeJWT(token) : null;
+        if (tokenData) {
+          u.role = tokenData.role || 'user';
+          if (tokenData.email) u.email = tokenData.email;
+          if (tokenData.plan) {
+            if (!u.subscription) u.subscription = {};
+            u.subscription.plan_name = tokenData.plan;
+          }
+        } else if (token) {
+           // Invalid token but token exists, strip admin privileges
+           u.role = 'user';
+        }
+        return u;
+      } catch (e) {
+        return null;
+      }
+    }
+
     function getResolvedUserPlan() {
       const token = localStorage.getItem("alokpoth_token");
       if (!token) return "Free"; // Guests and non-logged-in visitors are ALWAYS Free!
 
       try {
-        const userStr = localStorage.getItem("alokpoth_user");
-        if (userStr) {
-          const u = JSON.parse(userStr);
-          if (u) {
-            // Master admin always receives Max tier
-            if (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com")) {
-              return "Max";
-            }
-            // Check expiry
-            const expiry = (u.subscription && u.subscription.expires_at) || localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
-            if (expiry && new Date(expiry).getTime() <= Date.now()) {
-              return "Free";
-            }
-            if (u.subscription && u.subscription.plan_name) {
-              return u.subscription.plan_name;
-            }
-            if (u.plan) return u.plan;
+        const u = getTrustedUser();
+        if (u) {
+          // Master admin always receives Max tier
+          if (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com")) {
+            return "Max";
           }
+          // Check expiry
+          const expiry = (u.subscription && u.subscription.expires_at) || localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
+          if (expiry && new Date(expiry).getTime() <= Date.now()) {
+            return "Free";
+          }
+          if (u.subscription && u.subscription.plan_name) {
+            return u.subscription.plan_name;
+          }
+          if (u.plan) return u.plan;
         }
       } catch (e) {}
 
@@ -4584,6 +4652,61 @@
       } catch {}
     }
 
+    function showCustomConfirm(message, title = "নিশ্চিতকরণ") {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0"; overlay.style.left = "0"; overlay.style.right = "0"; overlay.style.bottom = "0";
+        overlay.style.backgroundColor = "rgba(0,0,0,0.5)";
+        overlay.style.zIndex = "99999";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.backdropFilter = "blur(3px)";
+        overlay.style.opacity = "0";
+        overlay.style.transition = "opacity 0.2s ease";
+
+        const box = document.createElement("div");
+        box.style.backgroundColor = "var(--bg-main, #ffffff)";
+        box.style.color = "var(--text-main, #000000)";
+        box.style.padding = "24px";
+        box.style.borderRadius = "12px";
+        box.style.maxWidth = "400px";
+        box.style.width = "90%";
+        box.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
+        box.style.transform = "scale(0.95) translateY(10px)";
+        box.style.transition = "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)";
+
+        box.innerHTML = `
+          <h3 style="margin-top:0; margin-bottom:12px; font-size:1.1rem; color:var(--accent, #10a37f);">${title}</h3>
+          <p style="margin-top:0; margin-bottom:24px; font-size:0.95rem; color:var(--text-sub); line-height:1.5;">${message}</p>
+          <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button id="customConfirmCancelBtn" style="padding:8px 16px; border-radius:999px; border:1px solid var(--border-color, #e5e5e5); background:transparent; color:var(--text-main); cursor:pointer; font-size:0.9rem; font-weight:500;">বাতিল</button>
+            <button id="customConfirmOkBtn" style="padding:8px 16px; border-radius:999px; border:none; background-color:#ef4444; color:#fff; cursor:pointer; font-size:0.9rem; font-weight:500;">হ্যাঁ, মুছুন</button>
+          </div>
+        `;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        overlay.offsetHeight; // trigger reflow
+        overlay.style.opacity = "1";
+        box.style.transform = "scale(1) translateY(0)";
+
+        const okBtn = box.querySelector("#customConfirmOkBtn");
+        const cancelBtn = box.querySelector("#customConfirmCancelBtn");
+
+        function cleanup() {
+          overlay.style.opacity = "0";
+          box.style.transform = "scale(0.95) translateY(10px)";
+          setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200);
+        }
+
+        okBtn.addEventListener("click", () => { cleanup(); resolve(true); });
+        cancelBtn.addEventListener("click", () => { cleanup(); resolve(false); });
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) { cleanup(); resolve(false); } });
+      });
+    }
+
     let currentPlan = loadCurrentPlan();
     const DYNAMIC_PLAN_LIMITS = {};
 
@@ -4621,12 +4744,9 @@
 
     function hasCredit() {
       try {
-        const userStr = localStorage.getItem("alokpoth_user");
-        if (userStr) {
-          const u = JSON.parse(userStr);
-          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
-            return true;
-          }
+        const u = getTrustedUser();
+        if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+          return true;
         }
       } catch {}
       const { limit } = getPlanWindowLimit();
@@ -4721,12 +4841,9 @@
 
       let isAdmin = false;
       try {
-        const userStr = localStorage.getItem("alokpoth_user");
-        if (userStr) {
-          const u = JSON.parse(userStr);
-          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
-            isAdmin = true;
-          }
+        const u = getTrustedUser();
+        if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+          isAdmin = true;
         }
       } catch {}
 
@@ -4822,12 +4939,9 @@
 
       let isAdmin = false;
       try {
-        const userStr = localStorage.getItem("alokpoth_user");
-        if (userStr) {
-          const u = JSON.parse(userStr);
-          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
-            isAdmin = true;
-          }
+        const u = getTrustedUser();
+        if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+          isAdmin = true;
         }
       } catch {}
 
@@ -5397,22 +5511,22 @@
 
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
-        if (countEl) countEl.textContent = "লগইন করুন";
+        const { limit } = getPlanWindowLimit();
+        const usage = getWindowUsage();
+        const used = usage.count || 0;
+        if (countEl) countEl.textContent = `গেস্ট: ${used}/${limit}`;
         if (badgeEl) badgeEl.className = "nav-credit-badge";
         if (drawerPlanEl) drawerPlanEl.textContent = "চ্যাট করতে লগইন করুন";
         return;
       }
 
-      const userStr = localStorage.getItem("alokpoth_user");
       let isAdmin = false;
-      if (userStr) {
-        try {
-          const u = JSON.parse(userStr);
-          if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
-            isAdmin = true;
-          }
-        } catch {}
-      }
+      try {
+        const u = getTrustedUser();
+        if (u && (u.role === "admin" || (u.email && u.email.toLowerCase().trim() === "zihanfakir@gmail.com"))) {
+          isAdmin = true;
+        }
+      } catch {}
 
       if (isAdmin) {
         if (countEl) countEl.textContent = "আনলিমিটেড";
@@ -7299,6 +7413,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       // Remove the targetRow and all subsequent rows from DOM
+      const wasImage = !!targetRow.querySelector(".generated-image-wrap");
       let node = targetRow;
       while (node) {
         const next = node.nextSibling;
@@ -7307,6 +7422,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       isGenerating = true;
+      if (wasImage) {
+        isImageGenEnabled = true;
+      }
       deductCredit(1);
       updateSendAvailability();
       try {
@@ -7340,14 +7458,45 @@ Capabilities & Code Generation Instructions (CRITICAL):
           const { textDiv, copyBtn, regenBtn } = createAIBubble();
           textDiv.classList.remove("streaming", "no-children");
           const rawText = typeof m.content === "string" ? m.content : "";
+          
+          let html = "";
+          let finalReasoning = "";
+          let finalContent = rawText;
+          
+          // Basic extract inline <think> tags if present
+          const regex = /<think>([\s\S]*?)(?:<\/think>|$)/gi;
+          let match;
+          let thoughts = [];
+          while ((match = regex.exec(rawText)) !== null) {
+            thoughts.push(match[1]);
+          }
+          if (thoughts.length > 0) {
+            finalReasoning = thoughts.join("\n\n");
+            finalContent = rawText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
+          }
+
+          if (finalReasoning) {
+             html += `<details class="thought-block">
+               <summary>
+                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+                 <span class="thought-duration" style="opacity:0.9">Thought process</span>
+                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+               </summary>
+               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+             </details>`;
+          }
+          if (finalContent) {
+             html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
+          }
+
           try {
-            textDiv.innerHTML = safeMarkdown(rawText);
+            textDiv.innerHTML = html || safeMarkdown(rawText);
             enhanceCodeBlocks(textDiv);
           } catch {
-            textDiv.textContent = rawText;
+            textDiv.textContent = finalContent || finalReasoning;
           }
           if (copyBtn) {
-            copyBtn.dataset.text = rawText;
+            copyBtn.dataset.text = finalContent || rawText;
             copyBtn.style.display = "inline-flex";
           }
           if (regenBtn) {
@@ -7640,6 +7789,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
         userInput.style.height = "auto";
         userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
         userInput.focus();
+        
+        // Restore attachments
+        if (images && images.length > 0) {
+          pendingImages = [...images];
+          if (typeof renderImagePreviews === "function") renderImagePreviews();
+        }
+        if (files && files.length > 0) {
+          pendingFiles = [...files];
+          if (typeof renderFilePreviews === "function") renderFilePreviews();
+        }
+        
         updateSendAvailability();
         
         const allMessageRows = Array.from(chatStream.querySelectorAll(".message-row"));
@@ -7672,22 +7832,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
     async function searchDuckDuckGo(query) {
       let combined = "";
       try {
-        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-        const res = await fetchWithTimeout(url, { method: "GET" }, 6000);
+        const url = `${API_BASE}/search?q=${encodeURIComponent(query)}`;
+        const res = await fetchWithTimeout(url, { method: "GET" }, 8000);
         if (res.ok) {
           const data = await res.json();
-          if (data.AbstractText) {
-            combined += `Abstract: ${data.AbstractText}\nSource: ${data.AbstractSource}\n`;
-          }
-          if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-            data.RelatedTopics.slice(0, 5).forEach((item) => {
-              if (item.Text) combined += `- ${item.Text}\n`;
-              else if (item.Topics && Array.isArray(item.Topics)) {
-                item.Topics.slice(0, 2).forEach((sub) => {
-                  if (sub.Text) combined += `- ${sub.Text}\n`;
-                });
-              }
-            });
+          if (data.success && data.results) {
+            combined += data.results + "\n";
           }
         }
       } catch (err) {
@@ -7746,7 +7896,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       // Client-side stream watchdog & timeout (prevent infinite loading)
       let streamWatchdog = null;
       let isTimeoutAbort = false;
-      const resetWatchdog = (timeoutMs = 28000) => {
+      const resetWatchdog = (timeoutMs = 300000) => {
         if (streamWatchdog) clearTimeout(streamWatchdog);
         streamWatchdog = setTimeout(() => {
           isTimeoutAbort = true;
@@ -7756,8 +7906,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }, timeoutMs);
       };
 
-      // Set initial 28s timeout to receive HTTP response
-      resetWatchdog(28000);
+      // Set initial 300s timeout to receive HTTP response
+      resetWatchdog(300000);
 
       let response;
       try {
@@ -7780,8 +7930,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         throw fetchErr;
       }
 
-      // Headers received - extend watchdog for initial token (28s)
-      resetWatchdog(28000);
+      // Headers received - extend watchdog for initial token (300s)
+      resetWatchdog(300000);
 
       if (!response.ok) {
         if (streamWatchdog) clearTimeout(streamWatchdog);
@@ -7793,6 +7943,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
           }
         } catch {}
 
+        if (response.status === 401 || response.status === 403) {
+          if (serverError.includes("অকার্যকর") || serverError.includes("লগইন") || serverError.includes("অননুমোদিত") || serverError.includes("ব্লক")) {
+            handleLogout();
+          }
+        }
         if (serverError) {
           throw new Error(serverError);
         }
@@ -7817,15 +7972,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
       let fullText = "";
+      let fullReasoning = "";
 
       try {
         while (true) {
-          // If no chunk arrives for 28s mid-stream, abort
-          resetWatchdog(28000);
+          // If no chunk arrives for 300s mid-stream, abort
+          resetWatchdog(300000);
           const { done, value } = await reader.read();
           if (done) break;
 
-          resetWatchdog(28000);
+          resetWatchdog(300000);
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop();
@@ -7845,17 +8001,20 @@ Capabilities & Code Generation Instructions (CRITICAL):
                   : "মডেল থেকে কোনো উত্তর পাওয়া যায়নি।";
                 throw new Error(safeMsg);
               }
-              const delta = json.choices?.[0]?.delta?.content 
-                ?? json.choices?.[0]?.delta?.reasoning 
-                ?? json.choices?.[0]?.delta?.reasoning_content 
+              let deltaContent = json.choices?.[0]?.delta?.content 
                 ?? json.choices?.[0]?.delta?.text 
                 ?? json.choices?.[0]?.text 
                 ?? json.text 
                 ?? json.choices?.[0]?.message?.content 
                 ?? "";
-              if (delta) {
-                fullText += delta;
-                onToken(delta, fullText);
+              let deltaReasoning = json.choices?.[0]?.delta?.reasoning 
+                ?? json.choices?.[0]?.delta?.reasoning_content 
+                ?? "";
+                
+              if (deltaContent || deltaReasoning) {
+                fullText += (deltaContent || "");
+                fullReasoning += (deltaReasoning || "");
+                onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
               }
             } catch (e) {
               if (e.message && !e.message.includes("JSON")) {
@@ -8055,6 +8214,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
             persistCurrentSession();
             scrollToBottom(); resolve();
           } catch (err) {
+            refundCredit();
+            soundEngine.playError();
+            triggerHaptic("error");
             aiTextElement.classList.remove("streaming", "no-children");
             aiTextElement.innerHTML = `
               <div class="ai-error-box">
@@ -8114,24 +8276,27 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const statusIntervalId = startDynamicStatusSequence(aiTextElement);
 
         let started = false;
-        let streamQueue = "";
-        let renderedStream = "";
+        let streamQueueContent = "";
+        let streamQueueReasoning = "";
+        let renderedContent = "";
+        let renderedReasoning = "";
         let apiFinished = false;
         let errOccurred = false;
         let queueRafId = null;
         let isQueueActive = false;
+        let thinkStartTime = Date.now();
         
         let lastRenderTime = 0;
         const RENDER_THROTTLE = 30;
 
         let overallWatchdog = setTimeout(() => {
           if (!apiFinished) {
-            console.warn("[Client Watchdog]: Hard timeout (35s) reached.");
+            console.warn("[Client Watchdog]: Hard initial timeout (65s) reached.");
             if (currentAbortController) {
               try { currentAbortController.abort("timeout"); } catch {}
             }
           }
-        }, 35000);
+        }, 65000);
 
         const finishUp = () => {
           if (overallWatchdog) {
@@ -8148,6 +8313,44 @@ Capabilities & Code Generation Instructions (CRITICAL):
           resolve();
         };
 
+        const extractThoughts = (text) => {
+          let thoughts = [];
+          let content = text;
+          const regex = /<think>([\s\S]*?)(?:<\/think>|$)/gi;
+          let match;
+          while ((match = regex.exec(content)) !== null) {
+            thoughts.push(match[1]);
+          }
+          content = content.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
+          return { extractedReasoning: thoughts.join("\n\n"), cleanContent: content };
+        };
+
+        const renderCurrentState = () => {
+           let html = "";
+           
+           const extracted = extractThoughts(renderedContent);
+           const finalReasoning = renderedReasoning + (renderedReasoning && extracted.extractedReasoning ? "\n\n" : "") + extracted.extractedReasoning;
+           const finalContent = extracted.cleanContent;
+
+           if (finalReasoning) {
+             const timeSecs = !apiFinished ? Math.floor((Date.now() - thinkStartTime) / 1000) : null;
+             const timeText = timeSecs !== null ? `Thought for ${timeSecs}s` : "Thought process";
+             html += `<details class="thought-block" ${!apiFinished ? 'open' : ''}>
+               <summary>
+                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+                 <span class="thought-duration" style="opacity:0.9">${timeText}</span>
+                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+               </summary>
+               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+             </details>`;
+           }
+           if (finalContent) {
+             html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
+           }
+           try { aiTextElement.innerHTML = html; } 
+           catch { aiTextElement.textContent = finalContent || finalReasoning; }
+        };
+
         const processQueue = () => {
           queueRafId = null;
           if (errOccurred) {
@@ -8155,46 +8358,65 @@ Capabilities & Code Generation Instructions (CRITICAL):
             return;
           }
 
-          if (streamQueue.length > 0) {
-            let take = 3;
-            if (streamQueue.length > 20) take = 8;
-            if (streamQueue.length > 80) take = Math.ceil(streamQueue.length / 4);
-            
-            renderedStream += streamQueue.substring(0, take);
-            streamQueue = streamQueue.substring(take);
+          if (streamQueueContent.length > 0 || streamQueueReasoning.length > 0) {
+            if (streamQueueReasoning.length > 0) {
+              let takeR = 3;
+              if (streamQueueReasoning.length > 20) takeR = 8;
+              if (streamQueueReasoning.length > 80) takeR = Math.ceil(streamQueueReasoning.length / 4);
+              renderedReasoning += streamQueueReasoning.substring(0, takeR);
+              streamQueueReasoning = streamQueueReasoning.substring(takeR);
+            }
+            if (streamQueueContent.length > 0) {
+              let takeC = 3;
+              if (streamQueueContent.length > 20) takeC = 8;
+              if (streamQueueContent.length > 80) takeC = Math.ceil(streamQueueContent.length / 4);
+              renderedContent += streamQueueContent.substring(0, takeC);
+              streamQueueContent = streamQueueContent.substring(takeC);
+            }
 
             const now = performance.now();
             if (now - lastRenderTime > RENDER_THROTTLE) {
-              try { aiTextElement.innerHTML = safeMarkdown(renderedStream); } 
-              catch { aiTextElement.textContent = renderedStream; }
-
+              renderCurrentState();
               if (aiTextElement.children.length === 0) aiTextElement.classList.add("no-children");
               else aiTextElement.classList.remove("no-children");
-
               scrollToBottom();
               lastRenderTime = now;
             }
             queueRafId = requestAnimationFrame(processQueue);
           } else {
             if (!apiFinished) {
+              // Re-render to update the thinking timer!
+              const now = performance.now();
+              if (renderedReasoning && now - lastRenderTime > 1000) {
+                 renderCurrentState();
+                 lastRenderTime = now;
+              }
               isQueueActive = false;
+              queueRafId = null;
             } else {
               isQueueActive = false;
+              queueRafId = null;
               aiTextElement.classList.remove("streaming", "no-children");
-              try {
-                aiTextElement.innerHTML = safeMarkdown(renderedStream);
-                enhanceCodeBlocks(aiTextElement);
-              } catch { aiTextElement.textContent = renderedStream; }
+              renderCurrentState();
+              enhanceCodeBlocks(aiTextElement);
               
-              copyBtn.dataset.text = renderedStream;
+              const extracted = extractThoughts(renderedContent || "");
+              const combinedReasoning = (renderedReasoning || "") + ((renderedReasoning && extracted.extractedReasoning) ? "\n\n" : "") + (extracted.extractedReasoning || "");
+              let finalSavedContent = extracted.cleanContent || "";
+              if (combinedReasoning) {
+                finalSavedContent = `<think>\n${combinedReasoning}\n</think>\n\n` + finalSavedContent;
+              }
+              if (!finalSavedContent && combinedReasoning) finalSavedContent = `<think>\n${combinedReasoning}\n</think>`;
+              
+              copyBtn.dataset.text = extracted.cleanContent || finalSavedContent;
               copyBtn.style.display = "inline-flex";
               regenBtn.classList.remove("regen-btn-highlight");
               regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার লিখুন</span>`;
               regenBtn.style.display = "inline-flex";
               
-              messagesHistory.push({ role: "assistant", content: renderedStream });
-              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
-                isCodeGen: countCodeBlocks(renderedStream) > 0
+              messagesHistory.push({ role: "assistant", content: finalSavedContent });
+              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
+                isCodeGen: countCodeBlocks(finalSavedContent) > 0
               });
               soundEngine.playReceive();
               triggerHaptic("light");
@@ -8205,15 +8427,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
           }
         };
 
-        const handleToken = (delta) => {
+        const handleToken = (deltaContent, deltaReasoning, fullContent, fullReasoning) => {
           if (!started) {
             started = true; 
+            thinkStartTime = Date.now();
             clearInterval(statusIntervalId);
+            if (overallWatchdog) { clearTimeout(overallWatchdog); overallWatchdog = null; }
             aiTextElement.style.whiteSpace = ""; 
             aiTextElement.innerHTML = "";
             aiTextElement.classList.add("streaming");
           }
-          streamQueue += delta;
+          if (deltaContent) streamQueueContent += deltaContent;
+          if (deltaReasoning) streamQueueReasoning += deltaReasoning;
+          
           if (!isQueueActive) {
             isQueueActive = true;
             if (!queueRafId) {
@@ -8226,6 +8452,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           await streamServerCompletions(selectedModelId, activeHistory, handleToken);
           apiFinished = true;
           if (!started) {
+            refundCredit();
             clearInterval(statusIntervalId);
             aiTextElement.classList.remove("streaming", "no-children");
             aiTextElement.innerHTML = `
@@ -8242,7 +8469,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             regenBtn.style.display = "inline-flex";
             copyBtn.style.display = "none";
             finishUp();
-          } else if (!isQueueActive && streamQueue.length === 0) {
+          } else if (!isQueueActive && streamQueueContent.length === 0 && streamQueueReasoning.length === 0) {
             processQueue();
           }
         } catch (err) {
@@ -8259,22 +8486,32 @@ Capabilities & Code Generation Instructions (CRITICAL):
           const isAbort = err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"));
 
           if (isAbort) {
-            if (renderedStream) {
+            const extracted = extractThoughts(renderedContent || "");
+            const combinedReasoning = (renderedReasoning || "") + ((renderedReasoning && extracted.extractedReasoning) ? "\n\n" : "") + (extracted.extractedReasoning || "");
+            let finalSavedContent = extracted.cleanContent || "";
+            if (combinedReasoning) {
+              finalSavedContent = `<think>\n${combinedReasoning}\n</think>\n\n` + finalSavedContent;
+            }
+            if (!finalSavedContent && combinedReasoning) finalSavedContent = `<think>\n${combinedReasoning}\n</think>`;
+
+            if (finalSavedContent) {
               try {
-                aiTextElement.innerHTML = safeMarkdown(renderedStream) + `<div class="generation-stopped-note">⏹ উত্তর তৈরি থামানো হয়েছে</div>`;
+                renderCurrentState();
+                aiTextElement.innerHTML += `<div class="generation-stopped-note">⏹ উত্তর তৈরি থামানো হয়েছে</div>`;
                 enhanceCodeBlocks(aiTextElement);
               } catch {
-                aiTextElement.textContent = renderedStream + "\n\n(উত্তর তৈরি থামানো হয়েছে)";
+                aiTextElement.textContent = finalSavedContent + "\n\n(উত্তর তৈরি থামানো হয়েছে)";
               }
-              messagesHistory.push({ role: "assistant", content: renderedStream });
-              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(renderedStream), {
-                isCodeGen: countCodeBlocks(renderedStream) > 0
+              messagesHistory.push({ role: "assistant", content: finalSavedContent });
+              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
+                isCodeGen: countCodeBlocks(fullResult) > 0
               });
             } else {
               aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
             }
           } else {
-            if (!renderedStream || renderedStream.trim().length === 0) {
+            const fullResult = renderedContent || renderedReasoning;
+            if (!fullResult || fullResult.trim().length === 0) {
               refundCredit();
             }
             soundEngine.playError();
@@ -8305,12 +8542,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
               errorDetail = "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             }
 
-            if (renderedStream && renderedStream.trim().length > 0) {
+            if (fullResult && fullResult.trim().length > 0) {
               try {
-                aiTextElement.innerHTML = safeMarkdown(renderedStream) + `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।</div>`;
+                renderCurrentState();
+                aiTextElement.innerHTML += `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।</div>`;
                 enhanceCodeBlocks(aiTextElement);
               } catch {
-                aiTextElement.textContent = renderedStream;
+                aiTextElement.textContent = fullResult;
               }
             } else {
               aiTextElement.innerHTML = `
@@ -8329,8 +8567,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
           regenBtn.classList.add("regen-btn-highlight");
           regenBtn.style.display = "inline-flex";
 
-          if (renderedStream && renderedStream.trim().length > 0) {
-            copyBtn.dataset.text = renderedStream;
+          if (fullResult && fullResult.trim().length > 0) {
+            copyBtn.dataset.text = fullResult;
             copyBtn.style.display = "inline-flex";
           } else {
             copyBtn.style.display = "none";

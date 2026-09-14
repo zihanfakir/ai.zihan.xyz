@@ -34,17 +34,16 @@ async function getApiKeyFromSupabase(modelId) {
 }
 
 const MODEL_ALIASES = {
-  'llama-3.3-70b-versatile': 'openai/gpt-oss-120b',
   'gemini-1.5-flash': 'gemini-3.5-flash-lite'
 };
 
 function resolveModelAlias(rawId) {
   if (!rawId || typeof rawId !== 'string') return rawId;
   let current = rawId;
-  const visited = new Set();
-  while (MODEL_ALIASES[current] && !visited.has(current)) {
-    visited.add(current);
+  let depth = 0;
+  while (MODEL_ALIASES[current] && depth < 3) {
     current = MODEL_ALIASES[current];
+    depth++;
   }
   return current;
 }
@@ -153,30 +152,43 @@ async function savePersistedModels(models) {
 
 async function getUserUsageDetails(userId, windowHours) {
   const windowMs = (windowHours || 3) * 60 * 60 * 1000;
-  const def = { count: 0, resetInMinutes: Math.round((windowHours || 3) * 60), resetAt: null, start: null };
-  if (!supabase) return def;
-  try {
-    const { data } = await supabase
-      .from('api_keys')
-      .select('api_key')
-      .eq('model_id', '__usage_' + userId + '__')
-      .limit(1);
+  const now = Date.now();
+  const windowStart = now - windowMs;
+  let count = 0;
+  let start = now;
 
-    if (data && data.length > 0 && data[0].api_key) {
-      const usage = JSON.parse(data[0].api_key);
-      const now = Date.now();
-      if (now - usage.start < windowMs) {
-        const remainingMs = Math.max(0, (usage.start + windowMs) - now);
-        return {
-          count: usage.count || 0,
-          resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000)),
-          resetAt: new Date(usage.start + windowMs).toISOString(),
-          start: usage.start
-        };
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__usage_' + userId + '__')
+        .limit(1);
+
+      if (data && data.length > 0 && data[0].api_key) {
+        const usage = JSON.parse(data[0].api_key);
+        if (now - usage.start < windowMs) {
+          count = usage.count || 0;
+          start = usage.start;
+        }
       }
-    }
-  } catch (e) {}
-  return def;
+    } catch (e) {}
+  }
+
+  // Also check memoryStore to get true count
+  const memLogs = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp).getTime() >= windowStart);
+  if (memLogs.length > count) {
+    count = memLogs.length;
+    start = memLogs.length > 0 ? Math.min(...memLogs.map(l => new Date(l.timestamp).getTime())) : now;
+  }
+
+  const remainingMs = Math.max(0, (start + windowMs) - now);
+  return {
+    count,
+    resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000)),
+    resetAt: new Date(start + windowMs).toISOString(),
+    start
+  };
 }
 
 async function getUserUsage(userId, windowHours) {
@@ -306,7 +318,7 @@ async function getPersistedRedeemCodes() {
     const { data, error } = await supabase
       .from('api_keys')
       .select('api_key')
-      .eq('model_id', '__redeem_codes__')
+      .eq('model_id', '__redeem_codes_metadata__')
       .limit(1);
 
     if (!error && data && data.length > 0 && data[0].api_key) {
@@ -345,7 +357,7 @@ async function savePersistedRedeemCodes(codes) {
     const { error } = await supabase
       .from('api_keys')
       .upsert({
-        model_id: '__redeem_codes__',
+        model_id: '__redeem_codes_metadata__',
         api_key: JSON.stringify(cleanCodes),
         updated_at: new Date().toISOString()
       }, { onConflict: 'model_id' });

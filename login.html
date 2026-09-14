@@ -842,19 +842,7 @@
       }
     });
 
-    // Block text selection highlight & copy across page
-    document.addEventListener("selectstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("dragstart", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("copy", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
-    document.addEventListener("contextmenu", (e) => {
-      if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault();
-    });
+
   </script>
 </body>
 </html>
