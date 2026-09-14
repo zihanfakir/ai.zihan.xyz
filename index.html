@@ -873,10 +873,16 @@
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      overscroll-behavior-y: contain;
-      scroll-behavior: smooth;
       display: flex;
       flex-direction: column;
+      position: relative;
+      scroll-behavior: smooth;
+      background: var(--bg-main);
+      contain: layout paint;
+      /* Force GPU Compositing for smooth 60fps on low-end devices */
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: transform;
       min-width: 0;
     }
 
