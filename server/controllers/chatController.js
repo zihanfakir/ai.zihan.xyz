@@ -131,6 +131,15 @@ const streamChatCompletions = async (req, res) => {
           messages: safeMessages,
           stream: true
         };
+        
+        // Pass maximum safe tokens to avoid cutoff. 
+        // GPT limits to 4096, others support 8192+.
+        const lowerMod = modName.toLowerCase();
+        if (lowerMod.includes('gpt')) {
+          p.max_tokens = 4096;
+        } else {
+          p.max_tokens = 8192;
+        }
 
         const r = await fetch(url, {
           method: 'POST',

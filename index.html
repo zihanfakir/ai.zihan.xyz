@@ -7981,6 +7981,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       let fullReasoning = "";
 
       try {
+        let isDone = false;
         while (true) {
           // If no chunk arrives for 300s mid-stream, abort
           resetWatchdog(300000);
@@ -7997,39 +7998,49 @@ Capabilities & Code Generation Instructions (CRITICAL):
             if (!trimmed || trimmed.startsWith(":")) continue;
             if (!trimmed.startsWith("data:")) continue;
             const payload = trimmed.slice(5).trim();
-            if (payload === "[DONE]") continue;
-            try {
-              const json = JSON.parse(payload);
-              if (json.error) {
-                const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
-                const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("/"))
-                  ? rawErrMsg
-                  : "মডেল থেকে কোনো উত্তর পাওয়া যায়নি।";
-                throw new Error(safeMsg);
+              if (payload === "[DONE]") {
+                isDone = true;
+                continue;
               }
-              let deltaContent = json.choices?.[0]?.delta?.content 
-                ?? json.choices?.[0]?.delta?.text 
-                ?? json.choices?.[0]?.text 
-                ?? json.text 
-                ?? json.choices?.[0]?.message?.content 
-                ?? "";
-              let deltaReasoning = json.choices?.[0]?.delta?.reasoning 
-                ?? json.choices?.[0]?.delta?.reasoning_content 
-                ?? "";
-                
-              if (deltaContent || deltaReasoning) {
-                fullText += (deltaContent || "");
-                fullReasoning += (deltaReasoning || "");
-                onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
-              }
-            } catch (e) {
-              if (e.message && !e.message.includes("JSON")) {
-                throw e;
+              try {
+                const json = JSON.parse(payload);
+                if (json.error) {
+                  const rawErrMsg = typeof json.error === "object" ? (json.error.message || JSON.stringify(json.error)) : json.error;
+                  const safeMsg = (typeof rawErrMsg === "string" && !rawErrMsg.includes("API") && !rawErrMsg.includes("http") && !rawErrMsg.includes("{") && !rawErrMsg.includes("/"))
+                    ? rawErrMsg
+                    : "মডেল থেকে কোনো উত্তর পাওয়া যায়নি।";
+                  throw new Error(safeMsg);
+                }
+                let deltaContent = json.choices?.[0]?.delta?.content 
+                  ?? json.choices?.[0]?.delta?.text 
+                  ?? json.choices?.[0]?.text 
+                  ?? json.text 
+                  ?? json.choices?.[0]?.message?.content 
+                  ?? "";
+                let deltaReasoning = json.choices?.[0]?.delta?.reasoning 
+                  ?? json.choices?.[0]?.delta?.reasoning_content 
+                  ?? "";
+                  
+                if (deltaContent || deltaReasoning) {
+                  fullText += (deltaContent || "");
+                  fullReasoning += (deltaReasoning || "");
+                  onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
+                }
+              } catch (e) {
+                if (e.message && !e.message.includes("JSON")) {
+                  throw e;
+                }
               }
             }
           }
-        }
-      } catch (readErr) {
+          if (!isDone && fullText) {
+             console.warn("Stream ended without [DONE]. Likely Vercel 60s timeout.");
+             // We won't throw an error so the user keeps the partial text,
+             // but we could append a warning.
+             fullText += "\n\n*(সার্ভারের সময়সীমা শেষ হওয়ায় উত্তরটি অসম্পূর্ণ রয়ে গেছে)*";
+             onToken("\n\n*(সার্ভারের সময়সীমা শেষ হওয়ায় উত্তরটি অসম্পূর্ণ রয়ে গেছে)*", "", fullText, fullReasoning);
+          }
+        } catch (readErr) {
         if (isTimeoutAbort) {
           if (!fullText) {
             throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।");
