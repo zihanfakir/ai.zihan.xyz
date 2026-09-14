@@ -1757,10 +1757,6 @@
       margin: -10px 16px 16px;
       line-height: 1.4;
     }
-      display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
-    }
-    .account-stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
-    .account-stat-label { font-size: 0.75rem; color: var(--text-sub); }
 
     .account-credit-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -2219,9 +2215,8 @@
       max-height: 150px; 
       min-height: 24px;
       line-height: 1.5; 
-      padding: 10px 8px;
+      padding: 8px 8px;
       margin: 0;
-      margin-bottom: 2px;
       overflow-y: auto;
     }
 
@@ -2825,6 +2820,7 @@
       fill: currentColor;
     }
     .drawer-search-wrap {
+      position: relative;
       padding: 0 16px 10px;
     }
     .drawer-search-input {
@@ -3726,16 +3722,17 @@
         </div>
 
         <div class="settings-group" style="margin-top: 10px;">
-          <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="logout()">
+          <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="if(localStorage.getItem('alokpoth_token')){performAccountLogout();}else{openAuthModal('login');}">
             <div class="settings-row-left" style="color: #ef4444;">
               <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span>লগ আউট / লগইন</span>
             </div>
           </button>
 
-      </div>
-    </div>
-  </div>
+        </div> <!-- closes settings-group -->
+      </div> <!-- closes account-panel -->
+    </div> <!-- closes modal-sheet -->
+  </div> <!-- closes #accountModalOverlay -->
 
   <!-- Chat History Page Screen -->
   <div class="modal-overlay page-modal" id="chatHistoryModalOverlay">
@@ -5682,9 +5679,9 @@
     function applyAccountName(name) {
       const token = localStorage.getItem("alokpoth_token");
       const displayName = (token && name && name.trim()) ? name.trim() : "লগইন করা নেই";
-      accountNameDisplay.textContent = displayName;
       const initial = (token && name && name.trim()) ? displayName.trim().charAt(0).toUpperCase() : "অ";
-      accountAvatar.textContent = initial;
+      if (accountNameDisplay) accountNameDisplay.textContent = displayName;
+      if (accountAvatar) accountAvatar.textContent = initial;
 
       const dName = document.getElementById("drawerUserName");
       const dAv = document.getElementById("drawerAvatar");
@@ -5697,11 +5694,11 @@
       const costText = usageTotals.costUSD < 0.01 && usageTotals.costUSD > 0
         ? `$${usageTotals.costUSD.toFixed(5)}`
         : `$${usageTotals.costUSD.toFixed(4)}`;
-      accountStatTokens.textContent = totalTokens.toLocaleString("bn-BD");
-      accountStatCost.textContent = costText;
-      accountStatMessages.textContent = messageCount.toLocaleString("bn-BD");
-      accountStatImages.textContent = (usageTotals.images || 0).toLocaleString("bn-BD");
-      renderDailyUsage();
+      if (accountStatTokens) accountStatTokens.textContent = totalTokens.toLocaleString("bn-BD");
+      if (accountStatCost) accountStatCost.textContent = costText;
+      if (accountStatMessages) accountStatMessages.textContent = messageCount.toLocaleString("bn-BD");
+      if (accountStatImages) accountStatImages.textContent = (usageTotals.images || 0).toLocaleString("bn-BD");
+      if (typeof renderDailyUsage === "function") renderDailyUsage();
     }
 
     async function syncUserProfileFromServer() {
@@ -5987,13 +5984,42 @@
         }
       });
 
-      accountRedeemInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          if (!accountRedeemBtn.disabled) accountRedeemBtn.click();
+    window.redeemPromoCode = async function(code) {
+      if (!code || !code.trim()) return;
+      const rawCode = code.trim().toUpperCase();
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        showToast("রিডিম কোড ব্যবহারের জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
+        openAuthModal("login");
+        return;
+      }
+      showToast("কোড যাচাই হচ্ছে...", "info");
+      try {
+        const res = await fetch(`${API_BASE}/redeem/claim`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ code: rawCode })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
+          const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
+          if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+          currentPlan = newPlan;
+          saveCurrentPlan(newPlan);
+          if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
+          renderCreditBalance();
+          if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
+          if (typeof updateAuthUIState === "function") updateAuthUIState();
+          showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
+          if (typeof triggerConfetti === "function") triggerConfetti();
+        } else {
+          showToast(data.error || "রিডিম করতে ব্যর্থ হয়েছে! কোডটি পুনরায় পরীক্ষা করুন।", "error");
         }
-      });
-    }
+      } catch (e) {
+        showToast("সার্ভারের সাথে যোগাযোগ করা যায়নি।", "error");
+      }
+    };
 
     const setMenuProfile = document.getElementById("setMenuProfile");
     if (setMenuProfile) {
@@ -6538,26 +6564,28 @@
       });
     }
 
-    accountResetBtn.addEventListener("click", () => {
-      showCustomUI('confirm', "আপনি কি নিশ্চিত? এতে চ্যাট হিস্ট্রি ও ব্যবহারের সব হিসাব মুছে যাবে।", null, (confirmed) => {
-        if (!confirmed) return;
-        
-        usageTotals = { inputTokens: 0, outputTokens: 0, images: 0, costUSD: 0 };
-        messageCount = 0;
-        try {
-          localStorage.setItem("alokpoth_message_count", "0");
-          localStorage.removeItem("alokpoth_chat_sessions");
-          localStorage.removeItem("alokpoth_current_session_id");
-          localStorage.removeItem("alokpoth_daily_usage");
-        } catch {}
-        
-        renderUsage();
-        messagesHistory = [{ role: "system", content: messagesHistory[0]?.content || SYSTEM_PROMPT }];
-        chatStream.innerHTML = "";
-        closeAccountModal();
-        location.reload();
+    if (accountResetBtn) {
+      accountResetBtn.addEventListener("click", () => {
+        showCustomUI('confirm', "আপনি কি নিশ্চিত? এতে চ্যাট হিস্ট্রি ও ব্যবহারের সব হিসাব মুছে যাবে।", null, (confirmed) => {
+          if (!confirmed) return;
+          
+          usageTotals = { inputTokens: 0, outputTokens: 0, images: 0, costUSD: 0 };
+          messageCount = 0;
+          try {
+            localStorage.setItem("alokpoth_message_count", "0");
+            localStorage.removeItem("alokpoth_chat_sessions");
+            localStorage.removeItem("alokpoth_current_session_id");
+            localStorage.removeItem("alokpoth_daily_usage");
+          } catch {}
+          
+          renderUsage();
+          messagesHistory = [{ role: "system", content: messagesHistory[0]?.content || SYSTEM_PROMPT }];
+          chatStream.innerHTML = "";
+          closeAccountModal();
+          location.reload();
+        });
       });
-    });
+    }
 
     const initialToken = localStorage.getItem("alokpoth_token");
     if (initialToken) {
