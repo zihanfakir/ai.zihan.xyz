@@ -29,6 +29,7 @@ import xyz.zihan.aloai.api.UserData
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableHighRefreshRate()
         
         val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
         if (prefs.getString("auth_token", null) != null) {
@@ -63,9 +64,21 @@ class AuthActivity : ComponentActivity() {
                             .putString("user_plan", plan)
                             .apply()
                         
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this@AuthActivity, MainActivity::class.java))
                         finish()
                     })
+                }
+            }
+        }
+    }
+
+    private fun enableHighRefreshRate() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val display = windowManager.defaultDisplay
+            val maxMode = display.supportedModes.maxByOrNull { it.refreshRate }
+            maxMode?.let {
+                window.attributes = window.attributes.apply {
+                    preferredDisplayModeId = it.modeId
                 }
             }
         }

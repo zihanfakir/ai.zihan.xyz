@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableHighRefreshRate()
         setContentView(R.layout.activity_main)
 
         initViews()
@@ -117,6 +118,18 @@ class MainActivity : AppCompatActivity() {
             WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
         webView.loadUrl(APP_URL)
+    }
+
+    private fun enableHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val display = windowManager.defaultDisplay
+            val maxMode = display.supportedModes.maxByOrNull { it.refreshRate }
+            maxMode?.let {
+                window.attributes = window.attributes.apply {
+                    preferredDisplayModeId = it.modeId
+                }
+            }
+        }
     }
 
     private fun initViews() {
