@@ -4320,7 +4320,7 @@
       const isOffline = !navigator.onLine;
       const hasImages = (Array.isArray(pendingImages) && pendingImages.length > 0);
       const hasFiles = (Array.isArray(pendingFiles) && pendingFiles.length > 0);
-      const hasContent = userInput ? (!!userInput.value.trim() || hasImages || hasFiles) : false;
+      const hasContent = userInput ? (!!(userInput.value || "").trim() || hasImages || hasFiles) : false;
       sendBtn.disabled = isOffline || !hasContent;
       if (userInput) {
         userInput.disabled = isOffline;
@@ -4328,6 +4328,20 @@
           ? (isEn ? "No internet connection..." : "ইন্টারনেট সংযোগ নেই...")
           : (isEn ? "Ask Alo AI anything..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
       }
+    }
+
+    function clearComposerState() {
+      pendingImages = [];
+      pendingFiles = [];
+      if (typeof renderImagePreviews === "function") renderImagePreviews();
+      if (typeof renderFilePreviews === "function") renderFilePreviews();
+      const uInput = document.getElementById("userInput") || (typeof userInput !== "undefined" ? userInput : null);
+      if (uInput) {
+        uInput.value = "";
+        uInput.style.height = "auto";
+      }
+      if (typeof updateTokenCounter === "function") updateTokenCounter();
+      if (typeof updateSendAvailability === "function") updateSendAvailability();
     }
 
     let isWebSearchEnabled = false;
@@ -6281,7 +6295,7 @@
       if (brandMenuOverlay) brandMenuOverlay.classList.remove("open");
     }
 
-    brandMenuBtn.addEventListener("click", openBrandMenu);
+    if (brandMenuBtn) brandMenuBtn.addEventListener("click", openBrandMenu);
     if (brandMenuClose) brandMenuClose.addEventListener("click", closeBrandMenu);
     if (brandMenuOverlay) {
       brandMenuOverlay.addEventListener("click", (e) => {
@@ -9324,6 +9338,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let searchContext = "";
         // Web Search Logic based on Toggle
         if (isWebSearchEnabled && lastUserMsg && lastUserMsg.content) {
+          try {
             const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
             setBubbleStatus(aiTextElement, "searching", isEnNow ? "Searching the web..." : "ওয়েব সার্চ করা হচ্ছে...");
             const searchData = await searchDuckDuckGo(lastUserMsg.content);
