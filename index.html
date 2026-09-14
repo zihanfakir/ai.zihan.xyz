@@ -8483,6 +8483,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           aiTextElement.classList.remove("streaming", "no-children");
           aiTextElement.style.whiteSpace = "";
 
+          const fullResult = renderedContent || renderedReasoning;
           const isAbort = err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"));
 
           if (isAbort) {
@@ -8504,13 +8505,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
               }
               messagesHistory.push({ role: "assistant", content: finalSavedContent });
               addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
-                isCodeGen: countCodeBlocks(fullResult) > 0
+                isCodeGen: countCodeBlocks(finalSavedContent) > 0
               });
             } else {
               aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
             }
           } else {
-            const fullResult = renderedContent || renderedReasoning;
             if (!fullResult || fullResult.trim().length === 0) {
               refundCredit();
             }
@@ -8523,13 +8523,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
               userFriendlyMsg = "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে।";
               errorDetail = "আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
             } else if (err.name === "AbortError" || err === "timeout" || (err.message && err.message.toLowerCase().includes("timeout"))) {
-              userFriendlyMsg = `AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
+              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
               errorDetail = "মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য কোনো মডেল নির্বাচন করে চেষ্টা করুন।";
             } else if (err.message && err.message.includes("বার্তা সীমা শেষ")) {
               userFriendlyMsg = err.message;
               errorDetail = "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && (err.message.includes("মডেল প্রোভাইডার") || err.message.includes("429"))) {
-              userFriendlyMsg = `AI মডেল '${curModelName}' এ বর্তমানে অতিরিক্ত ট্রাফিক চাপ রয়েছে।`;
+              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' এ বর্তমানে অতিরিক্ত ট্রাফিক চাপ রয়েছে।`;
               errorDetail = "প্রোভাইডার সার্ভার সাময়িকভাবে ব্যস্ত আছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             } else if (err.message && (err.message.includes("প্ল্যান প্রয়োজন") || err.message.includes("লগইন করুন এবং") || err.message.includes("প্ল্যান সক্রিয় করুন"))) {
               userFriendlyMsg = err.message;
@@ -8538,7 +8538,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               userFriendlyMsg = err.message;
               errorDetail = "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিয়ে পুনরায় চেষ্টা করতে পারেন।";
             } else {
-              userFriendlyMsg = `AI মডেল '${curModelName}' থেকে কোনো উত্তর পাওয়া যায়নি।`;
+              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' থেকে কোনো উত্তর পাওয়া যায়নি।`;
               errorDetail = "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             }
 
