@@ -129,6 +129,7 @@ const streamChatCompletions = async (req, res) => {
         const p = {
           model: modName,
           messages: safeMessages,
+          max_tokens: 1000000,
           stream: true,
           include_reasoning: true
         };
