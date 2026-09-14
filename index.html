@@ -4304,29 +4304,29 @@
 
     function updateSendAvailability() {
       if (!sendBtn) return;
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (typeof isGenerating !== "undefined" && isGenerating) {
         sendBtn.disabled = false;
         sendBtn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #ef4444; width: 18px; height: 18px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`;
-        sendBtn.setAttribute("aria-label", "থামুন");
-        sendBtn.setAttribute("title", "উত্তর তৈরি থামান");
+        sendBtn.setAttribute("aria-label", isEn ? "Stop" : "থামুন");
+        sendBtn.setAttribute("title", isEn ? "Stop generating" : "উত্তর তৈরি থামান");
         return;
       } else {
         sendBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>`;
-        sendBtn.setAttribute("aria-label", "পাঠান");
-        sendBtn.setAttribute("title", "পাঠান");
+        sendBtn.setAttribute("aria-label", isEn ? "Send" : "পাঠান");
+        sendBtn.setAttribute("title", isEn ? "Send" : "পাঠান");
       }
 
       const isOffline = !navigator.onLine;
-      const outOfCredit = (typeof hasCredit === "function") ? !hasCredit() : false;
       const hasImages = (Array.isArray(pendingImages) && pendingImages.length > 0);
       const hasFiles = (Array.isArray(pendingFiles) && pendingFiles.length > 0);
       const hasContent = userInput ? (!!userInput.value.trim() || hasImages || hasFiles) : false;
-      sendBtn.disabled = isOffline || outOfCredit || !hasContent;
+      sendBtn.disabled = isOffline || !hasContent;
       if (userInput) {
-        userInput.disabled = outOfCredit;
+        userInput.disabled = isOffline;
         userInput.placeholder = isOffline
-          ? "ইন্টারনেট সংযোগ নেই..."
-          : (outOfCredit ? "প্ল্যান সীমা শেষ..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
+          ? (isEn ? "No internet connection..." : "ইন্টারনেট সংযোগ নেই...")
+          : (isEn ? "Ask Alo AI anything..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
       }
     }
 
@@ -9276,9 +9276,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
           setBubbleGeneratingImage(aiTextElement);
           
           // Auto turn off toggle
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           isImageGenEnabled = false; 
           updateAttachBtnActiveState();
-          imageGenText.textContent = "ছবি তৈরি: বন্ধ"; 
+          imageGenText.textContent = isEnNow ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
           attachImageGenOption.style.color = "var(--text-main)"; 
           attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
           attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
@@ -9323,22 +9324,27 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let searchContext = "";
         // Web Search Logic based on Toggle
         if (isWebSearchEnabled && lastUserMsg && lastUserMsg.content) {
-          try {
-            setBubbleStatus(aiTextElement, "searching", "ওয়েব সার্চ করা হচ্ছে...");
+            const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            setBubbleStatus(aiTextElement, "searching", isEnNow ? "Searching the web..." : "ওয়েব সার্চ করা হচ্ছে...");
             const searchData = await searchDuckDuckGo(lastUserMsg.content);
             if (searchData) {
-              searchContext = `\n\n[Web Search Results Live Data]:\n${searchData}\n(এই তথ্যের উপর ভিত্তি করে উত্তর দাও)`;
+              searchContext = isEnNow 
+                ? `\n\n[Web Search Results Live Data]:\n${searchData}\n(Answer based on these verified facts)`
+                : `\n\n[Web Search Results Live Data]:\n${searchData}\n(এই তথ্যের উপর ভিত্তি করে উত্তর দাও)`;
             } else {
-              searchContext = `\n\n[Web Search]: সরাসরি কোনো তথ্য পাওয়া যায়নি, আপনার সাধারণ জ্ঞান ব্যবহার করুন।`;
-              showToast("সার্চে কোনো ফলাফল পাওয়া যায়নি", "error");
+              searchContext = isEnNow
+                ? `\n\n[Web Search]: No live web results found, rely on your existing knowledge.`
+                : `\n\n[Web Search]: সরাসরি কোনো তথ্য পাওয়া যায়নি, আপনার সাধারণ জ্ঞান ব্যবহার করুন।`;
+              showToast(isEnNow ? "No search results found" : "সার্চে কোনো ফলাফল পাওয়া যায়নি", "error");
             }
           } catch (searchErr) {
             console.warn("[Web Search Error]:", searchErr);
           } finally {
             // Auto turn off toggle reliably
+            const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
             isWebSearchEnabled = false; 
             updateAttachBtnActiveState();
-            if (webSearchText) webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
+            if (webSearchText) webSearchText.textContent = isEnNow ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ"; 
             if (attachWebSearchOption) {
               attachWebSearchOption.style.color = "var(--text-main)"; 
               const span = attachWebSearchOption.querySelector("span");
@@ -9551,6 +9557,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         try {
           await streamServerCompletions(selectedModelId, activeHistory, handleToken);
           apiFinished = true;
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           if (!started) {
             refundCredit();
             clearInterval(statusIntervalId);
@@ -9559,12 +9566,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
               <div class="ai-error-box" style="display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি</span>
-                  <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য মডেল নির্বাচন করে চেষ্টা করুন।</span>
+                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${isEnNow ? `AI model '${curModelName}' did not respond in time` : `AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি`}</span>
+                  <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${isEnNow ? 'The model server may be slow or busy. Please try another model.' : 'মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য মডেল নির্বাচন করে চেষ্টা করুন।'}</span>
                 </div>
               </div>
             `;
-            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
             regenBtn.classList.add("regen-btn-highlight");
             regenBtn.style.display = "inline-flex";
             copyBtn.style.display = "none";
@@ -9585,6 +9592,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
           const fullResult = renderedContent || renderedReasoning;
           const isAbort = err.name === "AbortError" || (err.message && err.message.toLowerCase().includes("abort"));
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
 
           if (isAbort) {
             const extracted = extractThoughts(renderedContent || "");
@@ -9598,17 +9606,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
             if (finalSavedContent) {
               try {
                 renderCurrentState();
-                aiTextElement.innerHTML += `<div class="generation-stopped-note">⏹ উত্তর তৈরি থামানো হয়েছে</div>`;
+                aiTextElement.innerHTML += `<div class="generation-stopped-note">${isEnNow ? "⏹ Generation stopped" : "⏹ উত্তর তৈরি থামানো হয়েছে"}</div>`;
                 enhanceCodeBlocks(aiTextElement);
               } catch {
-                aiTextElement.textContent = finalSavedContent + "\n\n(উত্তর তৈরি থামানো হয়েছে)";
+                aiTextElement.textContent = finalSavedContent + (isEnNow ? "\n\n(Generation stopped)" : "\n\n(উত্তর তৈরি থামানো হয়েছে)");
               }
               messagesHistory.push({ role: "assistant", content: finalSavedContent });
               addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
                 isCodeGen: countCodeBlocks(finalSavedContent) > 0
               });
             } else {
-              aiTextElement.innerHTML = `<span class="status-indicator status-error">উত্তর তৈরি থামানো হয়েছে।</span>`;
+              aiTextElement.innerHTML = `<span class="status-indicator status-error">${isEnNow ? "Generation stopped." : "উত্তর তৈরি থামানো হয়েছে।"}</span>`;
             }
           } else {
             if (!fullResult || fullResult.trim().length === 0) {
@@ -9620,32 +9628,32 @@ Capabilities & Code Generation Instructions (CRITICAL):
             let userFriendlyMsg = "";
             let errorDetail = "";
             if (!navigator.onLine) {
-              userFriendlyMsg = "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে।";
-              errorDetail = "আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
+              userFriendlyMsg = isEnNow ? "Internet connection disconnected." : "ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে।";
+              errorDetail = isEnNow ? "Please check your network and try again." : "আপনার নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।";
             } else if (err.name === "AbortError" || err === "timeout" || (err.message && err.message.toLowerCase().includes("timeout"))) {
-              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
-              errorDetail = "মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য কোনো মডেল নির্বাচন করে চেষ্টা করুন।";
-            } else if (err.message && err.message.includes("বার্তা সীমা শেষ")) {
+              userFriendlyMsg = isEnNow ? `AI model '${currentModel?.name || "Model"}' did not respond in time.` : `AI মডেল '${currentModel?.name || "মডেল"}' নির্দিষ্ট সময়ে সাড়া দেয়নি।`;
+              errorDetail = isEnNow ? "The model server may be slow or busy. Please try another model." : "মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য কোনো মডেল নির্বাচন করে চেষ্টা করুন।";
+            } else if (err.message && (err.message.includes("বার্তা সীমা শেষ") || err.message.includes("limit"))) {
               userFriendlyMsg = err.message;
-              errorDetail = "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
+              errorDetail = isEnNow ? "Please wait a moment or upgrade your plan." : "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && (err.message.includes("মডেল প্রোভাইডার") || err.message.includes("429"))) {
-              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' এ বর্তমানে অতিরিক্ত ট্রাফিক চাপ রয়েছে।`;
-              errorDetail = "প্রোভাইডার সার্ভার সাময়িকভাবে ব্যস্ত আছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
+              userFriendlyMsg = isEnNow ? `AI model '${currentModel?.name || "Model"}' is experiencing high traffic.` : `AI মডেল '${currentModel?.name || "মডেল"}' এ বর্তমানে অতিরিক্ত ট্রাফিক চাপ রয়েছে।`;
+              errorDetail = isEnNow ? "Provider servers are temporarily busy. Please wait a moment or switch models." : "প্রোভাইডার সার্ভার সাময়িকভাবে ব্যস্ত আছে। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             } else if (err.message && (err.message.includes("প্ল্যান প্রয়োজন") || err.message.includes("লগইন করুন এবং") || err.message.includes("প্ল্যান সক্রিয় করুন"))) {
               userFriendlyMsg = err.message;
-              errorDetail = "অনুমোদিত মডেল নির্বাচন করুন অথবা প্ল্যান আপগ্রেড করুন।";
+              errorDetail = isEnNow ? "Please select an available model or upgrade your plan." : "অনুমোদিত মডেল নির্বাচন করুন অথবা প্ল্যান আপগ্রেড করুন।";
             } else if (err.message && err.message.length > 5 && !err.message.includes("fetch") && !err.message.includes("Object") && !err.message.includes("JSON")) {
               userFriendlyMsg = err.message;
-              errorDetail = "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিয়ে পুনরায় চেষ্টা করতে পারেন।";
+              errorDetail = isEnNow ? "You can select another model from options and try again." : "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিয়ে পুনরায় চেষ্টা করতে পারেন।";
             } else {
-              userFriendlyMsg = `AI মডেল '${currentModel?.name || "মডেল"}' থেকে কোনো উত্তর পাওয়া যায়নি।`;
-              errorDetail = "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
+              userFriendlyMsg = isEnNow ? `No response received from AI model '${currentModel?.name || "Model"}'.` : `AI মডেল '${currentModel?.name || "মডেল"}' থেকে কোনো উত্তর পাওয়া যায়নি।`;
+              errorDetail = isEnNow ? "Connection to the server failed. Please try again or choose another model." : "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             }
 
             if (fullResult && fullResult.trim().length > 0) {
               try {
                 renderCurrentState();
-                aiTextElement.innerHTML += `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।</div>`;
+                aiTextElement.innerHTML += `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${isEnNow ? "Temporary connection issue. Click button below to retry." : "সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।"}</div>`;
                 enhanceCodeBlocks(aiTextElement);
               } catch {
                 aiTextElement.textContent = fullResult;
@@ -9663,7 +9671,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             }
           }
 
-          regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
+          regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
           regenBtn.classList.add("regen-btn-highlight");
           regenBtn.style.display = "inline-flex";
 
@@ -9711,15 +9719,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
       setTimeout(() => { chatForm._isSubmitting = false; }, 800);
       
       const token = localStorage.getItem("alokpoth_token");
-      if (!token) {
-        showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
-        openAuthModal("login");
-        return;
-      }
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       
       if (!navigator.onLine) { updateOnlineStatus(); return; }
       if (!hasCredit()) {
-        openAccountModal();
+        if (!token) {
+          showToast(isEn ? "Free message limit reached! Please log in or register to continue." : "ফ্রি মেসেজ সীমা শেষ! চ্যাট চালিয়ে যেতে লগইন অথবা সাইন-আপ করুন।", "warning");
+          openAuthModal("login");
+        } else {
+          showToast(isEn ? "Message limit reached! Please upgrade your plan or wait for reset." : "আপনার প্ল্যানের বার্তা সীমা শেষ হয়েছে! দয়া করে আপগ্রেড করুন।", "warning");
+          openAccountModal();
+        }
         return;
       }
       const text = userInput.value.trim();

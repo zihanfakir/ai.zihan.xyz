@@ -106,12 +106,12 @@ router.get('/ping', async (req, res) => {
       }
     }
     if (!targetKey) {
-      if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
-      else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
-      else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
-      else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
+      if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY || (await getApiKeyFromSupabase('__openrouter_key__'));
+      else if (targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY || (await getApiKeyFromSupabase('__groq_key__'));
+      else if (targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY || (await getApiKeyFromSupabase('__bai_key__'));
+      else if (targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY || (await getApiKeyFromSupabase('__vyce_key__'));
       else if (targetUrl.includes('googleapis.com')) {
-        targetKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
+        targetKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || (await getApiKeyFromSupabase('__gemini_key__'));
       }
     }
 

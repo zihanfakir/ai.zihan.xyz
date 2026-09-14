@@ -92,11 +92,17 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
 
   // 3. Provider Default Key Fallback & Key Format Validation
   if (!targetKey || (providerType === 'gemini' && !targetKey.startsWith('AIza')) || (providerType === 'groq' && !targetKey.startsWith('gsk_'))) {
-    if (providerType === 'gemini' || targetUrl.includes('googleapis.com')) targetKey = geminiKey;
-    else if (providerType === 'groq' || targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-    else if (providerType === 'bai' || targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY;
-    else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
-    else if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
+    if (providerType === 'gemini' || targetUrl.includes('googleapis.com')) {
+      targetKey = geminiKey || (await getApiKeyFromSupabase('__gemini_key__')) || (await getApiKeyFromSupabase('gemini-3.6-flash'));
+    } else if (providerType === 'groq' || targetUrl.includes('groq.com')) {
+      targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));
+    } else if (providerType === 'bai' || targetUrl.includes('b.ai')) {
+      targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY || (await getApiKeyFromSupabase('__bai_key__')) || (await getApiKeyFromSupabase('mimo-v2.5'));
+    } else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) {
+      targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY || (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6'));
+    } else if (targetUrl.includes('openrouter.ai')) {
+      targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
+    }
   }
 
   // Final sanity check for Gemini URL query param
@@ -259,9 +265,9 @@ const streamChatCompletions = async (req, res) => {
     if (!response || !response.ok) {
       console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying multi-provider fallback chain...`);
 
-      const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY;
-      const groqKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-      const openRouterKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
+      const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY || (await getApiKeyFromSupabase('__gemini_key__')) || (await getApiKeyFromSupabase('gemini-3.6-flash'));
+      const groqKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));
+      const openRouterKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
       const fallbacks = [
         {
           id: 'gemini-3.6-flash',
@@ -526,7 +532,10 @@ const generateImage = async (req, res) => {
     }
 
     const cleanPrompt = prompt.trim().slice(0, 1000);
-    const targetKey = process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY;
+    let targetKey = process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY;
+    if (!targetKey) {
+      targetKey = (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6')) || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
+    }
     if (!targetKey) {
       return res.status(503).json({ success: false, error: 'ছবি তৈরির সার্ভিস এই মুহূর্তে কনফিগার করা হয়নি।' });
     }
