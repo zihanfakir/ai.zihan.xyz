@@ -3678,9 +3678,15 @@
     </div>
 
     <div class="drawer-footer" style="padding: 12px 16px; border-top: none; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="drawerUserCardWrap">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div class="drawer-avatar" id="drawerAvatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; background: rgba(128,128,128,0.2);">অ</div>
-        <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600;">লগইন করা নেই</div>
+      <div style="display: flex; align-items: center; gap: 12px; width: calc(100% - 36px);">
+        <div class="drawer-avatar" id="drawerAvatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; background: rgba(128,128,128,0.2); flex-shrink: 0;">অ</div>
+        <div style="display: flex; flex-direction: column; width: 100%; overflow: hidden;">
+          <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">লগইন করা নেই</div>
+          <div id="drawerUserPlan" style="font-size: 0.72rem; color: var(--text-sub); white-space: nowrap;">চ্যাট করতে লগইন করুন</div>
+          <div class="drawer-quota-track">
+            <div class="drawer-quota-fill" id="drawerQuotaFill" style="width: 0%;"></div>
+          </div>
+        </div>
       </div>
       <button type="button" style="background: transparent; border: none; color: var(--text-sub); padding: 8px;">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
@@ -3855,6 +3861,16 @@
               </div>
               <div class="settings-row-right">
                 <span id="setMenuPlanName">Free</span>
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+            </button>
+            <button class="settings-row" type="button" id="setMenuLimits" onclick="showSettingsView('settingsLimitsView')">
+              <div class="settings-row-left">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <span data-i18n="usageLimits">ব্যবহারের সীমা</span>
+              </div>
+              <div class="settings-row-right">
+                <span id="setMenuLimitBadge" style="font-size: 0.75rem; color: var(--accent-color); font-weight: 600;"></span>
                 <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
               </div>
             </button>
@@ -4124,6 +4140,125 @@
               <div>🌐 ওয়েবসাইট: <a href="https://ai.zihan.xyz" target="_blank" style="color: var(--accent-color); text-decoration: none;">ai.zihan.xyz</a></div>
             </div>
           </div>
+        </div>
+      <!-- SUBPAGE 7: Usage Limits & Quota Sub-view -->
+      <div class="settings-subview" id="settingsLimitsView">
+        <div class="page-header-bar">
+          <button class="page-back-btn" type="button" onclick="showSettingsView('settingsMainView')">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span data-i18n="backToSettings">সেটিংস</span>
+          </button>
+          <span class="page-nav-title" data-i18n="usageLimitsTitle">ব্যবহারের সীমা ও কোটা</span>
+          <div class="page-header-spacer"></div>
+        </div>
+        <div class="settings-subview-content">
+          
+          <div class="account-plan-info" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; padding: 0 4px;">
+             <div>
+                <span id="accountPlanDisplay" class="account-plan-badge plan-Free">Free (ফ্রি)</span>
+                <span id="accountPlanLimitText" class="account-plan-limit-badge" style="margin-left: 8px;"></span>
+             </div>
+             <div id="accountPlanExpiryDisplay" class="account-plan-expiry-text" style="font-size: 0.75rem; color: var(--text-sub);"></div>
+          </div>
+          
+          <div id="accountPlanWarning" class="account-credit-warning"></div>
+
+          <div class="account-quota-card">
+            <div class="account-quota-header">
+              <div class="account-quota-title-wrap">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span data-i18n="quotaTitle">মেসেজ কোটা</span>
+              </div>
+              <div class="account-quota-count" id="quotaCountDisplay">
+                <strong id="quotaRemainingDigits">10</strong> / <span id="quotaTotalDigits">10</span>
+              </div>
+            </div>
+            <div class="account-quota-track">
+              <div class="account-quota-fill" id="accountQuotaFill" style="width: 100%;"></div>
+            </div>
+            <div class="account-quota-footer">
+              <div class="quota-timer-wrap">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span data-i18n="quotaReset">রিসেট:</span> <span class="quota-timer-value" id="quotaLiveCountdown">--:--:--</span>
+              </div>
+              <div class="quota-window-subtext" id="quotaWindowSubtext"></div>
+            </div>
+          </div>
+
+          <div class="account-limits-card" style="margin-top: 12px;">
+            <div class="account-limits-top">
+              <div class="account-limits-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <span data-i18n="allPlansTitle">সব প্ল্যানের তুলনা</span>
+              </div>
+              <button class="account-limits-toggle-btn" id="accountLimitsToggleBtn" type="button" onclick="document.getElementById('accountAllPlansGrid').style.display = document.getElementById('accountAllPlansGrid').style.display === 'none' ? 'grid' : 'none'; this.classList.toggle('open');">
+                <span id="accountLimitsToggleText" data-i18n="showAllPlans">সব প্ল্যান দেখুন</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+            </div>
+            
+            <div class="account-limits-summary">
+              <div class="account-limit-item">
+                <div class="account-limit-icon">💬</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label" data-i18n="quotaMessages">বার্তা</span>
+                  <span class="account-limit-val" id="limitValMessages">১০ বার্তা</span>
+                </div>
+              </div>
+              <div class="account-limit-item">
+                <div class="account-limit-icon">🧠</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label" data-i18n="quotaModels">মডেল</span>
+                  <span class="account-limit-val" id="limitValModels">ফ্রি মডেলসমূহ</span>
+                </div>
+              </div>
+              <div class="account-limit-item">
+                <div class="account-limit-icon">⚡</div>
+                <div class="account-limit-detail">
+                  <span class="account-limit-label" data-i18n="quotaSpeed">স্পিড</span>
+                  <span class="account-limit-val" id="limitValSpeed">সাধারণ স্পিড</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="account-all-plans-grid" id="accountAllPlansGrid" style="display: none;">
+              <div class="plan-compare-card active-plan" id="compareCardFree">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name">Free</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>১০ বার্তা / ৩ ঘণ্টা</li>
+                  <li>ফ্রি মডেলসমূহ</li>
+                  <li>সাধারণ স্পিড</li>
+                </ul>
+              </div>
+              <div class="plan-compare-card" id="compareCardPro">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name">Pro</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>৩০ বার্তা / ৩ ঘণ্টা</li>
+                  <li>প্রো মডেলসমূহ</li>
+                  <li>টার্বো স্পিড</li>
+                </ul>
+              </div>
+              <div class="plan-compare-card" id="compareCardMax">
+                <div class="plan-compare-header">
+                  <span class="plan-compare-name" style="color:var(--accent-color);">Max</span>
+                </div>
+                <ul class="plan-compare-features">
+                  <li>৫০ বার্তা / ১ ঘণ্টা</li>
+                  <li>ফ্ল্যাগশিপ মডেল</li>
+                  <li>আল্ট্রা স্পিড</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <button class="settings-btn-primary" type="button" onclick="window.location.href='plans.html'" style="margin-top: 16px;">
+             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+             <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
+          </button>
         </div>
       </div>
 
@@ -5830,7 +5965,7 @@
       if (badgeEl) {
         if (remaining <= 0) {
           badgeEl.className = "nav-credit-badge danger";
-        } else if (remaining <= Math.ceil(limit * 0.2)) {
+        } else if (remaining <= limit * 0.25) {
           badgeEl.className = "nav-credit-badge warning";
         } else {
           badgeEl.className = "nav-credit-badge";
@@ -6423,8 +6558,19 @@
         themeOled: "ওলেড (OLED - খাঁটি কালো)",
         versionStatus: "আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।",
         downloadApk: "নতুন APK ডাউনলোড করুন",
-        feedbackLabel: "আপনার মতামত বা প্রতিক্রিয়া",
-        feedbackSubmit: "প্রতিক্রিয়া পাঠান"
+        feedbackLabel: "আপনার মতামত বা প্রতিক্রিয়া",
+        feedbackSubmit: "প্রতিক্রিয়া পাঠান",
+        usageLimits: "ব্যবহারের সীমা",
+        usageLimitsTitle: "ব্যবহারের সীমা ও কোটা",
+        quotaTitle: "মেসেজ কোটা",
+        quotaMessages: "বার্তা",
+        quotaModels: "মডেল",
+        quotaSpeed: "স্পিড",
+        quotaReset: "রিসেট",
+        allPlansTitle: "সব প্ল্যানের তুলনা",
+        showAllPlans: "সব প্ল্যান দেখুন",
+        hideAllPlans: "প্ল্যান লুকান",
+        currentPlanTag: "বর্তমান"
       },
       en: {
         // App & Navigation
@@ -6552,7 +6698,18 @@
         versionStatus: "You are on the latest version.",
         downloadApk: "Download Android APK",
         feedbackLabel: "Your Feedback or Suggestion",
-        feedbackSubmit: "Submit Feedback"
+        feedbackSubmit: "Submit Feedback",
+        usageLimits: "Usage Limits",
+        usageLimitsTitle: "Usage Limits & Quota",
+        quotaTitle: "Message Quota",
+        quotaMessages: "Messages",
+        quotaModels: "Models",
+        quotaSpeed: "Speed",
+        quotaReset: "Reset",
+        allPlansTitle: "Compare All Plans",
+        showAllPlans: "Show All Plans",
+        hideAllPlans: "Hide Plans",
+        currentPlanTag: "Current"
       }
     };
 
