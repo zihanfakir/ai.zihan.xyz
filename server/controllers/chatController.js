@@ -129,8 +129,7 @@ const streamChatCompletions = async (req, res) => {
         const p = {
           model: modName,
           messages: safeMessages,
-          stream: true,
-          include_reasoning: true
+          stream: true
         };
 
         const r = await fetch(url, {
