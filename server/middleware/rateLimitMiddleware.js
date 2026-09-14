@@ -3,22 +3,76 @@ const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
-const { getModelConfig, getUserUsageDetails } = require('../../utils/getModelConfig');
+const { getModelConfig, getUserUsageDetails, getUserImageUsageDetails } = require('../../utils/getModelConfig');
 
 const checkRateLimit = async (req, res, next) => {
   try {
     const user = req.user;
+    const isImageRoute = req.path === '/image' || (req.originalUrl && req.originalUrl.includes('/chat/image'));
 
     // Admin users are never rate-limited
     const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
     const isVerifiedAdmin = (user && user.role === 'admin') || (user && user.email && adminEmails.includes(user.email.toLowerCase().trim()));
     if (isVerifiedAdmin) {
-      req.currentPlan = { name: 'Admin', displayName: 'অ্যাডমিন', message_limit: 999999, window_hours: 1, allowed_models: ['*'] };
+      req.currentPlan = { name: 'Admin', displayName: 'অ্যাডমিন', message_limit: 999999, image_limit: 999999, window_hours: 1, allowed_models: ['*'] };
       return next();
     }
 
+    // Resolve IP for guest tracking
+    const vercelIp = req.headers['x-real-ip'] || req.headers['x-vercel-forwarded-for'];
+    const xff = req.headers['x-forwarded-for'];
+    let resolvedIp = req.socket?.remoteAddress || req.ip || '127.0.0.1';
+    if (vercelIp) resolvedIp = Array.isArray(vercelIp) ? vercelIp[0] : vercelIp.split(',')[0].trim();
+    else if (xff) {
+      const parts = Array.isArray(xff) ? xff[0].split(',') : xff.split(',');
+      resolvedIp = parts[parts.length - 1].trim();
+    }
+    const cleanIp = String(resolvedIp).replace(/^::ffff:/, '').replace(/[^a-zA-Z0-9]/g, '_');
+    const guestId = `guest_${cleanIp}`;
+
     // 0. Guest User (Not logged in)
     if (!user) {
+      if (isImageRoute) {
+        // Enforce Guest Image Rate Limit: 3 images per 3 hours
+        const guestWindowHours = 3;
+        const guestImageLimit = 3;
+        const windowStart = new Date(Date.now() - guestWindowHours * 60 * 60 * 1000);
+        let imageCount = 0;
+        let resetTimeMinutes = guestWindowHours * 60;
+
+        if (getIsMongoConnected()) {
+          imageCount = await UsageLog.countDocuments({
+            user_id: guestId,
+            model_id: 'image-generation',
+            timestamp: { $gte: windowStart }
+          });
+          if (imageCount >= guestImageLimit) {
+            const oldest = await UsageLog.findOne({ user_id: guestId, model_id: 'image-generation', timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+            if (oldest) {
+              resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldest.timestamp).getTime() + guestWindowHours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
+            }
+          }
+        } else {
+          const imgUsage = await getUserImageUsageDetails(guestId, guestWindowHours);
+          const memLogs = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === guestId && l.model_id === 'image-generation' && new Date(l.timestamp) >= windowStart);
+          imageCount = Math.max(imgUsage.count, memLogs.length);
+          resetTimeMinutes = imgUsage.resetInMinutes || 180;
+        }
+
+        if (imageCount >= guestImageLimit) {
+          res.setHeader('Retry-After', resetTimeMinutes * 60);
+          return res.status(429).json({
+            success: false,
+            error: `ছবি তৈরির সীমা শেষ! ফ্রি প্ল্যানে প্রতি ${guestWindowHours} ঘণ্টায় সর্বোচ্চ ${guestImageLimit}টি ছবি তৈরি করা যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন অথবা লগইন করে প্ল্যান আপগ্রেড করুন।`
+          });
+        }
+
+        req.guestId = guestId;
+        req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, image_limit: guestImageLimit, window_hours: guestWindowHours, allowed_models: ['*'] };
+        return next();
+      }
+
+      // Guest text message rate limit
       const model_id = req.body.model || 'openrouter/free';
 
       let aiModel = null;
@@ -40,19 +94,6 @@ const checkRateLimit = async (req, res, next) => {
         });
       }
 
-      // Enforce IP-based Guest Rate Limit: 10 messages per 3 hours
-      const vercelIp = req.headers['x-real-ip'] || req.headers['x-vercel-forwarded-for'];
-      const xff = req.headers['x-forwarded-for'];
-      let resolvedIp = req.socket?.remoteAddress || req.ip || '127.0.0.1';
-      if (vercelIp) resolvedIp = Array.isArray(vercelIp) ? vercelIp[0] : vercelIp.split(',')[0].trim();
-      else if (xff) {
-        const parts = Array.isArray(xff) ? xff[0].split(',') : xff.split(',');
-        resolvedIp = parts[parts.length - 1].trim();
-      }
-      const rawIp = resolvedIp;
-      const cleanIp = String(rawIp).replace(/^::ffff:/, '').replace(/[^a-zA-Z0-9]/g, '_');
-      const guestId = `guest_${cleanIp}`;
-
       const usageDetails = await getUserUsageDetails(guestId, 3);
       if (usageDetails.count >= 10) {
         res.setHeader('Retry-After', Math.max(1, Math.ceil((usageDetails.resetInMinutes || 180) * 60)));
@@ -63,7 +104,7 @@ const checkRateLimit = async (req, res, next) => {
       }
 
       req.guestId = guestId;
-      req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['*'] };
+      req.currentPlan = { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, image_limit: 3, window_hours: 3, allowed_models: ['*'] };
       return next();
     }
 
@@ -111,15 +152,16 @@ const checkRateLimit = async (req, res, next) => {
 
     if (!plan) {
       const defaultLimits = {
-        'Free': { limit: 10, window: 3, name: 'ফ্রি প্ল্যান', allowed: ['*'] },
-        'Pro': { limit: 30, window: 3, name: 'প্রো প্ল্যান', allowed: ['*'] },
-        'Max': { limit: 50, window: 1, name: 'ম্যাক্স প্ল্যান', allowed: ['*'] }
+        'Free': { limit: 10, imgLimit: 3, window: 3, name: 'ফ্রি প্ল্যান', allowed: ['*'] },
+        'Pro': { limit: 30, imgLimit: 20, window: 3, name: 'প্রো প্ল্যান', allowed: ['*'] },
+        'Max': { limit: 50, imgLimit: 100, window: 1, name: 'ম্যাক্স প্ল্যান', allowed: ['*'] }
       };
       const def = defaultLimits[currentPlanName] || defaultLimits['Free'];
       plan = {
         name: currentPlanName,
         displayName: def.name,
         message_limit: def.limit,
+        image_limit: def.imgLimit,
         window_hours: def.window,
         allowed_models: def.allowed,
         is_active: true
@@ -127,8 +169,56 @@ const checkRateLimit = async (req, res, next) => {
     }
     plan.message_limit = Number(plan.message_limit) || 10;
     plan.window_hours = Number(plan.window_hours) || 3;
+    plan.image_limit = plan.image_limit !== undefined && !isNaN(Number(plan.image_limit)) ? Number(plan.image_limit) : (plan.name === 'Free' ? 3 : (plan.name === 'Pro' ? 20 : 100));
 
-    // 3. Model Access Permission Check
+    const userId = String(user._id || user.id);
+    const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
+
+    // 3. Image Generation Limit Check
+    if (isImageRoute) {
+      let imageCount = 0;
+      let resetTimeMinutes = Math.round(plan.window_hours * 60);
+
+      if (getIsMongoConnected()) {
+        imageCount = await UsageLog.countDocuments({
+          user_id: userId,
+          model_id: 'image-generation',
+          timestamp: { $gte: windowStart }
+        });
+        if (imageCount >= plan.image_limit) {
+          const oldestLog = await UsageLog.findOne({
+            user_id: userId,
+            model_id: 'image-generation',
+            timestamp: { $gte: windowStart }
+          }).sort({ timestamp: 1 });
+          if (oldestLog) {
+            resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
+          }
+        }
+      } else {
+        const imgDetails = await getUserImageUsageDetails(userId, plan.window_hours);
+        const memLogs = (memoryStore.usageLogs || []).filter(l =>
+          String(l.user_id) === userId &&
+          l.model_id === 'image-generation' &&
+          new Date(l.timestamp) >= windowStart
+        );
+        imageCount = Math.max(imgDetails.count, memLogs.length);
+        resetTimeMinutes = imgDetails.resetInMinutes;
+      }
+
+      if (imageCount >= plan.image_limit) {
+        res.setHeader('Retry-After', Math.max(1, Math.ceil(resetTimeMinutes * 60)));
+        return res.status(429).json({
+          success: false,
+          error: `ছবি তৈরির সীমা শেষ! ${plan.displayName || plan.name}-এ প্রতি ${plan.window_hours} ঘণ্টায় সর্বোচ্চ ${plan.image_limit}টি ছবি তৈরি করা যায়। আবার ${resetTimeMinutes} মিনিট পর চেষ্টা করুন বা প্ল্যান আপগ্রেড করুন।`
+        });
+      }
+
+      req.currentPlan = plan;
+      return next();
+    }
+
+    // 4. Model Access Permission Check (for text chat)
     const model_id = req.body.model || 'openrouter/free';
     
     let aiModel = null;
@@ -177,26 +267,25 @@ const checkRateLimit = async (req, res, next) => {
       }
     }
 
-    // 4. Dynamic Window Rate Limit Check
-    const userId = String(user._id || user.id);
-    const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);
+    // 5. Dynamic Window Message Rate Limit Check
     let messageCount = 0;
     let resetTimeMinutes = Math.round(plan.window_hours * 60);
 
     if (getIsMongoConnected()) {
       messageCount = await UsageLog.countDocuments({
         user_id: userId,
+        model_id: { $ne: 'image-generation' },
         timestamp: { $gte: windowStart }
       });
       if (messageCount >= plan.message_limit) {
-        const oldestLog = await UsageLog.findOne({ user_id: userId, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        const oldestLog = await UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }
       }
     } else {
       const usageDetails = await getUserUsageDetails(userId, plan.window_hours);
-      const memCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && new Date(l.timestamp) >= windowStart).length;
+      const memCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && l.model_id !== 'image-generation' && new Date(l.timestamp) >= windowStart).length;
       messageCount = Math.max(usageDetails.count, memCount);
       resetTimeMinutes = usageDetails.resetInMinutes;
     }

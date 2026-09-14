@@ -241,6 +241,39 @@
       background: var(--bg-surface-hover);
     }
 
+    @media (max-width: 640px) {
+      .top-bar {
+        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+        padding-bottom: 12px;
+        padding-left: max(14px, env(safe-area-inset-left, 14px));
+        padding-right: max(14px, env(safe-area-inset-right, 14px));
+      }
+      .brand-link span {
+        font-size: 1.05rem;
+      }
+      .brand-logo {
+        width: 28px;
+        height: 28px;
+      }
+      .top-actions {
+        gap: 8px;
+      }
+      .back-btn span {
+        display: none;
+      }
+      .back-btn {
+        padding: 8px 10px;
+      }
+      .lang-toggle-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+      .theme-toggle-btn {
+        width: 34px;
+        height: 34px;
+      }
+    }
+
     /* Layout */
     .plans-container {
       flex: 1;

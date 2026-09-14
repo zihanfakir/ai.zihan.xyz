@@ -568,7 +568,7 @@ const generateImage = async (req, res) => {
       // Record usage log for image generation
       const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
       if (userId) {
-        if (req.user && getIsMongoConnected()) {
+        if (getIsMongoConnected()) {
           UsageLog.create({
             user_id: userId,
             model_id: 'image-generation',
@@ -585,10 +585,11 @@ const generateImage = async (req, res) => {
             memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
           }
           debouncedSave();
-          try {
-            await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-          } catch (e) {}
         }
+        try {
+          const { incrementUserImageUsage } = require('../../utils/getModelConfig');
+          await incrementUserImageUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
+        } catch (e) {}
       }
 
       if (item?.url) {

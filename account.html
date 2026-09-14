@@ -208,11 +208,37 @@
     }
 
     @media (max-width: 640px) {
-      .top-bar { padding: 12px 16px; }
-      .brand-link span { font-size: 1.2rem; }
-      .top-actions { gap: 8px; }
+      .top-bar {
+        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+        padding-bottom: 12px;
+        padding-left: max(14px, env(safe-area-inset-left, 14px));
+        padding-right: max(14px, env(safe-area-inset-right, 14px));
+      }
+      .brand-link span { font-size: 1.05rem; }
+      .top-actions { gap: 6px; }
       .back-btn span { display: none; }
       .back-btn { padding: 8px; }
+    }
+
+    @media (max-width: 480px) {
+      #topDownloadText {
+        display: none;
+      }
+      #downloadAppTopBtn {
+        padding: 8px !important;
+      }
+      #logoutBtn {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+      }
+      .lang-toggle-btn {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+      }
+      .theme-toggle-btn {
+        width: 34px;
+        height: 34px;
+      }
     }
 
     .theme-toggle-btn {

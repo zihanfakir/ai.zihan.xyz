@@ -402,7 +402,7 @@ const updatePlanLimits = async (req, res) => {
     if (!planName || !['Free', 'Pro', 'Max'].includes(planName)) {
       return res.status(400).json({ success: false, error: 'সঠিক প্ল্যানের নাম দিন (Free, Pro, Max)' });
     }
-    const { message_limit, window_hours, is_active } = req.body;
+    const { message_limit, window_hours, image_limit, displayName, allowed_models, is_active } = req.body;
 
     let validLimit = undefined;
     if (message_limit !== undefined) {
@@ -418,6 +418,27 @@ const updatePlanLimits = async (req, res) => {
       validWindow = n;
     }
 
+    let validImageLimit = undefined;
+    if (image_limit !== undefined) {
+      const n = parseInt(image_limit, 10);
+      if (isNaN(n) || n < 0 || n > 100000) return res.status(400).json({ success: false, error: 'ছবি তৈরির সীমা ০ থেকে ১,০০,০০০ এর মধ্যে হতে হবে।' });
+      validImageLimit = n;
+    }
+
+    let validDisplayName = undefined;
+    if (displayName && typeof displayName === 'string' && displayName.trim()) {
+      validDisplayName = displayName.trim().slice(0, 50);
+    }
+
+    let validModels = undefined;
+    if (allowed_models !== undefined) {
+      if (Array.isArray(allowed_models)) {
+        validModels = allowed_models.map(m => String(m).trim()).filter(Boolean);
+      } else if (typeof allowed_models === 'string') {
+        validModels = allowed_models.split(',').map(m => m.trim()).filter(Boolean);
+      }
+    }
+
     if (getIsMongoConnected()) {
       let plan = await Plan.findOne({ name: planName });
       if (!plan) {
@@ -425,16 +446,20 @@ const updatePlanLimits = async (req, res) => {
         const defaultNames = { Free: 'ফ্রি প্ল্যান', Pro: 'প্রো প্ল্যান', Max: 'ম্যাক্স প্ল্যান' };
         plan = await Plan.create({
           name: planName,
-          displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
+          displayName: validDisplayName || defaultNames[planName] || (planName + ' প্ল্যান'),
           message_limit: validLimit !== undefined ? validLimit : 10,
           window_hours: validWindow !== undefined ? validWindow : 3,
-          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*'],
+          image_limit: validImageLimit !== undefined ? validImageLimit : (planName === 'Free' ? 3 : (planName === 'Pro' ? 20 : 100)),
+          allowed_models: validModels || (planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*']),
           is_active: true
         });
       }
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
       if (validWindow !== undefined) plan.window_hours = validWindow;
+      if (validImageLimit !== undefined) plan.image_limit = validImageLimit;
+      if (validDisplayName !== undefined) plan.displayName = validDisplayName;
+      if (validModels !== undefined) plan.allowed_models = validModels;
       if (is_active !== undefined) {
         const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
         plan.is_active = activeBool;
@@ -449,6 +474,9 @@ const updatePlanLimits = async (req, res) => {
         if (pIdx !== -1) {
           if (validLimit !== undefined) plans[pIdx].message_limit = validLimit;
           if (validWindow !== undefined) plans[pIdx].window_hours = validWindow;
+          if (validImageLimit !== undefined) plans[pIdx].image_limit = validImageLimit;
+          if (validDisplayName !== undefined) plans[pIdx].displayName = validDisplayName;
+          if (validModels !== undefined) plans[pIdx].allowed_models = validModels;
           if (is_active !== undefined) {
             const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
             plans[pIdx].is_active = activeBool;
@@ -459,6 +487,7 @@ const updatePlanLimits = async (req, res) => {
             displayName: plan.displayName,
             message_limit: plan.message_limit,
             window_hours: plan.window_hours,
+            image_limit: plan.image_limit !== undefined ? plan.image_limit : 3,
             allowed_models: plan.allowed_models || ['*'],
             is_active: plan.is_active !== false
           });
@@ -484,10 +513,11 @@ const updatePlanLimits = async (req, res) => {
         const defaultNames = { Free: 'ফ্রি প্ল্যান', Pro: 'প্রো প্ল্যান', Max: 'ম্যাক্স প্ল্যান' };
         plan = {
           name: planName,
-          displayName: defaultNames[planName] || (planName + ' প্ল্যান'),
+          displayName: validDisplayName || defaultNames[planName] || (planName + ' প্ল্যান'),
           message_limit: validLimit !== undefined ? validLimit : 10,
           window_hours: validWindow !== undefined ? validWindow : 3,
-          allowed_models: planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*'],
+          image_limit: validImageLimit !== undefined ? validImageLimit : (planName === 'Free' ? 3 : (planName === 'Pro' ? 20 : 100)),
+          allowed_models: validModels || (planName === 'Free' ? ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3'] : ['*']),
           is_active: true
         };
         plans.push(plan);
@@ -495,6 +525,9 @@ const updatePlanLimits = async (req, res) => {
 
       if (validLimit !== undefined) plan.message_limit = validLimit;
       if (validWindow !== undefined) plan.window_hours = validWindow;
+      if (validImageLimit !== undefined) plan.image_limit = validImageLimit;
+      if (validDisplayName !== undefined) plan.displayName = validDisplayName;
+      if (validModels !== undefined) plan.allowed_models = validModels;
       if (is_active !== undefined) {
         const activeBool = is_active === true || is_active === 'true' || is_active === 1 || is_active === '1';
         plan.is_active = activeBool;

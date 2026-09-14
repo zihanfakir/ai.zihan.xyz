@@ -19,6 +19,10 @@ const PlanSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  image_limit: {
+    type: Number,
+    default: 3
+  },
   allowed_models: [{
     type: String
   }],
@@ -38,6 +42,7 @@ PlanSchema.statics.seedDefaultPlans = async function() {
         displayName: 'ফ্রি প্ল্যান',
         message_limit: 10,
         window_hours: 3,
+        image_limit: 3,
         allowed_models: ['openrouter/free', 'gemini-3.5-flash-lite', 'mimo-v2.5', 'hy3']
       },
       {
@@ -45,6 +50,7 @@ PlanSchema.statics.seedDefaultPlans = async function() {
         displayName: 'প্রো প্ল্যান',
         message_limit: 30,
         window_hours: 3,
+        image_limit: 20,
         allowed_models: ['*']
       },
       {
@@ -52,6 +58,7 @@ PlanSchema.statics.seedDefaultPlans = async function() {
         displayName: 'ম্যাক্স প্ল্যান',
         message_limit: 50,
         window_hours: 1,
+        image_limit: 100,
         allowed_models: ['*']
       }
     ]);

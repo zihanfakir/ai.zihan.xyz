@@ -196,6 +196,85 @@ async function getUserUsage(userId, windowHours) {
   return details.count;
 }
 
+async function getUserImageUsageDetails(userId, windowHours) {
+  const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+  let count = 0;
+  let start = now;
+
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__img_usage_' + userId + '__')
+        .limit(1);
+
+      if (data && data.length > 0 && data[0].api_key) {
+        const usage = JSON.parse(data[0].api_key);
+        if (now - usage.start < windowMs) {
+          count = usage.count || 0;
+          start = usage.start;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Also check memoryStore to get true count for image generations
+  const memLogs = (memoryStore.usageLogs || []).filter(l => 
+    String(l.user_id) === String(userId) && 
+    (l.model_id === 'image-generation') && 
+    new Date(l.timestamp).getTime() >= windowStart
+  );
+  if (memLogs.length > count) {
+    count = memLogs.length;
+    start = memLogs.length > 0 ? Math.min(...memLogs.map(l => new Date(l.timestamp).getTime())) : now;
+  }
+
+  const remainingMs = Math.max(0, (start + windowMs) - now);
+  return {
+    count,
+    resetInMinutes: Math.max(1, Math.ceil(remainingMs / 60000)),
+    resetAt: new Date(start + windowMs).toISOString(),
+    start
+  };
+}
+
+async function incrementUserImageUsage(userId, windowHours) {
+  if (!supabase) return;
+  try {
+    const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+    const now = Date.now();
+    let count = 1;
+    let start = now;
+
+    const { data } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('model_id', '__img_usage_' + userId + '__')
+      .limit(1);
+
+    if (data && data.length > 0 && data[0].api_key) {
+      try {
+        const prev = JSON.parse(data[0].api_key);
+        if (now - prev.start < windowMs) {
+          count = (prev.count || 0) + 1;
+          start = prev.start;
+        }
+      } catch (e) {}
+    }
+
+    await supabase
+      .from('api_keys')
+      .upsert({
+        model_id: '__img_usage_' + userId + '__',
+        api_key: JSON.stringify({ count, start }),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'model_id' });
+  } catch (e) {}
+}
+
 async function incrementUserUsage(userId, windowHours) {
   if (!supabase) return;
   try {
@@ -245,9 +324,9 @@ async function getPersistedPlans() {
   }
 
   const defaultPlans = [
-    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, allowed_models: ['gemini-3.6-flash', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'openrouter/free', 'mimo-v2.5', 'hy3'], is_active: true },
-    { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, allowed_models: ['*'], is_active: true },
-    { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, allowed_models: ['*'], is_active: true }
+    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, image_limit: 3, allowed_models: ['gemini-3.6-flash', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'openrouter/free', 'mimo-v2.5', 'hy3'], is_active: true },
+    { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, image_limit: 20, allowed_models: ['*'], is_active: true },
+    { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, image_limit: 100, allowed_models: ['*'], is_active: true }
   ];
 
   if (!supabase) return memoryStore.plans || defaultPlans;
@@ -262,6 +341,11 @@ async function getPersistedPlans() {
     if (!error && data && data.length > 0 && data[0].api_key) {
       const parsed = JSON.parse(data[0].api_key);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed.forEach(p => {
+          if (p.image_limit === undefined) {
+            p.image_limit = p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100);
+          }
+        });
         plansCache = parsed;
         plansCacheTs = now;
         memoryStore.plans = parsed;
@@ -272,7 +356,13 @@ async function getPersistedPlans() {
     console.warn('[Supabase] __plans_metadata__ fetch failed:', e.message);
   }
 
-  return memoryStore.plans && memoryStore.plans.length > 0 ? memoryStore.plans : defaultPlans;
+  const resPlans = memoryStore.plans && memoryStore.plans.length > 0 ? memoryStore.plans : defaultPlans;
+  resPlans.forEach(p => {
+    if (p.image_limit === undefined) {
+      p.image_limit = p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100);
+    }
+  });
+  return resPlans;
 }
 
 async function savePersistedPlans(plans) {
@@ -676,6 +766,8 @@ module.exports = {
   getUserUsage,
   getUserUsageDetails,
   incrementUserUsage,
+  getUserImageUsageDetails,
+  incrementUserImageUsage,
   getPersistedRedeemCodes,
   savePersistedRedeemCodes,
   invalidateRedeemCodesCache,

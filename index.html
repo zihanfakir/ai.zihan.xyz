@@ -2776,125 +2776,7 @@
       }
     }
 
-    /* ========================================================
-       Interwind App Entry Loading Splash Overlay
-       ======================================================== */
-    :root {
-      --loader-bg: #09090b;
-      --loader-ball-1: #3b82f6;
-      --loader-ball-2: #ffffff;
-      --loader-text: #f8fafc;
-    }
-    :root[data-theme="light"] {
-      --loader-bg: #f9fafb;
-      --loader-ball-1: #2563eb;
-      --loader-ball-2: #0f172a;
-      --loader-text: #0f172a;
-    }
-    :root[data-theme="oled"] {
-      --loader-bg: #000000;
-      --loader-ball-1: #3b82f6;
-      --loader-ball-2: #ffffff;
-      --loader-text: #e5e5e5;
-    }
-    :root[data-theme="eyecare"] {
-      --loader-bg: #f5eedc;
-      --loader-ball-1: #d97706;
-      --loader-ball-2: #4a3b2c;
-      --loader-text: #4a3b2c;
-    }
 
-    .app-splash-loader {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      background-color: var(--loader-bg);
-      z-index: 999999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
-    .app-splash-loader.fade-out {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .splash-loader-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
-    .splash-brand-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--loader-text);
-      opacity: 0.9;
-      animation: splashPulse 1.8s ease-in-out infinite;
-    }
-    @keyframes splashPulse {
-      0%, 100% { opacity: 0.6; transform: scale(0.98); }
-      50% { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes ldio-x2uulkbinbj-r {
-      0%, 100% { animation-timing-function: cubic-bezier(0.2, 0, 0.8, 0.8); }
-      50% { animation-timing-function: cubic-bezier(0.2, 0.2, 0.8, 1); }
-      0% { transform: rotate(0deg); }
-      50% { transform: rotate(180deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes ldio-x2uulkbinbj-s {
-      0%, 100% { animation-timing-function: cubic-bezier(0.2, 0, 0.8, 0.8); }
-      50% { animation-timing-function: cubic-bezier(0.2, 0.2, 0.8, 1); }
-      0% { transform: translate(-30px, -30px) scale(0); }
-      50% { transform: translate(-30px, -30px) scale(1); }
-      100% { transform: translate(-30px, -30px) scale(0); }
-    }
-    .loadingio-spinner-interwind-nq4q5u6dq7r {
-      width: 140px;
-      height: 140px;
-      display: inline-block;
-      overflow: hidden;
-      background: none;
-    }
-    .ldio-x2uulkbinbj {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform: translateZ(0) scale(0.7);
-      transform-origin: 0 0;
-      backface-visibility: hidden;
-    }
-    .ldio-x2uulkbinbj div { box-sizing: content-box; }
-    .ldio-x2uulkbinbj > div { transform: translate(0px, -15px); }
-    .ldio-x2uulkbinbj > div > div {
-      animation: ldio-x2uulkbinbj-r 1s linear infinite;
-      transform-origin: 100px 100px;
-    }
-    .ldio-x2uulkbinbj > div > div > div {
-      position: absolute;
-      transform: translate(100px, 82px);
-    }
-    .ldio-x2uulkbinbj > div > div > div > div {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: var(--loader-ball-1);
-      animation: ldio-x2uulkbinbj-s 1s linear infinite;
-    }
-    .ldio-x2uulkbinbj > div > div:last-child {
-      animation-delay: -0.5s;
-    }
-    .ldio-x2uulkbinbj > div > div:last-child > div > div {
-      animation-delay: -0.5s;
-      background: var(--loader-ball-2);
-    }
 
     /* ===== Modern Sliding Sidebar Drawer ===== */
     .drawer-backdrop {
@@ -3610,40 +3492,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 </head>
 <body>
-  <!-- Fullscreen App Entry Splash Loader (Interwind Animation) -->
-  <div id="appSplashLoader" class="app-splash-loader" aria-label="Loading Alokpoth AI...">
-    <div class="splash-loader-container">
-      <div class="loadingio-spinner-interwind-nq4q5u6dq7r">
-        <div class="ldio-x2uulkbinbj">
-          <div><div><div><div></div></div></div><div><div><div></div></div></div></div>
-        </div>
-      </div>
-      <div class="splash-brand-title">Alokpoth AI</div>
-    </div>
-  </div>
 
-  <script>
-    (function() {
-      function dismissSplash() {
-        var loader = document.getElementById("appSplashLoader");
-        if (loader && !loader.classList.contains("fade-out")) {
-          loader.classList.add("fade-out");
-          setTimeout(function() {
-            try { if (loader && loader.parentNode) loader.parentNode.removeChild(loader); } catch(e) {}
-          }, 450);
-        }
-      }
-      // Failsafe: splash will ALWAYS dismiss within 800ms to 1200ms MAX under ANY circumstances
-      setTimeout(dismissSplash, 900);
-      if (document.readyState === "complete" || document.readyState === "interactive") {
-        setTimeout(dismissSplash, 300);
-      } else {
-        document.addEventListener("DOMContentLoaded", function() { setTimeout(dismissSplash, 350); });
-        window.addEventListener("load", function() { setTimeout(dismissSplash, 250); });
-      }
-      window.dismissSplashLoader = dismissSplash;
-    })();
-  </script>
 <div class="toast-container" id="toastContainer"></div>
 
   <!-- Sliding Sidebar Navigation Drawer & Backdrop -->
@@ -5222,25 +5071,60 @@
     }
 
     const PLAN_LIMIT_DETAILS = {
-      Free: {
-        shortLimit: "১০ বার্তা / ৩ ঘণ্টা",
-        messages: "১০ বার্তা / ৩ ঘণ্টা",
-        models: "ফ্রি মডেলসমূহ",
-        speed: "সাধারণ স্পিড"
+      en: {
+        Free: {
+          shortLimit: "10 msgs / 3 hours",
+          messages: "10 messages / 3 hours",
+          imageLimit: "3 images / 3 hours",
+          models: "Free models",
+          speed: "Standard speed"
+        },
+        Pro: {
+          shortLimit: "30 msgs / 3 hours",
+          messages: "30 messages / 3 hours",
+          imageLimit: "20 images / 3 hours",
+          models: "Pro models",
+          speed: "Turbo speed"
+        },
+        Max: {
+          shortLimit: "50 msgs / 1 hour",
+          messages: "50 messages / 1 hour",
+          imageLimit: "100 images / 1 hour",
+          models: "Flagship models",
+          speed: "Ultra speed"
+        }
       },
-      Pro: {
-        shortLimit: "৩০ বার্তা / ৩ ঘণ্টা",
-        messages: "৩০ বার্তা / ৩ ঘণ্টা",
-        models: "প্রো মডেলসমূহ",
-        speed: "টার্বো স্পিড"
-      },
-      Max: {
-        shortLimit: "৫০ বার্তা / ১ ঘণ্টা",
-        messages: "৫০ বার্তা / ১ ঘণ্টা",
-        models: "ফ্ল্যাগশিপ মডেল",
-        speed: "আল্ট্রা স্পিড"
+      bn: {
+        Free: {
+          shortLimit: "১০ বার্তা / ৩ ঘণ্টা",
+          messages: "১০ বার্তা / ৩ ঘণ্টা",
+          imageLimit: "৩ ছবি / ৩ ঘণ্টা",
+          models: "ফ্রি মডেলসমূহ",
+          speed: "সাধারণ স্পিড"
+        },
+        Pro: {
+          shortLimit: "৩০ বার্তা / ৩ ঘণ্টা",
+          messages: "৩০ বার্তা / ৩ ঘণ্টা",
+          imageLimit: "২০ ছবি / ৩ ঘণ্টা",
+          models: "প্রো মডেলসমূহ",
+          speed: "টার্বো স্পিড"
+        },
+        Max: {
+          shortLimit: "৫০ বার্তা / ১ ঘণ্টা",
+          messages: "৫০ বার্তা / ১ ঘণ্টা",
+          imageLimit: "১০০ ছবি / ১ ঘণ্টা",
+          models: "ফ্ল্যাগশিপ মডেল",
+          speed: "আল্ট্রা স্পিড"
+        }
       }
     };
+
+    function getPlanLimitDetails(planName) {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const langKey = isEn ? "en" : "bn";
+      const dict = PLAN_LIMIT_DETAILS[langKey] || PLAN_LIMIT_DETAILS.bn;
+      return dict[planName] || dict.Free;
+    }
 
     async function syncPlanLimitsFromServer() {
       try {
@@ -5254,11 +5138,20 @@
           data.plans.forEach(p => {
             const lim = Number(p.message_limit) || 10;
             const hrs = Number(p.window_hours) || 3;
-            DYNAMIC_PLAN_LIMITS[p.name] = { limit: lim, hours: hrs };
-            if (PLAN_LIMIT_DETAILS[p.name]) {
-              const str = `${toBengaliDigits(lim)} বার্তা / ${toBengaliDigits(hrs)} ঘণ্টা`;
-              PLAN_LIMIT_DETAILS[p.name].shortLimit = str;
-              PLAN_LIMIT_DETAILS[p.name].messages = str;
+            const imgLim = Number(p.image_limit) || (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
+            DYNAMIC_PLAN_LIMITS[p.name] = { limit: lim, hours: hrs, image_limit: imgLim };
+
+            if (PLAN_LIMIT_DETAILS.bn[p.name]) {
+              const bnStr = `${toBengaliDigits(lim)} বার্তা / ${toBengaliDigits(hrs)} ঘণ্টা`;
+              PLAN_LIMIT_DETAILS.bn[p.name].shortLimit = bnStr;
+              PLAN_LIMIT_DETAILS.bn[p.name].messages = bnStr;
+              PLAN_LIMIT_DETAILS.bn[p.name].imageLimit = `${toBengaliDigits(imgLim)} ছবি / ${toBengaliDigits(hrs)} ঘণ্টা`;
+            }
+            if (PLAN_LIMIT_DETAILS.en[p.name]) {
+              const enStr = `${lim} msgs / ${hrs} hours`;
+              PLAN_LIMIT_DETAILS.en[p.name].shortLimit = enStr;
+              PLAN_LIMIT_DETAILS.en[p.name].messages = enStr;
+              PLAN_LIMIT_DETAILS.en[p.name].imageLimit = `${imgLim} images / ${hrs} hours`;
             }
           });
           renderCreditBalance();
@@ -5363,13 +5256,13 @@
     function renderCreditBalance() {
       checkPlanExpiration(false);
 
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const valueEl = document.getElementById("accountPlanDisplay");
       const expiryEl = document.getElementById("accountPlanExpiryDisplay");
       const warningEl = document.getElementById("accountPlanWarning");
 
       if (valueEl) {
-        const isEnPlan = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        const planDisplayNames = isEnPlan ? { Free: "Free", Pro: "Pro", Max: "Max" } : { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
+        const planDisplayNames = isEn ? { Free: "Free", Pro: "Pro", Max: "Max" } : { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
         valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
         valueEl.className = "account-plan-badge plan-" + currentPlan;
       }
@@ -5391,7 +5284,7 @@
       const quotaSubtextEl = document.getElementById("quotaWindowSubtext");
       const quotaCountWrapEl = document.getElementById("quotaCountDisplay");
 
-      const planInfo = PLAN_LIMIT_DETAILS[currentPlan] || PLAN_LIMIT_DETAILS.Free;
+      const planInfo = getPlanLimitDetails(currentPlan);
       const { limit, hours } = getPlanWindowLimit();
       const usage = getWindowUsage();
       const used = usage.count || 0;
@@ -5429,20 +5322,19 @@
 
       let timeLeftStr = "";
       if (used === 0) {
-        timeLeftStr = "কোটা সম্পূর্ণ পূর্ণ";
+        timeLeftStr = isEn ? "Full Quota Available" : "কোটা সম্পূর্ণ পূর্ণ";
       } else if (hoursLeft > 0) {
-        timeLeftStr = `${toBengaliDigits(hoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${hoursLeft}h ${minsLeft}m ${secsLeft}s` : `${toBengaliDigits(hoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
       } else if (minsLeft > 0) {
-        timeLeftStr = `${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${minsLeft}m ${secsLeft}s` : `${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
       } else {
-        timeLeftStr = `${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${secsLeft}s` : `${toBengaliDigits(secsLeft)} সেকেন্ড`;
       }
 
-      const isEnBal = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isAdmin) {
-        if (quotaRemainingEl) quotaRemainingEl.textContent = isEnBal ? "Unlimited" : "আনলিমিটেড";
+        if (quotaRemainingEl) quotaRemainingEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
         if (quotaTotalEl) quotaTotalEl.textContent = "∞";
-        if (quotaCountWrapEl) quotaCountWrapEl.innerHTML = isEnBal ? "<strong>Unlimited</strong> Messages (Admin)" : "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
+        if (quotaCountWrapEl) quotaCountWrapEl.innerHTML = isEn ? "<strong>Unlimited</strong> Messages (Admin)" : "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
         if (quotaFillEl) {
           quotaFillEl.style.width = "100%";
           quotaFillEl.className = "account-quota-fill";
@@ -5451,9 +5343,9 @@
           drawerFillEl.style.width = "100%";
           drawerFillEl.className = "drawer-quota-fill";
         }
-        if (quotaTimerEl) quotaTimerEl.textContent = isEnBal ? "Unlimited Access" : "সীমাহীন এক্সেস";
-        if (quotaSubtextEl) quotaSubtextEl.textContent = isEnBal ? "No rate limits apply" : "কোনো রেট লিমিট প্রযোজ্য নয়";
-        if (limitBadgeEl) limitBadgeEl.textContent = isEnBal ? "Unlimited Messages" : "আনলিমিটেড বার্তা";
+        if (quotaTimerEl) quotaTimerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
+        if (quotaSubtextEl) quotaSubtextEl.textContent = isEn ? "No rate limits apply" : "কোনো রেট লিমিট প্রযোজ্য নয়";
+        if (limitBadgeEl) limitBadgeEl.textContent = isEn ? "Unlimited Messages" : "আনলিমিটেড বার্তা";
         if (warningEl) warningEl.classList.remove("visible");
       } else {
         const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
@@ -5477,31 +5369,34 @@
             drawerFillEl.className = "drawer-quota-fill";
           }
         }
-        if (quotaRemainingEl) quotaRemainingEl.textContent = isEnBal ? String(remaining) : toBengaliDigits(remaining);
-        if (quotaTotalEl) quotaTotalEl.textContent = isEnBal ? String(limit) : toBengaliDigits(limit);
+        if (quotaRemainingEl) quotaRemainingEl.textContent = isEn ? String(remaining) : toBengaliDigits(remaining);
+        if (quotaTotalEl) quotaTotalEl.textContent = isEn ? String(limit) : toBengaliDigits(limit);
         if (quotaCountWrapEl) {
-          quotaCountWrapEl.innerHTML = isEnBal 
+          quotaCountWrapEl.innerHTML = isEn 
             ? `<strong id="quotaRemainingDigits">${remaining}</strong> / <span id="quotaTotalDigits">${limit}</span> msgs left`
             : `<strong id="quotaRemainingDigits">${toBengaliDigits(remaining)}</strong> / <span id="quotaTotalDigits">${toBengaliDigits(limit)}</span> বার্তা বাকি`;
         }
         if (quotaTimerEl) quotaTimerEl.textContent = timeLeftStr;
         if (quotaSubtextEl) {
-          quotaSubtextEl.textContent = isEnBal
+          quotaSubtextEl.textContent = isEn
             ? `Refreshes ${limit} messages every ${hours} hours`
             : `প্রতি ${toBengaliDigits(hours)} ঘণ্টায় ${toBengaliDigits(limit)}টি বার্তা নবায়ন হয়`;
         }
 
         if (limitBadgeEl) {
           if (remaining <= 0) {
-            limitBadgeEl.textContent = `বাকি: ০/${toBengaliDigits(limit)} বার্তা (রিসেট: ${timeLeftStr})`;
+            limitBadgeEl.textContent = isEn ? `Remaining: 0/${limit} msgs (Reset: ${timeLeftStr})` : `বাকি: ০/${toBengaliDigits(limit)} বার্তা (রিসেট: ${timeLeftStr})`;
           } else {
-            limitBadgeEl.textContent = `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
+            limitBadgeEl.textContent = isEn ? `Remaining: ${remaining}/${limit} msgs (${hours}h)` : `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
           }
         }
 
         if (warningEl) {
           if (remaining <= 0) {
-            warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ${timeLeftStr} পর)`;
+            const warnText = isEn 
+              ? `Your message limit has been reached! (Resets in: ${timeLeftStr})`
+              : `আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ${timeLeftStr} পর)`;
+            warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnText}`;
             warningEl.classList.add("visible");
           } else {
             warningEl.classList.remove("visible");
@@ -5509,21 +5404,55 @@
         }
       }
 
-      if (limitMsgEl) limitMsgEl.textContent = `${toBengaliDigits(limit)} বার্তা / ${toBengaliDigits(hours)} ঘণ্টা`;
+      if (limitMsgEl) limitMsgEl.textContent = planInfo.messages;
       if (limitModEl) limitModEl.textContent = planInfo.models;
       if (limitSpdEl) limitSpdEl.textContent = planInfo.speed;
 
-      ["Free", "Pro", "Max"].forEach((p) => {
-        const card = document.getElementById("compareCard" + p);
-        if (card) {
-          if (p === currentPlan) card.classList.add("active-plan");
-          else card.classList.remove("active-plan");
-        }
-      });
+      const compareGrid = document.getElementById("accountAllPlansGrid");
+      if (compareGrid) {
+        const pFree = getPlanLimitDetails("Free");
+        const pPro = getPlanLimitDetails("Pro");
+        const pMax = getPlanLimitDetails("Max");
+        compareGrid.innerHTML = `
+          <div class="plan-compare-card ${currentPlan === 'Free' ? 'active-plan' : ''}" id="compareCardFree">
+            <div class="plan-compare-header">
+              <span class="plan-compare-name">Free</span>
+            </div>
+            <ul class="plan-compare-features">
+              <li>${pFree.messages}</li>
+              <li>${pFree.imageLimit}</li>
+              <li>${pFree.models}</li>
+              <li>${pFree.speed}</li>
+            </ul>
+          </div>
+          <div class="plan-compare-card ${currentPlan === 'Pro' ? 'active-plan' : ''}" id="compareCardPro">
+            <div class="plan-compare-header">
+              <span class="plan-compare-name">Pro</span>
+            </div>
+            <ul class="plan-compare-features">
+              <li>${pPro.messages}</li>
+              <li>${pPro.imageLimit}</li>
+              <li>${pPro.models}</li>
+              <li>${pPro.speed}</li>
+            </ul>
+          </div>
+          <div class="plan-compare-card ${currentPlan === 'Max' ? 'active-plan' : ''}" id="compareCardMax">
+            <div class="plan-compare-header">
+              <span class="plan-compare-name" style="color:var(--accent-color);">Max</span>
+            </div>
+            <ul class="plan-compare-features">
+              <li>${pMax.messages}</li>
+              <li>${pMax.imageLimit}</li>
+              <li>${pMax.models}</li>
+              <li>${pMax.speed}</li>
+            </ul>
+          </div>
+        `;
+      }
 
       if (expiryEl) {
         if (currentPlan === "Free") {
-          expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+          expiryEl.textContent = isEn ? "Validity: Lifetime / Unlimited" : "মেয়াদ: আজীবন / মেয়াদহীন";
           expiryEl.className = "account-plan-expiry-text";
         } else {
           const expiryStr = localStorage.getItem(PLAN_EXPIRY_KEY);
@@ -5532,19 +5461,21 @@
             if (!isNaN(expiryDate.getTime())) {
               const diffMs = expiryDate.getTime() - Date.now();
               if (diffMs <= 0) {
-                expiryEl.textContent = "মেয়াদ: মেয়াদ উত্তীর্ণ";
+                expiryEl.textContent = isEn ? "Validity: Expired" : "মেয়াদ: মেয়াদ উত্তীর্ণ";
                 expiryEl.className = "account-plan-expiry-text expired";
               } else {
                 const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                expiryEl.textContent = `মেয়াদ: ${formatBengaliDate(expiryDate)} (বাকি ${toBengaliDigits(daysLeft)} দিন)`;
+                expiryEl.textContent = isEn 
+                  ? `Expires: ${expiryDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
+                  : `মেয়াদ: ${formatBengaliDate(expiryDate)} (বাকি ${toBengaliDigits(daysLeft)} দিন)`;
                 expiryEl.className = "account-plan-expiry-text";
               }
             } else {
-              expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+              expiryEl.textContent = isEn ? "Validity: Lifetime / Unlimited" : "মেয়াদ: আজীবন / মেয়াদহীন";
               expiryEl.className = "account-plan-expiry-text";
             }
           } else {
-            expiryEl.textContent = "মেয়াদ: আজীবন / মেয়াদহীন";
+            expiryEl.textContent = isEn ? "Validity: Lifetime / Unlimited" : "মেয়াদ: আজীবন / মেয়াদহীন";
             expiryEl.className = "account-plan-expiry-text";
           }
         }
@@ -9368,15 +9299,22 @@ Capabilities & Code Generation Instructions (CRITICAL):
             soundEngine.playError();
             triggerHaptic("error");
             aiTextElement.classList.remove("streaming", "no-children");
+            const isLimit = err.message && (err.message.includes("সীমা শেষ") || err.message.includes("429") || err.message.includes("limit"));
+            const errorMsg = err.message || (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Failed to generate image. Please try again." : "ছবি তৈরি করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
             aiTextElement.innerHTML = `
-              <div class="ai-error-box">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <span>ছবি তৈরি করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</span>
+              <div class="ai-error-box" style="display:flex; flex-direction:column; gap:8px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
+                </div>
+                ${isLimit ? `<button type="button" class="btn btn-primary" onclick="showSettingsView('settingsLimitsView'); document.getElementById('accountModalOverlay').classList.add('visible');" style="align-self:flex-start; margin-top:6px; padding:6px 14px; font-size:0.82rem; background:var(--accent-primary); color:#fff; border-radius:8px; border:none; cursor:pointer;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
               </div>
             `;
-            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>আবার চেষ্টা করুন</span>`;
-            regenBtn.classList.add("regen-btn-highlight");
-            regenBtn.style.display = "inline-flex";
+            if (!isLimit) {
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Retry" : "আবার চেষ্টা করুন"}</span>`;
+              regenBtn.classList.add("regen-btn-highlight");
+              regenBtn.style.display = "inline-flex";
+            }
             scrollToBottom(); resolve();
           }
           return;
@@ -9837,25 +9775,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
     });
 
-    /* ========================================================
-       App Entry Splash Loader Controller
-       ======================================================== */
-    function dismissSplashLoader() {
-      const loader = document.getElementById("appSplashLoader");
-      if (loader && !loader.classList.contains("fade-out")) {
-        loader.classList.add("fade-out");
-        setTimeout(() => {
-          try { loader.remove(); } catch (e) {}
-        }, 450);
-      }
-    }
-
-    if (document.readyState === "complete") {
-      setTimeout(dismissSplashLoader, 700);
-    } else {
-      window.addEventListener("load", () => setTimeout(dismissSplashLoader, 600));
-      setTimeout(dismissSplashLoader, 1800);
-    }
+    window.dismissSplashLoader = function() {};
   </script>
 </body>
 </html>

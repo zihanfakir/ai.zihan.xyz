@@ -341,9 +341,25 @@
     /* Mobile Phones (<= 640px) */
     @media (max-width: 640px) {
       .navbar {
-        padding: 12px 16px;
+        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+        padding-bottom: 12px;
+        padding-left: max(14px, env(safe-area-inset-left, 14px));
+        padding-right: max(14px, env(safe-area-inset-right, 14px));
         flex-wrap: wrap;
         gap: 10px;
+      }
+      .navbar > div:last-child {
+        flex-wrap: wrap;
+        gap: 8px !important;
+        justify-content: flex-end;
+        width: 100%;
+      }
+      #adminName {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.8rem !important;
       }
       .logo-area {
         font-size: 1.05rem;
@@ -440,7 +456,18 @@
         grid-template-columns: 1fr;
       }
       .navbar {
-        padding: 10px 12px;
+        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 10px));
+        padding-bottom: 10px;
+        padding-left: max(10px, env(safe-area-inset-left, 10px));
+        padding-right: max(10px, env(safe-area-inset-right, 10px));
+      }
+      #adminChangePassBtn {
+        padding: 5px 8px !important;
+        font-size: 0.76rem !important;
+      }
+      #logoutBtn {
+        padding: 5px 10px !important;
+        font-size: 0.76rem !important;
       }
       .logo-area span:first-child {
         font-size: 0.95rem;
@@ -1795,6 +1822,10 @@
           const safeDisplayName = escapeHtml(p.displayName || p.name);
           const safeName = escapeHtml(p.name);
           const safeId = safeName.replace(/[^a-zA-Z0-9_-]/g, '_');
+          const allowedModelsStr = Array.isArray(p.allowed_models) ? p.allowed_models.join(', ') : (p.allowed_models || '*');
+          const isActive = p.is_active !== false;
+          const imageLimitVal = p.image_limit !== undefined && !isNaN(Number(p.image_limit)) ? Number(p.image_limit) : (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
+
           const card = document.createElement("div");
           card.className = "stat-card";
           card.style.gap = "14px";
@@ -1804,12 +1835,31 @@
               <span class="tag tag-${safeName.toLowerCase()}">${safeName}</span>
             </div>
             <div class="form-group">
+              <label>প্ল্যানের নাম (Display Name)</label>
+              <input type="text" id="display_${safeId}" value="${safeDisplayName}">
+            </div>
+            <div class="form-group">
               <label>মেসেজ লিমিট (Message Limit)</label>
               <input type="number" id="limit_${safeId}" value="${Number(p.message_limit) || 10}">
             </div>
             <div class="form-group">
-              <label>সময়সীমা (Window Hours)</label>
+              <label>ছবি তৈরির লিমিট (Image Gen Limit)</label>
+              <input type="number" id="img_limit_${safeId}" value="${imageLimitVal}">
+            </div>
+            <div class="form-group">
+              <label>সময়সীমা ঘণ্টায় (Window Hours)</label>
               <input type="number" id="window_${safeId}" value="${Number(p.window_hours) || 3}">
+            </div>
+            <div class="form-group">
+              <label>অনুমোদিত মডেল (Allowed Models, * = All)</label>
+              <input type="text" id="models_${safeId}" value="${escapeHtml(allowedModelsStr)}">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0;">
+              <label style="font-size: 0.85rem; color: var(--text-sub);">প্ল্যান সক্রিয় (Active Status)</label>
+              <label class="switch">
+                <input type="checkbox" id="active_${safeId}" ${isActive ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
             </div>
             <button type="button" class="btn btn-primary" onclick="savePlanLimits('${safeName}', this)" style="margin-top: 10px;">সংরক্ষণ করুন</button>
           `;
@@ -1820,13 +1870,25 @@
 
     async function savePlanLimits(planName, btn) {
       const safeId = String(planName).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const displayInput = document.getElementById(`display_${safeId}`);
       const limitInput = document.getElementById(`limit_${safeId}`);
+      const imgLimitInput = document.getElementById(`img_limit_${safeId}`);
       const windowInput = document.getElementById(`window_${safeId}`);
+      const modelsInput = document.getElementById(`models_${safeId}`);
+      const activeInput = document.getElementById(`active_${safeId}`);
+
+      const displayName = displayInput ? displayInput.value.trim() : "";
       const message_limit = limitInput ? parseInt(limitInput.value, 10) : NaN;
+      const image_limit = imgLimitInput ? parseInt(imgLimitInput.value, 10) : NaN;
       const window_hours = windowInput ? parseInt(windowInput.value, 10) : NaN;
+      const allowed_models = modelsInput ? modelsInput.value.split(',').map(m => m.trim()).filter(Boolean) : ['*'];
+      const is_active = activeInput ? activeInput.checked : true;
 
       if (isNaN(message_limit) || message_limit <= 0) {
         return showToast("সঠিক মেসেজ লিমিট (ধনাত্মক সংখ্যা) লিখুন", "error");
+      }
+      if (isNaN(image_limit) || image_limit < 0) {
+        return showToast("সঠিক ছবি তৈরির লিমিট (০ বা ধনাত্মক সংখ্যা) লিখুন", "error");
       }
       if (isNaN(window_hours) || window_hours <= 0) {
         return showToast("সঠিক সময়সীমা (ঘণ্টা) লিখুন", "error");
@@ -1840,7 +1902,7 @@
       try {
         const res = await authFetch(`${API_BASE}/admin/plans/${planName}`, {
           method: "PUT",
-          body: JSON.stringify({ message_limit, window_hours })
+          body: JSON.stringify({ displayName, message_limit, image_limit, window_hours, allowed_models, is_active })
         });
         const data = await res.json();
         if (data.success) {
