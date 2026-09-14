@@ -1463,7 +1463,7 @@
       background: linear-gradient(0deg, var(--bg-main) 60%, transparent 100%);
       flex-shrink: 0;
       z-index: 10;
-      touch-action: none;
+      touch-action: manipulation;
       overscroll-behavior: none;
     }
 
@@ -2428,7 +2428,7 @@
       }
       .input-wrapper {
         padding: 0 8px max(12px, env(safe-area-inset-bottom, 12px));
-        touch-action: none;
+        touch-action: manipulation;
         overscroll-behavior: none;
       }
       .input-card {
@@ -5976,6 +5976,7 @@
           accountRedeemBtn.textContent = "দাবি করুন";
         }
       });
+    }
 
     window.redeemPromoCode = async function(code) {
       if (!code || !code.trim()) return;
