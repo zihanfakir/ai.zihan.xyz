@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -786,7 +786,7 @@
       ? window.location.origin 
       : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
     const API_BASE = BACKEND_URL + "/api";
-    let token = localStorage.getItem("alokpoth_admin_token") || null;
+    let token = localStorage.getItem("alokpoth_admin_token") || localStorage.getItem("alokpoth_token") || null;
     let currentModelsList = [];
 
     const loginOverlay = document.getElementById("loginOverlay");
@@ -928,6 +928,7 @@
             // Token is explicitly expired or invalid
             token = null;
             localStorage.removeItem("alokpoth_admin_token");
+      localStorage.removeItem("alokpoth_token");
             localStorage.removeItem("alokpoth_admin_name");
             loginOverlay.style.display = "flex";
             return;
@@ -948,6 +949,121 @@
       }
     }
     checkAuth();
+
+    /* Admin Bilingual Support (English Default) */
+    let currentAdminLang = localStorage.getItem("alokpoth_lang") || "en";
+
+    const ADMIN_I18N = {
+      en: {
+        backChat: "Back to Chat",
+        langBtn: "বাংলা",
+        changePass: "Change Password",
+        logout: "Log Out",
+        statUsers: "Total Users",
+        statPro: "Pro Subscribers",
+        statMax: "Max Subscribers",
+        statRedeem: "Used Redeem Codes",
+        statMessages: "Total Message History",
+        tabUsers: "User Management",
+        tabPlans: "Plan Settings",
+        tabRedeem: "Redeem Codes",
+        tabModels: "AI Models",
+        tabSettings: "System Settings",
+        usersHeader: "User Directory & Account Controls",
+        plansHeader: "Dynamic Plan Settings",
+        redeemHeader: "Redeem Code Generator",
+        modelsHeader: "AI Model Settings",
+        settingsHeader: "System Prompt & Global Configuration",
+        searchUserPlaceholder: "Search users (name, email, or plan)...",
+        thName: "Name",
+        thEmail: "Email",
+        thPlan: "Current Plan",
+        thExpiry: "Subscription Expiry",
+        thStatus: "Status",
+        thActions: "Actions (Plan & Block)"
+      },
+      bn: {
+        backChat: "চ্যাটে ফিরে যান",
+        langBtn: "English",
+        changePass: "পাসওয়ার্ড পরিবর্তন",
+        logout: "লগআউট",
+        statUsers: "মোট ইউজার",
+        statPro: "Pro সাবস্ক্রাইবার",
+        statMax: "Max সাবস্ক্রাইবার",
+        statRedeem: "ব্যবহৃত রিডিম কোড",
+        statMessages: "মোট মেসেজ হিস্ট্রি",
+        tabUsers: "ইউজার ম্যানেজমেন্ট",
+        tabPlans: "প্ল্যান সেটিংস",
+        tabRedeem: "রিডিম কোড",
+        tabModels: "AI মডেল",
+        tabSettings: "সিস্টেম সেটিংস",
+        usersHeader: "ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ",
+        plansHeader: "ডাইনামিক প্ল্যান সেটিংস",
+        redeemHeader: "রিডিম কোড জেনারেটর",
+        modelsHeader: "AI মডেল সেটিংস",
+        settingsHeader: "সিস্টেম প্রম্পট ও গ্লোবাল কনফিগারেশন",
+        searchUserPlaceholder: "ইউজার খুঁজুন (নাম, ইমেইল বা প্ল্যান)...",
+        thName: "নাম",
+        thEmail: "ইমেইল",
+        thPlan: "বর্তমান প্ল্যান",
+        thExpiry: "সাবস্ক্রিপশন মেয়াদ",
+        thStatus: "স্ট্যাটাস",
+        thActions: "অ্যাকশন (প্ল্যান পরিবর্তন ও ব্লক)"
+      }
+    };
+
+    function applyAdminI18n() {
+      const d = ADMIN_I18N[currentAdminLang] || ADMIN_I18N.en;
+      document.documentElement.setAttribute("lang", currentAdminLang);
+
+      const backBtn = document.getElementById("adminBackChatBtn");
+      if (backBtn) backBtn.textContent = d.backChat;
+
+      const langBtn = document.getElementById("adminLangToggleBtn");
+      if (langBtn) langBtn.textContent = d.langBtn;
+
+      const passBtn = document.getElementById("adminChangePassBtn");
+      if (passBtn) passBtn.textContent = d.changePass;
+
+      const loBtn = document.getElementById("logoutBtn");
+      if (loBtn) loBtn.textContent = d.logout;
+
+      // Stats labels
+      const statLabels = document.querySelectorAll(".stat-lbl");
+      if (statLabels && statLabels.length >= 5) {
+        statLabels[0].textContent = d.statUsers;
+        statLabels[1].textContent = d.statPro;
+        statLabels[2].textContent = d.statMax;
+        statLabels[3].textContent = d.statRedeem;
+        statLabels[4].textContent = d.statMessages;
+      }
+
+      // Tab buttons
+      const tabBtns = document.querySelectorAll(".tab-btn");
+      if (tabBtns && tabBtns.length >= 5) {
+        tabBtns[0].textContent = d.tabUsers;
+        tabBtns[1].textContent = d.tabPlans;
+        tabBtns[2].textContent = d.tabRedeem;
+        tabBtns[3].textContent = d.tabModels;
+        tabBtns[4].textContent = d.tabSettings;
+      }
+
+      const uSearch = document.getElementById("userSearchInput");
+      if (uSearch) uSearch.placeholder = d.searchUserPlaceholder;
+    }
+
+    const adminLangBtn = document.getElementById("adminLangToggleBtn");
+    if (adminLangBtn) {
+      adminLangBtn.addEventListener("click", () => {
+        currentAdminLang = (currentAdminLang === "en" ? "bn" : "en");
+        try { localStorage.setItem("alokpoth_lang", currentAdminLang); } catch {}
+        applyAdminI18n();
+      });
+    }
+
+    // Apply on load
+    applyAdminI18n();
+
 
     adminLoginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -975,6 +1091,7 @@
             localStorage.setItem("alokpoth_admin_name", data.user.name);
           }
           localStorage.setItem("alokpoth_admin_token", token);
+          localStorage.setItem("alokpoth_token", token);
           loginOverlay.style.display = "none";
           showToast("সফলভাবে লগইন হয়েছে!", "success");
           loadAllData();

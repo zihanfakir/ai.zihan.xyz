@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -889,14 +889,19 @@
       width: 100%;
       max-width: 800px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      padding: 20px 16px 36px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
       flex: 1;
       min-height: 100%;
       min-width: 0;
       box-sizing: border-box;
+      justify-content: flex-start;
+    }
+    .chat-inner:has(.empty-state:only-child) {
+      justify-content: center;
+      padding: 0 16px;
     }
 
     .empty-state {
@@ -3647,7 +3652,7 @@
     <div style="padding: 16px 16px 8px;">
       <div class="drawer-search-wrap" style="margin: 0; position: relative; width: 100%; padding: 0;">
         <svg viewBox="0 0 24 24" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--text-sub); stroke-width: 2; pointer-events: none; z-index: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাটের বিষয়বস্তু অনুসন্ধান করুন..." style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
+        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="Search chats..." style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
       </div>
     </div>
 
@@ -3677,7 +3682,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-color);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
           <span data-i18n="usageLimits">ব্যবহারের সীমা ও কোটা</span>
         </span>
-        <span id="drawerLimitBadge" style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--accent-color); color: #fff; font-weight: 600;">সীমা দেখুন</span>
+        <span id="drawerLimitBadge" style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--accent-color); color: #fff; font-weight: 600;">View Limits</span>
       </button>
     </div>
 
@@ -3685,8 +3690,8 @@
       <div style="display: flex; align-items: center; gap: 12px; width: calc(100% - 36px);">
         <div class="drawer-avatar" id="drawerAvatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; background: rgba(128,128,128,0.2); flex-shrink: 0;">অ</div>
         <div style="display: flex; flex-direction: column; width: 100%; overflow: hidden;">
-          <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">লগইন করা নেই</div>
-          <div id="drawerUserPlan" style="font-size: 0.72rem; color: var(--text-sub); white-space: nowrap;">চ্যাট করতে লগইন করুন</div>
+          <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Not Logged In</div>
+          <div id="drawerUserPlan" style="font-size: 0.72rem; color: var(--text-sub); white-space: nowrap;">Sign in to unlock all features</div>
           <div class="drawer-quota-track">
             <div class="drawer-quota-fill" id="drawerQuotaFill" style="width: 0%;"></div>
           </div>
@@ -3727,13 +3732,13 @@
         <button class="brand-menu-item sheen-surface" id="newChatBtn" type="button">
           <span class="brand-menu-item-left">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
-            <span>নতুন চ্যাট</span>
+            <span data-i18n="newChatAria">New Chat</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="chatHistoryBtn" type="button">
           <span class="brand-menu-item-left">
             <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7 6.9 6.9 0 0 1-4.9-2.03l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8z"/></svg>
-            <span>চ্যাট হিস্ট্রি</span>
+            <span>Chat History</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="themeToggleBtn" type="button">
@@ -4342,7 +4347,7 @@
 
   <div class="offline-banner" id="offlineBanner">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-    <span>ইন্টারনেট সংযোগ নেই — বার্তা পাঠানো যাবে না</span>
+    <span data-i18n="offlineNotice">No internet connection — cannot send messages</span>
   </div>
 
   <div class="chat-container" id="scrollContainer">
@@ -4350,8 +4355,8 @@
       <div class="drag-drop-icon">
         <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.8;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><polyline points="12 11 12 16 12 11"/><polyline points="9 13 12 10 15 13"/></svg>
       </div>
-      <div style="font-weight:600; font-size:1.1rem;">ফাইল বা ছবি এখানে ড্রপ করুন</div>
-      <div style="color:var(--text-sub); font-size:0.85rem;">ছবি, পিডিএফ বা টেক্সট ফাইল সরাসরি যুক্ত হবে</div>
+      <div style="font-weight:600; font-size:1.1rem;" data-i18n="dropOverlayTitle">Drop files or images here</div>
+      <div style="color:var(--text-sub); font-size:0.85rem;" data-i18n="dropOverlaySub">Images, PDFs, or text files will attach directly</div>
     </div>
     
     <div class="chat-inner" id="chatStream">
@@ -4362,7 +4367,7 @@
           <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0;">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </span>
-          <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">অ্যান্ড্রয়েড অ্যাপ ব্যবহার করুন — <strong style="color: #60a5fa; text-decoration: underline;">APK ডাউনলোড করুন</strong></span>
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);"><span data-i18n="heroDownloadBannerText">Use Android App — </span><strong style="color: #60a5fa; text-decoration: underline;" data-i18n="heroDownloadBannerBtn">Download APK</strong></span>
         </div>
       </div>
     </div>
@@ -4387,11 +4392,11 @@
           <div class="attach-menu" id="attachMenu">
             <button type="button" class="attach-menu-item" id="attachImageOption">
               <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              <span>ছবি যুক্ত করুন</span>
+              <span data-i18n="attachImageText">Attach Image</span>
             </button>
             <button type="button" class="attach-menu-item" id="attachFileOption">
               <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span>ফাইল যুক্ত করুন (PDF/TXT/HTML/CSS/JS)</span>
+              <span data-i18n="attachFileText">Attach File (PDF/TXT/Code)</span>
             </button>
             
             <div class="attach-menu-divider"></div>
@@ -4399,13 +4404,13 @@
             <!-- Web Search inside Menu -->
             <button type="button" class="attach-menu-item" id="attachWebSearchOption">
               <svg class="stroke-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-              <span id="webSearchText" style="color: var(--text-sub);">ওয়েব সার্চ: বন্ধ</span>
+              <span id="webSearchText" style="color: var(--text-sub);">Web Search: Off</span>
             </button>
 
             <!-- Image Generation inside Menu -->
             <button type="button" class="attach-menu-item" id="attachImageGenOption">
               <svg class="stroke-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-              <span id="imageGenText" style="color: var(--text-sub);">ছবি তৈরি: বন্ধ</span>
+              <span id="imageGenText" style="color: var(--text-sub);">Image Gen: Off</span>
             </button>
           </div>
         </div>
@@ -4413,7 +4418,7 @@
       <textarea 
         class="chat-textarea" 
         id="userInput" 
-        placeholder="আলোকপথ AI-কে জিজ্ঞাসা করুন..." 
+        placeholder="Ask Alo AI anything..." 
         rows="1"
       ></textarea>
       <button type="button" class="mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড করুন" title="কথা বলে লিখুন">
@@ -4637,90 +4642,21 @@
     let isSpeechRecording = false;
 
     function initVoiceInput() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       const micBtn = document.getElementById("micBtn");
       if (!micBtn) return;
 
-      if (!SpeechRec) {
-        micBtn.style.display = "none";
-        return;
-      }
-
-      speechRecognitionInstance = new SpeechRec();
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      speechRecognitionInstance.lang = isEn ? "en-US" : "bn-BD";
-      speechRecognitionInstance.continuous = false;
-      speechRecognitionInstance.interimResults = true;
-
-      let baseTextBeforeVoice = "";
-
-      speechRecognitionInstance.onstart = () => {
-        isSpeechRecording = true;
-        const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        micBtn.classList.add("recording");
-        micBtn.setAttribute("title", isCurrentEn ? "Click to stop recording" : "রেকর্ডিং বন্ধ করতে চাপুন");
-        micBtn.innerHTML = `
-          <div class="voice-wave-container">
-            <span class="voice-wave-bar"></span>
-            <span class="voice-wave-bar"></span>
-            <span class="voice-wave-bar"></span>
-            <span class="voice-wave-bar"></span>
-          </div>
-          <span class="mic-rec-text">${isCurrentEn ? "Listening" : "রেকর্ড হচ্ছে"}</span>
-        `;
-        const userInputEl = document.getElementById("userInput");
-        baseTextBeforeVoice = userInputEl ? userInputEl.value : "";
-        if (userInputEl && !userInputEl.value.trim()) {
-          userInputEl.setAttribute("data-orig-placeholder", userInputEl.placeholder || "");
-          userInputEl.placeholder = isCurrentEn ? "Listening... Speak now..." : "শুনছি... কথা বলুন...";
-        }
-        triggerHaptic("medium");
-        showToast(isCurrentEn ? "Listening... (Microphone active)" : "কথা বলুন... (বাংলা ও ইংরেজি)", "success");
-      };
-
-      speechRecognitionInstance.onresult = (event) => {
-        let finalTranscript = "";
-        let interimTranscript = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-        const currentTranscript = (finalTranscript || interimTranscript).trim();
-        if (currentTranscript) {
-          const input = document.getElementById("userInput");
-          if (input) {
-            const prefix = baseTextBeforeVoice.trim();
-            input.value = prefix ? (prefix + " " + currentTranscript) : currentTranscript;
-            input.dispatchEvent(new Event("input"));
-            if (finalTranscript) {
-              baseTextBeforeVoice = input.value;
-            }
-          }
-        }
-      };
-
-      speechRecognitionInstance.onerror = (e) => {
-        isSpeechRecording = false;
-        resetMicBtn();
-        if (e.error !== "no-speech") {
-          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-          showToast(isCurrentEn ? "Microphone error encountered" : "মাইক্রোফোনে সমস্যা হয়েছে", "error");
-        }
-      };
-
-      speechRecognitionInstance.onend = () => {
-        isSpeechRecording = false;
-        resetMicBtn();
-      };
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
       function resetMicBtn() {
         isSpeechRecording = false;
+        if (speechRecognitionInstance) {
+          try { speechRecognitionInstance.abort(); } catch (e) {}
+          speechRecognitionInstance = null;
+        }
         micBtn.classList.remove("recording");
         const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        micBtn.setAttribute("title", isCurrentEn ? "Voice typing (Speak)" : "কথা বলে লিখুন");
+        micBtn.setAttribute("title", isCurrentEn ? "Voice Typing (Speak)" : "কথা বলে লিখুন");
+        micBtn.setAttribute("aria-label", isCurrentEn ? "Voice Typing" : "ভয়েস রেকর্ড করুন");
         micBtn.innerHTML = `
           <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         `;
@@ -4736,17 +4672,115 @@
         }
       }
 
-      micBtn.addEventListener("click", () => {
-        if (isSpeechRecording) {
-          speechRecognitionInstance.stop();
+      function startListening() {
+        if (!SpeechRec) {
+          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          showToast(isCurrentEn ? "Speech recognition is not supported in this browser. Please use Chrome, Edge, or the Alo AI App." : "আপনার ব্রাউজারে ভয়েস টাইপিং সমর্থিত নয়। ক্রোম বা অ্যান্ড্রয়েড অ্যাপ ব্যবহার করুন।", "error");
+          return;
+        }
+
+        try {
+          if (speechRecognitionInstance) {
+            try { speechRecognitionInstance.abort(); } catch (e) {}
+          }
+          speechRecognitionInstance = new SpeechRec();
+        } catch (initErr) {
+          console.error("SpeechRec instantiation failed:", initErr);
+          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          showToast(isCurrentEn ? "Could not initialize microphone." : "মাইক্রোফোন চালু করা যায়নি।", "error");
+          return;
+        }
+
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        speechRecognitionInstance.lang = isEn ? "en-US" : "bn-BD";
+        speechRecognitionInstance.continuous = false;
+        speechRecognitionInstance.interimResults = true;
+        speechRecognitionInstance.maxAlternatives = 1;
+
+        let baseTextBeforeVoice = "";
+
+        speechRecognitionInstance.onstart = () => {
+          isSpeechRecording = true;
+          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          micBtn.classList.add("recording");
+          micBtn.setAttribute("title", isCurrentEn ? "Click to stop recording" : "রেকর্ডিং বন্ধ করতে চাপুন");
+          micBtn.innerHTML = `
+            <div class="voice-wave-container">
+              <span class="voice-wave-bar"></span>
+              <span class="voice-wave-bar"></span>
+              <span class="voice-wave-bar"></span>
+              <span class="voice-wave-bar"></span>
+            </div>
+            <span class="mic-rec-text">${isCurrentEn ? "Listening" : "শুনছি"}</span>
+          `;
+          const userInputEl = document.getElementById("userInput");
+          baseTextBeforeVoice = userInputEl ? userInputEl.value : "";
+          if (userInputEl && !userInputEl.value.trim()) {
+            userInputEl.setAttribute("data-orig-placeholder", userInputEl.placeholder || "");
+            userInputEl.placeholder = isCurrentEn ? "Listening... Speak now..." : "শুনছি... কথা বলুন...";
+          }
+          triggerHaptic("medium");
+          showToast(isCurrentEn ? "Listening... Speak now" : "শুনছি... কথা বলুন", "success");
+        };
+
+        speechRecognitionInstance.onresult = (event) => {
+          let finalTranscript = "";
+          let interimTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          const currentTranscript = (finalTranscript || interimTranscript).trim();
+          if (currentTranscript) {
+            const input = document.getElementById("userInput");
+            if (input) {
+              const prefix = baseTextBeforeVoice.trim();
+              input.value = prefix ? (prefix + " " + currentTranscript) : currentTranscript;
+              input.style.height = "auto";
+              input.style.height = Math.min(input.scrollHeight, 200) + "px";
+              input.dispatchEvent(new Event("input", { bubbles: true }));
+              if (finalTranscript) {
+                baseTextBeforeVoice = input.value;
+              }
+            }
+          }
+        };
+
+        speechRecognitionInstance.onerror = (e) => {
+          console.warn("[Speech Recognition Error]:", e.error);
           isSpeechRecording = false;
           resetMicBtn();
-        } else {
-          try {
-            speechRecognitionInstance.start();
-          } catch {
-            speechRecognitionInstance.stop();
+          const isCurrentEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          if (e.error === "not-allowed" || e.error === "permission-denied") {
+            showToast(isCurrentEn ? "Microphone permission denied. Please allow mic access." : "মাইক্রোফোনের অনুমতি দেওয়া হয়নি। সেটিংসে অনুমতি দিন।", "error");
+          } else if (e.error === "network") {
+            showToast(isCurrentEn ? "Network error during speech recognition." : "ভয়েস টাইপিংয়ে নেটওয়ার্ক ত্রুটি ঘটেছে।", "error");
+          } else if (e.error !== "no-speech") {
+            showToast(isCurrentEn ? "Microphone error: " + e.error : "মাইক্রোফোনে সমস্যা হয়েছে", "error");
           }
+        };
+
+        speechRecognitionInstance.onend = () => {
+          isSpeechRecording = false;
+          resetMicBtn();
+        };
+
+        try {
+          speechRecognitionInstance.start();
+        } catch (startErr) {
+          console.warn("speechRecognitionInstance.start error:", startErr);
+          resetMicBtn();
+        }
+      }
+
+      micBtn.addEventListener("click", () => {
+        if (isSpeechRecording) {
+          resetMicBtn();
+        } else {
+          startListening();
         }
       });
     }
@@ -5265,9 +5299,10 @@
         }
       } catch {}
 
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isAdmin) {
-        if (timerEl) timerEl.textContent = "সীমাহীন এক্সেস";
-        if (limitBadgeEl) limitBadgeEl.textContent = "আনলিমিটেড বার্তা";
+        if (timerEl) timerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
+        if (limitBadgeEl) limitBadgeEl.textContent = isEn ? "Unlimited Messages" : "আনলিমিটেড বার্তা";
         return;
       }
 
@@ -5301,24 +5336,26 @@
 
       let timeLeftStr = "";
       if (used === 0) {
-        timeLeftStr = "কোটা সম্পূর্ণ পূর্ণ";
+        timeLeftStr = isEn ? "Full Quota Available" : "কোটা সম্পূর্ণ পূর্ণ";
       } else if (hoursLeft > 0) {
-        timeLeftStr = `${toBengaliDigits(hoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${hoursLeft}h ${minsLeft}m ${secsLeft}s` : `${toBengaliDigits(hoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
       } else if (minsLeft > 0) {
-        timeLeftStr = `${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${minsLeft}m ${secsLeft}s` : `${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
       } else {
-        timeLeftStr = `${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        timeLeftStr = isEn ? `${secsLeft}s` : `${toBengaliDigits(secsLeft)} সেকেন্ড`;
       }
 
       if (timerEl) timerEl.textContent = timeLeftStr;
       if (warningEl && remaining <= 0) {
-        warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ${timeLeftStr} পর)`;
+        const warnPrefix = isEn ? "Your message limit has been reached! (Resets in: " : "আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ";
+        const warnSuffix = isEn ? ")" : " পর)";
+        warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnPrefix}${timeLeftStr}${warnSuffix}`;
       }
       if (limitBadgeEl) {
         if (remaining <= 0) {
-          limitBadgeEl.textContent = `বাকি: ০/${toBengaliDigits(limit)} বার্তা (রিসেট: ${timeLeftStr})`;
+          limitBadgeEl.textContent = isEn ? `Remaining: 0/${limit} msgs (Reset: ${timeLeftStr})` : `বাকি: ০/${toBengaliDigits(limit)} বার্তা (রিসেট: ${timeLeftStr})`;
         } else {
-          limitBadgeEl.textContent = `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
+          limitBadgeEl.textContent = isEn ? `Remaining: ${remaining}/${limit} msgs (${hours}h)` : `বাকি: ${toBengaliDigits(remaining)}/${toBengaliDigits(limit)} বার্তা (${toBengaliDigits(hours)} ঘণ্টা)`;
         }
       }
     }
@@ -5331,7 +5368,8 @@
       const warningEl = document.getElementById("accountPlanWarning");
 
       if (valueEl) {
-        const planDisplayNames = { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
+        const isEnPlan = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        const planDisplayNames = isEnPlan ? { Free: "Free", Pro: "Pro", Max: "Max" } : { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
         valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
         valueEl.className = "account-plan-badge plan-" + currentPlan;
       }
@@ -5400,10 +5438,11 @@
         timeLeftStr = `${toBengaliDigits(secsLeft)} সেকেন্ড`;
       }
 
+      const isEnBal = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isAdmin) {
-        if (quotaRemainingEl) quotaRemainingEl.textContent = "আনলিমিটেড";
+        if (quotaRemainingEl) quotaRemainingEl.textContent = isEnBal ? "Unlimited" : "আনলিমিটেড";
         if (quotaTotalEl) quotaTotalEl.textContent = "∞";
-        if (quotaCountWrapEl) quotaCountWrapEl.innerHTML = "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
+        if (quotaCountWrapEl) quotaCountWrapEl.innerHTML = isEnBal ? "<strong>Unlimited</strong> Messages (Admin)" : "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
         if (quotaFillEl) {
           quotaFillEl.style.width = "100%";
           quotaFillEl.className = "account-quota-fill";
@@ -5412,9 +5451,9 @@
           drawerFillEl.style.width = "100%";
           drawerFillEl.className = "drawer-quota-fill";
         }
-        if (quotaTimerEl) quotaTimerEl.textContent = "সীমাহীন এক্সেস";
-        if (quotaSubtextEl) quotaSubtextEl.textContent = "কোনো রেট লিমিট প্রযোজ্য নয়";
-        if (limitBadgeEl) limitBadgeEl.textContent = "আনলিমিটেড বার্তা";
+        if (quotaTimerEl) quotaTimerEl.textContent = isEnBal ? "Unlimited Access" : "সীমাহীন এক্সেস";
+        if (quotaSubtextEl) quotaSubtextEl.textContent = isEnBal ? "No rate limits apply" : "কোনো রেট লিমিট প্রযোজ্য নয়";
+        if (limitBadgeEl) limitBadgeEl.textContent = isEnBal ? "Unlimited Messages" : "আনলিমিটেড বার্তা";
         if (warningEl) warningEl.classList.remove("visible");
       } else {
         const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
@@ -5438,14 +5477,18 @@
             drawerFillEl.className = "drawer-quota-fill";
           }
         }
-        if (quotaRemainingEl) quotaRemainingEl.textContent = toBengaliDigits(remaining);
-        if (quotaTotalEl) quotaTotalEl.textContent = toBengaliDigits(limit);
+        if (quotaRemainingEl) quotaRemainingEl.textContent = isEnBal ? String(remaining) : toBengaliDigits(remaining);
+        if (quotaTotalEl) quotaTotalEl.textContent = isEnBal ? String(limit) : toBengaliDigits(limit);
         if (quotaCountWrapEl) {
-          quotaCountWrapEl.innerHTML = `<strong id="quotaRemainingDigits">${toBengaliDigits(remaining)}</strong> / <span id="quotaTotalDigits">${toBengaliDigits(limit)}</span> বার্তা বাকি`;
+          quotaCountWrapEl.innerHTML = isEnBal 
+            ? `<strong id="quotaRemainingDigits">${remaining}</strong> / <span id="quotaTotalDigits">${limit}</span> msgs left`
+            : `<strong id="quotaRemainingDigits">${toBengaliDigits(remaining)}</strong> / <span id="quotaTotalDigits">${toBengaliDigits(limit)}</span> বার্তা বাকি`;
         }
         if (quotaTimerEl) quotaTimerEl.textContent = timeLeftStr;
         if (quotaSubtextEl) {
-          quotaSubtextEl.textContent = `প্রতি ${toBengaliDigits(hours)} ঘণ্টায় ${toBengaliDigits(limit)}টি বার্তা নবায়ন হয়`;
+          quotaSubtextEl.textContent = isEnBal
+            ? `Refreshes ${limit} messages every ${hours} hours`
+            : `প্রতি ${toBengaliDigits(hours)} ঘণ্টায় ${toBengaliDigits(limit)}টি বার্তা নবায়ন হয়`;
         }
 
         if (limitBadgeEl) {
@@ -5586,7 +5629,7 @@
 
     let MODELS = [
       { id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false },
-      { id: "llama-3.3-70b-versatile", name: "Alo Pro", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false },
+      { id: "alo-pro", name: "Alo Pro", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false },
       { id: "openai/gpt-oss-120b", name: "Alo Ultra", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: true, efficient: false },
       { id: "qwen/qwen3.8-27b", name: "Alo Plus", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false },
       { id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false },
@@ -5727,6 +5770,14 @@
     const modelList = document.getElementById("modelList");
 
     function statusLabel(status) {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      if (isEn) {
+        if (status === "online") return "Online";
+        if (status === "degraded") return "Degraded";
+        if (status === "slow") return "Slow";
+        if (status === "checking") return "Checking...";
+        return "Offline";
+      }
       if (status === "online") return "অনলাইন";
       if (status === "degraded") return "ধীরগতি";
       if (status === "slow") return "অতি ধীর";
@@ -6489,7 +6540,7 @@
     }
     window.showSettingsView = showSettingsView;
 
-    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
 
     const I18N = {
       bn: {
@@ -6837,6 +6888,13 @@
         if (dEmptyTitle) dEmptyTitle.textContent = dict.drawerNoChatsTitle;
         const dEmptySub = dEmptyState.querySelector("div:nth-child(2)");
         if (dEmptySub) dEmptySub.textContent = dict.drawerNoChatsSub;
+        const dLimitBadge = document.getElementById("drawerLimitBadge");
+        if (dLimitBadge) dLimitBadge.textContent = isEn ? "View Limits" : "সীমা দেখুন";
+        const token = localStorage.getItem("alokpoth_token");
+        const dUserName = document.getElementById("drawerUserName");
+        const dUserPlan = document.getElementById("drawerUserPlan");
+        if (!token && dUserName) dUserName.textContent = dict.drawerUserLoggedOut;
+        if (!token && dUserPlan) dUserPlan.textContent = isEn ? "Sign in to unlock all features" : "চ্যাট করতে লগইন করুন";
       }
 
       const dEmptyBtn = document.getElementById("drawerEmptyNewChatBtn");
@@ -8250,9 +8308,10 @@ You must respond ENTIRELY in Bengali (Bangla script), unless the user explicitly
 - SCRIPT PURITY (very important): write every Bengali word using actual Bengali (Bangla) script/letters (বাংলা বর্ণ) - never write a Bengali word using Latin/English letters (no "Banglish").
 - Exception: actual code inside code blocks should stay in its programming language as-is (comments can be in Bengali or English).
 
-Identity rules (follow these exactly):
+Identity rules (CRITICAL - follow strictly):
 - Your one and only name is "${modelDisplayName}". Built by Alokpoth.
-- All models available in this app are Alokpoth's own in-house models.
+- All models available in this app are Alokpoth's own proprietary in-house models.
+- NEVER reveal, mention, or admit to using OpenAI, Google, Anthropic, Meta, Groq, DeepSeek, or any other third-party provider. Always state you are developed by Alokpoth AI.
 
 Capabilities & Code Generation Instructions (CRITICAL):
 - You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
@@ -8422,12 +8481,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     async function handleRegenerateFromBtn(regenBtn) {
       if (isGenerating) return;
-      const token = localStorage.getItem("alokpoth_token");
-      if (!token) {
-        showToast("লগইন ছাড়া মেসেজ পাঠানো যাবে না। দয়া করে আগে লগইন বা সাইন-আপ করুন।", "error");
-        openAuthModal("login");
-        return;
-      }
+      // Guest users are allowed to chat freely within their quota
       if (!hasCredit()) {
         openAccountModal();
         return;

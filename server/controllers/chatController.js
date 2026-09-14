@@ -6,13 +6,19 @@ const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const AiModel = require('../models/AiModel');
 const { getModelConfig, getApiKeyFromSupabase, incrementUserUsage } = require('../../utils/getModelConfig');
 
+const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || '';
+const DEFAULT_GROQ_KEY = process.env.GROQ_API_KEY || '';
+const DEFAULT_OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
+const DEFAULT_BAI_KEY = process.env.BAI_API_KEY || '';
+const DEFAULT_VYCE_KEY = process.env.VYCE_API_KEY || '';
+
 const resolveModelTarget = async (targetModelId, targetModelConfig) => {
   let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
   let targetKey = (targetModelConfig && targetModelConfig.api_key) || null;
   let actualModel = targetModelId || 'gemini-3.6-flash';
   let providerType = 'openrouter';
 
-  const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
+  const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY;
 
   // 1. Model ID Normalization & Provider Resolution
   if (targetModelId.startsWith('gemini-') || targetModelId.includes('gemini') || targetModelConfig?.type === 'gemini') {
@@ -30,42 +36,42 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'openai/gpt-oss-120b';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
   } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b') {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'qwen/qwen3.8-27b';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
   } else if (targetModelId === 'openai/gpt-oss-20b') {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'openai/gpt-oss-20b';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
   } else if (targetModelId === 'openrouter/free' || !targetModelId) {
     providerType = 'openrouter';
     targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
     actualModel = 'openrouter/free';
-    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY;
+    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
   } else if (targetModelId === 'claude-sonnet-4-6') {
     providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'claude-sonnet-4-6';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
   } else if (targetModelId === 'gpt-5.6') {
     providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'gpt-5.6-new';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
   } else if (targetModelId === 'nemotron-ultra-550b') {
     providerType = 'vyce';
     targetUrl = 'https://vyceai.com/v1/chat/completions';
     actualModel = 'deepseek-v4-flash-lr';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY;
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
   } else if (targetModelId === 'mimo-v2.5' || targetModelId === 'hy3') {
     providerType = 'bai';
     targetUrl = 'https://api.b.ai/v1/chat/completions';
     actualModel = targetModelId;
-    if (!targetKey) targetKey = process.env.BAI_API_KEY;
+    if (!targetKey) targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY;
   } else if (targetModelConfig && targetModelConfig.base_url) {
     let bUrl = targetModelConfig.base_url.trim();
     if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions') && !bUrl.includes('streamGenerateContent')) {
@@ -84,13 +90,18 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     }
   }
 
-  // 3. Provider Default Key Fallback
-  if (!targetKey) {
+  // 3. Provider Default Key Fallback & Key Format Validation
+  if (!targetKey || (providerType === 'gemini' && !targetKey.startsWith('AIza')) || (providerType === 'groq' && !targetKey.startsWith('gsk_'))) {
     if (providerType === 'gemini' || targetUrl.includes('googleapis.com')) targetKey = geminiKey;
-    else if (providerType === 'groq' || targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY;
-    else if (providerType === 'bai' || targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY;
-    else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY;
-    else if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY;
+    else if (providerType === 'groq' || targetUrl.includes('groq.com')) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
+    else if (providerType === 'bai' || targetUrl.includes('b.ai')) targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY;
+    else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
+    else if (targetUrl.includes('openrouter.ai')) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
+  }
+
+  // Final sanity check for Gemini URL query param
+  if (providerType === 'gemini' && targetKey && targetUrl.includes('key=')) {
+    targetUrl = targetUrl.replace(/key=[^&]+/, 'key=' + targetKey);
   }
 
   return { targetUrl, targetKey, actualModel, providerType };
@@ -248,7 +259,9 @@ const streamChatCompletions = async (req, res) => {
     if (!response || !response.ok) {
       console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying multi-provider fallback chain...`);
 
-      const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '');
+      const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY;
+      const groqKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
+      const openRouterKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
       const fallbacks = [
         {
           id: 'gemini-3.6-flash',
@@ -258,24 +271,38 @@ const streamChatCompletions = async (req, res) => {
           model: 'gemini-3.6-flash'
         },
         {
+          id: 'gemini-3.5-flash-lite',
+          type: 'gemini',
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?key=${geminiKey}&alt=sse`,
+          key: geminiKey,
+          model: 'gemini-3.5-flash-lite'
+        },
+        {
           id: 'openai/gpt-oss-120b',
           type: 'groq',
           url: 'https://api.groq.com/openai/v1/chat/completions',
-          key: process.env.GROQ_API_KEY,
+          key: groqKey,
           model: 'openai/gpt-oss-120b'
         },
         {
           id: 'qwen/qwen3.8-27b',
           type: 'groq',
           url: 'https://api.groq.com/openai/v1/chat/completions',
-          key: process.env.GROQ_API_KEY,
+          key: groqKey,
           model: 'qwen/qwen3.8-27b'
+        },
+        {
+          id: 'openai/gpt-oss-20b',
+          type: 'groq',
+          url: 'https://api.groq.com/openai/v1/chat/completions',
+          key: groqKey,
+          model: 'openai/gpt-oss-20b'
         },
         {
           id: 'openrouter/free',
           type: 'openrouter',
           url: 'https://openrouter.ai/api/v1/chat/completions',
-          key: process.env.OPENROUTER_API_KEY,
+          key: openRouterKey,
           model: 'openrouter/free'
         }
       ].filter(fb => fb.id !== cleanModel);

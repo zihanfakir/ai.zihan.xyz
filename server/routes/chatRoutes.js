@@ -7,6 +7,7 @@ const { checkRateLimit } = require('../middleware/rateLimitMiddleware');
 // Streaming completions and image generation
 // Note: Per user privacy requirements, chat sessions are stored 100% locally on the device (localStorage) and never on the database.
 router.post('/completions', optionalProtect, checkRateLimit, streamChatCompletions);
+router.post('/', optionalProtect, checkRateLimit, streamChatCompletions);
 router.post('/image', optionalProtect, checkRateLimit, generateImage);
 
 

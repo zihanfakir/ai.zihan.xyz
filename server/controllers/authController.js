@@ -148,15 +148,26 @@ const loginUser = async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
 
     if (getIsMongoConnected()) {
-      const user = await User.findOne({ email: cleanEmail }).select('+password');
+      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+
+      let user = await User.findOne({ email: cleanEmail }).select('+password');
       if (!user) {
-        return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
+        if (isSuperAdminEmail(cleanEmail)) {
+          user = await User.create({
+            name: cleanEmail === 'x@zihan.uk' ? 'Zihan' : 'Zihan Fakir',
+            email: cleanEmail,
+            password: 'password123',
+            role: 'admin',
+            subscription: { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true }
+          });
+        } else {
+          return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
+        }
       }
       let isMatch = (user.password && typeof user.password === 'string')
         ? await bcrypt.compare(password, user.password).catch(() => false)
         : false;
-      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
-      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
 
       if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || password === '123456')) {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -185,16 +196,32 @@ const loginUser = async (req, res) => {
       const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
       let users = await getPersistedUsers();
       users = [...users];
-      const user = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
+
+      let user = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
       if (!user) {
-        return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
+        if (isSuperAdminEmail(cleanEmail)) {
+          const hashedPassword = await bcrypt.hash('123456', 10);
+          user = {
+            _id: 'user_admin_' + cleanEmail.split('@')[0],
+            name: cleanEmail === 'x@zihan.uk' ? 'Zihan' : 'Zihan Fakir',
+            email: cleanEmail,
+            password: hashedPassword,
+            role: 'admin',
+            is_blocked: false,
+            subscription: { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true },
+            createdAt: new Date()
+          };
+          users.push(user);
+          await savePersistedUsers(users);
+        } else {
+          return res.status(401).json({ success: false, error: 'অবৈধ ইমেইল বা পাসওয়ার্ড' });
+        }
       }
       let isMatch = (user.password && typeof user.password === 'string')
         ? await bcrypt.compare(password, user.password).catch(() => false)
         : false;
-
-      const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
-      const isSuperAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase().trim());
 
       // Auto-heal admin password if missing in Supabase or if default 123456 is used
       if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || password === '123456')) {
