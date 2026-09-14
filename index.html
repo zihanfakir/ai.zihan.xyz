@@ -1675,59 +1675,88 @@
     .bubble-file-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 8px; }
 
     .account-panel {
-      padding: 24px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 20px;
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(140, 140, 140, 0.3) transparent;
+      background: var(--bg-main); /* Like #1c1c1e */
     }
-    @media (max-width: 480px) {
-      .account-panel { padding: 16px 12px; }
-    }
-    .account-panel::-webkit-scrollbar {
-      width: 6px;
-    }
-    .account-panel::-webkit-scrollbar-button {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-    }
-    .account-panel::-webkit-scrollbar-track {
-      background: transparent !important;
-    }
-    .account-panel::-webkit-scrollbar-thumb {
-      background: rgba(140, 140, 140, 0.3) !important;
-      border-radius: 999px !important;
-    }
-    .account-panel::-webkit-scrollbar-thumb:hover {
-      background: rgba(140, 140, 140, 0.5) !important;
-    }
-    .account-avatar-row { display: flex; align-items: center; gap: 16px; }
-    .account-avatar {
-      width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; font-weight: 600; flex-shrink: 0;
-    }
-    .account-name { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
-    .account-sub { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
 
-    .account-field { display: flex; flex-direction: column; gap: 8px; }
-    .account-field label { font-size: 0.85rem; color: var(--text-sub); }
-    .account-field input {
-      background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main);
-      padding: 12px 16px; border-radius: 999px; font-size: 1rem; font-family: inherit;
+    .settings-group-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-left: 16px;
+      margin-bottom: 6px;
+      font-weight: 500;
     }
-    .account-field input:focus { outline: none; border-color: var(--accent-color); }
 
-    .account-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .account-stat {
-      background: var(--download-btn-bg); border-radius: 24px; padding: 16px 10px;
+    .settings-group {
+      background: var(--bg-input); /* Like #2c2c2e */
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      background: transparent;
+      border-top: none; border-left: none; border-right: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      color: var(--text-main);
+      font-size: 1rem;
+    }
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+    .settings-row:active {
+      background: rgba(128,128,128,0.1);
+    }
+    
+    .settings-row-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .settings-row-left svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      color: var(--text-main);
+    }
+    
+    .settings-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+    
+    .settings-row-right svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .settings-subtext {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin: -10px 16px 16px;
+      line-height: 1.4;
+    }
       display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
     }
     .account-stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
@@ -3624,268 +3653,86 @@
         <div class="page-header-spacer"></div>
       </div>
       <div class="account-panel">
-        <div class="account-tabs-nav" id="accountTabsNav">
-          <button type="button" class="account-tab-pill active" data-tab="tabProfile">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>প্রোফাইল</span>
+        <div class="settings-group-label">প্রোফাইল</div>
+        <div class="settings-group">
+          <button class="settings-row" type="button" id="setMenuProfile">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>অ্যাকাউন্ট সেটিংস</span>
+            </div>
+            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
           </button>
-          <button type="button" class="account-tab-pill" data-tab="tabPlan">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span>প্ল্যান ও লিমিট</span>
+          <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans.html'">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>প্ল্যান ও আপগ্রেড</span>
+            </div>
+            <div class="settings-row-right">
+              <span id="setMenuPlanName">Free</span>
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
           </button>
-          <button type="button" class="account-tab-pill" data-tab="tabUsage">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            <span>ব্যবহার</span>
+          <button class="settings-row" type="button" id="setMenuRedeem" onclick="const p = prompt('রিডিম কোড লিখুন:'); if(p) redeemPromoCode(p);">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>রিডিম কোড</span>
+            </div>
+            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
           </button>
-          <button type="button" class="account-tab-pill" data-tab="tabSecurity">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>সিকিউরিটি ও রিডিম</span>
+        </div>
+
+        <div class="settings-group-label" style="margin-top: 10px;">অ্যাপ</div>
+        <div class="settings-group">
+          <button class="settings-row" type="button">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>ভাষা</span>
+            </div>
+            <div class="settings-row-right">
+              <span>বাংলা</span>
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </button>
+          <button class="settings-row" type="button" id="setMenuTheme" onclick="if(typeof cycleTheme === 'function') cycleTheme();">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <span>চেহারা (থিম)</span>
+            </div>
+            <div class="settings-row-right">
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
           </button>
         </div>
 
-        <!-- Tab 1: Profile -->
-        <div class="account-tab-panel active" id="tabProfile">
-          <div class="account-avatar-row">
-            <div class="account-avatar" id="accountAvatar">অ</div>
-            <div>
-              <div class="account-name" id="accountNameDisplay">লগইন করা নেই</div>
-              <div class="account-sub">Alokpoth AI ব্যবহারকারী</div>
+        <div class="settings-group-label" style="margin-top: 10px;">সম্পর্কে</div>
+        <div class="settings-group">
+          <button class="settings-row" type="button">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>আপডেটের জন্য চেক করুন</span>
             </div>
-          </div>
-
-          <div class="account-field">
-            <label for="accountNameInput">আপনার নাম</label>
-            <input type="text" id="accountNameInput" placeholder="আপনার নাম লিখুন" maxlength="40">
-          </div>
-
-          <button class="account-action-btn account-save-btn" id="accountSaveBtn" type="button">নাম সংরক্ষণ করুন</button>
-          <button class="account-action-btn account-auth-btn" id="accountAuthBtn" type="button" style="background: var(--accent-color); color: #fff;">লগইন / রেজিস্টার করুন</button>
-          <button class="account-action-btn account-logout-btn" id="accountLogoutBtn" type="button">লগআউট করুন</button>
+            <div class="settings-row-right">
+              <span>v1.0.7</span>
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </button>
+          <button class="settings-row" type="button">
+            <div class="settings-row-left">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>সাহায্য ও প্রতিক্রিয়া</span>
+            </div>
+            <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+          </button>
         </div>
 
-        <!-- Tab 2: Plan & Limits -->
-        <div class="account-tab-panel" id="tabPlan">
-          <div class="account-credit-row">
-            <div class="account-credit-info">
-              <div class="account-plan-badge-row">
-                <span class="account-credit-label">বর্তমান প্ল্যান</span>
-                <span class="account-plan-badge plan-Free" id="accountPlanDisplay">Free</span>
-              </div>
-              <div class="account-plan-expiry-text" id="accountPlanExpiryDisplay">মেয়াদ: আজীবন / মেয়াদহীন</div>
+        <div class="settings-group" style="margin-top: 10px;">
+          <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="logout()">
+            <div class="settings-row-left" style="color: #ef4444;">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>লগ আউট / লগইন</span>
             </div>
-            <div class="account-plan-limit-badge" id="accountPlanLimitBadge" title="প্ল্যানের বার্তা লিমিট">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span id="accountPlanLimitText">১০ বার্তা / ৩ ঘণ্টা</span>
-            </div>
-          </div>
+          </button>
 
-          <!-- Apple HIG Dynamic Subscription Usage Progress & Countdown Meter -->
-          <div class="account-quota-card" id="accountQuotaCard">
-            <div class="account-quota-header">
-              <div class="account-quota-title-wrap">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                <span>বার্তা কোটা স্থিতি</span>
-              </div>
-              <span class="account-quota-count" id="quotaCountDisplay">
-                <strong id="quotaRemainingDigits">১০</strong> / <span id="quotaTotalDigits">১০</span> বার্তা বাকি
-              </span>
-            </div>
-
-            <!-- Apple-style Depleting Quota Progress Track -->
-            <div class="account-quota-track" id="accountQuotaTrack" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" title="কোটা ব্যবহার স্থিতি">
-              <div class="account-quota-fill" id="accountQuotaFill" style="width: 100%;"></div>
-            </div>
-
-            <!-- Real-time Dynamic Reset Countdown Bar -->
-            <div class="account-quota-footer">
-              <div class="quota-timer-wrap">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span>রিসেট হতে বাকি:</span>
-                <span class="quota-timer-value" id="quotaLiveCountdown">০৩ ঘণ্টা ০০ মিনিট</span>
-              </div>
-              <span class="quota-window-subtext" id="quotaWindowSubtext">প্রতি ৩ ঘণ্টায় কোটা নবায়ন হয়</span>
-            </div>
-          </div>
-
-          <div class="account-credit-warning" id="accountPlanWarning">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>আপনার মেসেজ লিমিট শেষ!</span>
-          </div>
-
-          <!-- Plan Limits View Card -->
-          <div class="account-limits-card">
-            <div class="account-limits-top">
-              <div class="account-limits-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                <span>প্ল্যান লিমিট ও সুবিধাসমূহ</span>
-              </div>
-              <button type="button" class="account-limits-toggle-btn" id="accountLimitsToggleBtn">
-                <span id="accountLimitsToggleText">সব প্ল্যান দেখুন</span>
-                <svg id="accountLimitsToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Active Plan Limit Overview -->
-            <div class="account-limits-summary" id="accountLimitsSummary">
-              <div class="account-limit-item">
-                <div class="account-limit-icon">
-                  <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                </div>
-                <div class="account-limit-detail">
-                  <span class="account-limit-label">বার্তা লিমিট</span>
-                  <span class="account-limit-val" id="limitValMessages">৫০ বার্তা / ১ ঘণ্টা</span>
-                </div>
-              </div>
-              <div class="account-limit-item">
-                <div class="account-limit-icon">
-                  <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                </div>
-                <div class="account-limit-detail">
-                  <span class="account-limit-label">মডেল এক্সেস</span>
-                  <span class="account-limit-val" id="limitValModels">সকল ফ্ল্যাগশিপ মডেল</span>
-                </div>
-              </div>
-              <div class="account-limit-item">
-                <div class="account-limit-icon">
-                  <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;"><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
-                </div>
-                <div class="account-limit-detail">
-                  <span class="account-limit-label">অগ্রাধিকার</span>
-                  <span class="account-limit-val" id="limitValSpeed">সর্বোচ্চ আল্ট্রা স্পিড</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- All Plans Comparison Grid -->
-            <div class="account-all-plans-grid" id="accountAllPlansGrid" style="display: none;">
-              <div class="plan-compare-card" id="compareCardFree">
-                <div class="plan-compare-header">
-                  <span class="plan-compare-name">Free</span>
-                  <span class="plan-compare-tag">বেসিক</span>
-                </div>
-                <ul class="plan-compare-features">
-                  <li>১০ বার্তা প্রতি ৩ ঘণ্টায়</li>
-                  <li>ফ্রি এআই মডেলসমূহ</li>
-                  <li>সাধারণ রেসপন্স স্পিড</li>
-                </ul>
-              </div>
-              <div class="plan-compare-card" id="compareCardPro">
-                <div class="plan-compare-header">
-                  <span class="plan-compare-name" style="color: #a855f7;">Pro</span>
-                  <span class="plan-compare-tag" style="background: rgba(168,85,247,0.15); color: #a855f7;">উন্নত</span>
-                </div>
-                <ul class="plan-compare-features">
-                  <li>৩০ বার্তা প্রতি ৩ ঘণ্টায়</li>
-                  <li>সকল প্রো মডেল এক্সেস</li>
-                  <li>টার্বো রেসপন্স স্পিড</li>
-                </ul>
-              </div>
-              <div class="plan-compare-card" id="compareCardMax">
-                <div class="plan-compare-header">
-                  <span class="plan-compare-name" style="color: #f59e0b;">Max</span>
-                  <span class="plan-compare-tag" style="background: rgba(245,158,11,0.15); color: #f59e0b;">সর্বোচ্চ</span>
-                </div>
-                <ul class="plan-compare-features">
-                  <li>৫০ বার্তা প্রতি ১ ঘণ্টায়</li>
-                  <li>সবচেয়ে শক্তিশালী মডেল</li>
-                  <li>সর্বোচ্চ অগ্রাধিকার ও স্পিড</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 3: Usage Stats -->
-        <div class="account-tab-panel" id="tabUsage">
-          <div class="account-stats-grid">
-            <div class="account-stat">
-              <span class="account-stat-value" id="accountStatTokens">0</span>
-              <span class="account-stat-label">মোট টোকেন</span>
-            </div>
-            <div class="account-stat">
-              <span class="account-stat-value" id="accountStatCost">$0.0000</span>
-              <span class="account-stat-label">আনুমানিক খরচ</span>
-            </div>
-            <div class="account-stat">
-              <span class="account-stat-value" id="accountStatMessages">0</span>
-              <span class="account-stat-label">মোট বার্তা</span>
-            </div>
-            <div class="account-stat">
-              <span class="account-stat-value" id="accountStatImages">0</span>
-              <span class="account-stat-label">তৈরি হওয়া ছবি</span>
-            </div>
-            <div class="account-stat">
-              <span class="account-stat-value" id="accountStatDailyCost">$0.0000</span>
-              <span class="account-stat-label">আজকের খরচ</span>
-            </div>
-          </div>
-          <button class="account-action-btn account-reset-btn" id="accountResetBtn" type="button">চ্যাট ও ব্যবহারের হিসাব রিসেট করুন</button>
-        </div>
-
-        <!-- Tab 4: Security & Redeem -->
-        <div class="account-tab-panel" id="tabSecurity">
-          <!-- Redeem Code Section -->
-          <div class="account-redeem-card">
-            <div class="account-redeem-header">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <line x1="2" y1="10" x2="22" y2="10"></line>
-              </svg>
-              <span>রিডিম কোড ব্যবহার করুন</span>
-            </div>
-            <div class="account-redeem-body">
-              <input type="text" id="accountRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX বা কাস্টম কোড" maxlength="50" autocomplete="off" spellcheck="false">
-              <button type="button" id="accountRedeemBtn" class="account-redeem-btn">দাবি করুন</button>
-            </div>
-            <div class="account-redeem-msg" id="accountRedeemMsg"></div>
-          </div>
-
-          <!-- Password Change Card (Logged-in users) -->
-          <div class="account-redeem-card" id="accountPasswordCard" style="display: none;">
-            <div class="account-redeem-header" id="accountPasswordToggleBtn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-                <span>পাসওয়ার্ড পরিবর্তন করুন</span>
-              </div>
-              <svg id="accountPasswordToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </div>
-            <div id="accountPasswordBody" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px;">
-              <div class="account-field">
-                <label for="currentPasswordInput">বর্তমান পাসওয়ার্ড *</label>
-                <input type="password" id="currentPasswordInput" placeholder="বর্তমান পাসওয়ার্ড লিখুন" autocomplete="current-password">
-              </div>
-              <div class="account-field">
-                <label for="newPasswordInput">নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর) *</label>
-                <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
-              </div>
-              <div class="account-field">
-                <label for="confirmPasswordInput">নতুন পাসওয়ার্ড নিশ্চিত করুন *</label>
-                <input type="password" id="confirmPasswordInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" autocomplete="new-password">
-              </div>
-              <div id="passwordChangeMsg" style="font-size: 0.82rem; min-height: 18px;"></div>
-              <button type="button" id="changePasswordSubmitBtn" class="account-redeem-btn" style="width: 100%; border-radius: 999px; padding: 10px 16px; font-size: 0.88rem;">
-                পাসওয়ার্ড সেভ করুন
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -4878,6 +4725,10 @@
         valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
         valueEl.className = "account-plan-badge plan-" + currentPlan;
       }
+      const setMenuPlanName = document.getElementById("setMenuPlanName");
+      if (setMenuPlanName) {
+        setMenuPlanName.textContent = currentPlan;
+      }
 
       const limitBadgeEl = document.getElementById("accountPlanLimitText");
       const limitMsgEl = document.getElementById("limitValMessages");
@@ -5393,7 +5244,7 @@
     const drawerNewChatBtn = document.getElementById("drawerNewChatBtn");
     const quickNewChatBtn = document.getElementById("quickNewChatBtn");
     const drawerSearchInput = document.getElementById("drawerSearchInput");
-    const drawerUserCard = document.getElementById("drawerUserCard");
+    const drawerUserCard = document.getElementById("drawerUserCardWrap");
     const drawerSettingsBtn = document.getElementById("drawerSettingsBtn");
     const drawerThemeBtn = document.getElementById("drawerThemeBtn");
     const navCreditBadge = document.getElementById("navCreditBadge");
@@ -5425,6 +5276,19 @@
     if (quickNewChatBtn) {
       quickNewChatBtn.addEventListener("click", () => {
         startNewChat();
+      });
+    }
+
+    const quickNewChatNavBtn = document.getElementById("quickNewChatNavBtn");
+    if (quickNewChatNavBtn) {
+      quickNewChatNavBtn.addEventListener("click", startNewChat);
+    }
+
+    const drawerEmptyNewChatBtn = document.getElementById("drawerEmptyNewChatBtn");
+    if (drawerEmptyNewChatBtn) {
+      drawerEmptyNewChatBtn.addEventListener("click", () => {
+        startNewChat();
+        closeSidebarDrawer();
       });
     }
 
@@ -5527,10 +5391,23 @@
         sessions = sessions.filter(s => (s.title || "").toLowerCase().includes(q));
       }
 
+      const drawerEmptyState = document.getElementById("drawerEmptyState");
+
       if (!sessions.length) {
-        drawerListEl.innerHTML = `<div style="text-align:center; padding: 24px 12px; color: var(--text-sub); font-size: 0.85rem;">${filterQuery ? "কোনো চ্যাট মেলেনি" : "কোনো সংরক্ষিত চ্যাট নেই"}</div>`;
+        drawerListEl.innerHTML = "";
+        drawerListEl.style.display = "none";
+        if (drawerEmptyState) drawerEmptyState.style.display = "flex";
+        
+        if (filterQuery) {
+            drawerListEl.style.display = "block";
+            if (drawerEmptyState) drawerEmptyState.style.display = "none";
+            drawerListEl.innerHTML = `<div style="text-align:center; padding: 24px 12px; color: var(--text-sub); font-size: 0.85rem;">কোনো চ্যাট মেলেনি</div>`;
+        }
         return;
       }
+      
+      drawerListEl.style.display = "block";
+      if (drawerEmptyState) drawerEmptyState.style.display = "none";
 
       drawerListEl.innerHTML = "";
 
@@ -5813,22 +5690,6 @@
       const dAv = document.getElementById("drawerAvatar");
       if (dName) dName.textContent = displayName;
       if (dAv) dAv.textContent = initial;
-
-      const heroGreeting = document.getElementById("heroGreetingText");
-      if (heroGreeting) {
-        if (!token) {
-          heroGreeting.textContent = "আজ কীভাবে সাহায্য করতে পারি?";
-        } else {
-          const hr = new Date().getHours();
-          let timeGreeting = "আজ";
-          if (hr >= 5 && hr < 12) timeGreeting = "শুভ সকাল";
-          else if (hr >= 12 && hr < 16) timeGreeting = "শুভ দুপুর";
-          else if (hr >= 16 && hr < 19) timeGreeting = "শুভ বিকেল";
-          else timeGreeting = "শুভ সন্ধ্যা";
-          const firstName = displayName.split(" ")[0] || displayName;
-          heroGreeting.textContent = `${timeGreeting}, ${firstName}! আজ কীভাবে সাহায্য করতে পারি?`;
-        }
-      }
     }
 
     function renderAccountStats() {
@@ -6134,32 +5995,40 @@
       });
     }
 
-    accountSaveBtn.addEventListener("click", async () => {
-      const name = accountNameInput.value.trim();
-      try { localStorage.setItem("alokpoth_account_name", name); } catch {}
-      applyAccountName(name);
+    const setMenuProfile = document.getElementById("setMenuProfile");
+    if (setMenuProfile) {
+      setMenuProfile.addEventListener("click", async () => {
+        const token = localStorage.getItem("alokpoth_token");
+        if (!token) {
+          openAuthModal("login");
+          return;
+        }
+        const currentName = localStorage.getItem("alokpoth_account_name") || "";
+        const name = prompt("আপনার নতুন নাম লিখুন:", currentName);
+        if (name === null) return; // cancelled
+        const cleanName = name.trim();
+        try { localStorage.setItem("alokpoth_account_name", cleanName); } catch {}
+        applyAccountName(cleanName);
 
-      const token = localStorage.getItem("alokpoth_token");
-      if (token && name) {
-        try {
-          const res = await fetch(`${API_BASE}/auth/me`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ name })
-          });
-          const data = await res.json();
-          if (data.success && data.user) {
-            localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
-          }
-        } catch (e) {}
-      }
-
-      closeAccountModal();
-      showToast("নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
-    });
+        if (cleanName) {
+          try {
+            const res = await fetch(`${API_BASE}/auth/me`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({ name: cleanName })
+            });
+            const data = await res.json();
+            if (data.success && data.user) {
+              localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
+            }
+          } catch (e) {}
+        }
+        showToast("নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
+      });
+    }
 
     function performAccountLogout(force = false) {
       const doLogout = () => {
