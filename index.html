@@ -7489,9 +7489,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
           } else if (!finalContent && finalReasoning) {
-             html += `<div class="content-block" style="opacity: 0.8; font-style: italic;">
-               <strong>মডেলের চিন্তা:</strong><br><br>
-               ${safeMarkdown(finalReasoning)}
+             html += `<div class="content-block" style="color: var(--error-color); font-weight: 500;">
+               সার্ভারের সময়সীমা (৬০ সেকেন্ড) শেষ হওয়ার কারণে মডেলটি উত্তর তৈরি করতে ব্যর্থ হয়েছে।
              </div>`;
           }
 
@@ -8366,14 +8365,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
            } else if (!apiFinished) {
              html += `<span class="streaming-cursor"></span>`;
            } else if (apiFinished && !finalContent && finalReasoning) {
-             // Fallback: If the model ONLY outputted reasoning and no answer, show the reasoning so the message isn't blank
-             html += `<div class="content-block" style="opacity: 0.8; font-style: italic;">
-               <strong>মডেলের চিন্তা:</strong><br><br>
-               ${safeMarkdown(finalReasoning)}
+             // If it finished (or timed out) but only has thoughts, DO NOT show the messy thoughts.
+             // Show a polite error explaining the timeout.
+             html += `<div class="content-block" style="color: var(--error-color); font-weight: 500;">
+               সার্ভারের সময়সীমা (৬০ সেকেন্ড) শেষ হওয়ার কারণে মডেলটি উত্তর তৈরি করতে ব্যর্থ হয়েছে।<br><br>
+               <span style="font-size: 0.9em; opacity: 0.8; font-weight: normal;">পরামর্শ: থিংকিং মডেলগুলো (যেমন DeepSeek R1) অনেক সময় নেয়। দ্রুত উত্তরের জন্য 'Alo Elite' বা 'Gemini Flash' মডেলগুলো ব্যবহার করুন।</span>
              </div>`;
            }
            try { aiTextElement.innerHTML = html; } 
-           catch { aiTextElement.textContent = finalContent || finalReasoning; }
+           catch { aiTextElement.textContent = finalContent || "সার্ভারের সময়সীমা (৬০ সেকেন্ড) শেষ হওয়ার কারণে মডেলটি উত্তর তৈরি করতে ব্যর্থ হয়েছে।"; }
         };
 
         const processQueue = () => {
