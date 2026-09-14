@@ -148,6 +148,19 @@ const streamChatCompletions = async (req, res) => {
       aiModelConfig = await getModelConfig(cleanModel);
     }
 
+    // Admin-configured model name: models must always introduce themselves by this name
+    const adminModelName = (aiModelConfig && typeof aiModelConfig.name === 'string' && aiModelConfig.name.trim())
+      ? aiModelConfig.name.trim()
+      : (cleanModel || 'Alo AI');
+
+    const modelIdentityDirective = `=== MANDATORY MODEL IDENTITY DIRECTIVE (ABSOLUTE PRIORITY OVERRIDE) ===
+Your official name is "${adminModelName}". You were developed exclusively by Alokpoth AI (আলোকপথ).
+- When asked who you are ("তুমি কে?", "Who are you?"), what your name is ("তোমার নাম কি?", "What is your name?"), or who created you:
+  - If replying in Bengali, you MUST explicitly say: "আমি ${adminModelName}, আলোকপথ (Alokpoth AI) দ্বারা নির্মিত একটি এআই অ্যাসিস্ট্যান্ট।"
+  - If replying in English, you MUST explicitly say: "I am ${adminModelName}, an AI assistant developed by Alokpoth AI."
+- NEVER mention, reveal, or admit to being Google, Gemini, OpenAI, ChatGPT, Anthropic, Claude, Meta, Llama, Groq, DeepSeek, or any other third-party company.
+- You have NO other name. Your name is ONLY "${adminModelName}".`;
+
     let { targetUrl, targetKey, actualModel, providerType } = await resolveModelTarget(cleanModel, aiModelConfig);
 
     // Upstream abort controller: triggered ONLY if client terminates response stream early
@@ -170,10 +183,10 @@ const streamChatCompletions = async (req, res) => {
       try {
         if (pType === 'gemini') {
           const geminiContents = [];
-          let systemInstructionText = '';
+          let systemInstructionText = modelIdentityDirective;
           for (const m of safeMessages) {
             if (m.role === 'system') {
-              systemInstructionText += (systemInstructionText ? '\n' : '') + (typeof m.content === 'string' ? m.content : '');
+              systemInstructionText += '\n\n' + (typeof m.content === 'string' ? m.content : '');
             } else {
               let parts = [];
               if (typeof m.content === 'string') {
@@ -225,9 +238,20 @@ const streamChatCompletions = async (req, res) => {
           const h = { 'Content-Type': 'application/json' };
           if (key) h['Authorization'] = `Bearer ${key}`;
 
+          const safeMessagesWithIdentity = [...safeMessages];
+          const sysIdx = safeMessagesWithIdentity.findIndex(m => m.role === 'system');
+          if (sysIdx >= 0) {
+            safeMessagesWithIdentity[sysIdx] = {
+              ...safeMessagesWithIdentity[sysIdx],
+              content: modelIdentityDirective + '\n\n' + (typeof safeMessagesWithIdentity[sysIdx].content === 'string' ? safeMessagesWithIdentity[sysIdx].content : '')
+            };
+          } else {
+            safeMessagesWithIdentity.unshift({ role: 'system', content: modelIdentityDirective });
+          }
+
           const p = {
             model: modName,
-            messages: safeMessages,
+            messages: safeMessagesWithIdentity,
             stream: true
           };
 

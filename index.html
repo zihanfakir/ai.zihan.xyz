@@ -4212,7 +4212,7 @@
       <div class="empty-state" id="emptyState">
         <div id="heroGreetingText" style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em;">How can I help you today?</div>
         
-        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 0;">
+        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 0; display: none;">
           <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0;">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </span>
@@ -5595,16 +5595,7 @@
 
           MODELS = data.models.map(m => {
             const prev = statusMap.get(m.id) || {};
-            let cleanName = (m.name || "Alo AI")
-              .replace(/OSS\s*120B/gi, 'Ultra')
-              .replace(/120B/gi, 'Ultra')
-              .replace(/Qwen/gi, 'Plus')
-              .replace(/Gemini/gi, 'Flash')
-              .replace(/Groq/gi, 'Pro')
-              .replace(/HY3/gi, 'Vision')
-              .replace(/Mimo/gi, 'Swift')
-              .replace(/Llama/gi, 'Pro')
-              .trim();
+            const cleanName = (typeof m.name === "string" && m.name.trim()) ? m.name.trim() : (m.id || "Alo AI");
             return {
               id: m.id,
               name: cleanName,
@@ -5626,6 +5617,15 @@
           } else {
             selectedModelId = MODELS[0]?.id || "gemini-3.6-flash";
             try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
+          }
+
+          const currentModelObj = MODELS.find(m => m.id === selectedModelId) || MODELS[0];
+          if (currentModelObj) {
+            const curLabel = document.getElementById("modelTriggerLabel");
+            if (curLabel) curLabel.textContent = currentModelObj.name;
+            if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
+              messagesHistory[0].content = buildSystemPrompt(currentModelObj.name, true, true);
+            }
           }
 
           renderModelList();

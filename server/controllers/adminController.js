@@ -884,7 +884,7 @@ const updateModel = async (req, res) => {
       if (mongoModel) {
         if (premium !== undefined) mongoModel.premium = Boolean(premium);
         if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
-        if (name !== undefined) mongoModel.name = name;
+        if (name !== undefined) mongoModel.name = (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI');
         if (cleanBaseUrl !== undefined) mongoModel.base_url = cleanBaseUrl;
         if (hasValidKey) mongoModel.api_key = api_key.trim();
         else if (shouldClearKey) mongoModel.api_key = '';
@@ -892,7 +892,7 @@ const updateModel = async (req, res) => {
       } else {
         await AiModel.create({
           model_id: modelId,
-          name: name || modelId,
+          name: (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI'),
           base_url: cleanBaseUrl || '',
           api_key: hasValidKey ? api_key.trim() : '',
           premium: Boolean(premium),
@@ -914,7 +914,7 @@ const updateModel = async (req, res) => {
       model = {
         id: modelId,
         model_id: modelId,
-        name: name || modelId,
+        name: (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI'),
         base_url: cleanBaseUrl || '',
         api_key: hasValidKey ? api_key.trim() : (dbKey || ''),
         premium: Boolean(premium),
@@ -927,7 +927,7 @@ const updateModel = async (req, res) => {
     } else {
       model.id = modelId;
       model.model_id = modelId;
-      if (name !== undefined) model.name = name;
+      if (name !== undefined) model.name = (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI');
       if (cleanBaseUrl !== undefined) model.base_url = cleanBaseUrl;
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);

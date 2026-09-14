@@ -17,17 +17,7 @@ const { memoryStore } = require('../config/memoryStore');
 router.get('/models', async (req, res) => {
   try {
     const sanitizeModel = (m) => {
-      let cleanName = m.name || 'Alo AI';
-      cleanName = cleanName
-        .replace(/OSS\s*120B/gi, 'Ultra')
-        .replace(/120B/gi, 'Ultra')
-        .replace(/Qwen/gi, 'Plus')
-        .replace(/Gemini/gi, 'Flash')
-        .replace(/Groq/gi, 'Pro')
-        .replace(/HY3/gi, 'Vision')
-        .replace(/Mimo/gi, 'Swift')
-        .replace(/Llama/gi, 'Pro')
-        .trim();
+      const cleanName = (typeof m.name === 'string' && m.name.trim()) ? m.name.trim() : (m.id || m.model_id || 'Alo AI');
 
       return {
         id: m.id || m.model_id,
