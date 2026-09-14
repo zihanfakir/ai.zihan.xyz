@@ -122,11 +122,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableHighRefreshRate() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val display = windowManager.defaultDisplay
-            val maxMode = display.supportedModes.maxByOrNull { it.refreshRate }
+            val currentDisplay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                this.display
+            } else {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay
+            }
+            val maxMode = currentDisplay?.supportedModes?.maxByOrNull { it.refreshRate }
             maxMode?.let {
                 window.attributes = window.attributes.apply {
                     preferredDisplayModeId = it.modeId
+                    preferredRefreshRate = it.refreshRate
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        preferredMinDisplayRefreshRate = it.refreshRate
+                        preferredMaxDisplayRefreshRate = it.refreshRate
+                    }
                 }
             }
         }
@@ -155,6 +165,9 @@ class MainActivity : AppCompatActivity() {
             setSupportZoom(false)
             builtInZoomControls = false
             displayZoomControls = false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                offscreenPreRaster = true
+            }
             userAgentString = "$userAgentString AloAI-Android/1.0"
         }
 

@@ -723,8 +723,17 @@
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("alokpoth_token");
-        localStorage.removeItem("alokpoth_user");
+        try {
+          localStorage.removeItem("alokpoth_token");
+          localStorage.removeItem("alokpoth_user");
+          localStorage.removeItem("alokpoth_account_name");
+          localStorage.removeItem("alokpoth_plan_expires_at");
+          localStorage.removeItem("alokpoth_plan_expiry");
+          localStorage.removeItem("alokpoth_usage_window");
+          localStorage.setItem("alokpoth_current_plan", "Free");
+          localStorage.setItem("alokpoth_plan", "Free");
+          localStorage.setItem("alokpoth_user_plan", "Free");
+        } catch (e) {}
         showAlert("লগআউট সফল হয়েছে!", "success");
         setTimeout(() => {
           window.location.reload();

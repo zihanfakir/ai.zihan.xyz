@@ -225,8 +225,12 @@ const getMe = async (req, res) => {
     let rateLimit = null;
     let usage = null;
     
-    // Auto-downgrade expired subscriptions before computing quota and returning user object
-    if (user.subscription && user.subscription.plan_name !== 'Free' && user.subscription.expires_at) {
+    const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
+    if (isVerifiedAdmin) {
+      if (!user.subscription || user.subscription.plan_name !== 'Max' || user.subscription.expires_at !== null) {
+        user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
+      }
+    } else if (user.subscription && user.subscription.plan_name !== 'Free' && user.subscription.expires_at) {
       if (new Date() > new Date(user.subscription.expires_at)) {
         user.subscription.plan_name = 'Free';
         user.subscription.expires_at = null;
@@ -251,8 +255,6 @@ const getMe = async (req, res) => {
         } catch {}
       }
     }
-
-    const isVerifiedAdmin = user.role === 'admin' || (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com');
     if (!isVerifiedAdmin) {
       const Plan = require('../models/Plan');
       const UsageLog = require('../models/UsageLog');

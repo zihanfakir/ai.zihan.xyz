@@ -12,9 +12,13 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
   let actualModel = targetModelId || 'gemini-3.5-flash-lite';
 
   // 1. Model ID Normalization & Provider Resolution
-  if (targetModelId === 'openai/gpt-oss-120b' || targetModelId === 'llama-3.3-70b-versatile') {
+  if (targetModelId === 'openai/gpt-oss-120b') {
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
     actualModel = 'openai/gpt-oss-120b';
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY;
+  } else if (targetModelId === 'llama-3.3-70b-versatile') {
+    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    actualModel = 'llama-3.3-70b-versatile';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY;
   } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b') {
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
@@ -225,6 +229,14 @@ const streamChatCompletions = async (req, res) => {
 
     return new Promise((resolve) => {
       let isResolved = false;
+      const onClientClose = () => {
+        if (response && response.body && typeof response.body.destroy === 'function') {
+          try { response.body.destroy(); } catch {}
+        }
+        safeResolve();
+      };
+      res.on('close', onClientClose);
+
       const safeResolve = () => {
         if (!isResolved) {
           isResolved = true;

@@ -876,13 +876,11 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      scroll-behavior: smooth;
       background: var(--bg-main);
       contain: layout paint;
-      /* Force GPU Compositing for smooth 60fps on low-end devices */
+      /* Force GPU Compositing for smooth 144fps/60fps on all devices */
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
-      will-change: transform;
       min-width: 0;
     }
 
@@ -3954,7 +3952,7 @@
         </div>
         <div class="settings-subview-content">
           <div class="settings-card">
-            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="redeemCode">প্রোমো কোড ব্যবহার করুন</div>
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="redeemPromoTitle">প্রোমো কোড ব্যবহার করুন</div>
             <div class="settings-field">
               <label class="settings-field-label">ভাউচার বা রিডিম কোড</label>
               <input type="text" class="settings-field-input" id="subRedeemInput" placeholder="যেমন: ALO-PRO-XXXXXX বা কোড" maxlength="50" style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;" autocomplete="off" spellcheck="false">
@@ -4008,6 +4006,10 @@
           <div class="settings-group">
             <button class="settings-select-item" id="themeOptDark" type="button" onclick="selectAppTheme('dark')">
               <span data-i18n="themeDark">ডার্ক (Dark - ডিফল্ট)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptSapphire" type="button" onclick="selectAppTheme('sapphire')">
+              <span data-i18n="themeSapphire">স্যাফায়ার (Sapphire - নেভি ব্লু)</span>
               <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
             <button class="settings-select-item" id="themeOptLight" type="button" onclick="selectAppTheme('light')">
@@ -4625,63 +4627,88 @@
       }
     });
 
+    function handleDismissableLayers() {
+      // 1. Custom Alert / Confirm Dialog
+      const customOverlay = document.getElementById("customDialogOverlay");
+      if (customOverlay && customOverlay.classList.contains("open")) {
+        if (typeof closeCustomUI === "function") closeCustomUI(false);
+        return true;
+      }
+      // 2. Attach Menu Popup
+      const attachMenu = document.getElementById("attachMenu");
+      if (attachMenu && attachMenu.classList.contains("open")) {
+        attachMenu.classList.remove("open");
+        return true;
+      }
+      // 3. Auth Modal
+      const authModal = document.getElementById("authModalOverlay");
+      if (authModal && authModal.classList.contains("open")) {
+        if (typeof closeAuthModal === "function") closeAuthModal();
+        return true;
+      }
+      // 4. App Download Modal
+      const appDlModal = document.getElementById("appDownloadModalOverlay");
+      if (appDlModal && appDlModal.classList.contains("open")) {
+        if (typeof closeAppDownloadModal === "function") closeAppDownloadModal();
+        else {
+          appDlModal.classList.remove("open");
+          appDlModal.style.display = "none";
+        }
+        return true;
+      }
+      // 5. Chat History Modal
+      const historyModal = document.getElementById("chatHistoryModalOverlay");
+      if (historyModal && historyModal.classList.contains("open")) {
+        if (typeof closeChatHistoryModal === "function") closeChatHistoryModal();
+        return true;
+      }
+      // 6. Settings / Account Modal (Subpage-aware)
+      const accountModal = document.getElementById("accountModalOverlay");
+      if (accountModal && accountModal.classList.contains("open")) {
+        const activeSubview = accountModal.querySelector(".settings-subview.active");
+        if (activeSubview && activeSubview.id !== "settingsMainView" && typeof showSettingsView === "function") {
+          showSettingsView("settingsMainView");
+          return true;
+        }
+        if (typeof closeAccountModal === "function") closeAccountModal();
+        return true;
+      }
+      // 7. AI Model Modal
+      const modelModal = document.getElementById("modelModalOverlay");
+      if (modelModal && modelModal.classList.contains("open")) {
+        if (typeof closeModal === "function") closeModal();
+        return true;
+      }
+      // 8. Brand Menu Overlay
+      const brandMenu = document.getElementById("brandMenuOverlay");
+      if (brandMenu && brandMenu.classList.contains("open")) {
+        if (typeof closeBrandMenu === "function") closeBrandMenu();
+        return true;
+      }
+      // 9. Sidebar Drawer
+      const drawer = document.getElementById("sidebarDrawer");
+      if (drawer && drawer.classList.contains("open")) {
+        if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+        else {
+          drawer.classList.remove("open");
+          const backdrop = document.getElementById("drawerBackdrop");
+          if (backdrop) backdrop.classList.remove("open");
+        }
+        return true;
+      }
+      return false;
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        const customOverlay = document.getElementById("customDialogOverlay");
-        if (customOverlay && customOverlay.classList.contains("open")) {
-          closeCustomUI(false);
-          return;
-        }
-        if (typeof closeModal === "function" && modelModalOverlay && modelModalOverlay.classList.contains("open")) {
-          closeModal();
-          return;
-        }
-        if (typeof closeAccountModal === "function" && accountModalOverlay && accountModalOverlay.classList.contains("open")) {
-          closeAccountModal();
-          return;
-        }
-        if (typeof closeAuthModal === "function" && authModalOverlay && authModalOverlay.classList.contains("open")) {
-          closeAuthModal();
-          return;
-        }
-        if (typeof closeChatHistoryModal === "function" && chatHistoryModalOverlay && chatHistoryModalOverlay.classList.contains("open")) {
-          closeChatHistoryModal();
-          return;
-        }
-        if (typeof closeBrandMenu === "function" && brandMenuOverlay && brandMenuOverlay.classList.contains("open")) {
-          closeBrandMenu();
-          return;
+        if (handleDismissableLayers()) {
+          e.preventDefault();
         }
       }
     });
 
     window.handleAppBackButton = function() {
-      const customOverlay = document.getElementById("customDialogOverlay");
-      if (customOverlay && customOverlay.classList.contains("open")) {
-        closeCustomUI(false);
-        return true;
-      }
-      if (typeof closeModal === "function" && modelModalOverlay && modelModalOverlay.classList.contains("open")) {
-        closeModal();
-        return true;
-      }
-      if (typeof closeAccountModal === "function" && accountModalOverlay && accountModalOverlay.classList.contains("open")) {
-        closeAccountModal();
-        return true;
-      }
-      if (typeof closeAuthModal === "function" && authModalOverlay && authModalOverlay.classList.contains("open")) {
-        closeAuthModal();
-        return true;
-      }
-      if (typeof closeChatHistoryModal === "function" && chatHistoryModalOverlay && chatHistoryModalOverlay.classList.contains("open")) {
-        closeChatHistoryModal();
-        return true;
-      }
-      if (typeof closeBrandMenu === "function" && brandMenuOverlay && brandMenuOverlay.classList.contains("open")) {
-        closeBrandMenu();
-        return true;
-      }
-      return false;
+      return handleDismissableLayers();
     };
 
     const PLAN_STORAGE_KEY = "alokpoth_current_plan";
@@ -5908,7 +5935,7 @@
       }, { passive: true });
 
       btn.addEventListener("click", () => {
-        scrollToBottom();
+        scrollToBottom(true, "smooth");
         triggerHaptic("light");
       });
     }
@@ -6227,8 +6254,10 @@
         changePassTitle: "পাসওয়ার্ড পরিবর্তন",
         savePassBtn: "পাসওয়ার্ড আপডেট করুন",
         redeemBtn: "কোড রিডিম করুন",
+        redeemPromoTitle: "প্রোমো কোড ব্যবহার করুন",
         redeemHint: "যেকোনো প্রোমো কোড বা ভাউচার কোড ব্যবহার করে আপনার একাউন্ট প্রো বা ম্যাক্স প্ল্যানে তাৎক্ষণিক আপগ্রেড করতে পারবেন।",
         themeDark: "ডার্ক (Dark - ডিফল্ট)",
+        themeSapphire: "স্যাফায়ার (Sapphire - নেভি ব্লু)",
         themeLight: "লাইট (Light)",
         themeEyecare: "আইকেয়ার (Eye Care - সেপিয়া)",
         themeOled: "ওলেড (OLED - খাঁটি কালো)",
@@ -6258,8 +6287,10 @@
         changePassTitle: "Change Password",
         savePassBtn: "Update Password",
         redeemBtn: "Claim Code",
+        redeemPromoTitle: "Use Promo Code",
         redeemHint: "Upgrade your account instantly with any voucher or promo code.",
         themeDark: "Dark (Default)",
+        themeSapphire: "Sapphire (Deep Navy Blue)",
         themeLight: "Light",
         themeEyecare: "Eye Care (Sepia)",
         themeOled: "OLED (Pure Black)",
@@ -6323,6 +6354,7 @@
       const current = document.documentElement.getAttribute("data-theme") || "dark";
       const themeItems = {
         dark: document.getElementById("themeOptDark"),
+        sapphire: document.getElementById("themeOptSapphire"),
         light: document.getElementById("themeOptLight"),
         eyecare: document.getElementById("themeOptEyecare"),
         oled: document.getElementById("themeOptOled")
@@ -6397,18 +6429,20 @@
         clearInterval(accountCountdownInterval);
         accountCountdownInterval = null;
       }
-      const curP = document.getElementById("currentPasswordInput");
-      const newP = document.getElementById("newPasswordInput");
-      const cnfP = document.getElementById("confirmPasswordInput");
-      const msgP = document.getElementById("passwordChangeMsg");
-      const bdyP = document.getElementById("accountPasswordBody");
-      const icnP = document.getElementById("accountPasswordToggleIcon");
-      if (curP) curP.value = "";
+      const oldP = document.getElementById("subAccountOldPass");
+      const newP = document.getElementById("subAccountNewPass");
+      const cnfP = document.getElementById("subAccountConfirmPass");
+      const passMsg = document.getElementById("subAccountPassMsg");
+      const redIn = document.getElementById("subRedeemInput");
+      const redMsg = document.getElementById("subRedeemMsg");
+      const feedIn = document.getElementById("subFeedbackInput");
+      if (oldP) oldP.value = "";
       if (newP) newP.value = "";
       if (cnfP) cnfP.value = "";
-      if (msgP) { msgP.textContent = ""; msgP.className = ""; }
-      if (bdyP) bdyP.style.display = "none";
-      if (icnP) icnP.style.transform = "rotate(0deg)";
+      if (passMsg) { passMsg.textContent = ""; passMsg.style.color = ""; }
+      if (redIn) redIn.value = "";
+      if (redMsg) { redMsg.textContent = ""; redMsg.style.color = ""; }
+      if (feedIn) feedIn.value = "";
     }
 
     if (accountMenuBtn) accountMenuBtn.addEventListener("click", openAccountModal);
@@ -6436,104 +6470,6 @@
 
     if (typeof syncPlanLimitsFromServer === "function") {
       syncPlanLimitsFromServer();
-    }
-
-    const accountRedeemInput = document.getElementById("accountRedeemInput");
-    const accountRedeemBtn = document.getElementById("accountRedeemBtn");
-    const accountRedeemMsg = document.getElementById("accountRedeemMsg");
-
-    if (accountRedeemBtn && accountRedeemInput) {
-      accountRedeemBtn.addEventListener("click", async () => {
-        const rawCode = accountRedeemInput.value.trim().toUpperCase();
-        if (!rawCode) {
-          if (accountRedeemMsg) {
-            accountRedeemMsg.textContent = "অনুগ্রহ করে রিডিম কোডটি প্রবেশ করান!";
-            accountRedeemMsg.className = "account-redeem-msg show error";
-          }
-          accountRedeemInput.focus();
-          return;
-        }
-
-        accountRedeemBtn.disabled = true;
-        accountRedeemBtn.textContent = "যাচাই হচ্ছে...";
-        if (accountRedeemMsg) {
-          accountRedeemMsg.textContent = "";
-          accountRedeemMsg.className = "account-redeem-msg";
-        }
-
-        try {
-          const token = localStorage.getItem("alokpoth_token");
-          if (!token) {
-            showToast("রিডিম কোড ব্যবহার করার জন্য অনুগ্রহ করে প্রথমে লগইন করুন!", "error");
-            if (accountRedeemMsg) {
-              accountRedeemMsg.textContent = "রিডিম কোড ব্যবহারের জন্য আপনাকে লগইন করতে হবে।";
-              accountRedeemMsg.className = "account-redeem-msg show error";
-            }
-            accountRedeemBtn.disabled = false;
-            accountRedeemBtn.textContent = "দাবি করুন";
-            openAuthModal();
-            return;
-          }
-
-          const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
-          const res = await fetch(`${API_BASE}/redeem/claim`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ code: rawCode })
-          });
-          const data = await res.json();
-
-          if (res.ok && data.success) {
-            const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
-            const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
-
-            if (data.token) {
-              try { localStorage.setItem("alokpoth_token", data.token); } catch {}
-            }
-            currentPlan = newPlan;
-            saveCurrentPlan(newPlan);
-            if (expiresAt) {
-              try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
-            }
-            renderCreditBalance();
-            if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
-            if (typeof updateAuthUIState === "function") updateAuthUIState();
-            if (typeof updateSendAvailability === "function") updateSendAvailability();
-
-            accountRedeemInput.value = "";
-            if (accountRedeemMsg) {
-              accountRedeemMsg.textContent = data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`;
-              accountRedeemMsg.className = "account-redeem-msg show success";
-            }
-            showToast(data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
-            triggerConfetti();
-            soundEngine.playSuccess();
-            triggerHaptic("success");
-            updateNavbarCreditBadge();
-          } else {
-            const errMsg = data.error || "রিডিম করতে ব্যর্থ হয়েছে! কোডটি পুনরায় পরীক্ষা করুন।";
-            if (accountRedeemMsg) {
-              accountRedeemMsg.textContent = errMsg;
-              accountRedeemMsg.className = "account-redeem-msg show error";
-            }
-            showToast(errMsg, "error");
-            soundEngine.playError();
-            triggerHaptic("error");
-          }
-        } catch (err) {
-          const errMsg = "সার্ভারের সাথে যোগাযোগ করা যায়নি। অনুগ্রহ করে ইন্টারনেট সংযোগ চেক করুন।";
-          if (accountRedeemMsg) {
-            accountRedeemMsg.textContent = errMsg;
-            accountRedeemMsg.className = "account-redeem-msg show error";
-          }
-          showToast(errMsg, "error");
-          soundEngine.playError();
-          triggerHaptic("error");
-        } finally {
-          accountRedeemBtn.disabled = false;
-          accountRedeemBtn.textContent = "দাবি করুন";
-        }
-      });
     }
 
     window.redeemPromoCode = async function(code) {
@@ -6609,6 +6545,16 @@
       });
     }
 
+    const subAccountNameInput = document.getElementById("subAccountNameInput");
+    if (subAccountNameInput) {
+      subAccountNameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (subAccountSaveBtn) subAccountSaveBtn.click();
+        }
+      });
+    }
+
     const subAccountPassSubmitBtn = document.getElementById("subAccountPassSubmitBtn");
     if (subAccountPassSubmitBtn) {
       subAccountPassSubmitBtn.addEventListener("click", async () => {
@@ -6617,9 +6563,12 @@
           showToast("দয়া করে প্রথমে লগইন করুন", "error");
           return;
         }
-        const oldPass = (document.getElementById("subAccountOldPass")?.value || "").trim();
-        const newPass = (document.getElementById("subAccountNewPass")?.value || "").trim();
-        const cnfPass = (document.getElementById("subAccountConfirmPass")?.value || "").trim();
+        const oldPassEl = document.getElementById("subAccountOldPass");
+        const newPassEl = document.getElementById("subAccountNewPass");
+        const cnfPassEl = document.getElementById("subAccountConfirmPass");
+        const oldPass = (oldPassEl?.value || "").trim();
+        const newPass = (newPassEl?.value || "").trim();
+        const cnfPass = (cnfPassEl?.value || "").trim();
         const msgEl = document.getElementById("subAccountPassMsg");
 
         if (!oldPass || !newPass || !cnfPass) {
@@ -6635,8 +6584,9 @@
           return;
         }
 
+        const btnSpan = subAccountPassSubmitBtn.querySelector("span") || subAccountPassSubmitBtn;
         subAccountPassSubmitBtn.disabled = true;
-        subAccountPassSubmitBtn.textContent = "আপডেট হচ্ছে...";
+        btnSpan.textContent = currentLanguage === 'en' ? "Updating..." : "আপডেট হচ্ছে...";
         try {
           const res = await fetch(`${API_BASE}/auth/change-password`, {
             method: "PUT",
@@ -6645,11 +6595,11 @@
           });
           const data = await res.json();
           if (res.ok && data.success) {
-            if (msgEl) { msgEl.textContent = "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"; msgEl.style.color = "#10b981"; }
-            showToast("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
-            document.getElementById("subAccountOldPass").value = "";
-            document.getElementById("subAccountNewPass").value = "";
-            document.getElementById("subAccountConfirmPass").value = "";
+            if (msgEl) { msgEl.textContent = data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"; msgEl.style.color = "#10b981"; }
+            showToast(data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+            if (oldPassEl) oldPassEl.value = "";
+            if (newPassEl) newPassEl.value = "";
+            if (cnfPassEl) cnfPassEl.value = "";
           } else {
             const err = data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে";
             if (msgEl) { msgEl.textContent = err; msgEl.style.color = "#ef4444"; }
@@ -6659,10 +6609,24 @@
           if (msgEl) { msgEl.textContent = "সার্ভার এরর"; msgEl.style.color = "#ef4444"; }
         } finally {
           subAccountPassSubmitBtn.disabled = false;
-          subAccountPassSubmitBtn.textContent = currentLanguage === 'en' ? "Update Password" : "পাসওয়ার্ড আপডেট করুন";
+          const finalSpan = subAccountPassSubmitBtn.querySelector("span") || subAccountPassSubmitBtn;
+          finalSpan.setAttribute("data-i18n", "savePassBtn");
+          finalSpan.textContent = (I18N[currentLanguage] || I18N.bn).savePassBtn || (currentLanguage === 'en' ? "Update Password" : "পাসওয়ার্ড আপডেট করুন");
         }
       });
     }
+
+    ["subAccountOldPass", "subAccountNewPass", "subAccountConfirmPass"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (subAccountPassSubmitBtn && !subAccountPassSubmitBtn.disabled) subAccountPassSubmitBtn.click();
+          }
+        });
+      }
+    });
 
     const subRedeemSubmitBtn = document.getElementById("subRedeemSubmitBtn");
     if (subRedeemSubmitBtn) {
@@ -6682,8 +6646,9 @@
           return;
         }
 
+        const btnSpan = subRedeemSubmitBtn.querySelector("span") || subRedeemSubmitBtn;
         subRedeemSubmitBtn.disabled = true;
-        subRedeemSubmitBtn.textContent = "যাচাই হচ্ছে...";
+        btnSpan.textContent = currentLanguage === 'en' ? "Verifying..." : "যাচাই হচ্ছে...";
         try {
           const res = await fetch(`${API_BASE}/redeem/claim`, {
             method: "POST",
@@ -6714,7 +6679,19 @@
           if (msgEl) { msgEl.textContent = "সার্ভারের সাথে যোগাযোগ করা যায়নি।"; msgEl.style.color = "#ef4444"; }
         } finally {
           subRedeemSubmitBtn.disabled = false;
-          subRedeemSubmitBtn.textContent = currentLanguage === 'en' ? "Claim Code" : "কোড রিডিম করুন";
+          const finalSpan = subRedeemSubmitBtn.querySelector("span") || subRedeemSubmitBtn;
+          finalSpan.setAttribute("data-i18n", "redeemBtn");
+          finalSpan.textContent = (I18N[currentLanguage] || I18N.bn).redeemBtn || (currentLanguage === 'en' ? "Claim Code" : "কোড রিডিম করুন");
+        }
+      });
+    }
+
+    const subRedeemInput = document.getElementById("subRedeemInput");
+    if (subRedeemInput) {
+      subRedeemInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (subRedeemSubmitBtn && !subRedeemSubmitBtn.disabled) subRedeemSubmitBtn.click();
         }
       });
     }
@@ -6749,12 +6726,22 @@
         currentPlan = "Free";
         saveCurrentPlan("Free");
         applyAccountName("");
-        if (accountNameInput) accountNameInput.value = "";
-        if (accountRedeemInput) accountRedeemInput.value = "";
-        if (accountRedeemMsg) {
-          accountRedeemMsg.textContent = "";
-          accountRedeemMsg.className = "account-redeem-msg";
-        }
+
+        const subName = document.getElementById("subAccountNameInput");
+        const subOldP = document.getElementById("subAccountOldPass");
+        const subNewP = document.getElementById("subAccountNewPass");
+        const subCnfP = document.getElementById("subAccountConfirmPass");
+        const subPMsg = document.getElementById("subAccountPassMsg");
+        const subRedIn = document.getElementById("subRedeemInput");
+        const subRedMsg = document.getElementById("subRedeemMsg");
+        if (subName) subName.value = "";
+        if (subOldP) subOldP.value = "";
+        if (subNewP) subNewP.value = "";
+        if (subCnfP) subCnfP.value = "";
+        if (subPMsg) { subPMsg.textContent = ""; subPMsg.style.color = ""; }
+        if (subRedIn) subRedIn.value = "";
+        if (subRedMsg) { subRedMsg.textContent = ""; subRedMsg.style.color = ""; }
+
         renderCreditBalance();
 
         if (typeof startNewChat === "function") {
@@ -6764,6 +6751,7 @@
         closeAccountModal();
         closeBrandMenu();
         updateAuthUIState();
+        refreshAccountSubpageUI();
         if (!force) {
           showToast("সফলভাবে লগআউট হয়েছে!", "info");
         }
@@ -6850,149 +6838,22 @@
         }
       }
 
-      const currentPasswordCard = document.getElementById("accountPasswordCard");
-      if (currentPasswordCard) {
-        currentPasswordCard.style.display = token ? "block" : "none";
+      const setLogoutLbl = document.getElementById("setMenuLogoutLabel");
+      const setPlanName = document.getElementById("setMenuPlanName");
+      if (setPlanName) {
+        setPlanName.textContent = currentPlan || "Free";
+      }
+      if (setLogoutLbl) {
+        if (token) {
+          setLogoutLbl.textContent = currentLanguage === 'en' ? "Log Out" : "লগ আউট";
+        } else {
+          setLogoutLbl.textContent = currentLanguage === 'en' ? "Log In" : "লগইন";
+        }
       }
 
       if (typeof updateNavbarCreditBadge === "function") {
         updateNavbarCreditBadge();
       }
-    }
-
-    // Password Change Logic
-    const accountPasswordToggleBtn = document.getElementById("accountPasswordToggleBtn");
-    const accountPasswordBody = document.getElementById("accountPasswordBody");
-    const accountPasswordToggleIcon = document.getElementById("accountPasswordToggleIcon");
-    const changePasswordSubmitBtn = document.getElementById("changePasswordSubmitBtn");
-    const currentPasswordInput = document.getElementById("currentPasswordInput");
-    const newPasswordInput = document.getElementById("newPasswordInput");
-    const confirmPasswordInput = document.getElementById("confirmPasswordInput");
-    const passwordChangeMsg = document.getElementById("passwordChangeMsg");
-
-    if (accountPasswordToggleBtn && accountPasswordBody) {
-      accountPasswordToggleBtn.addEventListener("click", () => {
-        const isOpen = accountPasswordBody.style.display === "flex";
-        accountPasswordBody.style.display = isOpen ? "none" : "flex";
-        if (accountPasswordToggleIcon) {
-          accountPasswordToggleIcon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
-        }
-        if (passwordChangeMsg) {
-          passwordChangeMsg.textContent = "";
-          passwordChangeMsg.className = "";
-        }
-      });
-    }
-
-    if (changePasswordSubmitBtn) {
-      changePasswordSubmitBtn.addEventListener("click", async () => {
-        const token = localStorage.getItem("alokpoth_token");
-        if (!token) {
-          showToast("পাসওয়ার্ড পরিবর্তনের জন্য অনুগ্রহ করে প্রথমে লগইন করুন", "error");
-          openAuthModal();
-          return;
-        }
-
-        const currentPass = currentPasswordInput ? currentPasswordInput.value : "";
-        const newPass = newPasswordInput ? newPasswordInput.value.trim() : "";
-        const confirmPass = confirmPasswordInput ? confirmPasswordInput.value.trim() : "";
-
-        if (!currentPass) {
-          if (passwordChangeMsg) {
-            passwordChangeMsg.textContent = "বর্তমান পাসওয়ার্ড প্রদান করুন";
-            passwordChangeMsg.style.color = "#ef4444";
-          }
-          return;
-        }
-        if (!newPass || newPass.trim().length < 6) {
-          if (passwordChangeMsg) {
-            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে";
-            passwordChangeMsg.style.color = "#ef4444";
-          }
-          return;
-        }
-        if (newPass.length > 72) {
-          if (passwordChangeMsg) {
-            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারবে";
-            passwordChangeMsg.style.color = "#ef4444";
-          }
-          return;
-        }
-        if (newPass !== confirmPass) {
-          if (passwordChangeMsg) {
-            passwordChangeMsg.textContent = "নতুন পাসওয়ার্ড ও নিশ্চিতকরণ পাসওয়ার্ড মেলেনি";
-            passwordChangeMsg.style.color = "#ef4444";
-          }
-          return;
-        }
-
-        changePasswordSubmitBtn.disabled = true;
-        changePasswordSubmitBtn.textContent = "সংরক্ষণ হচ্ছে...";
-        if (passwordChangeMsg) {
-          passwordChangeMsg.textContent = "";
-        }
-
-        try {
-          const res = await fetch(`${API_BASE}/auth/change-password`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              current_password: currentPass,
-              new_password: newPass,
-              confirm_password: confirmPass
-            })
-          });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            if (passwordChangeMsg) {
-              passwordChangeMsg.textContent = data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!";
-              passwordChangeMsg.style.color = "#10b981";
-            }
-            showToast(data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
-            if (currentPasswordInput) currentPasswordInput.value = "";
-            if (newPasswordInput) newPasswordInput.value = "";
-            if (confirmPasswordInput) confirmPasswordInput.value = "";
-            setTimeout(() => {
-              if (accountPasswordBody) accountPasswordBody.style.display = "none";
-              if (accountPasswordToggleIcon) accountPasswordToggleIcon.style.transform = "rotate(0deg)";
-              if (passwordChangeMsg) passwordChangeMsg.textContent = "";
-            }, 2200);
-          } else {
-            const err = data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে";
-            if (passwordChangeMsg) {
-              passwordChangeMsg.textContent = err;
-              passwordChangeMsg.style.color = "#ef4444";
-            }
-            showToast(err, "error");
-          }
-        } catch (err) {
-          const errMsg = "সার্ভারের সাথে যোগাযোগ করা যায়নি";
-          if (passwordChangeMsg) {
-            passwordChangeMsg.textContent = errMsg;
-            passwordChangeMsg.style.color = "#ef4444";
-          }
-          showToast(errMsg, "error");
-        } finally {
-          changePasswordSubmitBtn.disabled = false;
-          changePasswordSubmitBtn.textContent = "পাসওয়ার্ড সেভ করুন";
-        }
-      });
-
-      [currentPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => {
-        if (input) {
-          input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (changePasswordSubmitBtn && !changePasswordSubmitBtn.disabled) {
-                changePasswordSubmitBtn.click();
-              }
-            }
-          });
-        }
-      });
     }
 
     function setAuthMode(mode) {
@@ -8139,9 +8000,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
       userScrolledUp = distance > 100;
     }, { passive: true });
 
-    const scrollToBottom = (force = false) => {
+    const scrollToBottom = (force = false, behavior = "auto") => {
       if (force || !userScrolledUp) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        if (behavior === "smooth") {
+          try {
+            scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" });
+          } catch {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        } else {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
       }
     };
     
