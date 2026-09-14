@@ -4176,7 +4176,10 @@
     function safeMarkdown(md) {
       try {
         const raw = marked.parse(md || "");
-        return (typeof DOMPurify !== "undefined") ? DOMPurify.sanitize(raw) : raw;
+        let html = (typeof DOMPurify !== "undefined") ? DOMPurify.sanitize(raw) : raw;
+        // Deep Optimization: Lazy load images
+        html = html.replace(/<img /g, '<img loading="lazy" ');
+        return html;
       } catch {
         const div = document.createElement("div");
         div.textContent = String(md || "");
@@ -5132,7 +5135,7 @@
         if (window.scrollY !== 0 || window.scrollX !== 0) {
           window.scrollTo(0, 0);
         }
-      });
+      }, { passive: true });
     }
     window.addEventListener("resize", setAppHeight);
     window.addEventListener("orientationchange", () => {
@@ -5717,7 +5720,7 @@
         } else {
           btn.classList.remove("visible");
         }
-      });
+      }, { passive: true });
 
       btn.addEventListener("click", () => {
         scrollToBottom();
@@ -7131,6 +7134,52 @@
       });
     }
 
+    function compressImage(file, maxSizeMB = 3.5) {
+      return new Promise((resolve) => {
+        const maxSize = maxSizeMB * 1024 * 1024;
+        if (file.size <= maxSize) return resolve(file);
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let { width, height } = img;
+            
+            const MAX_DIM = 2048;
+            if (width > MAX_DIM || height > MAX_DIM) {
+              const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+              width = Math.floor(width * ratio);
+              height = Math.floor(height * ratio);
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            let quality = 0.9;
+            let dataUrl = canvas.toDataURL("image/jpeg", quality);
+            
+            // Fast loop to reduce quality if still over limit
+            while (Math.round((dataUrl.length * 3) / 4) > maxSize && quality > 0.4) {
+              quality -= 0.1;
+              dataUrl = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            fetch(dataUrl)
+              .then(res => res.blob())
+              .then(blob => resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" })))
+              .catch(() => resolve(file));
+          };
+          img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+      });
+    }
+
     function renderImagePreviews() {
       imagePreviewRow.innerHTML = "";
       pendingImages.forEach((img, idx) => {
@@ -7152,11 +7201,13 @@
 
     imageInput.addEventListener("change", async () => {
       const files = Array.from(imageInput.files || []);
-      for (const file of files) {
-        if (!file.type.startsWith("image/")) continue;
-        const MAX_IMG_SIZE = 3.5 * 1024 * 1024; // 3.5MB safe for Vercel 4.5MB payload limit
+      for (const originalFile of files) {
+        if (!originalFile.type.startsWith("image/")) continue;
+        const file = await compressImage(originalFile);
+        
+        const MAX_IMG_SIZE = 3.5 * 1024 * 1024;
         if (file.size > MAX_IMG_SIZE) {
-          showToast(`ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
+          showToast(`ছবিটি অনেক বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
           continue;
         }
         const base64 = await fileToBase64(file);
@@ -7171,11 +7222,12 @@
       if (!items) return;
       for (const item of items) {
         if (item.type.indexOf("image") !== -1) {
-          const file = item.getAsFile();
-          if (file) {
+          const originalFile = item.getAsFile();
+          if (originalFile) {
+            const file = await compressImage(originalFile);
             const MAX_IMG_SIZE = 3.5 * 1024 * 1024;
             if (file.size > MAX_IMG_SIZE) {
-              showToast(`পেস্ট করা ছবিটি অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
+              showToast(`পেস্ট করা ছবিটি অনেক বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
               continue;
             }
             const base64 = await fileToBase64(file);
