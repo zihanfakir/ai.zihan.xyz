@@ -7475,16 +7475,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
             finalContent = rawText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
           }
 
-          if (finalReasoning) {
-             html += `<details class="thought-block">
-               <summary>
-                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-                 <span class="thought-duration" style="opacity:0.9">Thought process</span>
-                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
-               </summary>
-               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
-             </details>`;
-          }
+          // if (finalReasoning) {
+          //    html += `<details class="thought-block">
+          //      <summary>
+          //        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+          //        <span class="thought-duration" style="opacity:0.9">Thought process</span>
+          //        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          //      </summary>
+          //      <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+          //    </details>`;
+          // }
           if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
           }
@@ -8332,20 +8332,25 @@ Capabilities & Code Generation Instructions (CRITICAL):
            const finalReasoning = renderedReasoning + (renderedReasoning && extracted.extractedReasoning ? "\n\n" : "") + extracted.extractedReasoning;
            const finalContent = extracted.cleanContent;
 
-           if (finalReasoning) {
-             const timeSecs = !apiFinished ? Math.floor((Date.now() - thinkStartTime) / 1000) : null;
-             const timeText = timeSecs !== null ? `Thought for ${timeSecs}s` : "Thought process";
-             html += `<details class="thought-block" ${!apiFinished ? 'open' : ''}>
-               <summary>
-                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-                 <span class="thought-duration" style="opacity:0.9">${timeText}</span>
-                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
-               </summary>
-               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
-             </details>`;
-           }
+           // if (finalReasoning) {
+           //   const timeSecs = !apiFinished ? Math.floor((Date.now() - thinkStartTime) / 1000) : null;
+           //   const timeText = timeSecs !== null ? `Thought for ${timeSecs}s` : "Thought process";
+           //   html += `<details class="thought-block" ${!apiFinished ? 'open' : ''}>
+           //     <summary>
+           //       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+           //       <span class="thought-duration" style="opacity:0.9">${timeText}</span>
+           //       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+           //     </summary>
+           //     <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+           //   </details>`;
+           // }
            if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
+           } else if (!apiFinished && finalReasoning) {
+             html += `<div style="font-size: 0.9rem; color: var(--text-sub); font-style: italic; display: flex; align-items: center; gap: 8px;">
+               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
+               মডেলটি চিন্তা করছে...
+             </div>`;
            }
            try { aiTextElement.innerHTML = html; } 
            catch { aiTextElement.textContent = finalContent || finalReasoning; }
