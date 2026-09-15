@@ -1,6 +1,6 @@
 {
   "name": "alokpoth-ai",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "Alokpoth AI - Multi-model AI Chat Application",
   "main": "api/index.js",
   "scripts": {

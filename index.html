@@ -3744,7 +3744,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
           <a href="AloAI.apk" download="AloAI.apk" id="modalApkDownloadBtn" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 18px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>সরাসরি APK ডাউনলোড করুন (v1.0.7)</span>
+            <span>সরাসরি APK ডাউনলোড করুন (v1.0.8)</span>
           </a>
         </div>
       </div>
@@ -3851,7 +3851,7 @@
                 <span data-i18n="checkUpdates">আপডেটের জন্য চেক করুন</span>
               </div>
               <div class="settings-row-right">
-                <span>v1.0.7</span>
+                <span>v1.0.8</span>
                 <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
               </div>
             </button>
@@ -4037,22 +4037,22 @@
               <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Alokpoth AI</div>
-            <div class="settings-version-tag">Version 1.0.7 (Latest)</div>
+            <div class="settings-version-tag">Version 1.0.8 (Latest)</div>
             <div style="font-size: 0.9rem; color: var(--text-sub); margin-top: 4px;" data-i18n="versionStatus">আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।</div>
             <div style="width: 100%; margin-top: 12px;">
-              <a href="https://github.com/zihanfakir/ai.zihan.xyz/releases" target="_blank" class="settings-btn-primary" style="text-decoration: none;">
+              <a href="AloAI.apk" download="AloAI.apk" class="settings-btn-primary" style="text-decoration: none;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span data-i18n="downloadApk">নতুন APK ডাউনলোড করুন</span>
               </a>
             </div>
           </div>
           <div class="settings-card">
-            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.7):</div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.8):</div>
             <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.6;">
-              <li>🚀 DeepSeek মিনিমালিস্ট মোবাইল UI রিডিজাইন</li>
-              <li>⚡ 144Hz ও 60fps লো-এন্ড ডিভাইস GPU অপ্টিমাইজেশন</li>
-              <li>🌐 সম্পূর্ণ ইংরেজি ও বাংলা ভাষা সাপোর্ট</li>
-              <li>🔒 চ্যাট ডাটাবেজে নয়—১০০% ডিভাইসে সুরক্ষিত</li>
+              <li>🎙️ নেটিভ হাই-স্পিড ভয়েস ও অডিও টিটিএস ইঞ্জিন ফিক্স</li>
+              <li>👤 ড্রয়ার ও অ্যাকাউন্ট সেটিংস প্রোফাইল সিঙ্ক ফিক্স</li>
+              <li>⚡ অপ্টিমাইজড 144Hz রিফ্রেশ রেট ও দ্রুততর চ্যাট ইন্টারফেস</li>
+              <li>🌐 সম্পূর্ণ দ্বিভাষিক (বাংলা ও ইংরেজি) ইউজার ইন্টারফেস</li>
             </ul>
           </div>
         </div>
@@ -4629,7 +4629,14 @@
     function speakBengaliText(text) {
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
 
-      // Toggle stop if already playing
+      // 0. Toggle stop if AloAndroid native TTS is currently speaking
+      if (window.AloAndroid && typeof window.AloAndroid.isSpeaking === "function" && window.AloAndroid.isSpeaking()) {
+        try { window.AloAndroid.stopSpeech(); } catch (e) {}
+        showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
+        return;
+      }
+
+      // Toggle stop if already playing HTML5 Audio
       if (currentTtsAudio && !currentTtsAudio.paused) {
         try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch (e) {}
         currentTtsAudio = null;
@@ -4651,6 +4658,19 @@
       if (!clean) return;
 
       const langCode = isEn ? "en" : "bn";
+
+      // 1. If running inside AloAndroid Native App with native TTS engine
+      if (window.AloAndroid && typeof window.AloAndroid.speakText === "function") {
+        try {
+          const ok = window.AloAndroid.speakText(clean, langCode);
+          if (ok) {
+            showToast(isEn ? "Playing voice audio..." : "ভয়েস অডিও প্লে হচ্ছে...", "success");
+            return;
+          }
+        } catch (e) {
+          console.warn("AloAndroid native TTS failed, falling back:", e);
+        }
+      }
 
       // 1. Try native Web Speech API if supported
       if ("speechSynthesis" in window && window.speechSynthesis) {

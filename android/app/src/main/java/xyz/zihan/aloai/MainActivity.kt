@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraPhotoUri: Uri? = null
     private var pendingPermissionRequest: PermissionRequest? = null
+    private var webAppInterface: WebAppInterface? = null
 
     private var lastBackPressTime = 0L
 
@@ -133,10 +134,6 @@ class MainActivity : AppCompatActivity() {
                 window.attributes = window.attributes.apply {
                     preferredDisplayModeId = it.modeId
                     preferredRefreshRate = it.refreshRate
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        preferredMinDisplayRefreshRate = it.refreshRate
-                        preferredMaxDisplayRefreshRate = it.refreshRate
-                    }
                 }
             }
         }
@@ -184,7 +181,9 @@ class MainActivity : AppCompatActivity() {
             isHorizontalScrollBarEnabled = false
         }
 
-        webView.addJavascriptInterface(WebAppInterface(this), "AloAndroid")
+        val wai = WebAppInterface(this)
+        webAppInterface = wai
+        webView.addJavascriptInterface(wai, "AloAndroid")
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
@@ -569,6 +568,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        webAppInterface?.destroy()
         webView.destroy()
         super.onDestroy()
     }
