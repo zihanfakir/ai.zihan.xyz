@@ -3923,6 +3923,13 @@
               <span data-i18n="savePassBtn">পাসওয়ার্ড আপডেট করুন</span>
             </button>
           </div>
+
+          <div class="settings-card" id="subLogoutCard" style="margin-top: 14px;">
+            <button type="button" class="settings-btn-primary" id="accountLogoutBtn" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>লগআউট করুন</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -4429,10 +4436,13 @@
       const hasContent = userInput ? (!!(userInput.value || "").trim() || hasImages || hasFiles) : false;
       sendBtn.disabled = isOffline || !hasContent;
       if (userInput) {
+        const token = localStorage.getItem("alokpoth_token");
         userInput.disabled = isOffline;
         userInput.placeholder = isOffline
           ? (isEn ? "No internet connection..." : "ইন্টারনেট সংযোগ নেই...")
-          : (isEn ? "Ask Alo AI anything..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন...");
+          : (!token
+            ? (isEn ? "Please log in or register to chat..." : "চ্যাট করতে অনুগ্রহ করে লগইন বা সাইন-আপ করুন...")
+            : (isEn ? "Ask Alo AI anything..." : "আলোকপথ AI-কে জিজ্ঞাসা করুন..."));
       }
     }
 
@@ -6911,7 +6921,9 @@
           purgeLocalUserData();
           return;
         }
+        if (!localStorage.getItem("alokpoth_token")) return;
         const data = await res.json();
+        if (!localStorage.getItem("alokpoth_token")) return;
         if (res.ok && data.success && data.user) {
           if (data.token) {
             try { localStorage.setItem("alokpoth_token", data.token); } catch {}
@@ -7926,6 +7938,7 @@
     function performAccountLogout(force = false) {
       const doLogout = () => {
         purgeLocalUserData();
+        try { sessionStorage.clear(); } catch (e) {}
 
         const subName = document.getElementById("subAccountNameInput");
         const subOldP = document.getElementById("subAccountOldPass");
@@ -7949,6 +7962,9 @@
         if (!force) {
           showToast("সফলভাবে লগআউট হয়েছে!", "info");
         }
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 350);
       };
 
       if (force) {
@@ -7997,6 +8013,9 @@
       const dName = document.getElementById("drawerUserName");
       const dAv = document.getElementById("drawerAvatar");
       const dPlan = document.getElementById("drawerUserPlan");
+
+      const subLogoutCard = document.getElementById("subLogoutCard");
+      if (subLogoutCard) subLogoutCard.style.display = token ? "block" : "none";
 
       if (token) {
         if (currentAuthBtn) currentAuthBtn.style.display = "none";
@@ -9331,6 +9350,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     userInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        if (!requireAuth()) return;
         if (!sendBtn.disabled && !isGenerating) {
           sendBtn.click();
         }
@@ -9338,6 +9358,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
     });
 
     userInput.addEventListener("focus", () => {
+      if (!localStorage.getItem("alokpoth_token")) {
+        userInput.blur();
+        requireAuth();
+        return;
+      }
       setTimeout(scrollToBottom, 100); setTimeout(scrollToBottom, 300);
     });
 
