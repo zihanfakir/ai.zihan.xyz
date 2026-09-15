@@ -1059,6 +1059,9 @@
           }
           localStorage.setItem("alokpoth_token", data.token);
           if (data.user) {
+            try { localStorage.setItem("alokpoth_user", JSON.stringify(data.user)); } catch {}
+            const nameToSave = data.user.name || (data.user.email ? data.user.email.split('@')[0] : "ব্যবহারকারী");
+            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch {}
             const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
             const isAdmin = data.user.role === "admin" || (data.user.email && adminEmails.includes(data.user.email.toLowerCase().trim()));
             const planName = isAdmin ? "Max" : ((data.user.subscription && data.user.subscription.plan_name) || data.user.plan || "Free");

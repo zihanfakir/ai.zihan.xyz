@@ -4581,16 +4581,68 @@
       requestAnimationFrame(render);
     }
 
-    // ===== Bilingual Text-to-Speech (TTS) =====
+    // ===== Bilingual Text-to-Speech (TTS) with Universal Audio Fallback =====
+    let currentTtsAudio = null;
+
+    function playAudioTts(text, lang = "bn") {
+      if (currentTtsAudio) {
+        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch (e) {}
+        currentTtsAudio = null;
+      }
+
+      const sentences = text.match(/[^.!?।\n]+[.!?।\n]*/g) || [text];
+      const chunks = [];
+      let currentChunk = "";
+      for (const s of sentences) {
+        if ((currentChunk + " " + s).length < 150) {
+          currentChunk += (currentChunk ? " " : "") + s;
+        } else {
+          if (currentChunk.trim()) chunks.push(currentChunk.trim());
+          currentChunk = s;
+        }
+      }
+      if (currentChunk.trim()) chunks.push(currentChunk.trim());
+      if (!chunks.length) return;
+
+      let currentIndex = 0;
+      const playNext = () => {
+        if (currentIndex >= chunks.length) {
+          currentTtsAudio = null;
+          return;
+        }
+        const chunk = chunks[currentIndex++];
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${lang}&q=${encodeURIComponent(chunk)}`;
+        currentTtsAudio = new Audio(url);
+        currentTtsAudio.onended = playNext;
+        currentTtsAudio.onerror = () => {
+          playNext();
+        };
+        currentTtsAudio.play().catch((err) => {
+          console.warn("TTS Audio playback error:", err);
+          playNext();
+        });
+      };
+
+      playNext();
+    }
+
     function speakBengaliText(text) {
-      if (!("speechSynthesis" in window)) {
-        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        showToast(isEn ? "Speech synthesis is not supported in this browser" : "আপনার ব্রাউজারে স্পিচ সাপোর্ট নেই", "error");
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+
+      // Toggle stop if already playing
+      if (currentTtsAudio && !currentTtsAudio.paused) {
+        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch (e) {}
+        currentTtsAudio = null;
+        showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
         return;
       }
-      window.speechSynthesis.cancel();
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      const clean = text
+      if ("speechSynthesis" in window && window.speechSynthesis && window.speechSynthesis.speaking) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+        showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
+        return;
+      }
+
+      const clean = (text || "")
         .replace(/```[\s\S]*?```/g, isEn ? "Code block omitted." : "কোড ব্লক বাদ দেওয়া হয়েছে।")
         .replace(/`[^`]+`/g, "")
         .replace(/[*_#>`~]/g, "")
@@ -4598,22 +4650,56 @@
         .trim();
       if (!clean) return;
 
-      const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = isEn ? "en-US" : "bn-BD";
-      utter.rate = 1.0;
-      utter.pitch = 1.0;
+      const langCode = isEn ? "en" : "bn";
 
-      const voices = window.speechSynthesis.getVoices();
-      let voice = null;
-      if (isEn) {
-        voice = voices.find((v) => v.lang && (v.lang.startsWith("en-") || v.lang.startsWith("en_")));
-      } else {
-        voice = voices.find((v) => v.lang && (v.lang.includes("bn") || v.lang.includes("Bengali")));
+      // 1. Try native Web Speech API if supported
+      if ("speechSynthesis" in window && window.speechSynthesis) {
+        try {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(clean);
+          utter.lang = isEn ? "en-US" : "bn-BD";
+          utter.rate = 1.0;
+          utter.pitch = 1.0;
+
+          const voices = window.speechSynthesis.getVoices();
+          let voice = null;
+          if (isEn) {
+            voice = voices.find((v) => v.lang && (v.lang.startsWith("en-") || v.lang.startsWith("en_")));
+          } else {
+            voice = voices.find((v) => v.lang && (v.lang.includes("bn") || v.lang.includes("Bengali")));
+          }
+          if (voice) utter.voice = voice;
+
+          let didSpeak = false;
+          const fallbackTimer = setTimeout(() => {
+            if (!didSpeak) {
+              try { window.speechSynthesis.cancel(); } catch (e) {}
+              playAudioTts(clean, langCode);
+            }
+          }, 1200);
+
+          utter.onstart = () => {
+            didSpeak = true;
+            clearTimeout(fallbackTimer);
+          };
+          utter.onerror = () => {
+            clearTimeout(fallbackTimer);
+            if (!didSpeak) {
+              playAudioTts(clean, langCode);
+            }
+          };
+
+          window.speechSynthesis.speak(utter);
+          showToast(isEn ? "Playing voice audio..." : "ভয়েস অডিও প্লে হচ্ছে...", "success");
+          return;
+        } catch (e) {
+          console.warn("speechSynthesis failed, falling back to Audio TTS:", e);
+        }
       }
-      if (voice) utter.voice = voice;
 
-      window.speechSynthesis.speak(utter);
+      // 2. High-reliability HTML5 Audio TTS fallback for Android WebView / in-app browsers
       showToast(isEn ? "Playing voice audio..." : "ভয়েস অডিও প্লে হচ্ছে...", "success");
+      playAudioTts(clean, langCode);
     }
 
     // ===== Speech-to-Text Voice Input =====
@@ -6843,13 +6929,36 @@
     } catch {}
 
     function getAccountName() {
-      try { return localStorage.getItem("alokpoth_account_name") || ""; } catch { return ""; }
+      try {
+        const stored = localStorage.getItem("alokpoth_account_name");
+        if (stored && stored.trim() && stored.trim() !== "লগইন করা নেই" && stored.trim() !== "Not Logged In") {
+          return stored.trim();
+        }
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (u.name && u.name.trim()) return u.name.trim();
+          if (u.email && u.email.trim()) return u.email.split("@")[0].trim();
+        }
+      } catch (e) {}
+      return "";
     }
 
     function applyAccountName(name) {
       const token = localStorage.getItem("alokpoth_token");
-      const displayName = (token && name && name.trim()) ? name.trim() : "লগইন করা নেই";
-      const initial = (token && name && name.trim()) ? displayName.trim().charAt(0).toUpperCase() : "অ";
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      let resolvedName = (name && typeof name === "string" && name.trim() && name.trim() !== "লগইন করা নেই" && name.trim() !== "Not Logged In") ? name.trim() : "";
+      if (!resolvedName && token) {
+        resolvedName = getAccountName();
+      }
+      if (!resolvedName && token) {
+        resolvedName = isEn ? "User" : "ব্যবহারকারী";
+      }
+
+      const notLoggedInText = isEn ? "Not Logged In" : "লগইন করা নেই";
+      const displayName = token ? resolvedName : notLoggedInText;
+      const initial = token ? (resolvedName ? resolvedName.trim().charAt(0).toUpperCase() : "U") : "অ";
+
       if (accountNameDisplay) accountNameDisplay.textContent = displayName;
       if (accountAvatar) accountAvatar.textContent = initial;
 
@@ -6857,6 +6966,9 @@
       const dAv = document.getElementById("drawerAvatar");
       if (dName) dName.textContent = displayName;
       if (dAv) dAv.textContent = initial;
+
+      const currentNameDisplay = document.getElementById("accountNameDisplay");
+      if (currentNameDisplay) currentNameDisplay.textContent = displayName;
     }
 
     function renderAccountStats() {
@@ -6931,10 +7043,13 @@
           const u = data.user;
           try { localStorage.setItem("alokpoth_user", JSON.stringify(u)); } catch {}
 
-          if (u.name) {
-            applyAccountName(u.name);
-            if (accountNameInput) accountNameInput.value = u.name;
-            try { localStorage.setItem("alokpoth_account_name", u.name); } catch {}
+          const resolvedUserName = (u.name && u.name.trim()) || (u.email ? u.email.split('@')[0].trim() : "");
+          if (resolvedUserName) {
+            applyAccountName(resolvedUserName);
+            if (accountNameInput) accountNameInput.value = resolvedUserName;
+            try { localStorage.setItem("alokpoth_account_name", resolvedUserName); } catch {}
+          } else {
+            applyAccountName(getAccountName());
           }
 
           const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
@@ -7420,6 +7535,7 @@
         const dUserPlan = document.getElementById("drawerUserPlan");
         if (!token && dUserName) dUserName.textContent = dict.drawerUserLoggedOut;
         if (!token && dUserPlan) dUserPlan.textContent = isEn ? "Sign in to unlock all features" : "চ্যাট করতে লগইন করুন";
+        if (token) applyAccountName(getAccountName());
       }
 
       const dEmptyBtn = document.getElementById("drawerEmptyNewChatBtn");
@@ -8023,6 +8139,7 @@
         if (currentBrandAuth) currentBrandAuth.style.display = "none";
         if (currentBrandLogout) currentBrandLogout.style.display = "flex";
         currentPlan = getResolvedUserPlan();
+        applyAccountName(getAccountName());
       } else {
         // Not logged in: strictly enforce Free tier and clean up credentials
         currentPlan = "Free";
@@ -8041,10 +8158,12 @@
         if (currentLogoutBtn) currentLogoutBtn.style.display = "none";
         if (currentBrandAuth) currentBrandAuth.style.display = "flex";
         if (currentBrandLogout) currentBrandLogout.style.display = "none";
-        if (currentNameDisplay) currentNameDisplay.textContent = "লগইন করা নেই";
-        if (dName) dName.textContent = "লগইন করা নেই";
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        const notLoggedInText = isEn ? "Not Logged In" : "লগইন করা নেই";
+        if (currentNameDisplay) currentNameDisplay.textContent = notLoggedInText;
+        if (dName) dName.textContent = notLoggedInText;
         if (dAv) dAv.textContent = "অ";
-        if (dPlan) dPlan.textContent = "চ্যাট করতে লগইন করুন";
+        if (dPlan) dPlan.textContent = isEn ? "Sign in to unlock all features" : "চ্যাট করতে লগইন করুন";
         applyAccountName("");
         if (typeof renderCreditBalance === "function") {
           renderCreditBalance();
@@ -8182,11 +8301,10 @@
           localStorage.setItem("alokpoth_token", data.token);
           if (data.user) {
             localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
-            if (data.user.name) {
-              localStorage.setItem("alokpoth_account_name", data.user.name);
-              applyAccountName(data.user.name);
-              if (accountNameInput) accountNameInput.value = data.user.name;
-            }
+            const nameToSave = (data.user.name && data.user.name.trim()) || (data.user.email ? data.user.email.split('@')[0].trim() : "ব্যবহারকারী");
+            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch {}
+            applyAccountName(nameToSave);
+            if (accountNameInput) accountNameInput.value = nameToSave;
             if (data.user.subscription && data.user.subscription.plan_name) {
               currentPlan = data.user.subscription.plan_name;
               saveCurrentPlan(currentPlan);

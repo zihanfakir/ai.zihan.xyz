@@ -1457,6 +1457,8 @@
             }
             const u = data.user;
             localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            const nameToSave = (u.name && u.name.trim()) || (u.email ? u.email.split('@')[0].trim() : "ব্যবহারকারী");
+            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch {}
             const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
             const isAdminUser = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
             let planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
