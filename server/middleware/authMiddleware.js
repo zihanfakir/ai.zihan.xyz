@@ -38,7 +38,11 @@ const protect = async (req, res, next) => {
     if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         user = await User.findById(userId).select('-password').lean();
-      } else if (decoded.email) {
+      }
+      if (!user && userId) {
+        user = await User.findOne({ $or: [{ _id: userId }, { id: userId }] }).select('-password').lean();
+      }
+      if (!user && decoded.email) {
         user = await User.findOne({ email: decoded.email.toLowerCase().trim() }).select('-password').lean();
       }
     }
@@ -61,6 +65,34 @@ const protect = async (req, res, next) => {
         };
       } else if (isVerifiedAdmin && user.subscription.plan_name !== 'Max') {
         user.subscription.plan_name = 'Max';
+      } else if (!isVerifiedAdmin && user.subscription.plan_name !== 'Free' && user.subscription.expires_at && new Date() > new Date(user.subscription.expires_at)) {
+        // Auto-downgrade expired subscription
+        user.subscription.plan_name = 'Free';
+        user.subscription.expires_at = null;
+        user.subscription.is_active = true;
+        const uId = user._id || user.id;
+        if (getIsMongoConnected()) {
+          const q = mongoose.Types.ObjectId.isValid(uId) ? { _id: uId } : { $or: [{ _id: uId }, { id: uId }, ...(user.email ? [{ email: user.email }] : [])] };
+          User.updateOne(q, { $set: { subscription: user.subscription } }).catch(() => {});
+        }
+        try {
+          const { getPersistedUsers, savePersistedUsers, invalidateUsersCache, invalidateUserUsageCache } = require('../../utils/getModelConfig');
+          getPersistedUsers().then(uList => {
+            let list = [...uList];
+            const idx = list.findIndex(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+            if (idx !== -1) {
+              list[idx].subscription = user.subscription;
+              savePersistedUsers(list);
+            }
+          }).catch(() => {});
+          if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+          if (typeof invalidateUserUsageCache === 'function') {
+            invalidateUserUsageCache(uId);
+            if (user.email) invalidateUserUsageCache(user.email);
+          }
+        } catch {}
+        invalidateCachedUser(uId);
+        if (user.email) invalidateCachedUser(user.email);
       }
     }
 
@@ -125,7 +157,11 @@ const optionalProtect = async (req, res, next) => {
     if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         user = await User.findById(userId).select('-password').lean();
-      } else if (decoded.email) {
+      }
+      if (!user && userId) {
+        user = await User.findOne({ $or: [{ _id: userId }, { id: userId }] }).select('-password').lean();
+      }
+      if (!user && decoded.email) {
         user = await User.findOne({ email: decoded.email.toLowerCase().trim() }).select('-password').lean();
       }
     }
@@ -148,6 +184,34 @@ const optionalProtect = async (req, res, next) => {
         };
       } else if (isVerifiedAdmin && user.subscription.plan_name !== 'Max') {
         user.subscription.plan_name = 'Max';
+      } else if (!isVerifiedAdmin && user.subscription.plan_name !== 'Free' && user.subscription.expires_at && new Date() > new Date(user.subscription.expires_at)) {
+        // Auto-downgrade expired subscription
+        user.subscription.plan_name = 'Free';
+        user.subscription.expires_at = null;
+        user.subscription.is_active = true;
+        const uId = user._id || user.id;
+        if (getIsMongoConnected()) {
+          const q = mongoose.Types.ObjectId.isValid(uId) ? { _id: uId } : { $or: [{ _id: uId }, { id: uId }, ...(user.email ? [{ email: user.email }] : [])] };
+          User.updateOne(q, { $set: { subscription: user.subscription } }).catch(() => {});
+        }
+        try {
+          const { getPersistedUsers, savePersistedUsers, invalidateUsersCache, invalidateUserUsageCache } = require('../../utils/getModelConfig');
+          getPersistedUsers().then(uList => {
+            let list = [...uList];
+            const idx = list.findIndex(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
+            if (idx !== -1) {
+              list[idx].subscription = user.subscription;
+              savePersistedUsers(list);
+            }
+          }).catch(() => {});
+          if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+          if (typeof invalidateUserUsageCache === 'function') {
+            invalidateUserUsageCache(uId);
+            if (user.email) invalidateUserUsageCache(user.email);
+          }
+        } catch {}
+        invalidateCachedUser(uId);
+        if (user.email) invalidateCachedUser(user.email);
       }
     }
 

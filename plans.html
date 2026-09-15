@@ -458,6 +458,8 @@
       border: 1px solid var(--border-subtle);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text-main);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-plan:hover {
@@ -569,6 +571,8 @@
       gap: 8px;
       box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
       transition: all 0.2s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-claim:hover {
@@ -1284,7 +1288,56 @@
       Max: { message_limit: 50, window_hours: 1, image_limit: 100 }
     };
 
-    let userCurrentPlan = localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free";
+    function scrollToRedeem() {
+      const el = document.getElementById("redeemSection");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const input = document.getElementById("redeemInput");
+        if (input) {
+          setTimeout(() => input.focus(), 350);
+        }
+      }
+    }
+    window.scrollToRedeem = scrollToRedeem;
+
+    function getResolvedPlan() {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) return "Free";
+      const uStr = localStorage.getItem("alokpoth_user");
+      let isAdmin = false;
+      let userObj = null;
+      if (uStr) {
+        try {
+          userObj = JSON.parse(uStr);
+          const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+          isAdmin = userObj.role === "admin" || (userObj.email && adminEmails.includes(userObj.email.toLowerCase().trim()));
+        } catch {}
+      }
+      if (isAdmin) return "Max";
+
+      const expiryStr = localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (userObj && userObj.subscription && userObj.subscription.expires_at);
+      if (expiryStr) {
+        const expTime = new Date(expiryStr).getTime();
+        if (!isNaN(expTime) && Date.now() >= expTime) {
+          try {
+            localStorage.removeItem("alokpoth_plan_expiry");
+            localStorage.removeItem("alokpoth_plan_expires_at");
+            localStorage.setItem("alokpoth_current_plan", "Free");
+            localStorage.setItem("alokpoth_user_plan", "Free");
+            localStorage.setItem("alokpoth_plan", "Free");
+          } catch {}
+          return "Free";
+        }
+      }
+
+      return (userObj && userObj.subscription && userObj.subscription.plan_name) ||
+             localStorage.getItem("alokpoth_current_plan") ||
+             localStorage.getItem("alokpoth_user_plan") ||
+             localStorage.getItem("alokpoth_plan") ||
+             "Free";
+    }
+
+    let userCurrentPlan = getResolvedPlan();
 
     function toBnNum(num) {
       if (currentLanguage === "en") return String(num);
@@ -1326,6 +1379,7 @@
     }
 
     function updateUserPlanButtons() {
+      userCurrentPlan = getResolvedPlan();
       const isEn = (currentLanguage === "en");
       const btnFree = document.getElementById("btnFree");
       const btnPro = document.getElementById("btnPro");
@@ -1346,11 +1400,13 @@
           btnFree.style.borderColor = "var(--accent-primary)";
           btnFree.style.background = "rgba(99, 102, 241, 0.15)";
           btnFree.style.fontWeight = "700";
+          btnFree.onclick = () => { window.location.href = "index.html"; };
         } else {
           btnFree.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
           btnFree.style.borderColor = "var(--border-subtle)";
           btnFree.style.background = "rgba(255, 255, 255, 0.05)";
           btnFree.style.fontWeight = "600";
+          btnFree.onclick = () => { window.location.href = "index.html"; };
         }
       }
 
@@ -1434,9 +1490,25 @@
             const u = data.user;
             const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
             const isAdmin = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
-            userCurrentPlan = isAdmin ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
+            let planName = isAdmin ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
+            if (!isAdmin && u.subscription && u.subscription.expires_at) {
+              const expTime = new Date(u.subscription.expires_at).getTime();
+              if (!isNaN(expTime) && Date.now() >= expTime) {
+                planName = "Free";
+                localStorage.removeItem("alokpoth_plan_expiry");
+                localStorage.removeItem("alokpoth_plan_expires_at");
+              } else {
+                localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
+                localStorage.setItem("alokpoth_plan_expires_at", u.subscription.expires_at);
+              }
+            } else if (!isAdmin) {
+              localStorage.removeItem("alokpoth_plan_expiry");
+              localStorage.removeItem("alokpoth_plan_expires_at");
+            }
+            userCurrentPlan = planName;
             try {
               localStorage.setItem("alokpoth_current_plan", userCurrentPlan);
+              localStorage.setItem("alokpoth_user_plan", userCurrentPlan);
               localStorage.setItem("alokpoth_plan", userCurrentPlan);
               localStorage.setItem("alokpoth_user", JSON.stringify(u));
             } catch {}
@@ -1450,6 +1522,10 @@
     applyPlansI18n();
     syncPlansFromServer();
     syncUserStatusFromServer();
+
+    if (window.location.hash === "#redeemSection" || window.location.search.includes("redeem")) {
+      setTimeout(scrollToRedeem, 350);
+    }
   </script>
 </body>
 </html>

@@ -462,7 +462,9 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
             if (!hasContentTokens) {
               try {
                 const s = chunk.toString();
-                if (s.includes('"delta"') || s.includes('"content"')) hasContentTokens = true;
+                if (/"content"\s*:\s*"(?:[^"\\]|\\.)+"/.test(s) || /"reasoning(?:_content)?"\s*:\s*"(?:[^"\\]|\\.)+"/.test(s) || /"text"\s*:\s*"(?:[^"\\]|\\.)+"/.test(s)) {
+                  hasContentTokens = true;
+                }
               } catch {}
             }
             res.write(chunk);

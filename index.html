@@ -2986,6 +2986,17 @@
     .drawer-session-item.active .drawer-session-actions {
       opacity: 1;
     }
+    @media (hover: none) {
+      .drawer-session-actions {
+        opacity: 0.85;
+      }
+      .drawer-session-action-btn {
+        min-width: 28px;
+        min-height: 28px;
+        padding: 5px 6px;
+        touch-action: manipulation;
+      }
+    }
     .drawer-session-action-btn {
       background: transparent;
       border: none;
@@ -2996,6 +3007,8 @@
       font-size: 12px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
     }
     .drawer-session-action-btn:hover {
       background: rgba(128, 128, 128, 0.2);
@@ -3613,7 +3626,11 @@
         <svg class="chevron" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M7 10l5 5 5-5z"/></svg>
       </button>
     </div>
-    <div class="navbar-right">
+    <div class="navbar-right" style="display: flex; align-items: center; gap: 8px;">
+      <button class="nav-credit-badge" id="navCreditBadge" type="button" title="ব্যবহারের সীমা ও কোটা" aria-label="ব্যবহারের সীমা" style="touch-action: manipulation;">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="navCreditCount">১০/১০</span>
+      </button>
       <button class="icon-btn" id="quickNewChatNavBtn" type="button" aria-label="নতুন চ্যাট" style="background: transparent; border: none; color: var(--text-main); padding: 8px; margin-right: -8px;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="12" y1="9" x2="12" y2="15"/></svg>
       </button>
@@ -5000,6 +5017,17 @@
       }
     }
 
+    function checkIsUserAdmin() {
+      try {
+        const u = getTrustedUser();
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+          return true;
+        }
+      } catch {}
+      return false;
+    }
+
     function getResolvedUserPlan() {
       const token = localStorage.getItem("alokpoth_token");
       if (!token) return "Free"; // Guests and non-logged-in visitors are ALWAYS Free!
@@ -5022,6 +5050,11 @@
           if (u.plan) return u.plan;
         }
       } catch (e) {}
+
+      const exp = localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
+      if (exp && new Date(exp).getTime() <= Date.now()) {
+        return "Free";
+      }
 
       const raw = localStorage.getItem(PLAN_STORAGE_KEY) || localStorage.getItem("alokpoth_plan") || localStorage.getItem("alokpoth_user_plan");
       return (raw && ["Free", "Pro", "Max"].includes(raw)) ? raw : "Free";
@@ -5460,6 +5493,7 @@
 
     function renderCreditBalance() {
       checkPlanExpiration(false);
+      currentPlan = getResolvedUserPlan();
 
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const valueEl = document.getElementById("accountPlanDisplay");
@@ -5578,11 +5612,11 @@
       if (imgUsed === 0) {
         imgTimeLeftStr = isEn ? "Full Quota Available" : "কোটা সম্পূর্ণ পূর্ণ";
       } else if (imgHoursLeft > 0) {
-        imgTimeLeftStr = isEn ? `${imgHoursLeft}h ${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgHoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgHoursLeft}h ${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgHoursLeft)} ঘণ্টা ${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       } else if (imgMinsLeft > 0) {
-        imgTimeLeftStr = isEn ? `${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       } else {
-        imgTimeLeftStr = isEn ? `${imgSecsLeft}s` : `${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgSecsLeft}s` : `${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       }
 
       if (isAdmin) {
@@ -5714,7 +5748,7 @@
         const pPro = getPlanLimitDetails("Pro");
         const pMax = getPlanLimitDetails("Max");
         compareGrid.innerHTML = `
-          <div class="plan-compare-card ${currentPlan === 'Free' ? 'active-plan' : ''}" id="compareCardFree">
+          <div class="plan-compare-card ${(!isAdmin && currentPlan === 'Free') ? 'active-plan' : ''}" id="compareCardFree">
             <div class="plan-compare-header">
               <span class="plan-compare-name">Free</span>
             </div>
@@ -5725,7 +5759,7 @@
               <li>${pFree.speed}</li>
             </ul>
           </div>
-          <div class="plan-compare-card ${currentPlan === 'Pro' ? 'active-plan' : ''}" id="compareCardPro">
+          <div class="plan-compare-card ${(!isAdmin && currentPlan === 'Pro') ? 'active-plan' : ''}" id="compareCardPro">
             <div class="plan-compare-header">
               <span class="plan-compare-name">Pro</span>
             </div>
@@ -5736,7 +5770,7 @@
               <li>${pPro.speed}</li>
             </ul>
           </div>
-          <div class="plan-compare-card ${currentPlan === 'Max' ? 'active-plan' : ''}" id="compareCardMax">
+          <div class="plan-compare-card ${(isAdmin || currentPlan === 'Max') ? 'active-plan' : ''}" id="compareCardMax">
             <div class="plan-compare-header">
               <span class="plan-compare-name" style="color:var(--accent-color);">Max</span>
             </div>
@@ -5897,11 +5931,25 @@
 
           MODELS.sort((a, b) => (a.order || 0) - (b.order || 0));
 
+          const userPlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
+          const isUserAdmin = (typeof checkIsUserAdmin === "function") ? checkIsUserAdmin() : false;
+          const isModelAccessible = (m) => {
+            if (!m) return false;
+            if (isUserAdmin || userPlan === "Max") return true;
+            const isMax = Boolean(m.efficient) || m.id === "gpt-5.6";
+            const isPro = Boolean(m.premium) && !isMax;
+            if (userPlan === "Free") return !isMax && !isPro;
+            if (userPlan === "Pro") return !isMax;
+            return true;
+          };
+
           const savedModel = localStorage.getItem("alokpoth_selected_model");
-          if (savedModel && MODELS.some(m => m.id === savedModel)) {
+          const targetSaved = MODELS.find(m => m.id === savedModel);
+          if (targetSaved && isModelAccessible(targetSaved)) {
             selectedModelId = savedModel;
           } else {
-            selectedModelId = MODELS[0]?.id || "gemini-3.6-flash";
+            const firstAvailable = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
+            selectedModelId = firstAvailable ? firstAvailable.id : "gemini-3.6-flash";
             try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
           }
 
@@ -6160,38 +6208,115 @@
     }
 
     window.addEventListener("popstate", () => {
+      // 1. Account Settings modal & subviews
       const acc = document.getElementById("accountModalOverlay");
-      if (acc && acc.classList.contains("open") && typeof closeAccountModal === "function") {
-        closeAccountModal();
+      if (acc && acc.classList.contains("open")) {
+        const activeSub = acc.querySelector(".settings-subview.active");
+        if (activeSub && activeSub.id !== "settingsMainView") {
+          if (typeof showSettingsView === "function") showSettingsView("settingsMainView", true);
+          return;
+        }
+        if (typeof closeAccountModal === "function") closeAccountModal(true);
+        return;
       }
+      // 2. Model picker modal
       const mdl = document.getElementById("modelModalOverlay");
-      if (mdl && mdl.classList.contains("open") && typeof closeModal === "function") {
-        closeModal();
+      if (mdl && mdl.classList.contains("open")) {
+        if (typeof closeModal === "function") closeModal(true);
+        return;
       }
+      // 3. App download modal
       const appDl = document.getElementById("appDownloadModalOverlay");
-      if (appDl && appDl.classList.contains("open") && typeof closeAppDownloadModal === "function") {
-        closeAppDownloadModal();
+      if (appDl && appDl.classList.contains("open")) {
+        if (typeof closeAppDownloadModal === "function") closeAppDownloadModal(true);
+        return;
       }
+      // 4. Chat history modal
       const hist = document.getElementById("chatHistoryModalOverlay");
-      if (hist && hist.classList.contains("open") && typeof closeChatHistoryModal === "function") {
-        closeChatHistoryModal();
+      if (hist && hist.classList.contains("open")) {
+        if (typeof closeChatHistoryModal === "function") closeChatHistoryModal(true);
+        return;
+      }
+      // 5. Sidebar Drawer
+      const drw = document.getElementById("sidebarDrawer");
+      if (drw && drw.classList.contains("open")) {
+        if (typeof closeSidebarDrawer === "function") closeSidebarDrawer(true);
+        return;
+      }
+      // 6. Brand Menu
+      const bm = document.getElementById("brandMenuOverlay");
+      if (bm && bm.classList.contains("open")) {
+        if (typeof closeBrandMenu === "function") closeBrandMenu();
+        return;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" || e.keyCode === 27) {
+        // 1. Account Settings modal & subviews
+        const acc = document.getElementById("accountModalOverlay");
+        if (acc && acc.classList.contains("open")) {
+          const activeSub = acc.querySelector(".settings-subview.active");
+          if (activeSub && activeSub.id !== "settingsMainView") {
+            if (typeof showSettingsView === "function") showSettingsView("settingsMainView");
+            return;
+          }
+          if (typeof closeAccountModal === "function") closeAccountModal();
+          return;
+        }
+        // 2. Model picker modal
+        const mdl = document.getElementById("modelModalOverlay");
+        if (mdl && mdl.classList.contains("open")) {
+          if (typeof closeModal === "function") closeModal();
+          return;
+        }
+        // 3. App download modal
+        const appDl = document.getElementById("appDownloadModalOverlay");
+        if (appDl && appDl.classList.contains("open")) {
+          if (typeof closeAppDownloadModal === "function") closeAppDownloadModal();
+          return;
+        }
+        // 4. Chat history modal
+        const hist = document.getElementById("chatHistoryModalOverlay");
+        if (hist && hist.classList.contains("open")) {
+          if (typeof closeChatHistoryModal === "function") closeChatHistoryModal();
+          return;
+        }
+        // 5. Sidebar Drawer
+        const drw = document.getElementById("sidebarDrawer");
+        if (drw && drw.classList.contains("open")) {
+          if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+          return;
+        }
+        // 6. Brand Menu
+        const bMenu = document.getElementById("brandMenuOverlay");
+        if (bMenu && bMenu.classList.contains("open")) {
+          if (typeof closeBrandMenu === "function") closeBrandMenu();
+          return;
+        }
       }
     });
 
     async function openModal() {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
       renderModelList();
       modelModalOverlay.classList.add("open");
+      pushPageState("models");
       await fetchModelsFromServer();
       syncModelStatuses({ silent: true });
     }
 
-    function closeModal() {
-      modelModalOverlay.classList.remove("open");
+    function closeModal(isPopstate = false) {
+      if (modelModalOverlay) modelModalOverlay.classList.remove("open");
+      if (!isPopstate && history.state && history.state.page === "models") {
+        try { history.back(); } catch(e) {}
+      }
     }
     window.openModelPicker = openModal;
 
     modelTrigger.addEventListener("click", openModal);
-    modelModalClose.addEventListener("click", closeModal);
+    modelModalClose.addEventListener("click", () => closeModal());
     modelModalOverlay.addEventListener("click", (e) => {
       if (e.target === modelModalOverlay) closeModal();
     });
@@ -6212,14 +6337,18 @@
     function openSidebarDrawer() {
       if (sidebarDrawer) sidebarDrawer.classList.add("open");
       if (drawerBackdrop) drawerBackdrop.classList.add("open");
+      pushPageState("drawer");
       renderDrawerHistoryList(drawerSearchInput ? drawerSearchInput.value : "");
       updateNavbarCreditBadge();
       triggerHaptic("light");
     }
 
-    function closeSidebarDrawer() {
+    function closeSidebarDrawer(isPopstate = false) {
       if (sidebarDrawer) sidebarDrawer.classList.remove("open");
       if (drawerBackdrop) drawerBackdrop.classList.remove("open");
+      if (!isPopstate && history.state && history.state.page === "drawer") {
+        try { history.back(); } catch(e) {}
+      }
     }
 
     if (drawerToggleBtn) drawerToggleBtn.addEventListener("click", openSidebarDrawer);
@@ -6304,16 +6433,25 @@
       const drawerFill = document.getElementById("drawerQuotaFill");
       const drawerBadge = document.getElementById("drawerLimitBadge");
 
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const activePlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
+      currentPlan = activePlan;
+
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
         const { limit } = getPlanWindowLimit();
         const usage = getWindowUsage();
         const used = usage.count || 0;
-        if (countEl) countEl.textContent = `গেস্ট: ${used}/${limit}`;
+        const rem = Math.max(0, limit - used);
+        if (countEl) countEl.textContent = isEn ? `Guest: ${rem}/${limit}` : `গেস্ট: ${toBengaliDigits(rem)}/${toBengaliDigits(limit)}`;
         if (badgeEl) badgeEl.className = "nav-credit-badge";
-        if (drawerPlanEl) drawerPlanEl.textContent = "চ্যাট করতে লগইন করুন";
-        if (drawerBadge) drawerBadge.textContent = "লগইন করুন";
-        if (drawerFill) drawerFill.style.width = "0%";
+        if (drawerPlanEl) drawerPlanEl.textContent = isEn ? "Sign in to unlock all features" : "চ্যাট করতে লগইন করুন";
+        if (drawerBadge) drawerBadge.textContent = isEn ? "Sign In" : "লগইন করুন";
+        if (drawerFill) {
+          const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((rem / limit) * 100))) : 0;
+          drawerFill.style.width = `${pct}%`;
+          drawerFill.style.background = pct <= 20 ? "#ef4444" : (pct <= 40 ? "#f59e0b" : "linear-gradient(90deg, #3b82f6, #38bdf8)");
+        }
         return;
       }
 
@@ -6327,10 +6465,10 @@
       } catch {}
 
       if (isAdmin) {
-        if (countEl) countEl.textContent = "আনলিমিটেড";
+        if (countEl) countEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
         if (badgeEl) badgeEl.className = "nav-credit-badge";
-        if (drawerPlanEl) drawerPlanEl.textContent = "Admin (আনলিমিটেড)";
-        if (drawerBadge) drawerBadge.textContent = "Max (আনলিমিটেড)";
+        if (drawerPlanEl) drawerPlanEl.textContent = isEn ? "Admin (Unlimited)" : "Admin (আনলিমিটেড)";
+        if (drawerBadge) drawerBadge.textContent = isEn ? "Max (Unlimited)" : "Max (আনলিমিটেড)";
         if (drawerFill) {
           drawerFill.style.width = "100%";
           drawerFill.style.background = "linear-gradient(90deg, #10b981, #34d399)";
@@ -6343,7 +6481,7 @@
       const used = usage.count || 0;
       const remaining = Math.max(0, limit - used);
 
-      if (countEl) countEl.textContent = `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
+      if (countEl) countEl.textContent = isEn ? `${remaining}/${limit}` : `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
       if (badgeEl) {
         if (remaining <= 0) {
           badgeEl.className = "nav-credit-badge danger";
@@ -6355,10 +6493,14 @@
       }
 
       if (drawerPlanEl) {
-        drawerPlanEl.textContent = `${currentPlan || "Free"} (${toBengaliDigits(remaining)} বার্তা বাকি)`;
+        drawerPlanEl.textContent = isEn
+          ? `${activePlan} (${remaining} msgs left)`
+          : `${activePlan} (${toBengaliDigits(remaining)} বার্তা বাকি)`;
       }
       if (drawerBadge) {
-        drawerBadge.textContent = `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
+        drawerBadge.textContent = isEn
+          ? `${remaining}/${limit}`
+          : `${toBengaliDigits(remaining)}/${toBengaliDigits(limit)}`;
       }
       if (drawerFill) {
         const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
@@ -6849,13 +6991,23 @@
     }
 
     /* ===== Settings Subview Navigation & i18n Engine ===== */
-    function showSettingsView(viewId) {
+    function showSettingsView(viewId, fromHistory = false) {
       const views = document.querySelectorAll("#accountModalOverlay .settings-subview");
       views.forEach(v => {
         v.classList.toggle("active", v.id === viewId);
       });
       const target = document.getElementById(viewId);
       if (target) target.scrollTop = 0;
+
+      if (accountModalOverlay && accountModalOverlay.classList.contains("open") && !fromHistory) {
+        if (viewId === "settingsMainView") {
+          if (history.state && history.state.page && history.state.page.startsWith("account_sub_")) {
+            try { history.back(); } catch(e) {}
+          }
+        } else {
+          pushPageState("account_sub_" + viewId);
+        }
+      }
       
       if (viewId === 'settingsAccountView') {
         refreshAccountSubpageUI();
@@ -7177,10 +7329,15 @@
       refreshThemeSubpageUI();
 
       // Update active system prompt to match language
-      if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
+      if (typeof messagesHistory !== "undefined") {
         const curMod = (typeof MODELS !== "undefined" && Array.isArray(MODELS)) ? MODELS.find(m => m.id === selectedModelId) : null;
-        const modName = curMod ? curMod.name : "Alo Go";
-        messagesHistory[0].content = buildSystemPrompt(modName, true, true);
+        const modName = curMod ? curMod.name : "Alo AI";
+        const prompt = buildSystemPrompt(modName, true, true);
+        if (messagesHistory.length > 0 && messagesHistory[0].role === "system") {
+          messagesHistory[0].content = prompt;
+        } else {
+          messagesHistory.unshift({ role: "system", content: prompt });
+        }
       }
 
       // If we are on the welcome screen with no active chat, re-render it in new language
@@ -7396,6 +7553,8 @@
     window.refreshAccountSubpageUI = refreshAccountSubpageUI;
 
     function openAccountModal(targetTab = "") {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
       if (accountModalOverlay) {
         if (targetTab === "limits" || targetTab === "settingsLimitsView" || targetTab === "tabPlan") {
           showSettingsView("settingsLimitsView");
@@ -7421,9 +7580,9 @@
       }
     }
 
-    function closeAccountModal() {
+    function closeAccountModal(isPopstate = false) {
       if (accountModalOverlay) accountModalOverlay.classList.remove("open");
-      if (history.state && history.state.page === "account") {
+      if (!isPopstate && history.state && history.state.page && (history.state.page === "account" || history.state.page.startsWith("account_sub_"))) {
         try { history.back(); } catch(e) {}
       }
       stopQuotaCountdownTimer();
@@ -8034,6 +8193,8 @@
     const appDownloadModalClose = document.getElementById("appDownloadModalClose");
 
     function openAppDownloadModal() {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
       if (appDownloadModalOverlay) {
         appDownloadModalOverlay.style.display = "flex";
         requestAnimationFrame(() => appDownloadModalOverlay.classList.add("open"));
@@ -8041,9 +8202,12 @@
       }
     }
 
-    function closeAppDownloadModal() {
+    function closeAppDownloadModal(isPopstate = false) {
       if (appDownloadModalOverlay) {
         appDownloadModalOverlay.classList.remove("open");
+        if (!isPopstate && history.state && history.state.page === "download") {
+          try { history.back(); } catch(e) {}
+        }
         setTimeout(() => {
           if (!appDownloadModalOverlay.classList.contains("open")) {
             appDownloadModalOverlay.style.display = "none";
@@ -8256,12 +8420,30 @@
 
     function estimateTokens(text) {
       if (!text) return 0;
+      if (typeof text !== "string") {
+        if (Array.isArray(text)) {
+          return text.reduce((acc, item) => {
+            if (typeof item === "string") return acc + Math.ceil(item.length / 4);
+            if (item && item.text) return acc + Math.ceil(String(item.text).length / 4);
+            return acc + 65;
+          }, 0);
+        }
+        try {
+          return Math.ceil(JSON.stringify(text).length / 4);
+        } catch {
+          return 0;
+        }
+      }
       return Math.ceil(text.length / 4);
     }
 
     const MODEL_PRICING = {
+      "gemini-3.6-flash": { in: 0.075, out: 0.30 },
+      "gemini-3.5-flash-lite": { in: 0.075, out: 0.30 },
+      "llama-3.3-70b-versatile": { in: 0.59, out: 0.79 },
+      "alo-pro": { in: 0.59, out: 0.79 },
+      "qwen/qwen3.8-27b": { in: 0.20, out: 0.60 },
       "openrouter/free": { in: 0.05, out: 0.20 },
-      "gemini-3.5-flash-lite": { in: 0.10, out: 0.40 },
       "openai/gpt-oss-120b": { in: 0.15, out: 0.60 },
       "claude-sonnet-4-6": { in: 3.00, out: 15.00 },
       "nemotron-ultra-550b": { in: 1.00, out: 2.00 },
@@ -8689,9 +8871,26 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
     let currentSessionId = null;
 
+    function cleanUserMessageContent(rawContent) {
+      if (!rawContent || typeof rawContent !== "string") return "";
+      let t = rawContent;
+      t = t.replace(/\n\n\[(?:অনুস্মারক|System Note):[\s\S]*?\](?=\n|$)/gi, "");
+      t = t.replace(/\n\n\[(?:সংযুক্ত ফাইলের বিষয়বস্তু|Attached File Context)\][\s\S]*?(?=\n\n\[|$)/gi, "");
+      t = t.replace(/\n\n\[(?:Web Search Results Live Data|Web Search Results|Web Search|ওয়েব অনুসন্ধান)[^\]]*\][\s\S]*?(?=\n\n\[|$)/gi, "");
+      t = t.replace(/\n\n\[(?:অনুস্মারক|System Note):[\s\S]*$/gi, "");
+      t = t.replace(/\n\n\[(?:সংযুক্ত ফাইলের বিষয়বস্তু|Attached File Context)\][\s\S]*$/gi, "");
+      t = t.replace(/\n\n\[(?:Web Search Results Live Data|Web Search Results|Web Search|ওয়েব অনুসন্ধান)[\s\S]*$/gi, "");
+      return t.trim();
+    }
+
     function sanitizeChatTitleText(text) {
       if (!text || typeof text !== "string") return "";
-      let t = text.replace(/\[(?:System Note|Attached File Context|অনুস্মারক|সংযুক্ত ফাইলের|ফাইল|ছবি|ওয়েব অনুসন্ধান|Web Search)[\s\S]*?(?:\]|$)/gi, "").trim();
+      let t = text;
+      t = t.replace(/\[(?:System Note|Attached File Context|অনুস্মারক|সংযুক্ত ফাইলের বিষয়বস্তু|সংযুক্ত ফাইলের|সংযুক্ত|ফাইল|ছবি তৈরি|ছবি|ওয়েব অনুসন্ধান|Web Search Results Live Data|Web Search Results|Web Search)[\s\S]*?(?:\]|$)/gi, "");
+      t = t.replace(/=== LANGUAGE RULE[\s\S]*?(?:===|$)/gi, "");
+      t = t.replace(/^You are [^,\n]+[,\.]/gi, "");
+      t = t.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
+      t = t.replace(/---[^\n]+---/g, "");
       t = t.replace(/\s+/g, " ").trim();
       return t;
     }
@@ -8704,14 +8903,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (Array.isArray(sessions)) {
           let hasRepaired = false;
           sessions.forEach((s) => {
-            if (s && s.title && (s.title.includes("[System Note") || s.title.includes("[Attached File") || s.title.includes("[অনুস্মারক") || s.title.includes("[সংযুক্ত"))) {
-              if (s.messagesHistory && Array.isArray(s.messagesHistory)) {
-                s.title = makeSessionTitle(s.messagesHistory);
-              } else {
-                const cleaned = sanitizeChatTitleText(s.title);
-                s.title = cleaned ? (cleaned.length > 40 ? cleaned.slice(0, 40) + "…" : cleaned) : "নতুন চ্যাট";
+            if (s && s.title) {
+              const hasTag = s.title.includes("[") || s.title.includes("System Note") || s.title.includes("Attached File") || s.title.includes("অনুস্মারক") || s.title.includes("সংযুক্ত") || s.title.includes("---") || s.title.includes("LANGUAGE RULE") || s.title.includes("You are ") || s.title.includes("Please respond") || s.title.includes("সম্পূর্ণ উত্তর");
+              if (hasTag) {
+                s.title = makeSessionTitle(s.messagesHistory || []);
+                hasRepaired = true;
               }
-              hasRepaired = true;
             }
           });
           if (hasRepaired) {
@@ -8761,11 +8958,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function makeSessionTitle(history) {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const defaultTitle = isEn ? "New Chat" : "নতুন চ্যাট";
+      if (!history || !Array.isArray(history)) return defaultTitle;
       const firstUserMsg = history.find((m) => m.role === "user");
-      if (!firstUserMsg) return "নতুন চ্যাট";
-      let text = (typeof firstUserMsg.content === "string" ? firstUserMsg.content : "").trim();
+      if (!firstUserMsg) return defaultTitle;
+      let text = typeof firstUserMsg.content === "string" ? cleanUserMessageContent(firstUserMsg.content) : "";
       text = sanitizeChatTitleText(text);
-      return text ? (text.length > 40 ? text.slice(0, 40) + "…" : text) : "নতুন চ্যাট";
+      if (!text && firstUserMsg.files && firstUserMsg.files.length) {
+        text = firstUserMsg.files[0].name || (isEn ? "Attached File" : "সংযুক্ত ফাইল");
+      } else if (!text && firstUserMsg.images && firstUserMsg.images.length) {
+        text = isEn ? "Attached Image" : "সংযুক্ত ছবি";
+      }
+      return text ? (text.length > 40 ? text.slice(0, 40) + "…" : text) : defaultTitle;
     }
 
     function persistCurrentSession() {
@@ -8817,6 +9022,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function startNewChat() {
       currentSessionId = null;
       try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch {}
+      const curMod = (typeof MODELS !== "undefined" && Array.isArray(MODELS)) ? MODELS.find(m => m.id === selectedModelId) : null;
+      const modName = curMod ? curMod.name : "Alo AI";
+      messagesHistory = [{ role: "system", content: buildSystemPrompt(modName, true, true) }];
       clearComposerState();
       if (typeof updateSendAvailability === "function") updateSendAvailability();
       chatStream.innerHTML = getEmptyStateHtml();
@@ -8870,12 +9078,27 @@ Capabilities & Code Generation Instructions (CRITICAL):
     async function handleRegenerateFromBtn(regenBtn) {
       if (isGenerating) return;
       if (!requireAuth()) return;
-      if (!hasCredit()) {
-        openAccountModal();
-        return;
-      }
       const targetRow = regenBtn.closest(".message-row");
       if (!targetRow) return;
+
+      const wasImage = !!targetRow.querySelector(".generated-image-wrap");
+      const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      if (wasImage) {
+        if (!hasImageCredit()) {
+          showToast(isEnNow ? "Image quota reached. Please upgrade your plan." : "ছবি তৈরির সীমা শেষ হয়েছে। প্ল্যান আপগ্রেড করুন।", "warning");
+          openAccountModal();
+          return;
+        }
+        isImageGenEnabled = true;
+      } else {
+        if (!hasCredit()) {
+          showToast(isEnNow ? "Message quota reached. Please wait or upgrade." : "বার্তা সীমা শেষ হয়েছে। অনুগ্রহ করে আপগ্রেড করুন।", "warning");
+          openAccountModal();
+          return;
+        }
+        deductCredit(1);
+        updateNavbarCreditBadge();
+      }
 
       // Count how many user message rows appear before this assistant row
       const allRows = Array.from(chatStream.children);
@@ -8912,7 +9135,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       // Remove the targetRow and all subsequent rows from DOM
-      const wasImage = !!targetRow.querySelector(".generated-image-wrap");
       let node = targetRow;
       while (node) {
         const next = node.nextSibling;
@@ -8921,15 +9143,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       isGenerating = true;
-      if (wasImage) {
-        isImageGenEnabled = true;
-      }
-      deductCredit(1);
       updateSendAvailability();
       try {
         await generateAIReply();
       } catch (err) {
-        refundCredit();
+        if (!wasImage) refundCredit();
       } finally {
         isGenerating = false;
         updateSendAvailability();
@@ -8950,8 +9168,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       chatStream.innerHTML = "";
       messagesHistory.forEach((m) => {
         if (m.role === "user") {
-          let userText = typeof m.content === "string" ? m.content : "";
-          userText = userText.replace(/\n\n\[(অনুস্মারক|System Note):[\s\S]*\]$/, "").replace(/\n\n\[(সংযুক্ত ফাইলের বিষয়বস্তু|Attached File Context)\][\s\S]*$/, "");
+          let userText = typeof m.content === "string" ? cleanUserMessageContent(m.content) : "";
           createUserBubble(userText, m.images || [], m.files || []);
         } else if (m.role === "assistant") {
           const { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
@@ -9024,15 +9241,24 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const chatHistoryModalClose = document.getElementById("chatHistoryModalClose");
 
     function openChatHistoryModal() {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
       renderChatHistoryList();
-      closeBrandMenu();
-      chatHistoryModalOverlay.classList.add("open");
+      if (chatHistoryModalOverlay) {
+        chatHistoryModalOverlay.classList.add("open");
+        pushPageState("history");
+      }
     }
-    function closeChatHistoryModal() { chatHistoryModalOverlay.classList.remove("open"); }
+    function closeChatHistoryModal(isPopstate = false) {
+      if (chatHistoryModalOverlay) chatHistoryModalOverlay.classList.remove("open");
+      if (!isPopstate && history.state && history.state.page === "history") {
+        try { history.back(); } catch(e) {}
+      }
+    }
 
     newChatBtn.addEventListener("click", startNewChat);
     chatHistoryBtn.addEventListener("click", openChatHistoryModal);
-    chatHistoryModalClose.addEventListener("click", closeChatHistoryModal);
+    chatHistoryModalClose.addEventListener("click", () => closeChatHistoryModal());
     chatHistoryModalOverlay.addEventListener("click", (e) => {
       if (e.target === chatHistoryModalOverlay) closeChatHistoryModal();
     });
@@ -9827,7 +10053,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
               <span style="font-weight:600;font-size:0.92rem;color:var(--text-main);">${escapeHtml(limitMsg)}</span></div>
               <button type="button" class="btn btn-primary" onclick="openAccountModal()" style="align-self:flex-start;margin-top:4px;">${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}</button>
             </div>`;
-            refundCredit();
             scrollToBottom(); resolve(); return;
           }
 
@@ -9855,7 +10080,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
             persistCurrentSession();
             scrollToBottom(); resolve();
           } catch (err) {
-            refundCredit();
             soundEngine.playError();
             triggerHaptic("error");
             aiTextElement.classList.remove("streaming", "no-children");
@@ -9915,13 +10139,47 @@ Capabilities & Code Generation Instructions (CRITICAL):
           }
         }
 
-        let activeHistory = messagesHistory;
-        if (searchContext) {
-          activeHistory = messagesHistory.map((m, idx) => {
-            if (idx === messagesHistory.length - 1 && m.role === "user") {
-              return { ...m, content: m.content + searchContext };
+        const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        const langReminder = isEnNow
+          ? "\n\n[System Note: Please respond fluently in English unless the user explicitly asks in another language]"
+          : "\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]";
+
+        const lastUserIdx = messagesHistory.map((m) => m.role).lastIndexOf("user");
+
+        let activeHistory = messagesHistory.map((m, idx) => {
+          if (m.role === "system") {
+            return {
+              role: "system",
+              content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true)
+            };
+          }
+          if (m.role === "user") {
+            let text = typeof m.content === "string" ? cleanUserMessageContent(m.content) : "";
+            if (m.files && m.files.length) {
+              const fileText = m.files
+                .map((f) => f.text ? `--- ${f.name} ---\n${f.text}` : "")
+                .filter(Boolean)
+                .join("\n\n");
+              if (fileText) {
+                const fileLabel = isEnNow ? "Attached File Context" : "সংযুক্ত ফাইলের বিষয়বস্তু";
+                text += `\n\n[${fileLabel}]\n${fileText}`;
+              }
             }
-            return m;
+            if (idx === lastUserIdx) {
+              if (searchContext) {
+                text += searchContext;
+              }
+              text += langReminder;
+            }
+            return { ...m, content: text };
+          }
+          return m;
+        });
+
+        if (!activeHistory.some((m) => m.role === "system")) {
+          activeHistory.unshift({
+            role: "system",
+            content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true)
           });
         }
 
@@ -10122,12 +10380,25 @@ Capabilities & Code Generation Instructions (CRITICAL):
             refundCredit();
             clearInterval(statusIntervalId);
             aiTextElement.classList.remove("streaming", "no-children");
+            const modelDisplayName = currentModel?.name || selectedModelId || (isEnNow ? "Model" : "মডেল");
             aiTextElement.innerHTML = `
-              <div class="ai-error-box" style="display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${isEnNow ? `AI model '${curModelName}' did not respond in time` : `AI মডেল '${curModelName}' নির্দিষ্ট সময়ে সাড়া দেয়নি`}</span>
-                  <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${isEnNow ? 'The model server may be slow or busy. Please try another model.' : 'মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। অন্য মডেল নির্বাচন করে চেষ্টা করুন।'}</span>
+              <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                    <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${isEnNow ? `AI model '${escapeHtml(modelDisplayName)}' did not respond in time` : `AI মডেল '${escapeHtml(modelDisplayName)}' নির্দিষ্ট সময়ে সাড়া দেয়নি`}</span>
+                    <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${isEnNow ? 'The model server may be slow or busy. You can retry or choose another model.' : 'মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। আপনি পুনরায় চেষ্টা করতে পারেন বা অন্য মডেল বেছে নিতে পারেন।'}</span>
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                  <button type="button" class="btn-retry-action" onclick="this.closest('.message-row.ai')?.querySelector('.action-icon-btn.regen-btn-highlight')?.click()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--accent-primary, #3b82f6); color:#fff; border:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg>
+                    ${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}
+                  </button>
+                  <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
+                  </button>
                 </div>
               </div>
             `;
@@ -10240,7 +10511,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
                         ${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}
                       </a>
                     </div>
-                  ` : ''}
+                  ` : `
+                    <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                      <button type="button" class="btn-retry-action" onclick="this.closest('.message-row.ai')?.querySelector('.action-icon-btn.regen-btn-highlight')?.click()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--accent-primary, #3b82f6); color:#fff; border:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg>
+                        ${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}
+                      </button>
+                      <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
+                      </button>
+                    </div>
+                  `}
                 </div>
               `;
             }
@@ -10353,21 +10635,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
         updateNavbarCreditBadge();
       }
 
-      let fileContext = "";
-      if (filesForThisMessage.length) {
-        fileContext = "\n\n[" + (currentLanguage === "en" ? "Attached File Context" : "সংযুক্ত ফাইলের বিষয়বস্তু") + "]\n" + filesForThisMessage
-          .map((f) => `--- ${f.name} ---\n${f.text || (currentLanguage === "en" ? "(File could not be read)" : "(ফাইলটি পড়া যায়নি)")}`).join("\n\n");
-      }
-
-      const langReminder = (typeof currentLanguage !== "undefined" && currentLanguage === "en")
-        ? "\n\n[System Note: Please respond fluently in English unless the user explicitly asks in another language]"
-        : "\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]";
-
       messagesHistory.push({
         role: "user",
-        content: `${text}${fileContext}${langReminder}`,
+        content: text,
+        rawPrompt: text,
         images: imagesForThisMessage.length ? imagesForThisMessage.map((img) => ({ base64: img.base64, mimeType: img.mimeType })) : undefined,
-        files: filesForThisMessage.length ? filesForThisMessage.map((f) => ({ name: f.name })) : undefined
+        files: filesForThisMessage.length ? filesForThisMessage.map((f) => ({ name: f.name, text: f.text })) : undefined
       });
 
       pendingImages = []; pendingFiles = [];

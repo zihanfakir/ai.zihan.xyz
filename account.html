@@ -333,6 +333,8 @@
       gap: 8px;
       transition: all 0.2s;
       white-space: nowrap;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .tab-btn:hover {
@@ -609,6 +611,8 @@
       font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-primary:hover {
@@ -631,6 +635,8 @@
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-danger:hover {
@@ -1329,13 +1335,20 @@
     }
 
     // Tab Switching
-    function switchToTab(tabId) {
+    function switchToTab(tabId, pushHistory = true) {
       document.querySelectorAll(".tab-btn").forEach(b => {
         b.classList.toggle("active", b.dataset.tab === tabId);
       });
       document.querySelectorAll(".tab-panel").forEach(p => {
         p.classList.toggle("active", p.id === tabId);
       });
+      if (pushHistory) {
+        try {
+          if (history.state?.tab !== tabId) {
+            history.pushState({ tab: tabId }, "", "?tab=" + tabId);
+          }
+        } catch {}
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1345,11 +1358,20 @@
       });
     });
 
+    window.addEventListener("popstate", (e) => {
+      const stateTab = e.state?.tab;
+      const urlTab = new URLSearchParams(window.location.search).get("tab");
+      const activeTab = stateTab || urlTab || "tabProfile";
+      if (document.getElementById(activeTab)) {
+        switchToTab(activeTab, false);
+      }
+    });
+
     // Handle URL param tab
     const urlParams = new URLSearchParams(window.location.search);
     const targetTab = urlParams.get("tab");
     if (targetTab && document.getElementById(targetTab)) {
-      switchToTab(targetTab);
+      switchToTab(targetTab, false);
     }
 
     // Convert digits based on language
@@ -1437,17 +1459,24 @@
             localStorage.setItem("alokpoth_user", JSON.stringify(u));
             const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
             const isAdminUser = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
-            const planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
-            localStorage.setItem("alokpoth_current_plan", planName);
-            localStorage.setItem("alokpoth_user_plan", planName);
-            localStorage.setItem("alokpoth_plan", planName);
+            let planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
             if (!isAdminUser && u.subscription && u.subscription.expires_at) {
-              localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
-              localStorage.setItem("alokpoth_plan_expires_at", u.subscription.expires_at);
+              const expTime = new Date(u.subscription.expires_at).getTime();
+              if (!isNaN(expTime) && Date.now() >= expTime) {
+                planName = "Free";
+                localStorage.removeItem("alokpoth_plan_expiry");
+                localStorage.removeItem("alokpoth_plan_expires_at");
+              } else {
+                localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
+                localStorage.setItem("alokpoth_plan_expires_at", u.subscription.expires_at);
+              }
             } else {
               localStorage.removeItem("alokpoth_plan_expiry");
               localStorage.removeItem("alokpoth_plan_expires_at");
             }
+            localStorage.setItem("alokpoth_current_plan", planName);
+            localStorage.setItem("alokpoth_user_plan", planName);
+            localStorage.setItem("alokpoth_plan", planName);
             if (u.rateLimit || u.usage) {
               const lim = u.rateLimit || u.usage;
               const curPlan = planName;
@@ -1489,25 +1518,44 @@
         const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
         document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
 
-        const currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");
+        let currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");
+
+        const expiryStr = !isAdmin ? (localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (user.subscription && user.subscription.expires_at)) : null;
+        let isExpired = false;
+        let daysLeft = 0;
+        if (expiryStr) {
+          const expDate = new Date(expiryStr);
+          if (!isNaN(expDate.getTime())) {
+            if (Date.now() >= expDate.getTime()) {
+              isExpired = true;
+              currentPlan = "Free";
+              try {
+                localStorage.removeItem("alokpoth_plan_expiry");
+                localStorage.removeItem("alokpoth_plan_expires_at");
+                localStorage.setItem("alokpoth_current_plan", "Free");
+                localStorage.setItem("alokpoth_user_plan", "Free");
+                localStorage.setItem("alokpoth_plan", "Free");
+              } catch {}
+            } else {
+              daysLeft = Math.max(0, Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+            }
+          }
+        }
+
         const badge = document.getElementById("profilePlanBadge");
         badge.textContent = isEn ? `${currentPlan} Plan` : `${currentPlan} প্ল্যান`;
         badge.className = `badge-pill plan-${currentPlan}`;
 
         document.getElementById("currentPlanTitle").textContent = `${currentPlan} Plan`;
 
-        const expiryStr = localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (user.subscription && user.subscription.expires_at);
         const expiryEl = document.getElementById("currentPlanExpiry");
-        if (currentPlan === "Free") {
+        if (currentPlan === "Free" || isExpired || !expiryStr) {
           expiryEl.textContent = isEn ? "Validity: Lifetime / No Expiry" : "মেয়াদ: আজীবন / মেয়াদহীন";
-        } else if (expiryStr) {
+        } else {
           const expDate = new Date(expiryStr);
-          if (!isNaN(expDate.getTime())) {
-            const daysLeft = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-            expiryEl.textContent = isEn 
-              ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
-              : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
-          }
+          expiryEl.textContent = isEn 
+            ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
+            : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
         }
 
         // Highlight active plan card and update button text/state
@@ -1532,11 +1580,19 @@
                 } else if (p === "Pro") {
                   btn.textContent = isEn ? "Unlock Pro" : "প্রো আনলক করুন";
                   btn.style.background = "var(--accent-gradient)";
-                  btn.onclick = () => switchToTab('tabSecurity');
+                  btn.onclick = () => {
+                    switchToTab('tabSecurity');
+                    const inp = document.getElementById('redeemCodeInput');
+                    if (inp) setTimeout(() => { inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); inp.focus(); }, 250);
+                  };
                 } else if (p === "Max") {
                   btn.textContent = isEn ? "Unlock Max" : "ম্যাক্স আনলক করুন";
                   btn.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
-                  btn.onclick = () => switchToTab('tabSecurity');
+                  btn.onclick = () => {
+                    switchToTab('tabSecurity');
+                    const inp = document.getElementById('redeemCodeInput');
+                    if (inp) setTimeout(() => { inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); inp.focus(); }, 250);
+                  };
                 }
               }
             }
@@ -1644,6 +1700,11 @@
               ? `${formatDigits(limit)} messages refresh every ${formatDigits(hours)} hours`
               : `প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা নবায়ন হয়`;
           }
+        }
+
+        const usageResetEl = document.getElementById("usageResetVal");
+        if (usageResetEl) {
+          usageResetEl.textContent = isAdmin ? (isEn ? "Unlimited" : "সীমাহীন") : (timeLeftStr || (isEn ? "Full quota available" : "কোটা সম্পূর্ণ পূর্ণ"));
         }
 
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");

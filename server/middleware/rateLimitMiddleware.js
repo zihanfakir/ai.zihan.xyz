@@ -4,12 +4,12 @@ const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const { getModelConfig, getUserUsageDetails, getUserImageUsageDetails } = require('../../utils/getModelConfig');
-const { getCachedPlan, setCachedPlan, getCachedModel, setCachedModel } = require('../config/dbCache');
+const { getCachedPlan, setCachedPlan, getCachedModel, setCachedModel, invalidateCachedUser } = require('../config/dbCache');
 
 const checkRateLimit = async (req, res, next) => {
   try {
     const user = req.user;
-    const isImageRoute = req.path === '/image' || (req.originalUrl && req.originalUrl.includes('/chat/image'));
+    const isImageRoute = req.path.startsWith('/image') || (req.originalUrl && (req.originalUrl.includes('/chat/image') || req.originalUrl.includes('/image')));
 
     // Admin users are never rate-limited
     const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
@@ -47,27 +47,37 @@ const checkRateLimit = async (req, res, next) => {
         user.subscription.plan_name = 'Free';
         user.subscription.expires_at = null;
         user.subscription.is_active = true;
-        if (getIsMongoConnected() && typeof user.save === 'function') {
-          await user.save().catch(() => {});
+        const uId = user._id || user.id;
+        if (getIsMongoConnected()) {
+          const mongoose = require('mongoose');
+          const q = mongoose.Types.ObjectId.isValid(uId) ? { _id: uId } : { $or: [{ _id: uId }, { id: uId }, ...(user.email ? [{ email: user.email }] : [])] };
+          await User.updateOne(q, { $set: { subscription: user.subscription } }).catch(() => {});
         }
         // Unconditionally persist downgrade across Supabase and memoryStore
         try {
-          const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+          const { getPersistedUsers, savePersistedUsers, invalidateUsersCache, invalidateUserUsageCache } = require('../../utils/getModelConfig');
           let users = await getPersistedUsers();
           users = [...users];
-          const uIdx = users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+          const uIdx = users.findIndex(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
           if (uIdx !== -1) {
             users[uIdx].subscription = user.subscription;
             await savePersistedUsers(users);
           }
           if (memoryStore.users) {
-            const mIdx = memoryStore.users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+            const mIdx = memoryStore.users.findIndex(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
             if (mIdx !== -1) memoryStore.users[mIdx].subscription = user.subscription;
           }
           debouncedSave();
+          if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+          if (typeof invalidateUserUsageCache === 'function') {
+            invalidateUserUsageCache(uId);
+            if (user.email) invalidateUserUsageCache(user.email);
+          }
         } catch (syncErr) {
           console.warn('[RateLimit Auto-Downgrade Sync Warning]:', syncErr.message);
         }
+        invalidateCachedUser(uId);
+        if (user.email) invalidateCachedUser(user.email);
       }
     }
 
@@ -119,14 +129,16 @@ const checkRateLimit = async (req, res, next) => {
       let resetTimeMinutes = Math.round(plan.window_hours * 60);
 
       if (getIsMongoConnected()) {
+        const mongoose = require('mongoose');
+        const userQuery = mongoose.Types.ObjectId.isValid(userId) ? { $in: [userId, new mongoose.Types.ObjectId(userId)] } : userId;
         imageCount = await UsageLog.countDocuments({
-          user_id: userId,
+          user_id: userQuery,
           model_id: 'image-generation',
           timestamp: { $gte: windowStart }
         });
         if (imageCount >= plan.image_limit) {
           const oldestLog = await UsageLog.findOne({
-            user_id: userId,
+            user_id: userQuery,
             model_id: 'image-generation',
             timestamp: { $gte: windowStart }
           }).sort({ timestamp: 1 }).select('timestamp').lean();
@@ -164,7 +176,8 @@ const checkRateLimit = async (req, res, next) => {
     if (!aiModel) {
       if (getIsMongoConnected()) {
         aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] }).lean();
-      } else {
+      }
+      if (!aiModel) {
         aiModel = await getModelConfig(model_id);
       }
       if (aiModel) {
@@ -176,29 +189,44 @@ const checkRateLimit = async (req, res, next) => {
     const isProModel = Boolean(aiModel && aiModel.premium) && !isMaxModel;
     const isFreeModel = !isMaxModel && !isProModel;
 
-    const explicitlyAllowedByName = Array.isArray(plan.allowed_models) && plan.allowed_models.includes(model_id);
+    const explicitlyAllowedByName = Array.isArray(plan.allowed_models) && (
+      plan.allowed_models.includes(model_id) || 
+      (aiModel && (plan.allowed_models.includes(aiModel.id) || plan.allowed_models.includes(aiModel.model_id)))
+    );
     const hasWildcard = Array.isArray(plan.allowed_models) && plan.allowed_models.includes('*');
 
     if (currentPlanName === 'Free') {
-      // Free users can only use Free models or models explicitly listed by ID
-      if (isMaxModel && !explicitlyAllowedByName) {
+      // Free users can ONLY use Free models. Pro and Max models are strictly forbidden.
+      if (isMaxModel) {
         return res.status(403).json({
           success: false,
           error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'ফ্রি প্ল্যান'}।`
         });
       }
-      if (isProModel && !explicitlyAllowedByName) {
+      if (isProModel) {
         return res.status(403).json({
           success: false,
           error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Pro বা Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'ফ্রি প্ল্যান'}।`
         });
       }
+      if (!hasWildcard && Array.isArray(plan.allowed_models) && plan.allowed_models.length > 0 && !explicitlyAllowedByName) {
+        return res.status(403).json({
+          success: false,
+          error: `আপনার বর্তমান ${plan.displayName || 'ফ্রি প্ল্যান'}-এ '${aiModel?.name || model_id}' মডেল ব্যবহারের অনুমতি নেই।`
+        });
+      }
     } else if (currentPlanName === 'Pro') {
-      // Pro users can use Free and Pro models, but CANNOT use Max models (unless explicitly listed by ID)
-      if (isMaxModel && !explicitlyAllowedByName) {
+      // Pro users can use Free and Pro models, but CANNOT use Max models!
+      if (isMaxModel) {
         return res.status(403).json({
           success: false,
           error: `'${aiModel?.name || model_id}' মডেলটি ব্যবহারের জন্য Max প্ল্যান প্রয়োজন। আপনার বর্তমান প্ল্যান: ${plan.displayName || 'প্রো প্ল্যান'}।`
+        });
+      }
+      if (!hasWildcard && Array.isArray(plan.allowed_models) && plan.allowed_models.length > 0 && !explicitlyAllowedByName) {
+        return res.status(403).json({
+          success: false,
+          error: `আপনার বর্তমান ${plan.displayName || 'প্রো প্ল্যান'}-এ '${aiModel?.name || model_id}' মডেল ব্যবহারের অনুমতি নেই।`
         });
       }
     } else if (currentPlanName !== 'Max' && !isVerifiedAdmin) {
@@ -216,14 +244,16 @@ const checkRateLimit = async (req, res, next) => {
     let resetTimeMinutes = Math.round(plan.window_hours * 60);
 
     if (getIsMongoConnected()) {
+      const mongoose = require('mongoose');
+      const userQuery = mongoose.Types.ObjectId.isValid(userId) ? { $in: [userId, new mongoose.Types.ObjectId(userId)] } : userId;
       messageCount = await UsageLog.countDocuments({
-        user_id: userId,
+        user_id: userQuery,
         model_id: { $ne: 'image-generation' },
         timestamp: { $gte: windowStart }
       });
       if (messageCount >= plan.message_limit) {
         const oldestLog = await UsageLog.findOne({
-          user_id: userId,
+          user_id: userQuery,
           model_id: { $ne: 'image-generation' },
           timestamp: { $gte: windowStart }
         }).sort({ timestamp: 1 }).select('timestamp').lean();

@@ -6,7 +6,7 @@ const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave, saveBackup } = require('../config/memoryStore');
 const supabase = require('../config/supabase');
-const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
+const { invalidateModelKeyCache, invalidateUsersCache, invalidateUserUsageCache } = require('../../utils/getModelConfig');
 const { invalidateCachedUser, invalidateCachedPlans, invalidateCachedModels } = require('../config/dbCache');
 
 const SUPER_ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
@@ -32,12 +32,19 @@ async function upsertApiKeyToSupabase(modelId, apiKey) {
 
 const getAdminStats = async (req, res) => {
   try {
+    const now = new Date();
     if (getIsMongoConnected()) {
       // High-performance metadata counts (O(1)) and covered index scans
       const [totalUsers, proUsers, maxUsers, totalRedeemCodes, usedRedeemCodes, totalMessages] = await Promise.all([
         User.estimatedDocumentCount(),
-        User.countDocuments({ 'subscription.plan_name': 'Pro' }),
-        User.countDocuments({ 'subscription.plan_name': 'Max' }),
+        User.countDocuments({
+          'subscription.plan_name': 'Pro',
+          $or: [{ 'subscription.expires_at': null }, { 'subscription.expires_at': { $gt: now } }]
+        }),
+        User.countDocuments({
+          'subscription.plan_name': 'Max',
+          $or: [{ 'subscription.expires_at': null }, { 'subscription.expires_at': { $gt: now } }]
+        }),
         RedeemCode.estimatedDocumentCount(),
         RedeemCode.countDocuments({ is_used: true }),
         UsageLog.estimatedDocumentCount()
@@ -65,8 +72,8 @@ const getAdminStats = async (req, res) => {
       const { getPersistedUsers, getPersistedRedeemCodes } = require('../../utils/getModelConfig');
       const persistedUsers = await getPersistedUsers();
       const totalUsers = persistedUsers.length;
-      const proUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Pro').length;
-      const maxUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Max').length;
+      const proUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Pro' && (!u.subscription.expires_at || new Date(u.subscription.expires_at) > now)).length;
+      const maxUsers = persistedUsers.filter(u => u.subscription && u.subscription.plan_name === 'Max' && (!u.subscription.expires_at || new Date(u.subscription.expires_at) > now)).length;
       const persistedCodes = await getPersistedRedeemCodes();
       const totalRedeemCodes = persistedCodes.length;
       const usedRedeemCodes = persistedCodes.filter(c => c.is_used).length;
@@ -164,6 +171,18 @@ const updateUserPlan = async (req, res) => {
         if (pUser) {
           pUser.subscription = user.subscription;
           await savePersistedUsers(users);
+        } else {
+          users.push({
+            _id: String(user._id),
+            id: String(user._id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            is_blocked: user.is_blocked || false,
+            subscription: user.subscription,
+            createdAt: user.createdAt
+          });
+          await savePersistedUsers(users);
         }
         if (memoryStore.users) {
           const mUser = memoryStore.users.find(u => String(u._id) === String(user._id) || String(u.id) === String(user._id) || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
@@ -175,7 +194,16 @@ const updateUserPlan = async (req, res) => {
       }
 
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+      if (typeof invalidateUserUsageCache === 'function') {
+        invalidateUserUsageCache(userId);
+        if (user._id) invalidateUserUsageCache(String(user._id));
+        if (user.id) invalidateUserUsageCache(String(user.id));
+        if (user.email) invalidateUserUsageCache(user.email);
+      }
 
       return res.json({
         success: true,
@@ -205,7 +233,16 @@ const updateUserPlan = async (req, res) => {
       debouncedSave();
 
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+      if (typeof invalidateUserUsageCache === 'function') {
+        invalidateUserUsageCache(userId);
+        if (user._id) invalidateUserUsageCache(String(user._id));
+        if (user.id) invalidateUserUsageCache(String(user.id));
+        if (user.email) invalidateUserUsageCache(user.email);
+      }
 
       return res.json({
         success: true,
@@ -264,7 +301,10 @@ const toggleBlockUser = async (req, res) => {
       }
 
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
 
       return res.json({
         success: true,
@@ -289,7 +329,10 @@ const toggleBlockUser = async (req, res) => {
       debouncedSave();
 
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
 
       return res.json({
         success: true,
@@ -704,7 +747,7 @@ const getRedeemCodes = async (req, res) => {
       const codes = persisted.map(c => {
         let used_by = c.used_by;
         if (typeof used_by === 'string') {
-          const u = users.find(usr => String(usr._id) === String(used_by));
+          const u = users.find(usr => String(usr._id || usr.id) === String(used_by));
           if (u) used_by = { name: u.name, email: u.email };
         }
         return { ...c, used_by };

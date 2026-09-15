@@ -46,7 +46,9 @@ function invalidateCachedUser(key) {
     userCache.clear();
     return;
   }
-  const cleanKey = String(key).toLowerCase().trim();
+  const rawKey = typeof key === 'object' ? (key._id || key.id || key.email || '') : key;
+  const cleanKey = String(rawKey).toLowerCase().trim();
+  if (!cleanKey) return;
   userCache.delete(cleanKey);
   for (const [k, v] of userCache.entries()) {
     if (k === cleanKey) {

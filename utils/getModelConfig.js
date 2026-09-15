@@ -34,7 +34,8 @@ async function getApiKeyFromSupabase(modelId) {
 }
 
 const MODEL_ALIASES = {
-  'gemini-1.5-flash': 'gemini-3.5-flash-lite'
+  'gemini-1.5-flash': 'gemini-3.5-flash-lite',
+  'alo-pro': 'llama-3.3-70b-versatile'
 };
 
 function resolveModelAlias(rawId) {
@@ -51,11 +52,18 @@ function resolveModelAlias(rawId) {
 async function getModelConfig(rawId) {
   const modelId = resolveModelAlias(rawId);
 
-  // 1. Check persisted models (from Supabase)
+  // 1. Check persisted models (from Supabase / merged)
   const allModels = await getPersistedModels();
-  const model = allModels.find(
+  let model = allModels.find(
     m => m.id === modelId || m.model_id === modelId || m.id === rawId || m.model_id === rawId
   );
+
+  // Fallback to memoryStore.models if not found in allModels
+  if (!model && Array.isArray(memoryStore?.models)) {
+    model = memoryStore.models.find(
+      m => m.id === modelId || m.model_id === modelId || m.id === rawId || m.model_id === rawId
+    );
+  }
 
   // 2. Load API key from Supabase
   let apiKey = await getApiKeyFromSupabase(modelId);
@@ -111,9 +119,21 @@ async function getPersistedModels() {
       if (!error && data && data.length > 0 && data[0].api_key) {
         const parsed = JSON.parse(data[0].api_key);
         if (Array.isArray(parsed)) {
-          modelsCache = parsed;
+          // Merge with memoryStore.models so newly added models in code/backup are not dropped
+          const merged = [...parsed];
+          const existingIds = new Set(parsed.map(m => m.id || m.model_id));
+          if (Array.isArray(memoryStore.models)) {
+            for (const defModel of memoryStore.models) {
+              const defId = defModel.id || defModel.model_id;
+              if (defId && !existingIds.has(defId)) {
+                merged.push(defModel);
+                existingIds.add(defId);
+              }
+            }
+          }
+          modelsCache = merged;
           modelsCacheTs = now;
-          return parsed;
+          return merged;
         }
       }
     } catch (e) {
@@ -197,7 +217,7 @@ async function getUserUsageDetails(userId, windowHours) {
   }
 
   // Also check memoryStore to get true count
-  const memLogs = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === String(userId) && new Date(l.timestamp).getTime() >= windowStart);
+  const memLogs = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === String(userId) && l.model_id !== 'image-generation' && new Date(l.timestamp).getTime() >= windowStart);
   if (memLogs.length > count) {
     count = memLogs.length;
     start = memLogs.length > 0 ? Math.min(...memLogs.map(l => new Date(l.timestamp).getTime())) : now;
@@ -808,6 +828,8 @@ async function autoPurgeOrphanedDatabaseCaches() {
 
 module.exports = { 
   getModelConfig, 
+  MODEL_ALIASES,
+  resolveModelAlias,
   getApiKeyFromSupabase, 
   invalidateModelKeyCache,
   getPersistedModels,

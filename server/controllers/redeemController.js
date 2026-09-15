@@ -127,11 +127,8 @@ const claimRedeemCode = async (req, res) => {
 
       // Support both ObjectId and custom string user IDs without CastError
       const mongoose = require('mongoose');
-      if (mongoose.Types.ObjectId.isValid(userId)) {
-        await User.findByIdAndUpdate(userId, { $set: { subscription: subscriptionData } });
-      } else if (user.email) {
-        await User.findOneAndUpdate({ email: user.email.toLowerCase().trim() }, { $set: { subscription: subscriptionData } });
-      }
+      const uQuery = mongoose.Types.ObjectId.isValid(userId) ? { _id: userId } : { $or: [{ _id: userId }, { id: userId }, ...(user.email ? [{ email: user.email.toLowerCase().trim() }] : [])] };
+      await User.updateOne(uQuery, { $set: { subscription: subscriptionData } });
       user.subscription = subscriptionData;
 
       // Also sync to Supabase and memoryStore so multi-store stays in sync
@@ -142,6 +139,18 @@ const claimRedeemCode = async (req, res) => {
         const uIdx = users.findIndex(u => String(u._id || u.id) === String(userId) || (u.email && user.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
         if (uIdx !== -1) {
           users[uIdx].subscription = subscriptionData;
+          await savePersistedUsers(users);
+        } else {
+          users.push({
+            _id: String(userId),
+            id: String(userId),
+            name: user.name || 'User',
+            email: user.email || '',
+            role: user.role || 'user',
+            is_blocked: false,
+            subscription: subscriptionData,
+            createdAt: new Date()
+          });
           await savePersistedUsers(users);
         }
         if (memoryStore.users) {
@@ -178,8 +187,18 @@ const claimRedeemCode = async (req, res) => {
         email: user.email || ''
       }, JWT_SECRET, { expiresIn: '30d' });
 
+      const { invalidateUserUsageCache, invalidateUsersCache } = require('../../utils/getModelConfig');
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+      if (typeof invalidateUserUsageCache === 'function') {
+        invalidateUserUsageCache(userId);
+        if (user._id) invalidateUserUsageCache(String(user._id));
+        if (user.id) invalidateUserUsageCache(String(user.id));
+        if (user.email) invalidateUserUsageCache(user.email);
+      }
 
       return res.json({
         success: true,
@@ -323,8 +342,18 @@ const claimRedeemCode = async (req, res) => {
         email: user.email || ''
       }, JWT_SECRET, { expiresIn: '30d' });
 
+      const { invalidateUserUsageCache, invalidateUsersCache } = require('../../utils/getModelConfig');
       invalidateCachedUser(userId);
+      if (user._id) invalidateCachedUser(String(user._id));
+      if (user.id) invalidateCachedUser(String(user.id));
       if (user.email) invalidateCachedUser(user.email);
+      if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+      if (typeof invalidateUserUsageCache === 'function') {
+        invalidateUserUsageCache(userId);
+        if (user._id) invalidateUserUsageCache(String(user._id));
+        if (user.id) invalidateUserUsageCache(String(user.id));
+        if (user.email) invalidateUserUsageCache(user.email);
+      }
 
       return res.json({
         success: true,

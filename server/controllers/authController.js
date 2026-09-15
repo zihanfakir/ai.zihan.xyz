@@ -12,7 +12,9 @@ const generateToken = (user) => {
     id: String(user._id || user.id),
     role: user.role || 'user',
     plan: (user.subscription && user.subscription.plan_name) || 'Free',
-    expires_at: (user.subscription && user.subscription.expires_at) || null,
+    expires_at: (user.subscription && user.subscription.expires_at)
+      ? (user.subscription.expires_at instanceof Date ? user.subscription.expires_at.toISOString() : user.subscription.expires_at)
+      : null,
     name: user.name || '',
     email: user.email || ''
   } : { id: String(user) };
@@ -186,7 +188,16 @@ const loginUser = async (req, res) => {
         user.role = 'admin';
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
         await user.save();
+      } else if (user.subscription && user.subscription.plan_name !== 'Free' && user.subscription.expires_at) {
+        if (new Date() > new Date(user.subscription.expires_at)) {
+          user.subscription.plan_name = 'Free';
+          user.subscription.expires_at = null;
+          user.subscription.is_active = true;
+          await User.updateOne({ _id: user._id }, { $set: { subscription: user.subscription } }).catch(() => {});
+        }
       }
+      invalidateCachedUser(user._id);
+      if (user.email) invalidateCachedUser(user.email);
       const token = generateToken(user);
       return res.json({
         success: true,
@@ -242,7 +253,17 @@ const loginUser = async (req, res) => {
         user.subscription = { plan_name: 'Max', starts_at: new Date(), expires_at: null, is_active: true };
         await savePersistedUsers(users);
         debouncedSave();
+      } else if (user.subscription && user.subscription.plan_name !== 'Free' && user.subscription.expires_at) {
+        if (new Date() > new Date(user.subscription.expires_at)) {
+          user.subscription.plan_name = 'Free';
+          user.subscription.expires_at = null;
+          user.subscription.is_active = true;
+          await savePersistedUsers(users);
+          debouncedSave();
+        }
       }
+      invalidateCachedUser(user._id || user.id);
+      if (user.email) invalidateCachedUser(user.email);
       const token = generateToken(user);
       return res.json({
         success: true,
@@ -268,7 +289,11 @@ const getMe = async (req, res) => {
     if (getIsMongoConnected() && (targetUserId || targetEmail)) {
       if (targetUserId && mongoose.Types.ObjectId.isValid(targetUserId)) {
         user = await User.findById(targetUserId).select('-password').lean();
-      } else if (targetEmail) {
+      }
+      if (!user && targetUserId) {
+        user = await User.findOne({ $or: [{ _id: targetUserId }, { id: targetUserId }] }).select('-password').lean();
+      }
+      if (!user && targetEmail) {
         user = await User.findOne({ email: targetEmail }).select('-password').lean();
       }
     }
@@ -302,24 +327,33 @@ const getMe = async (req, res) => {
         user.subscription.plan_name = 'Free';
         user.subscription.expires_at = null;
         user.subscription.is_active = true;
-        if (getIsMongoConnected() && typeof user.save === 'function') {
-          await user.save().catch(() => {});
+        const uId = user._id || user.id;
+        if (getIsMongoConnected()) {
+          const q = mongoose.Types.ObjectId.isValid(uId) ? { _id: uId } : { $or: [{ _id: uId }, { id: uId }, ...(user.email ? [{ email: user.email }] : [])] };
+          await User.updateOne(q, { $set: { subscription: user.subscription } }).catch(() => {});
         }
         try {
-          const { getPersistedUsers, savePersistedUsers } = require('../../utils/getModelConfig');
+          const { getPersistedUsers, savePersistedUsers, invalidateUsersCache, invalidateUserUsageCache } = require('../../utils/getModelConfig');
           let users = await getPersistedUsers();
           users = [...users];
-          const uIdx = users.findIndex(u => String(u._id || u.id) === String(user._id || user.id));
+          const uIdx = users.findIndex(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
           if (uIdx !== -1) {
             users[uIdx].subscription = user.subscription;
             await savePersistedUsers(users);
           }
           if (memoryStore.users) {
-            const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(user._id || user.id));
+            const mUser = memoryStore.users.find(u => String(u._id || u.id) === String(uId) || (user.email && u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()));
             if (mUser) mUser.subscription = user.subscription;
           }
           debouncedSave();
+          if (typeof invalidateUsersCache === 'function') invalidateUsersCache();
+          if (typeof invalidateUserUsageCache === 'function') {
+            invalidateUserUsageCache(uId);
+            if (user.email) invalidateUserUsageCache(user.email);
+          }
         } catch {}
+        invalidateCachedUser(uId);
+        if (user.email) invalidateCachedUser(user.email);
       }
     }
     if (!isVerifiedAdmin) {
@@ -354,16 +388,20 @@ const getMe = async (req, res) => {
       const userId = String(user._id || user.id);
       const windowStart = new Date(Date.now() - planWindow * 60 * 60 * 1000);
       let messageCount = 0;
+      let imageCount = 0;
       let resetTimeMinutes = Math.round(planWindow * 60);
       let resetAt = null;
       let windowStartTs = windowStart.getTime();
       
       if (getIsMongoConnected()) {
-        const [cnt, oldestLog] = await Promise.all([
-          UsageLog.countDocuments({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }),
-          UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 }).select('timestamp').lean()
+        const userQuery = mongoose.Types.ObjectId.isValid(userId) ? { $in: [userId, new mongoose.Types.ObjectId(userId)] } : userId;
+        const [cnt, imgCnt, oldestLog] = await Promise.all([
+          UsageLog.countDocuments({ user_id: userQuery, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }),
+          UsageLog.countDocuments({ user_id: userQuery, model_id: 'image-generation', timestamp: { $gte: windowStart } }),
+          UsageLog.findOne({ user_id: userQuery, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 }).select('timestamp').lean()
         ]);
         messageCount = cnt;
+        imageCount = imgCnt;
         if (oldestLog) {
           const resetMs = new Date(oldestLog.timestamp).getTime() + planWindow * 60 * 60 * 1000;
           resetTimeMinutes = Math.max(1, Math.ceil((resetMs - Date.now()) / (60 * 1000)));
@@ -373,10 +411,15 @@ const getMe = async (req, res) => {
           resetAt = new Date(Date.now() + planWindow * 60 * 60 * 1000).toISOString();
         }
       } else {
-        const { getUserUsageDetails } = require('../../utils/getModelConfig');
-        const usageDetails = await getUserUsageDetails(userId, planWindow);
+        const { getUserUsageDetails, getUserImageUsageDetails } = require('../../utils/getModelConfig');
+        const [usageDetails, imgDetails] = await Promise.all([
+          getUserUsageDetails(userId, planWindow),
+          getUserImageUsageDetails(userId, planWindow)
+        ]);
         const memCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && l.model_id !== 'image-generation' && new Date(l.timestamp) >= windowStart).length;
+        const memImgCount = (memoryStore.usageLogs || []).filter(l => String(l.user_id) === userId && l.model_id === 'image-generation' && new Date(l.timestamp) >= windowStart).length;
         messageCount = Math.max(usageDetails.count, memCount);
+        imageCount = Math.max(imgDetails.count, memImgCount);
         resetTimeMinutes = usageDetails.resetInMinutes;
         if (usageDetails.resetAt) {
           resetAt = usageDetails.resetAt;
@@ -393,8 +436,11 @@ const getMe = async (req, res) => {
       rateLimit = {
         used: messageCount,
         limit: planLimit,
+        imageUsed: imageCount,
+        image_used: imageCount,
         imageLimit: planImageLimit,
         image_limit: planImageLimit,
+        imageRemaining: Math.max(0, planImageLimit - imageCount),
         remaining: Math.max(0, planLimit - messageCount),
         resetInMinutes: Math.max(1, resetTimeMinutes || 1),
         windowHours: planWindow,
@@ -405,8 +451,11 @@ const getMe = async (req, res) => {
       usage = {
         count: messageCount,
         limit: planLimit,
+        imageUsed: imageCount,
+        image_used: imageCount,
         imageLimit: planImageLimit,
         image_limit: planImageLimit,
+        imageRemaining: Math.max(0, planImageLimit - imageCount),
         remaining: Math.max(0, planLimit - messageCount),
         resetInMinutes: Math.max(1, resetTimeMinutes || 1),
         windowHours: planWindow,
@@ -419,8 +468,11 @@ const getMe = async (req, res) => {
         unlimited: true,
         used: 0,
         limit: 999999,
+        imageUsed: 0,
+        image_used: 0,
         imageLimit: 999999,
         image_limit: 999999,
+        imageRemaining: 999999,
         remaining: 999999,
         resetInMinutes: 0,
         windowHours: 1,
@@ -432,8 +484,11 @@ const getMe = async (req, res) => {
         unlimited: true,
         count: 0,
         limit: 999999,
+        imageUsed: 0,
+        image_used: 0,
         imageLimit: 999999,
         image_limit: 999999,
+        imageRemaining: 999999,
         remaining: 999999,
         resetInMinutes: 0,
         windowHours: 1,
