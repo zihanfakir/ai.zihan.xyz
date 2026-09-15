@@ -124,7 +124,7 @@
       flex-direction: column;
       position: relative;
       overflow-x: hidden;
-      padding-top: env(safe-area-inset-top, 0px);
+      padding-top: 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
@@ -806,6 +806,12 @@
       const userPassInput = document.getElementById("userPassInput");
       if (userPassInput) userPassInput.placeholder = d.passPlaceholder;
 
+      const passToggle = document.getElementById("passToggleBtn");
+      if (passToggle) {
+        passToggle.setAttribute("aria-label", showPass ? (isEn ? "Hide password" : "পাসওয়ার্ড লুকান") : (isEn ? "Show password" : "পাসওয়ার্ড দেখুন"));
+        passToggle.title = showPass ? (isEn ? "Hide password" : "পাসওয়ার্ড লুকান") : (isEn ? "Show password" : "পাসওয়ার্ড দেখুন");
+      }
+
       const forgotPassText = document.getElementById("forgotPassText");
       if (forgotPassText) forgotPassText.textContent = d.forgotPass;
 
@@ -1001,6 +1007,9 @@
       showPass = !showPass;
       userPassInput.type = showPass ? "text" : "password";
       passToggleBtn.style.color = showPass ? "var(--accent-primary)" : "var(--text-muted)";
+      const isEn = (currentLanguage === "en");
+      passToggleBtn.setAttribute("aria-label", showPass ? (isEn ? "Hide password" : "পাসওয়ার্ড লুকান") : (isEn ? "Show password" : "পাসওয়ার্ড দেখুন"));
+      passToggleBtn.title = showPass ? (isEn ? "Hide password" : "পাসওয়ার্ড লুকান") : (isEn ? "Show password" : "পাসওয়ার্ড দেখুন");
     });
 
     function showAlert(msg, type = "error") {

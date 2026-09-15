@@ -9,6 +9,9 @@ const supabase = require('../config/supabase');
 const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
 const { invalidateCachedUser, invalidateCachedPlans, invalidateCachedModels } = require('../config/dbCache');
 
+const SUPER_ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
+const isSuperAdminEmail = (email) => !!email && SUPER_ADMIN_EMAILS.includes(String(email).toLowerCase().trim());
+
 // Supabase তে api_key upsert করার helper
 async function upsertApiKeyToSupabase(modelId, apiKey) {
   if (!supabase || !modelId) return;
@@ -126,7 +129,7 @@ const updateUserPlan = async (req, res) => {
     }
 
     const cleanTarget = String(userId).toLowerCase().trim();
-    if (cleanTarget === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+    if (isSuperAdminEmail(cleanTarget) && plan_name !== 'Max') {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
     }
 
@@ -139,7 +142,7 @@ const updateUserPlan = async (req, res) => {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+      if (isSuperAdminEmail(user.email) && plan_name !== 'Max') {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
       }
 
@@ -188,7 +191,7 @@ const updateUserPlan = async (req, res) => {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com' && plan_name !== 'Max') {
+      if (isSuperAdminEmail(user.email) && plan_name !== 'Max') {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্টের প্ল্যান পরিবর্তন বা ডাউনগ্রেড করা সম্ভব নয়।' });
       }
 
@@ -221,7 +224,7 @@ const toggleBlockUser = async (req, res) => {
     const { is_blocked } = req.body;
     const cleanTarget = String(userId).toLowerCase().trim();
 
-    if (cleanTarget === 'zihanfakir@gmail.com' || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || cleanTarget === String(req.user.email).toLowerCase().trim()))) {
+    if (isSuperAdminEmail(cleanTarget) || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || isSuperAdminEmail(req.user.email)))) {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
     }
 
@@ -234,7 +237,7 @@ const toggleBlockUser = async (req, res) => {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+      if (isSuperAdminEmail(user.email)) {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
       }
 
@@ -277,7 +280,7 @@ const toggleBlockUser = async (req, res) => {
         return res.status(404).json({ success: false, error: 'ইউজার পাওয়া যায়নি।' });
       }
 
-      if (user.email && user.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+      if (isSuperAdminEmail(user.email)) {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট ব্লক করা সম্ভব নয়।' });
       }
 
@@ -307,7 +310,7 @@ const deleteUser = async (req, res) => {
     }
     const cleanTarget = String(userId).toLowerCase().trim();
 
-    if (cleanTarget === 'zihanfakir@gmail.com' || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || cleanTarget === String(req.user.email).toLowerCase().trim()))) {
+    if (isSuperAdminEmail(cleanTarget) || (req.user && (cleanTarget === String(req.user._id).toLowerCase() || cleanTarget === String(req.user.id).toLowerCase() || isSuperAdminEmail(req.user.email)))) {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
     }
 
@@ -327,7 +330,7 @@ const deleteUser = async (req, res) => {
 
       const existingUser = await User.findOne({ $or: queryOr });
 
-      if (existingUser && existingUser.email && existingUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+      if (existingUser && isSuperAdminEmail(existingUser.email)) {
         return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
       }
 
@@ -359,7 +362,7 @@ const deleteUser = async (req, res) => {
     const { getPersistedUsers, savePersistedUsers, invalidateUsersCache } = require('../../utils/getModelConfig');
     let users = await getPersistedUsers();
     const targetUser = users.find(matchesTarget);
-    if (targetUser && targetUser.email && targetUser.email.toLowerCase().trim() === 'zihanfakir@gmail.com') {
+    if (targetUser && isSuperAdminEmail(targetUser.email)) {
       return res.status(400).json({ success: false, error: 'মূল অ্যাডমিন অ্যাকাউন্ট মুছে ফেলা সম্ভব নয়।' });
     }
     users = users.filter(u => !matchesTarget(u));

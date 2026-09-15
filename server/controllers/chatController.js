@@ -25,9 +25,9 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
     providerType = 'gemini';
     let gMod = targetModelId;
     if (gMod === 'gemini-3.5-flash-lite' || gMod === 'gemini-flash' || gMod === 'gemini-1.5-flash') {
-      gMod = 'gemini-3.5-flash-lite';
+      gMod = 'gemini-1.5-flash';
     } else if (gMod === 'gemini-3.6-flash' || gMod === 'gemini-2.5-flash' || gMod === 'gemini-pro') {
-      gMod = 'gemini-3.6-flash';
+      gMod = 'gemini-1.5-flash';
     }
     actualModel = gMod;
     if (!targetKey) targetKey = geminiKey;
@@ -35,17 +35,17 @@ const resolveModelTarget = async (targetModelId, targetModelConfig) => {
   } else if (targetModelId === 'openai/gpt-oss-120b' || targetModelId === 'llama-3.3-70b-versatile' || targetModelId === 'alo-pro') {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'openai/gpt-oss-120b';
+    actualModel = 'llama-3.3-70b-versatile';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-  } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b') {
+  } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b' || targetModelId === 'deepseek' || targetModelId === 'deepseek-r1' || targetModelId === 'deepseek-r1-distill-llama-70b') {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'qwen/qwen3.8-27b';
+    actualModel = 'deepseek-r1-distill-llama-70b';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-  } else if (targetModelId === 'openai/gpt-oss-20b') {
+  } else if (targetModelId === 'openai/gpt-oss-20b' || targetModelId === 'llama-3.1-8b-instant' || targetModelId === 'llama-3.1-8b') {
     providerType = 'groq';
     targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'openai/gpt-oss-20b';
+    actualModel = 'llama-3.1-8b-instant';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
   } else if (targetModelId === 'openrouter/free' || !targetModelId) {
     providerType = 'openrouter';
@@ -294,39 +294,32 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
       const openRouterKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
       const fallbacks = [
         {
-          id: 'gemini-3.6-flash',
+          id: 'gemini-1.5-flash',
           type: 'gemini',
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?key=${geminiKey}&alt=sse`,
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${geminiKey}&alt=sse`,
           key: geminiKey,
-          model: 'gemini-3.6-flash'
+          model: 'gemini-1.5-flash'
         },
         {
-          id: 'gemini-3.5-flash-lite',
-          type: 'gemini',
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?key=${geminiKey}&alt=sse`,
-          key: geminiKey,
-          model: 'gemini-3.5-flash-lite'
-        },
-        {
-          id: 'openai/gpt-oss-120b',
+          id: 'llama-3.3-70b-versatile',
           type: 'groq',
           url: 'https://api.groq.com/openai/v1/chat/completions',
           key: groqKey,
-          model: 'openai/gpt-oss-120b'
+          model: 'llama-3.3-70b-versatile'
         },
         {
-          id: 'qwen/qwen3.8-27b',
+          id: 'deepseek-r1-distill-llama-70b',
           type: 'groq',
           url: 'https://api.groq.com/openai/v1/chat/completions',
           key: groqKey,
-          model: 'qwen/qwen3.8-27b'
+          model: 'deepseek-r1-distill-llama-70b'
         },
         {
-          id: 'openai/gpt-oss-20b',
+          id: 'llama-3.1-8b-instant',
           type: 'groq',
           url: 'https://api.groq.com/openai/v1/chat/completions',
           key: groqKey,
-          model: 'openai/gpt-oss-20b'
+          model: 'llama-3.1-8b-instant'
         },
         {
           id: 'openrouter/free',

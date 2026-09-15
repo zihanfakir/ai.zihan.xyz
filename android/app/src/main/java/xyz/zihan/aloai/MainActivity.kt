@@ -561,6 +561,13 @@ class MainActivity : AppCompatActivity() {
         webView.onPause()
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= TRIM_MEMORY_MODERATE) {
+            webView.clearCache(false)
+        }
+    }
+
     override fun onDestroy() {
         webView.destroy()
         super.onDestroy()

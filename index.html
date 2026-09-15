@@ -226,7 +226,7 @@
       letter-spacing: -0.011em;
     }
 
-    button, input, select, textarea, .btn, .action-btn, .brand-menu-item, .quick-prompt-chip, .icon-btn, .model-card, .drawer-item {
+    button, input, select, textarea, .btn, .action-btn, .brand-menu-item, .quick-prompt-chip, .icon-btn, .model-card, .drawer-item, a, [role="button"], .history-item, .action-icon-btn, .code-action-btn, .code-download-btn, .account-limits-toggle-btn {
       touch-action: manipulation;
     }
 
@@ -494,6 +494,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
+      height: var(--app-height, 100dvh);
       background: var(--bg-main) !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
@@ -3551,7 +3552,7 @@
     <div style="padding: 16px 16px 8px;">
       <div class="drawer-search-wrap" style="margin: 0; position: relative; width: 100%; padding: 0;">
         <svg viewBox="0 0 24 24" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--text-sub); stroke-width: 2; pointer-events: none; z-index: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="Search chats..." style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
+        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাট খুঁজুন..." data-i18n-placeholder="drawerSearchPlaceholder" style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
       </div>
     </div>
 
@@ -3560,8 +3561,8 @@
     </div>
     
     <div id="drawerEmptyState" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 32px 24px; text-align: center;">
-      <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">কোনো চ্যাট নেই</div>
-      <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;">আপনার Alokpoth-এর সাথে চ্যাট এখানে প্রদর্শিত হবে।</div>
+      <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;" data-i18n="drawerNoChatsTitle">কোনো চ্যাট নেই</div>
+      <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;" data-i18n="drawerNoChatsSub">আপনার Alokpoth-এর সাথে চ্যাট এখানে প্রদর্শিত হবে।</div>
       <button type="button" id="drawerEmptyNewChatBtn" style="background: var(--accent-color); color: #fff; border: none; border-radius: 99px; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer;">নতুন চ্যাট</button>
     </div>
 
@@ -3843,7 +3844,7 @@
             <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="if(localStorage.getItem('alokpoth_token')){performAccountLogout();}else{openAuthModal('login');}">
               <div class="settings-row-left" style="color: #ef4444;">
                 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span id="setMenuLogoutLabel" data-i18n="logoutLogin">লগ আউট / লগইন</span>
+                <span id="setMenuLogoutLabel">লগ আউট / লগইন</span>
               </div>
             </button>
           </div>
@@ -5437,11 +5438,11 @@
       if (imgUsed === 0) {
         imgTimeLeftStr = isEn ? "Full Quota Available" : "কোটা সম্পূর্ণ পূর্ণ";
       } else if (imgHoursLeft > 0) {
-        imgTimeLeftStr = isEn ? `${imgHoursLeft}h ${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgHoursLeft)} ঘণ্টা ${toBengaliDigits(minsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgHoursLeft}h ${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgHoursLeft)} ঘণ্টা ${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       } else if (imgMinsLeft > 0) {
-        imgTimeLeftStr = isEn ? `${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgMinsLeft}m ${imgSecsLeft}s` : `${toBengaliDigits(imgMinsLeft)} মিনিট ${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       } else {
-        imgTimeLeftStr = isEn ? `${imgSecsLeft}s` : `${toBengaliDigits(secsLeft)} সেকেন্ড`;
+        imgTimeLeftStr = isEn ? `${imgSecsLeft}s` : `${toBengaliDigits(imgSecsLeft)} সেকেন্ড`;
       }
 
       if (imgTimerEl) imgTimerEl.textContent = imgTimeLeftStr;
@@ -6318,7 +6319,8 @@
         if (filterQuery) {
             drawerListEl.style.display = "block";
             if (drawerEmptyState) drawerEmptyState.style.display = "none";
-            drawerListEl.innerHTML = `<div style="text-align:center; padding: 24px 12px; color: var(--text-sub); font-size: 0.85rem;">কোনো চ্যাট মেলেনি</div>`;
+            const noMatchMsg = (typeof currentLanguage !== "undefined" && currentLanguage === "en") ? "No chats found" : "কোনো চ্যাট মেলেনি";
+            drawerListEl.innerHTML = `<div style="text-align:center; padding: 24px 12px; color: var(--text-sub); font-size: 0.85rem;">${noMatchMsg}</div>`;
         }
         return;
       }
@@ -6333,11 +6335,12 @@
       const yesterdayStart = todayStart - 86400000;
       const weekStart = todayStart - 6 * 86400000;
 
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const groups = {
-        today: { label: "আজ", items: [] },
-        yesterday: { label: "গতকাল", items: [] },
-        week: { label: "বিগত ৭ দিন", items: [] },
-        older: { label: "পূর্ববর্তী চ্যাট", items: [] }
+        today: { label: isEn ? "Today" : "আজ", items: [] },
+        yesterday: { label: isEn ? "Yesterday" : "গতকাল", items: [] },
+        week: { label: isEn ? "Previous 7 Days" : "বিগত ৭ দিন", items: [] },
+        older: { label: isEn ? "Older Chats" : "পূর্ববর্তী চ্যাট", items: [] }
       };
 
       sessions.forEach((s) => {
@@ -6360,12 +6363,12 @@
           item.className = `drawer-session-item ${session.id === currentSessionId ? "active" : ""}`;
 
           item.innerHTML = `
-            <div class="drawer-session-title" title="${escapeHtml(session.title)}">${escapeHtml(session.title || "নামহীন চ্যাট")}</div>
+            <div class="drawer-session-title" title="${escapeHtml(session.title || (isEn ? "Untitled Chat" : "নামহীন চ্যাট"))}">${escapeHtml(session.title || (isEn ? "Untitled Chat" : "নামহীন চ্যাট"))}</div>
             <div class="drawer-session-actions">
-              <button type="button" class="drawer-session-action-btn edit-session-btn" title="নাম পরিবর্তন করুন">
+              <button type="button" class="drawer-session-action-btn edit-session-btn" title="${isEn ? "Rename" : "নাম পরিবর্তন করুন"}" aria-label="${isEn ? "Rename" : "নাম পরিবর্তন করুন"}">
                 <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
               </button>
-              <button type="button" class="drawer-session-action-btn del-session-btn" title="মুছে ফেলুন">
+              <button type="button" class="drawer-session-action-btn del-session-btn" title="${isEn ? "Delete" : "মুছে ফেলুন"}" aria-label="${isEn ? "Delete" : "মুছে ফেলুন"}">
                 <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
               </button>
             </div>
@@ -6519,25 +6522,27 @@
 
       if (pillSearch) {
         pillSearch.addEventListener("click", () => {
+          const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           isWebSearchEnabled = !isWebSearchEnabled;
           pillSearch.classList.toggle("active", isWebSearchEnabled);
           triggerHaptic("light");
-          showToast(isWebSearchEnabled ? "ওয়েব সার্চ সক্রিয় হয়েছে" : "ওয়েব সার্চ নিষ্ক্রিয় হয়েছে", "success");
+          showToast(isWebSearchEnabled ? (isEn ? "Web search enabled" : "ওয়েব সার্চ সক্রিয় হয়েছে") : (isEn ? "Web search disabled" : "ওয়েব সার্চ নিষ্ক্রিয় হয়েছে"), "success");
           if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
           const txt = document.getElementById("webSearchText");
-          if (txt) txt.textContent = isWebSearchEnabled ? "ওয়েব সার্চ: চালু" : "ওয়েব সার্চ: বন্ধ";
+          if (txt) txt.textContent = isWebSearchEnabled ? (isEn ? "Web Search: On" : "ওয়েব সার্চ: চালু") : (isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ");
         });
       }
 
       if (pillImage) {
         pillImage.addEventListener("click", () => {
+          const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           isImageGenEnabled = !isImageGenEnabled;
           pillImage.classList.toggle("active", isImageGenEnabled);
           triggerHaptic("light");
-          showToast(isImageGenEnabled ? "ছবি তৈরি সক্রিয় হয়েছে" : "ছবি তৈরি নিষ্ক্রিয় হয়েছে", "success");
+          showToast(isImageGenEnabled ? (isEn ? "Image generation enabled" : "ছবি তৈরি সক্রিয় হয়েছে") : (isEn ? "Image generation disabled" : "ছবি তৈরি নিষ্ক্রিয় হয়েছে"), "success");
           if (typeof updateAttachBtnActiveState === "function") updateAttachBtnActiveState();
           const txt = document.getElementById("imageGenText");
-          if (txt) txt.textContent = isImageGenEnabled ? "ছবি তৈরি: চালু" : "ছবি তৈরি: বন্ধ";
+          if (txt) txt.textContent = isImageGenEnabled ? (isEn ? "Image Gen: On" : "ছবি তৈরি: চালু") : (isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ");
         });
       }
 
@@ -7207,7 +7212,7 @@
       const mSearch = document.getElementById("modelSearchInput");
       if (mSearch) mSearch.placeholder = dict.modelSearchPlaceholder;
 
-      const mTitle = document.querySelector(".model-modal-header h3");
+      const mTitle = document.querySelector("#modelModalOverlay .modal-header span, .model-modal-header h3");
       if (mTitle) mTitle.textContent = dict.modelModalTitle;
 
       // 8. Settings badge
@@ -7231,6 +7236,14 @@
       // 10. Update Speech Recognition language dynamically
       if (speechRecognitionInstance) {
         speechRecognitionInstance.lang = isEn ? "en-US" : "bn-BD";
+      }
+
+      // 11. Synchronize Auth UI & live countdown timers with new language
+      if (typeof updateAuthUIState === "function") {
+        updateAuthUIState();
+      }
+      if (typeof updateQuotaCountdownDisplay === "function") {
+        updateQuotaCountdownDisplay();
       }
     }
     window.applyI18n = applyI18n;
@@ -7445,12 +7458,10 @@
           showToast(currentLanguage === 'en' ? "Please enter a valid name" : "দয়া করে একটি নাম লিখুন", "error");
           return;
         }
-        try { localStorage.setItem("alokpoth_account_name", cleanName); } catch {}
-        applyAccountName(cleanName);
-        refreshAccountSubpageUI();
 
         const token = localStorage.getItem("alokpoth_token");
         if (token) {
+          subAccountSaveBtn.disabled = true;
           try {
             const res = await fetch(`${API_BASE}/auth/me`, {
               method: "PUT",
@@ -7460,13 +7471,27 @@
               },
               body: JSON.stringify({ name: cleanName })
             });
-            const data = await res.json();
-            if (data.success && data.user) {
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success && data.user) {
               try { localStorage.setItem("alokpoth_user", JSON.stringify(data.user)); } catch {}
+              try { localStorage.setItem("alokpoth_account_name", data.user.name || cleanName); } catch {}
+              applyAccountName(data.user.name || cleanName);
+              refreshAccountSubpageUI();
+              showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
+            } else {
+              showToast(data.error || (currentLanguage === 'en' ? "Failed to update profile." : "প্রোফাইল আপডেট ব্যর্থ হয়েছে।"), "error");
             }
-          } catch (e) {}
+          } catch (e) {
+            showToast(currentLanguage === 'en' ? "Network error updating name." : "নাম আপডেটে নেটওয়ার্ক সমস্যা হয়েছে।", "error");
+          } finally {
+            subAccountSaveBtn.disabled = false;
+          }
+        } else {
+          try { localStorage.setItem("alokpoth_account_name", cleanName); } catch {}
+          applyAccountName(cleanName);
+          refreshAccountSubpageUI();
+          showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
         }
-        showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
       });
     }
 
@@ -7485,7 +7510,7 @@
       subAccountPassSubmitBtn.addEventListener("click", async () => {
         const token = localStorage.getItem("alokpoth_token");
         if (!token) {
-          showToast("দয়া করে প্রথমে লগইন করুন", "error");
+          showToast(currentLanguage === 'en' ? "Please log in first" : "দয়া করে প্রথমে লগইন করুন", "error");
           return;
         }
         const oldPassEl = document.getElementById("subAccountOldPass");
@@ -7497,15 +7522,19 @@
         const msgEl = document.getElementById("subAccountPassMsg");
 
         if (!oldPass || !newPass || !cnfPass) {
-          if (msgEl) { msgEl.textContent = "সবগুলো ফিল্ড পূরণ করুন"; msgEl.style.color = "#ef4444"; }
+          if (msgEl) { msgEl.textContent = currentLanguage === 'en' ? "Please fill all fields" : "সবগুলো ফিল্ড পূরণ করুন"; msgEl.style.color = "#ef4444"; }
           return;
         }
         if (newPass.length < 6) {
-          if (msgEl) { msgEl.textContent = "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে"; msgEl.style.color = "#ef4444"; }
+          if (msgEl) { msgEl.textContent = currentLanguage === 'en' ? "New password must be at least 6 characters" : "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে"; msgEl.style.color = "#ef4444"; }
+          return;
+        }
+        if (newPass.length > 72) {
+          if (msgEl) { msgEl.textContent = currentLanguage === 'en' ? "Password cannot exceed 72 characters" : "পাসওয়ার্ড সর্বোচ্চ ৭২ অক্ষরের হতে পারে"; msgEl.style.color = "#ef4444"; }
           return;
         }
         if (newPass !== cnfPass) {
-          if (msgEl) { msgEl.textContent = "নিশ্চিতকরণ পাসওয়ার্ড মেলেনি"; msgEl.style.color = "#ef4444"; }
+          if (msgEl) { msgEl.textContent = currentLanguage === 'en' ? "Confirmation password does not match" : "নিশ্চিতকরণ পাসওয়ার্ড মেলেনি"; msgEl.style.color = "#ef4444"; }
           return;
         }
 
@@ -7518,20 +7547,20 @@
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
             body: JSON.stringify({ current_password: oldPass, new_password: newPass, confirm_password: cnfPass })
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (res.ok && data.success) {
-            if (msgEl) { msgEl.textContent = data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"; msgEl.style.color = "#10b981"; }
-            showToast(data.message || "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+            if (msgEl) { msgEl.textContent = data.message || (currentLanguage === 'en' ? "Password updated successfully!" : "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"); msgEl.style.color = "#10b981"; }
+            showToast(data.message || (currentLanguage === 'en' ? "Password updated successfully!" : "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!"), "success");
             if (oldPassEl) oldPassEl.value = "";
             if (newPassEl) newPassEl.value = "";
             if (cnfPassEl) cnfPassEl.value = "";
           } else {
-            const err = data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে";
+            const err = data.error || (currentLanguage === 'en' ? "Failed to update password." : "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে");
             if (msgEl) { msgEl.textContent = err; msgEl.style.color = "#ef4444"; }
             showToast(err, "error");
           }
         } catch (e) {
-          if (msgEl) { msgEl.textContent = "সার্ভার এরর"; msgEl.style.color = "#ef4444"; }
+          if (msgEl) { msgEl.textContent = currentLanguage === 'en' ? "Server connection error" : "সার্ভার এরর"; msgEl.style.color = "#ef4444"; }
         } finally {
           subAccountPassSubmitBtn.disabled = false;
           const finalSpan = subAccountPassSubmitBtn.querySelector("span") || subAccountPassSubmitBtn;
@@ -8302,11 +8331,12 @@
     function renderFilePreviews() {
       filePreviewRow.innerHTML = "";
       pendingFiles.forEach((f, idx) => {
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
         const chip = document.createElement("div");
         chip.className = "file-preview-chip";
         chip.innerHTML = `
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-          <span class="file-preview-chip-name">${f.name}${f.loading ? " (পড়া হচ্ছে...)" : ""}</span>
+          <span class="file-preview-chip-name">${escapeHtml(f.name)}${f.loading ? (isEn ? " (Reading...)" : " (পড়া হচ্ছে...)") : ""}</span>
           <button type="button" class="file-preview-remove" data-idx="${idx}">×</button>
         `;
         filePreviewRow.appendChild(chip);
@@ -8321,12 +8351,13 @@
       });
     }
 
-    docInput.addEventListener("change", async () => {
-      const files = Array.from(docInput.files || []);
+    async function handleDocFiles(files) {
+      if (!files || !files.length) return;
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10MB
       for (const file of files) {
         if (file.size > MAX_DOC_SIZE) {
-          showToast(`"${file.name}" অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 10MB অনুমোদিত।`, "error");
+          showToast(isEn ? `"${file.name}" is too large (${(file.size / (1024*1024)).toFixed(1)}MB). Max 10MB allowed.` : `"${file.name}" অতিরিক্ত বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 10MB অনুমোদিত।`, "error");
           continue;
         }
         const entry = { name: file.name, text: "", loading: true };
@@ -8346,7 +8377,11 @@
         updateTokenCounter();
         updateSendAvailability();
       }
-      docInput.value = "";
+      if (docInput) docInput.value = "";
+    }
+
+    docInput.addEventListener("change", async () => {
+      await handleDocFiles(Array.from(docInput.files || []));
     });
 
     const attachMenuWrap = document.getElementById("attachMenuWrap");
@@ -8374,14 +8409,15 @@
 
     attachWebSearchOption.addEventListener("click", () => {
       isWebSearchEnabled = !isWebSearchEnabled;
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isWebSearchEnabled) {
         isImageGenEnabled = false; 
-        imageGenText.textContent = "ছবি তৈরি: বন্ধ"; 
+        imageGenText.textContent = isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
         attachImageGenOption.style.color = "var(--text-main)"; 
         attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
         attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
       }
-      webSearchText.textContent = isWebSearchEnabled ? "ওয়েব সার্চ: চালু" : "ওয়েব সার্চ: বন্ধ";
+      webSearchText.textContent = isWebSearchEnabled ? (isEn ? "Web Search: On" : "ওয়েব সার্চ: চালু") : (isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ");
       attachWebSearchOption.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-main)";
       webSearchText.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
       attachWebSearchOption.querySelector('svg').style.stroke = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
@@ -8390,14 +8426,15 @@
 
     attachImageGenOption.addEventListener("click", () => {
       isImageGenEnabled = !isImageGenEnabled;
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isImageGenEnabled) {
         isWebSearchEnabled = false; 
-        webSearchText.textContent = "ওয়েব সার্চ: বন্ধ"; 
+        webSearchText.textContent = isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ"; 
         attachWebSearchOption.style.color = "var(--text-main)"; 
         attachWebSearchOption.querySelector("span").style.color = "var(--text-sub)"; 
         attachWebSearchOption.querySelector('svg').style.stroke = "var(--text-sub)";
       }
-      imageGenText.textContent = isImageGenEnabled ? "ছবি তৈরি: চালু" : "ছবি তৈরি: বন্ধ";
+      imageGenText.textContent = isImageGenEnabled ? (isEn ? "Image Gen: On" : "ছবি তৈরি: চালু") : (isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ");
       attachImageGenOption.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-main)";
       imageGenText.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
       attachImageGenOption.querySelector('svg').style.stroke = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
@@ -8480,22 +8517,28 @@
       });
     }
 
-    imageInput.addEventListener("change", async () => {
-      const files = Array.from(imageInput.files || []);
+    async function handleImageFiles(files) {
+      if (!files || !files.length) return;
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       for (const originalFile of files) {
         if (!originalFile.type.startsWith("image/")) continue;
         const file = await compressImage(originalFile);
         
         const MAX_IMG_SIZE = 3.5 * 1024 * 1024;
         if (file.size > MAX_IMG_SIZE) {
-          showToast(`ছবিটি অনেক বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
+          showToast(isEn ? `Image is too large (${(file.size / (1024*1024)).toFixed(1)}MB). Max 3.5MB allowed.` : `ছবিটি অনেক বড় (${(file.size / (1024*1024)).toFixed(1)}MB)। সর্বোচ্চ 3.5MB অনুমোদিত।`, "error");
           continue;
         }
         const base64 = await fileToBase64(file);
         pendingImages.push({ base64, mimeType: file.type, previewUrl: URL.createObjectURL(file) });
       }
-      renderImagePreviews(); imageInput.value = "";
+      renderImagePreviews();
+      if (imageInput) imageInput.value = "";
       updateSendAvailability();
+    }
+
+    imageInput.addEventListener("change", async () => {
+      await handleImageFiles(Array.from(imageInput.files || []));
     });
 
     document.addEventListener("paste", async (e) => {
@@ -9470,15 +9513,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function startDynamicStatusSequence(element) {
       element.style.whiteSpace = "";
-      setBubbleStatus(element, "thinking", "চিন্তা করছি...");
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const thinkingLabel = isEn ? "Thinking..." : "চিন্তা করছি...";
+      const workingLabel = isEn ? "Please wait..." : "অপেক্ষা করুন...";
+      setBubbleStatus(element, "thinking", thinkingLabel);
       
       let step = 0;
       const intervalId = setInterval(() => {
         step++;
         if (step % 2 === 1) {
-          setBubbleStatus(element, "working", "অপেক্ষা করুন...");
+          setBubbleStatus(element, "working", workingLabel);
         } else {
-          setBubbleStatus(element, "thinking", "চিন্তা করছি...");
+          setBubbleStatus(element, "thinking", thinkingLabel);
         }
       }, 3500);
       
@@ -9486,7 +9532,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function setBubbleGeneratingImage(element) {
-      setBubbleStatus(element, "generating", "ছবি তৈরি হচ্ছে...");
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      setBubbleStatus(element, "generating", isEn ? "Generating image..." : "ছবি তৈরি হচ্ছে...");
     }
 
     function detectImageGenRequest(text) {
@@ -9494,8 +9541,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const patterns = [
         /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন)/i,
         /(একটি|একটা|কিছু|আমাকে)?\s*(ছবি|ইমেজ|আর্ট|চিত্র|পেইন্টিং)\s*(এঁকে|বানিয়ে|তৈরি করে|জেনারেট করে)/i,
-        /^\s*(draw|paint|sketch|generate|create)\s+([a-z0-9_\-\s]{2,})\s*(image|picture|photo|illustration|art|painting|drawing|wallpaper|logo|icon)?/i,
-        /\b(draw|generate|create|paint)\b.*\b(image|picture|art|logo|wallpaper|photo|painting|drawing)\b/i,
+        /^\s*(draw|paint|sketch)\s+(a|an|the\s+)?([a-z0-9_\-\s]{2,})/i,
+        /\b(draw|generate|create|paint|make)\b[\s\S]*?\b(image|picture|art|logo|wallpaper|photo|painting|drawing|illustration)\b/i,
         /\bimage\s*of\b/i
       ];
       return patterns.some((p) => p.test(text));

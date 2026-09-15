@@ -125,7 +125,7 @@
       flex-direction: column;
       position: relative;
       overflow-x: hidden;
-      padding-top: env(safe-area-inset-top, 0px);
+      padding-top: 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
@@ -914,6 +914,12 @@
 
       const langBtnText = document.getElementById("langBtnText");
       if (langBtnText) langBtnText.textContent = isEn ? "বাংলা" : "English";
+
+      const themeBtn = document.getElementById("themeToggleBtn");
+      if (themeBtn) {
+        themeBtn.title = isEn ? "Toggle theme" : "থিম পরিবর্তন";
+        themeBtn.setAttribute("aria-label", isEn ? "Toggle theme" : "থিম পরিবর্তন");
+      }
 
       const backToChatText = document.getElementById("backToChatText");
       if (backToChatText) backToChatText.textContent = d.backToChat;

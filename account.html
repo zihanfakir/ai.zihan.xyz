@@ -126,7 +126,7 @@
       flex-direction: column;
       position: relative;
       overflow-x: hidden;
-      padding-top: env(safe-area-inset-top, 0px);
+      padding-top: 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
@@ -672,7 +672,7 @@
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 24px;
+      bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 14px));
       right: 24px;
       padding: 14px 20px;
       border-radius: var(--radius-md);
@@ -1093,6 +1093,12 @@
 
       const topDownloadText = document.getElementById("topDownloadText");
       if (topDownloadText) topDownloadText.textContent = d.topDownload;
+
+      const themeBtn = document.getElementById("themeToggleBtn");
+      if (themeBtn) {
+        themeBtn.title = isEn ? "Toggle theme" : "থিম পরিবর্তন";
+        themeBtn.setAttribute("aria-label", isEn ? "Toggle theme" : "থিম পরিবর্তন");
+      }
 
       const backToChatText = document.getElementById("backToChatText");
       if (backToChatText) backToChatText.textContent = d.backToChat;
@@ -1630,16 +1636,17 @@
     // Logout
     document.getElementById("logoutBtn").addEventListener("click", () => {
       const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
-      localStorage.removeItem("alokpoth_token");
-      localStorage.removeItem("alokpoth_user");
-      localStorage.removeItem("alokpoth_account_name");
-      localStorage.removeItem("alokpoth_current_plan");
-      localStorage.removeItem("alokpoth_user_plan");
-      localStorage.removeItem("alokpoth_plan");
-      localStorage.removeItem("alokpoth_plan_expiry");
-      localStorage.removeItem("alokpoth_plan_expires_at");
-      localStorage.removeItem("alokpoth_window_usage");
-      localStorage.removeItem("alokpoth_usage_window");
+      const keysToPurge = [
+        "alokpoth_token", "alokpoth_user", "alokpoth_account_name",
+        "alokpoth_chat_sessions", "alokpoth_current_session_id",
+        "alokpoth_message_count", "alokpoth_daily_usage",
+        "alokpoth_current_plan", "alokpoth_user_plan", "alokpoth_plan",
+        "alokpoth_plan_expiry", "alokpoth_plan_expires_at",
+        "alokpoth_window_usage", "alokpoth_image_window_usage", "alokpoth_usage_window"
+      ];
+      keysToPurge.forEach(k => {
+        try { localStorage.removeItem(k); } catch {}
+      });
       showToast(d.logoutSuccess, "success");
       setTimeout(() => { window.location.href = "login.html"; }, 500);
     });
