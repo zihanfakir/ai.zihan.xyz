@@ -3023,6 +3023,17 @@
       justify-content: space-between;
       gap: 8px;
     }
+    #drawerUserCardWrap {
+      transition: background-color 0.15s ease;
+      border-radius: var(--radius-sm);
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #drawerUserCardWrap:hover,
+    #drawerUserCardWrap:active {
+      background: rgba(128, 128, 128, 0.12);
+    }
     .drawer-user-card {
       display: flex;
       align-items: center;
@@ -3599,7 +3610,7 @@
       </button>
     </div>
 
-    <div class="drawer-footer" style="padding: 12px 16px; border-top: none; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="drawerUserCardWrap" role="button" tabindex="0" aria-label="প্রোফাইল সেটিংস">
+    <div class="drawer-footer" style="padding: 12px 16px; border-top: none; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="drawerUserCardWrap" role="button" tabindex="0" aria-label="সেটিংস ও একাউন্ট" onclick="handleDrawerUserCardClick(event)">
       <div style="display: flex; align-items: center; gap: 12px; width: calc(100% - 36px); pointer-events: none;">
         <div class="drawer-avatar" id="drawerAvatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; background: rgba(128,128,128,0.2); flex-shrink: 0;">অ</div>
         <div style="display: flex; flex-direction: column; width: 100%; overflow: hidden;">
@@ -6383,24 +6394,26 @@
       });
     }
 
+    function handleDrawerUserCardClick(e) {
+      if (e) {
+        if (typeof e.preventDefault === "function") e.preventDefault();
+        if (typeof e.stopPropagation === "function") e.stopPropagation();
+      }
+      closeSidebarDrawer();
+      if (typeof openAccountModal === "function") {
+        openAccountModal("settingsMainView");
+      } else {
+        window.location.href = "account.html";
+      }
+    }
+    window.handleDrawerUserCardClick = handleDrawerUserCardClick;
+
     if (drawerUserCard) {
-      drawerUserCard.addEventListener("click", (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        closeSidebarDrawer();
-        const token = localStorage.getItem("alokpoth_token");
-        if (!token) {
-          openAuthModal("login");
-        } else {
-          openAccountModal("settingsAccountView");
-        }
-      });
+      drawerUserCard.addEventListener("click", handleDrawerUserCardClick);
       drawerUserCard.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          drawerUserCard.click();
+          handleDrawerUserCardClick(e);
         }
       });
     }
@@ -7568,6 +7581,10 @@
           showSettingsView("settingsAccountView");
         } else if (targetTab === "redeem" || targetTab === "settingsRedeemView") {
           showSettingsView("settingsRedeemView");
+        } else if (targetTab === "language" || targetTab === "settingsLanguageView") {
+          showSettingsView("settingsLanguageView");
+        } else if (targetTab === "theme" || targetTab === "settingsThemeView") {
+          showSettingsView("settingsThemeView");
         } else {
           showSettingsView("settingsMainView");
         }
@@ -7585,6 +7602,7 @@
         window.location.href = url;
       }
     }
+    window.openAccountModal = openAccountModal;
 
     function closeAccountModal(isPopstate = false) {
       if (accountModalOverlay) accountModalOverlay.classList.remove("open");
