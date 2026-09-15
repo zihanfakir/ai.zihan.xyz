@@ -257,7 +257,36 @@ const loginUser = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    const user = req.user;
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const targetUserId = req.user ? String(req.user._id || req.user.id || '') : null;
+    const targetEmail = req.user && req.user.email ? String(req.user.email).toLowerCase().trim() : null;
+
+    let user = null;
+    if (getIsMongoConnected() && (targetUserId || targetEmail)) {
+      if (targetUserId && mongoose.Types.ObjectId.isValid(targetUserId)) {
+        user = await User.findById(targetUserId).select('-password').lean();
+      } else if (targetEmail) {
+        user = await User.findOne({ email: targetEmail }).select('-password').lean();
+      }
+    }
+
+    if (!user) {
+      const { getPersistedUsers } = require('../../utils/getModelConfig');
+      const users = await getPersistedUsers();
+      user = users.find(u => (targetUserId && String(u._id || u.id) === targetUserId) || (targetEmail && u.email && u.email.toLowerCase().trim() === targetEmail));
+    }
+
+    if (!user) {
+      user = req.user;
+    } else {
+      user._id = user._id || user.id;
+      user.id = user.id || user._id;
+      setCachedUser(targetUserId || targetEmail, user);
+    }
+
     let rateLimit = null;
     let usage = null;
     

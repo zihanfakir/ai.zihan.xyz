@@ -862,7 +862,8 @@
           <div class="plan-card-quota">১০ <span>বার্তা / ৩ ঘণ্টা</span></div>
           <div style="font-size:0.85rem; color:var(--text-sub);">দৈনন্দিন সাধারণ কাজ ও প্রশ্নের জন্য উপযুক্ত</div>
           <ul class="plan-features-list">
-            <li>১০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li id="accFeatFreeMsgs">১০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li id="accFeatFreeImg">৩টি ছবি তৈরি প্রতি ৩ ঘণ্টায়</li>
             <li>সাধারণ এআই মডেল অ্যাক্সেস</li>
             <li>স্ট্যান্ডার্ড স্পিড রেসপন্স</li>
             <li>আজীবন ফ্রি মেয়াদ</li>
@@ -876,7 +877,8 @@
           <div class="plan-card-quota">৩০ <span>বার্তা / ৩ ঘণ্টা</span></div>
           <div style="font-size:0.85rem; color:var(--text-sub);">প্রফেশনাল ডেভেলপার ও পাওয়ার ইউজারদের জন্য</div>
           <ul class="plan-features-list">
-            <li>৩০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li id="accFeatProMsgs">৩০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
+            <li id="accFeatProImg">২০টি ছবি তৈরি প্রতি ৩ ঘণ্টায়</li>
             <li>সবগুলো প্রিমিয়াম মডেলের অ্যাক্সেস</li>
             <li>দ্রুততম স্ট্রিমিং স্পিড</li>
             <li>কোড জেনারেশন ও ওয়েব সার্চ সাপোর্ট</li>
@@ -890,7 +892,8 @@
           <div class="plan-card-quota">৫০ <span>বার্তা / ১ ঘণ্টা</span></div>
           <div style="font-size:0.85rem; color:var(--text-sub);">সর্বোচ্চ ক্ষমতা ও আনলিমিটেড কাজের জন্য</div>
           <ul class="plan-features-list">
-            <li>৫০টি বার্তা প্রতি ১ ঘণ্টায়</li>
+            <li id="accFeatMaxMsgs">৫০টি বার্তা প্রতি ১ ঘণ্টায়</li>
+            <li id="accFeatMaxImg">১০০টি ছবি তৈরি প্রতি ১ ঘণ্টায়</li>
             <li>সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ</li>
             <li>সবচেয়ে বড় কনটেক্সট উইন্ডো</li>
             <li>এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস</li>
@@ -1191,6 +1194,7 @@
         try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
         applyAccountI18n();
         renderUserData();
+        syncDynamicPlans();
       });
     }
 
@@ -1360,9 +1364,9 @@
     }
 
     let dynamicPlanLimits = {
-      Free: { limit: 10, hours: 3 },
-      Pro: { limit: 30, hours: 3 },
-      Max: { limit: 50, hours: 1 }
+      Free: { limit: 10, hours: 3, image_limit: 3 },
+      Pro: { limit: 30, hours: 3, image_limit: 20 },
+      Max: { limit: 50, hours: 1, image_limit: 100 }
     };
     let accountLiveTimerInterval = null;
 
@@ -1375,16 +1379,35 @@
         if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.plans)) {
+          const isEn = (currentLanguage === "en");
           data.plans.forEach(p => {
-            dynamicPlanLimits[p.name] = { limit: Number(p.message_limit) || 10, hours: Number(p.window_hours) || 3 };
+            const lim = Number(p.message_limit) || 10;
+            const hrs = Number(p.window_hours) || 3;
+            const imgLim = (p.image_limit !== undefined && p.image_limit !== null && !isNaN(Number(p.image_limit)))
+              ? Number(p.image_limit) : (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
+
+            dynamicPlanLimits[p.name] = { limit: lim, hours: hrs, image_limit: imgLim };
+
             const card = document.getElementById("cardPlan" + p.name);
             if (card) {
               const quotaDiv = card.querySelector(".plan-card-quota");
               if (quotaDiv) {
-                const safeLimit = escapeHtml(String(p.message_limit));
-                const safeHours = escapeHtml(String(p.window_hours));
-                const unit = currentLanguage === "en" ? `msgs / ${safeHours} hrs` : `বার্তা / ${formatDigits(safeHours)} ঘণ্টা`;
+                const safeLimit = escapeHtml(String(lim));
+                const safeHours = escapeHtml(String(hrs));
+                const unit = isEn ? `msgs / ${safeHours} hr${hrs > 1 ? 's' : ''}` : `বার্তা / ${formatDigits(safeHours)} ঘণ্টা`;
                 quotaDiv.innerHTML = `${formatDigits(safeLimit)} <span>${unit}</span>`;
+              }
+              const msgLi = document.getElementById(`accFeat${p.name}Msgs`);
+              if (msgLi) {
+                msgLi.textContent = isEn 
+                  ? `${lim} messages per ${hrs} hour${hrs > 1 ? 's' : ''}`
+                  : `${formatDigits(lim)}টি বার্তা প্রতি ${formatDigits(hrs)} ঘণ্টায়`;
+              }
+              const imgLi = document.getElementById(`accFeat${p.name}Img`);
+              if (imgLi) {
+                imgLi.textContent = isEn
+                  ? `${imgLim} image generations per ${hrs} hour${hrs > 1 ? 's' : ''}`
+                  : `${formatDigits(imgLim)}টি ছবি তৈরি প্রতি ${formatDigits(hrs)} ঘণ্টায়`;
               }
             }
           });
@@ -1397,8 +1420,12 @@
       const t = localStorage.getItem("alokpoth_token");
       if (!t) return;
       try {
-        const res = await fetch(`${API_BASE}/auth/me`, {
-          headers: { Authorization: `Bearer ${t}` }
+        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Authorization": `Bearer ${t}`,
+            "Cache-Control": "no-cache"
+          }
         });
         if (res.ok) {
           const data = await res.json();
@@ -1421,8 +1448,12 @@
             if (u.rateLimit || u.usage) {
               const lim = u.rateLimit || u.usage;
               const curPlan = planName;
+              const curImgLim = (lim.image_limit !== undefined || lim.imageLimit !== undefined)
+                ? Number(lim.image_limit ?? lim.imageLimit)
+                : (dynamicPlanLimits[curPlan]?.image_limit || (curPlan === 'Max' ? 100 : (curPlan === 'Pro' ? 20 : 3)));
+
               if (lim.limit && lim.windowHours) {
-                dynamicPlanLimits[curPlan] = { limit: Number(lim.limit), hours: Number(lim.windowHours) };
+                dynamicPlanLimits[curPlan] = { limit: Number(lim.limit), hours: Number(lim.windowHours), image_limit: curImgLim };
               }
               const startTimestamp = lim.start || (lim.resetAt ? (new Date(lim.resetAt).getTime() - (lim.windowHours * 60 * 60 * 1000)) : Date.now());
               const usageData = {
@@ -1751,6 +1782,8 @@
 
           codeInput.value = "";
           renderUserData();
+          syncUserDataFromServer();
+          syncDynamicPlans();
           triggerConfetti();
           soundEngine.playSuccess();
           const succMsg = currentLanguage === "en"

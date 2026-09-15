@@ -47,32 +47,32 @@ function invalidateCachedUser(key) {
     return;
   }
   const cleanKey = String(key).toLowerCase().trim();
-  const entry = userCache.get(cleanKey);
-  if (entry && entry.user) {
-    const user = entry.user;
-    if (user.email) userCache.delete(String(user.email).toLowerCase().trim());
-    if (user._id) userCache.delete(String(user._id).toLowerCase().trim());
-    if (user.id) userCache.delete(String(user.id).toLowerCase().trim());
-  }
   userCache.delete(cleanKey);
+  for (const [k, v] of userCache.entries()) {
+    if (k === cleanKey) {
+      userCache.delete(k);
+    } else if (v && v.user) {
+      const u = v.user;
+      const uEmail = String(u.email || '').toLowerCase().trim();
+      const uId = String(u._id || u.id || '').toLowerCase().trim();
+      if (uEmail === cleanKey || uId === cleanKey) {
+        userCache.delete(k);
+      }
+    }
+  }
 }
 
-// 2. Plan Cache (5 min TTL, invalidated on admin edit)
-const planCache = new Map(); // planName -> { plan, ts }
-const PLAN_CACHE_TTL = 5 * 60 * 1000;
+// 2. Plan Cache (ZERO Plan Caching: Always real-time direct from DB / store)
+// User requirement: "aye jonno plan er cash thakbe na"
+const planCache = new Map();
 
 function getCachedPlan(planName) {
-  if (!planName) return null;
-  const entry = planCache.get(planName);
-  if (entry && (Date.now() - entry.ts) < PLAN_CACHE_TTL) {
-    return entry.plan;
-  }
+  // Plan caching is completely disabled so limits & upgrades update instantly
   return null;
 }
 
 function setCachedPlan(planName, plan) {
-  if (!planName || !plan) return;
-  planCache.set(planName, { plan, ts: Date.now() });
+  // No-op: do not cache plans
 }
 
 function invalidateCachedPlans() {

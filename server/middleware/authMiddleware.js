@@ -29,7 +29,11 @@ const protect = async (req, res, next) => {
     const userId = decoded.id || decoded._id || decoded.userId;
 
     // 1. High-Performance In-Memory Cache Check (<0.01ms)
+    let isFromCache = false;
     let user = getCachedUser(userId) || (decoded.email ? getCachedUser(decoded.email) : null);
+    if (user) {
+      isFromCache = true;
+    }
 
     if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
@@ -88,7 +92,9 @@ const protect = async (req, res, next) => {
 
     user._id = user._id || user.id;
     user.id = user.id || user._id;
-    setCachedUser(userId, user);
+    if (!isFromCache) {
+      setCachedUser(userId, user);
+    }
     req.user = user;
     next();
   } catch (error) {
@@ -110,7 +116,11 @@ const optionalProtect = async (req, res, next) => {
     const userId = decoded.id || decoded._id || decoded.userId;
 
     // 1. High-Performance In-Memory Cache Check (<0.01ms)
+    let isFromCache = false;
     let user = getCachedUser(userId) || (decoded.email ? getCachedUser(decoded.email) : null);
+    if (user) {
+      isFromCache = true;
+    }
 
     if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
@@ -166,7 +176,9 @@ const optionalProtect = async (req, res, next) => {
     if (user) {
       user._id = user._id || user.id;
       user.id = user.id || user._id;
-      setCachedUser(userId, user);
+      if (!isFromCache) {
+        setCachedUser(userId, user);
+      }
     }
     req.user = user || null;
   } catch (error) {

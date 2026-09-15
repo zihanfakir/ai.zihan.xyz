@@ -353,6 +353,26 @@
       box-shadow: 0 0 0 1px var(--accent-primary), 0 20px 48px rgba(99, 102, 241, 0.2);
     }
 
+    .plan-card.active-user-plan {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 0 1px #10b981, 0 16px 36px rgba(16, 185, 129, 0.22) !important;
+    }
+
+    .active-plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #10b981;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
     .popular-tag {
       position: absolute;
       top: -12px;
@@ -670,7 +690,7 @@
     <!-- Plans Grid -->
     <div class="plans-grid">
       <!-- Free Plan -->
-      <div class="plan-card">
+      <div class="plan-card" id="planCardFree">
         <div class="plan-name" id="planNameFree">ফ্রি (Free)</div>
         <div class="plan-desc" id="planDescFree">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
@@ -681,6 +701,10 @@
           <li id="featFree1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             <span>১০টি বার্তা প্রতি ৩ ঘণ্টায়</span>
+          </li>
+          <li id="featFreeImg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="featFreeImgText">৩টি ছবি প্রতি ৩ ঘণ্টায়</span>
           </li>
           <li id="featFree2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -699,7 +723,7 @@
       </div>
 
       <!-- Pro Plan -->
-      <div class="plan-card featured">
+      <div class="plan-card featured" id="planCardPro">
         <div class="popular-tag" id="popularTag">সর্বাধিক জনপ্রিয়</div>
         <div class="plan-name" id="planNamePro">প্রো (Pro)</div>
         <div class="plan-desc" id="planDescPro">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
@@ -711,6 +735,10 @@
           <li id="featPro1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             <span>৩০টি বার্তা প্রতি ৩ ঘণ্টায়</span>
+          </li>
+          <li id="featProImg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="featProImgText">২০টি ছবি প্রতি ৩ ঘণ্টায়</span>
           </li>
           <li id="featPro2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -729,7 +757,7 @@
       </div>
 
       <!-- Max Plan -->
-      <div class="plan-card">
+      <div class="plan-card" id="planCardMax">
         <div class="plan-name" id="planNameMax">ম্যাক্স (Max)</div>
         <div class="plan-desc" id="planDescMax">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
         <div class="plan-quota">
@@ -740,6 +768,10 @@
           <li id="featMax1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             <span>৫০টি বার্তা প্রতি ১ ঘণ্টায়</span>
+          </li>
+          <li id="featMaxImg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="featMaxImgText">১০০টি ছবি প্রতি ১ ঘণ্টায়</span>
           </li>
           <li id="featMax2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -811,6 +843,7 @@
         quotaNumFree: "১০",
         quotaUnitFree: "বার্তা / ৩ ঘণ্টা",
         featFree1: "১০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featFreeImg: "৩টি ছবি প্রতি ৩ ঘণ্টায়",
         featFree2: "সাধারণ এআই মডেল অ্যাক্সেস",
         featFree3: "স্ট্যান্ডার্ড স্ট্রিমিং গতি",
         featFree4: "আজীবন মেয়াদহীন সুবিধা",
@@ -821,6 +854,7 @@
         quotaNumPro: "৩০",
         quotaUnitPro: "বার্তা / ৩ ঘণ্টা",
         featPro1: "৩০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featProImg: "২০টি ছবি প্রতি ৩ ঘণ্টায়",
         featPro2: "সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস",
         featPro3: "আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স",
         featPro4: "কোড জেন ও লাইভ ওয়েব সার্চ",
@@ -830,10 +864,12 @@
         quotaNumMax: "৫০",
         quotaUnitMax: "বার্তা / ১ ঘণ্টা",
         featMax1: "৫০টি বার্তা প্রতি ১ ঘণ্টায়",
+        featMaxImg: "১০০টি ছবি প্রতি ১ ঘণ্টায়",
         featMax2: "সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ",
         featMax3: "বৃহত্তম কনটেক্সট মেমোরি সাপোর্ট",
         featMax4: "সকল এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস",
         btnMax: "ম্যাক্স কোড রিডিম করুন",
+        currentPlanActive: "বর্তমান প্ল্যান (সক্রিয়)",
         redeemTitle: "রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!",
         redeemDesc: "আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।",
         redeemPlaceholder: "কোড লিখুন (যেমন: ALOAI2026 বা ABCD-EFGH-IJKL)",
@@ -861,6 +897,7 @@
         quotaNumFree: "10",
         quotaUnitFree: "msgs / 3 hrs",
         featFree1: "10 messages per 3 hours",
+        featFreeImg: "3 images per 3 hours",
         featFree2: "Access to standard AI models",
         featFree3: "Standard streaming speed",
         featFree4: "Lifetime free access",
@@ -871,6 +908,7 @@
         quotaNumPro: "30",
         quotaUnitPro: "msgs / 3 hrs",
         featPro1: "30 messages per 3 hours",
+        featProImg: "20 images per 3 hours",
         featPro2: "Access to all premium models",
         featPro3: "Ultrafast streaming & low latency",
         featPro4: "Code generation & live web search",
@@ -880,10 +918,12 @@
         quotaNumMax: "50",
         quotaUnitMax: "msgs / 1 hr",
         featMax1: "50 messages per 1 hour",
+        featMaxImg: "100 images per 1 hour",
         featMax2: "Highest priority bandwidth",
         featMax3: "Largest context window & memory",
         featMax4: "All exclusive features & early access",
         btnMax: "Claim Max with Code",
+        currentPlanActive: "Current Plan (Active)",
         redeemTitle: "Have a promo code? Upgrade immediately!",
         redeemDesc: "Paste your voucher or promo code below to instantly activate your Pro or Max subscription.",
         redeemPlaceholder: "Enter code (e.g. ALOAI2026 or ABCD-EFGH-IJKL)",
@@ -941,6 +981,8 @@
       if (quotaUnitFree) quotaUnitFree.textContent = d.quotaUnitFree;
       const featFree1 = document.querySelector("#featFree1 span");
       if (featFree1) featFree1.textContent = d.featFree1;
+      const featFreeImg = document.getElementById("featFreeImgText");
+      if (featFreeImg) featFreeImg.textContent = d.featFreeImg;
       const featFree2 = document.querySelector("#featFree2 span");
       if (featFree2) featFree2.textContent = d.featFree2;
       const featFree3 = document.querySelector("#featFree3 span");
@@ -963,6 +1005,8 @@
       if (quotaUnitPro) quotaUnitPro.textContent = d.quotaUnitPro;
       const featPro1 = document.querySelector("#featPro1 span");
       if (featPro1) featPro1.textContent = d.featPro1;
+      const featProImg = document.getElementById("featProImgText");
+      if (featProImg) featProImg.textContent = d.featProImg;
       const featPro2 = document.querySelector("#featPro2 span");
       if (featPro2) featPro2.textContent = d.featPro2;
       const featPro3 = document.querySelector("#featPro3 span");
@@ -983,6 +1027,8 @@
       if (quotaUnitMax) quotaUnitMax.textContent = d.quotaUnitMax;
       const featMax1 = document.querySelector("#featMax1 span");
       if (featMax1) featMax1.textContent = d.featMax1;
+      const featMaxImg = document.getElementById("featMaxImgText");
+      if (featMaxImg) featMaxImg.textContent = d.featMaxImg;
       const featMax2 = document.querySelector("#featMax2 span");
       if (featMax2) featMax2.textContent = d.featMax2;
       const featMax3 = document.querySelector("#featMax3 span");
@@ -1017,6 +1063,10 @@
       if (faqQ3) faqQ3.textContent = d.faqQ3;
       const faqA3 = document.getElementById("faqA3");
       if (faqA3) faqA3.textContent = d.faqA3;
+
+      if (typeof updatePlanCardsUI === "function") {
+        updatePlanCardsUI();
+      }
     }
 
     const langToggleBtn = document.getElementById("langToggleBtn");
@@ -1227,8 +1277,176 @@
       }
     });
 
-    // Run initial i18n
+    // Dynamic Plan Limits & User Sync
+    const dynamicPlanData = {
+      Free: { message_limit: 10, window_hours: 3, image_limit: 3 },
+      Pro: { message_limit: 30, window_hours: 3, image_limit: 20 },
+      Max: { message_limit: 50, window_hours: 1, image_limit: 100 }
+    };
+
+    let userCurrentPlan = localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free";
+
+    function toBnNum(num) {
+      if (currentLanguage === "en") return String(num);
+      const bn = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+      return String(num).replace(/\d/g, (d) => bn[parseInt(d, 10)]);
+    }
+
+    function updatePlanCardsUI() {
+      const isEn = (currentLanguage === "en");
+
+      ["Free", "Pro", "Max"].forEach(name => {
+        const data = dynamicPlanData[name];
+        if (!data) return;
+
+        const lim = data.message_limit;
+        const hrs = data.window_hours;
+        const imgLim = data.image_limit;
+
+        const numEl = document.getElementById("quotaNum" + name);
+        if (numEl) numEl.textContent = isEn ? String(lim) : toBnNum(lim);
+
+        const unitEl = document.getElementById("quotaUnit" + name);
+        if (unitEl) {
+          unitEl.textContent = isEn ? `msgs / ${hrs} hr${hrs > 1 ? 's' : ''}` : `বার্তা / ${toBnNum(hrs)} ঘণ্টা`;
+        }
+
+        const feat1 = document.querySelector(`#feat${name}1 span`);
+        if (feat1) {
+          feat1.textContent = isEn ? `${lim} messages per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(lim)}টি বার্তা প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+        }
+
+        const featImg = document.getElementById(`feat${name}ImgText`);
+        if (featImg) {
+          featImg.textContent = isEn ? `${imgLim} images per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(imgLim)}টি ছবি প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+        }
+      });
+
+      updateUserPlanButtons();
+    }
+
+    function updateUserPlanButtons() {
+      const isEn = (currentLanguage === "en");
+      const btnFree = document.getElementById("btnFree");
+      const btnPro = document.getElementById("btnPro");
+      const btnMax = document.getElementById("btnMax");
+
+      const cardFree = document.getElementById("planCardFree");
+      const cardPro = document.getElementById("planCardPro");
+      const cardMax = document.getElementById("planCardMax");
+
+      if (cardFree) cardFree.classList.toggle("active-user-plan", userCurrentPlan === "Free");
+      if (cardPro) cardPro.classList.toggle("active-user-plan", userCurrentPlan === "Pro");
+      if (cardMax) cardMax.classList.toggle("active-user-plan", userCurrentPlan === "Max");
+
+      // Free Button
+      if (btnFree) {
+        if (userCurrentPlan === "Free") {
+          btnFree.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
+          btnFree.style.borderColor = "var(--accent-primary)";
+          btnFree.style.background = "rgba(99, 102, 241, 0.15)";
+          btnFree.style.fontWeight = "700";
+        } else {
+          btnFree.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
+          btnFree.style.borderColor = "var(--border-subtle)";
+          btnFree.style.background = "rgba(255, 255, 255, 0.05)";
+          btnFree.style.fontWeight = "600";
+        }
+      }
+
+      // Pro Button
+      if (btnPro) {
+        if (userCurrentPlan === "Pro") {
+          btnPro.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
+          btnPro.style.background = "rgba(99, 102, 241, 0.25)";
+          btnPro.style.boxShadow = "none";
+          btnPro.onclick = () => { window.location.href = "account.html?tab=tabPlan"; };
+        } else {
+          btnPro.textContent = isEn ? "Unlock with Redeem Code" : "রিডিম কোড দিয়ে আনলক করুন";
+          btnPro.style.background = "var(--accent-gradient)";
+          btnPro.onclick = scrollToRedeem;
+        }
+      }
+
+      // Max Button
+      if (btnMax) {
+        if (userCurrentPlan === "Max") {
+          btnMax.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
+          btnMax.style.background = "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(245,158,11,0.3))";
+          btnMax.style.border = "1px solid #f59e0b";
+          btnMax.onclick = () => { window.location.href = "account.html?tab=tabPlan"; };
+        } else {
+          btnMax.textContent = isEn ? "Claim Max with Code" : "ম্যাক্স কোড রিডিম করুন";
+          btnMax.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
+          btnMax.style.border = "none";
+          btnMax.onclick = scrollToRedeem;
+        }
+      }
+    }
+
+    async function syncPlansFromServer() {
+      try {
+        const res = await fetch(`${API_BASE}/plans?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && Array.isArray(data.plans)) {
+          data.plans.forEach(p => {
+            if (dynamicPlanData[p.name]) {
+              dynamicPlanData[p.name] = {
+                message_limit: (p.message_limit !== undefined && !isNaN(Number(p.message_limit)))
+                  ? Number(p.message_limit) : dynamicPlanData[p.name].message_limit,
+                window_hours: (p.window_hours !== undefined && !isNaN(Number(p.window_hours)))
+                  ? Number(p.window_hours) : dynamicPlanData[p.name].window_hours,
+                image_limit: (p.image_limit !== undefined && !isNaN(Number(p.image_limit)))
+                  ? Number(p.image_limit) : dynamicPlanData[p.name].image_limit
+              };
+            }
+          });
+          updatePlanCardsUI();
+        }
+      } catch (e) {}
+    }
+
+    async function syncUserStatusFromServer() {
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        userCurrentPlan = "Free";
+        updateUserPlanButtons();
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Cache-Control": "no-cache"
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            const u = data.user;
+            const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+            const isAdmin = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
+            userCurrentPlan = isAdmin ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
+            try {
+              localStorage.setItem("alokpoth_current_plan", userCurrentPlan);
+              localStorage.setItem("alokpoth_plan", userCurrentPlan);
+              localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            } catch {}
+            updateUserPlanButtons();
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Run initial i18n & dynamic sync
     applyPlansI18n();
+    syncPlansFromServer();
+    syncUserStatusFromServer();
   </script>
 </body>
 </html>
