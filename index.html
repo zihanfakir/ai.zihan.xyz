@@ -4984,9 +4984,9 @@
         const token = localStorage.getItem("alokpoth_token");
         const tokenData = token ? decodeJWT(token) : null;
         if (tokenData) {
-          u.role = tokenData.role || 'user';
+          if (tokenData.role) u.role = tokenData.role;
           if (tokenData.email) u.email = tokenData.email;
-          if (tokenData.plan) {
+          if (tokenData.plan && (!u.subscription || !u.subscription.plan_name)) {
             if (!u.subscription) u.subscription = {};
             u.subscription.plan_name = tokenData.plan;
           }
@@ -6029,10 +6029,43 @@
         return;
       }
 
+      const userPlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
+      let isUserAdmin = false;
+      try {
+        const u = getTrustedUser();
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+          isUserAdmin = true;
+        }
+      } catch {}
+
       MODELS.forEach((m) => {
         const card = document.createElement("button");
         card.type = "button";
         card.className = "model-card" + (m.id === selectedModelId ? " selected" : "");
+
+        const isMaxOnly = Boolean(m.efficient) || m.id === "gpt-5.6";
+        const isProOnly = Boolean(m.premium) && !isMaxOnly;
+
+        let isLocked = false;
+        let requiredPlan = "";
+
+        if (!isUserAdmin) {
+          if (userPlan === "Free") {
+            if (isMaxOnly) {
+              isLocked = true;
+              requiredPlan = "Max";
+            } else if (isProOnly) {
+              isLocked = true;
+              requiredPlan = "Pro";
+            }
+          } else if (userPlan === "Pro") {
+            if (isMaxOnly) {
+              isLocked = true;
+              requiredPlan = "Max";
+            }
+          }
+        }
 
         let badgeHtml = "";
         if (m.efficient) {
@@ -6041,9 +6074,17 @@
           badgeHtml = `<span class="badge-tag badge-pro">PRO</span>`;
         }
 
+        let lockHtml = "";
+        if (isLocked) {
+          lockHtml = `<span class="model-lock-badge" style="display:inline-flex; align-items:center; gap:3px; margin-left:6px; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25);">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            ${requiredPlan}
+          </span>`;
+        }
+
         card.innerHTML = `
           <div class="model-card-left">
-            <div class="model-card-name">${escapeHtml(m.name)}${badgeHtml}</div>
+            <div class="model-card-name">${escapeHtml(m.name)}${badgeHtml}${lockHtml}</div>
           </div>
           <div class="model-card-right">
             <span class="model-latency">${latencyLabel(m)}</span>
@@ -6056,7 +6097,22 @@
           card.style.opacity = "0.55";
         }
 
+        if (isLocked) {
+          card.classList.add("model-locked");
+          card.style.opacity = "0.72";
+        }
+
         card.addEventListener("click", () => {
+          if (isLocked) {
+            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            const reqPlanName = requiredPlan === "Max" ? (isEn ? "Max Plan" : "ম্যাক্স প্ল্যান") : (isEn ? "Pro Plan" : "প্রো প্ল্যান");
+            const curPlanName = userPlan === "Pro" ? (isEn ? "Pro Plan" : "প্রো প্ল্যান") : (userPlan === "Max" ? (isEn ? "Max Plan" : "ম্যাক্স প্ল্যান") : (isEn ? "Free Plan" : "ফ্রি প্ল্যান"));
+            const msg = isEn
+              ? `'${m.name}' requires ${reqPlanName}. Your current plan: ${curPlanName}.`
+              : `'${m.name}' মডেলটি ব্যবহারের জন্য ${reqPlanName} প্রয়োজন। আপনার বর্তমান প্ল্যান: ${curPlanName}।`;
+            showToast(msg, "warning");
+            return;
+          }
           if (isOffline) {
             showToast(`'${m.name}' মডেলটিতে সাময়িক সংযোগ সমস্যা হতে পারে।`, "warning");
           }
@@ -6076,6 +6132,23 @@
 
         modelList.appendChild(card);
       });
+
+      if (!isUserAdmin && userPlan !== "Max") {
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        const footerBanner = document.createElement("div");
+        footerBanner.className = "model-upgrade-banner";
+        footerBanner.style.cssText = "margin-top:14px; padding:12px 14px; border-radius:10px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); display:flex; align-items:center; justify-content:space-between; gap:10px;";
+        footerBanner.innerHTML = `
+          <div style="font-size:0.8rem; color:var(--text-sub); line-height:1.4;">
+            <strong style="color:var(--text-main); display:block; margin-bottom:2px;">${isEn ? "Unlock All Premium Models" : "সব প্রিমিয়াম মডেল আনলক করুন"}</strong>
+            ${isEn ? "Upgrade your plan to access Alo Ultra and high-tier models." : "Alo Ultra সহ সর্বোচ্চ ক্ষমতার মডেল পেতে প্ল্যান আপগ্রেড করুন।"}
+          </div>
+          <a href="plans.html" style="display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; font-size:0.8rem; font-weight:600; text-decoration:none; white-space:nowrap; touch-action:manipulation;">
+            ${isEn ? "Upgrade" : "আপগ্রেড"}
+          </a>
+        `;
+        modelList.appendChild(footerBanner);
+      }
     }
 
     function pushPageState(name) {
@@ -6115,6 +6188,7 @@
     function closeModal() {
       modelModalOverlay.classList.remove("open");
     }
+    window.openModelPicker = openModal;
 
     modelTrigger.addEventListener("click", openModal);
     modelModalClose.addEventListener("click", closeModal);
@@ -6678,6 +6752,9 @@
         }
         const data = await res.json();
         if (res.ok && data.success && data.user) {
+          if (data.token) {
+            try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+          }
           const u = data.user;
           try { localStorage.setItem("alokpoth_user", JSON.stringify(u)); } catch {}
 
@@ -8612,10 +8689,36 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
     let currentSessionId = null;
 
+    function sanitizeChatTitleText(text) {
+      if (!text || typeof text !== "string") return "";
+      let t = text.replace(/\[(?:System Note|Attached File Context|অনুস্মারক|সংযুক্ত ফাইলের|ফাইল|ছবি|ওয়েব অনুসন্ধান|Web Search)[\s\S]*?(?:\]|$)/gi, "").trim();
+      t = t.replace(/\s+/g, " ").trim();
+      return t;
+    }
+
     function loadAllSessions() {
       try {
         const raw = localStorage.getItem(CHAT_SESSIONS_KEY);
-        return raw ? JSON.parse(raw) : [];
+        if (!raw) return [];
+        const sessions = JSON.parse(raw);
+        if (Array.isArray(sessions)) {
+          let hasRepaired = false;
+          sessions.forEach((s) => {
+            if (s && s.title && (s.title.includes("[System Note") || s.title.includes("[Attached File") || s.title.includes("[অনুস্মারক") || s.title.includes("[সংযুক্ত"))) {
+              if (s.messagesHistory && Array.isArray(s.messagesHistory)) {
+                s.title = makeSessionTitle(s.messagesHistory);
+              } else {
+                const cleaned = sanitizeChatTitleText(s.title);
+                s.title = cleaned ? (cleaned.length > 40 ? cleaned.slice(0, 40) + "…" : cleaned) : "নতুন চ্যাট";
+              }
+              hasRepaired = true;
+            }
+          });
+          if (hasRepaired) {
+            try { localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(sessions)); } catch {}
+          }
+        }
+        return Array.isArray(sessions) ? sessions : [];
       } catch { return []; }
     }
 
@@ -8661,7 +8764,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const firstUserMsg = history.find((m) => m.role === "user");
       if (!firstUserMsg) return "নতুন চ্যাট";
       let text = (typeof firstUserMsg.content === "string" ? firstUserMsg.content : "").trim();
-      text = text.replace(/\[(?:অনুস্মারক|সংযুক্ত ফাইলের|ফাইল|ছবি|ওয়েব অনুসন্ধান|Web Search)[\s\S]*?\]/g, "").trim();
+      text = sanitizeChatTitleText(text);
       return text ? (text.length > 40 ? text.slice(0, 40) + "…" : text) : "নতুন চ্যাট";
     }
 
@@ -9625,6 +9728,79 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }
         const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
         const currentModel = MODELS.find((m) => m.id === selectedModelId);
+
+        const userPlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
+        let isUserAdmin = false;
+        try {
+          const u = getTrustedUser();
+          const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+          if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+            isUserAdmin = true;
+          }
+        } catch {}
+
+        const isMaxOnlyModel = Boolean(currentModel && currentModel.efficient) || selectedModelId === 'gpt-5.6';
+        const isProOnlyModel = Boolean(currentModel && currentModel.premium) && !isMaxOnlyModel;
+        let isModelLocked = false;
+        let reqPlanForModel = "";
+
+        if (!isUserAdmin) {
+          if (userPlan === "Free") {
+            if (isMaxOnlyModel) {
+              isModelLocked = true;
+              reqPlanForModel = "Max";
+            } else if (isProOnlyModel) {
+              isModelLocked = true;
+              reqPlanForModel = "Pro";
+            }
+          } else if (userPlan === "Pro") {
+            if (isMaxOnlyModel) {
+              isModelLocked = true;
+              reqPlanForModel = "Max";
+            }
+          }
+        }
+
+        if (isModelLocked) {
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          const planRequiredText = reqPlanForModel === "Max" ? (isEnNow ? "Max Plan" : "Max প্ল্যান") : (isEnNow ? "Pro or Max Plan" : "Pro বা Max প্ল্যান");
+          const currentPlanText = userPlan === "Pro" ? (isEnNow ? "Pro Plan" : "প্রো প্ল্যান") : (isEnNow ? "Free Plan" : "ফ্রি প্ল্যান");
+          const errorMsg = isEnNow
+            ? `'${currentModel?.name || selectedModelId}' requires ${planRequiredText}. Your current plan: ${currentPlanText}.`
+            : `'${currentModel?.name || selectedModelId}' মডেলটি ব্যবহারের জন্য ${planRequiredText} প্রয়োজন। আপনার বর্তমান প্ল্যান: ${currentPlanText}।`;
+          const detailMsg = isEnNow
+            ? "Please select another model or upgrade your plan."
+            : "মডেল অপশন থেকে অন্য কোনো মডেল বেছে নিন অথবা প্ল্যান আপগ্রেড করুন।";
+
+          aiTextElement.classList.remove("streaming", "no-children");
+          aiTextElement.innerHTML = `
+            <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
+                  <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(detailMsg)}</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                  ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
+                </button>
+                <a href="plans.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  ${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}
+                </a>
+              </div>
+            </div>
+          `;
+          refundCredit();
+          regenBtn.style.display = "none";
+          scrollToBottom();
+          resolve();
+          return;
+        }
+
         const isGemini = currentModel?.type === "gemini";
         const isGroq = currentModel?.type === "groq";
         const isOpenRouter = currentModel?.type === "openrouter";
@@ -10034,6 +10210,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               errorDetail = isEnNow ? "Connection to the server failed. Please try again or choose another model." : "সার্ভারে সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য মডেল বেছে নিন।";
             }
 
+            const isPlanRestricted = Boolean(userFriendlyMsg && (userFriendlyMsg.includes("প্ল্যান প্রয়োজন") || userFriendlyMsg.includes("লগইন করুন এবং") || userFriendlyMsg.includes("প্ল্যান সক্রিয় করুন")));
             if (fullResult && fullResult.trim().length > 0) {
               try {
                 renderCurrentState();
@@ -10044,20 +10221,38 @@ Capabilities & Code Generation Instructions (CRITICAL):
               }
             } else {
               aiTextElement.innerHTML = `
-                <div class="ai-error-box" style="display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                  <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                    <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(userFriendlyMsg)}</span>
-                    <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(errorDetail)}</span>
+                <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
+                  <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                      <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(userFriendlyMsg)}</span>
+                      <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(errorDetail)}</span>
+                    </div>
                   </div>
+                  ${isPlanRestricted ? `
+                    <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                      <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
+                      </button>
+                      <a href="plans.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        ${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}
+                      </a>
+                    </div>
+                  ` : ''}
                 </div>
               `;
             }
           }
 
-          regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
-          regenBtn.classList.add("regen-btn-highlight");
-          regenBtn.style.display = "inline-flex";
+          if (isPlanRestricted) {
+            regenBtn.style.display = "none";
+          } else {
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
+            regenBtn.classList.add("regen-btn-highlight");
+            regenBtn.style.display = "inline-flex";
+          }
 
           if (fullResult && fullResult.trim().length > 0) {
             copyBtn.dataset.text = fullResult;

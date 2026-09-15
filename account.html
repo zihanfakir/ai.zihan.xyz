@@ -1430,6 +1430,9 @@
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.user) {
+            if (data.token) {
+              try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+            }
             const u = data.user;
             localStorage.setItem("alokpoth_user", JSON.stringify(u));
             const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];

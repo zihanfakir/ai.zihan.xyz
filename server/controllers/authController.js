@@ -443,8 +443,10 @@ const getMe = async (req, res) => {
     }
 
     const finalId = user._id || user.id;
+    const refreshedToken = generateToken(user);
     res.json({
       success: true,
+      token: refreshedToken,
       user: {
         _id: finalId,
         id: finalId,
