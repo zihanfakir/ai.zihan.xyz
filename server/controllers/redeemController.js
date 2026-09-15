@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const { JWT_SECRET } = require('../config/jwtSecret');
+const { invalidateCachedUser } = require('../config/dbCache');
 
 const PLAN_HIERARCHY = { 'Free': 1, 'Pro': 2, 'Max': 3 };
 
@@ -177,6 +178,9 @@ const claimRedeemCode = async (req, res) => {
         email: user.email || ''
       }, JWT_SECRET, { expiresIn: '30d' });
 
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
+
       return res.json({
         success: true,
         message: `অভিনন্দন! আপনার অ্যাকাউন্টে ${durationDays} দিনের জন্য '${finalPlanName}' প্ল্যান সক্রিয় হয়েছে।`,
@@ -318,6 +322,9 @@ const claimRedeemCode = async (req, res) => {
         name: user.name || '',
         email: user.email || ''
       }, JWT_SECRET, { expiresIn: '30d' });
+
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
 
       return res.json({
         success: true,

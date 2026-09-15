@@ -4,6 +4,7 @@ const AiModel = require('../models/AiModel');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const { getModelConfig, getUserUsageDetails, getUserImageUsageDetails } = require('../../utils/getModelConfig');
+const { getCachedPlan, setCachedPlan, getCachedModel, setCachedModel } = require('../config/dbCache');
 
 const checkRateLimit = async (req, res, next) => {
   try {
@@ -70,16 +71,21 @@ const checkRateLimit = async (req, res, next) => {
       }
     }
 
-    // 2. Fetch Current Plan Configuration
+    // 2. Fetch Current Plan Configuration (Microsecond In-Memory Cache)
     const currentPlanName = (user.subscription && user.subscription.plan_name) ? user.subscription.plan_name : 'Free';
     
-    let plan;
-    if (getIsMongoConnected()) {
-      plan = await Plan.findOne({ name: currentPlanName });
-    } else {
-      const { getPersistedPlans } = require('../../utils/getModelConfig');
-      const plans = await getPersistedPlans();
-      plan = plans.find(p => p.name === currentPlanName);
+    let plan = getCachedPlan(currentPlanName);
+    if (!plan) {
+      if (getIsMongoConnected()) {
+        plan = await Plan.findOne({ name: currentPlanName }).lean();
+      } else {
+        const { getPersistedPlans } = require('../../utils/getModelConfig');
+        const plans = await getPersistedPlans();
+        plan = plans.find(p => p.name === currentPlanName);
+      }
+      if (plan) {
+        setCachedPlan(currentPlanName, plan);
+      }
     }
 
     if (!plan) {
@@ -98,6 +104,7 @@ const checkRateLimit = async (req, res, next) => {
         allowed_models: def.allowed,
         is_active: true
       };
+      setCachedPlan(currentPlanName, plan);
     }
     plan.message_limit = Number(plan.message_limit) || 10;
     plan.window_hours = Number(plan.window_hours) || 3;
@@ -122,7 +129,7 @@ const checkRateLimit = async (req, res, next) => {
             user_id: userId,
             model_id: 'image-generation',
             timestamp: { $gte: windowStart }
-          }).sort({ timestamp: 1 });
+          }).sort({ timestamp: 1 }).select('timestamp').lean();
           if (oldestLog) {
             resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
           }
@@ -150,14 +157,19 @@ const checkRateLimit = async (req, res, next) => {
       return next();
     }
 
-    // 4. Model Access Permission Check (for text chat)
+    // 4. Model Access Permission Check (for text chat - Microsecond In-Memory Cache)
     const model_id = req.body.model || 'openrouter/free';
     
-    let aiModel = null;
-    if (getIsMongoConnected()) {
-      aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] });
-    } else {
-      aiModel = await getModelConfig(model_id);
+    let aiModel = getCachedModel(model_id);
+    if (!aiModel) {
+      if (getIsMongoConnected()) {
+        aiModel = await AiModel.findOne({ $or: [{ model_id }, { id: model_id }] }).lean();
+      } else {
+        aiModel = await getModelConfig(model_id);
+      }
+      if (aiModel) {
+        setCachedModel(model_id, aiModel);
+      }
     }
 
     const isMaxModel = Boolean(aiModel && aiModel.efficient) || model_id === 'gpt-5.6';
@@ -210,7 +222,11 @@ const checkRateLimit = async (req, res, next) => {
         timestamp: { $gte: windowStart }
       });
       if (messageCount >= plan.message_limit) {
-        const oldestLog = await UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        const oldestLog = await UsageLog.findOne({
+          user_id: userId,
+          model_id: { $ne: 'image-generation' },
+          timestamp: { $gte: windowStart }
+        }).sort({ timestamp: 1 }).select('timestamp').lean();
         if (oldestLog) {
           resetTimeMinutes = Math.max(1, Math.ceil((new Date(oldestLog.timestamp).getTime() + plan.window_hours * 60 * 60 * 1000 - Date.now()) / (60 * 1000)));
         }

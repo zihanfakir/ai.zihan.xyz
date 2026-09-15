@@ -36,6 +36,8 @@ const PlanSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+PlanSchema.index({ name: 1, is_active: 1 });
+
 // Seed default plans if not existing
 PlanSchema.statics.seedDefaultPlans = async function() {
   const count = await this.countDocuments();

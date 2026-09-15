@@ -32,7 +32,7 @@ router.get('/models', async (req, res) => {
 
     let result = [];
     if (getIsMongoConnected()) {
-      const models = await AiModel.find().sort({ order: 1, createdAt: 1 });
+      const models = await AiModel.find().sort({ order: 1, createdAt: 1 }).lean();
       result = models.map(sanitizeModel);
     } else {
       const { getPersistedModels } = require('../../utils/getModelConfig');

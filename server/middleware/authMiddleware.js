@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore } = require('../config/memoryStore');
 const { JWT_SECRET } = require('../config/jwtSecret');
+const { getCachedUser, setCachedUser, invalidateCachedUser } = require('../config/dbCache');
 
 function extractToken(req) {
   const authHeader = req.headers.authorization;
@@ -25,14 +26,16 @@ const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
-    let user = null;
     const userId = decoded.id || decoded._id || decoded.userId;
 
-    if (getIsMongoConnected()) {
+    // 1. High-Performance In-Memory Cache Check (<0.01ms)
+    let user = getCachedUser(userId) || (decoded.email ? getCachedUser(decoded.email) : null);
+
+    if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
-        user = await User.findById(userId);
+        user = await User.findById(userId).select('-password').lean();
       } else if (decoded.email) {
-        user = await User.findOne({ email: decoded.email.toLowerCase().trim() });
+        user = await User.findOne({ email: decoded.email.toLowerCase().trim() }).select('-password').lean();
       }
     }
     
@@ -85,6 +88,7 @@ const protect = async (req, res, next) => {
 
     user._id = user._id || user.id;
     user.id = user.id || user._id;
+    setCachedUser(userId, user);
     req.user = user;
     next();
   } catch (error) {
@@ -103,14 +107,16 @@ const optionalProtect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
-    let user = null;
     const userId = decoded.id || decoded._id || decoded.userId;
 
-    if (getIsMongoConnected()) {
+    // 1. High-Performance In-Memory Cache Check (<0.01ms)
+    let user = getCachedUser(userId) || (decoded.email ? getCachedUser(decoded.email) : null);
+
+    if (!user && getIsMongoConnected()) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
-        user = await User.findById(userId);
+        user = await User.findById(userId).select('-password').lean();
       } else if (decoded.email) {
-        user = await User.findOne({ email: decoded.email.toLowerCase().trim() });
+        user = await User.findOne({ email: decoded.email.toLowerCase().trim() }).select('-password').lean();
       }
     }
     
@@ -160,6 +166,7 @@ const optionalProtect = async (req, res, next) => {
     if (user) {
       user._id = user._id || user.id;
       user.id = user.id || user._id;
+      setCachedUser(userId, user);
     }
     req.user = user || null;
   } catch (error) {
@@ -168,4 +175,4 @@ const optionalProtect = async (req, res, next) => {
   next();
 };
 
-module.exports = { protect, optionalProtect };
+module.exports = { protect, optionalProtect, invalidateCachedUser };

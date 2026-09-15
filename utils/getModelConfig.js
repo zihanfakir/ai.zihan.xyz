@@ -150,6 +150,21 @@ async function savePersistedModels(models) {
   }
 }
 
+// High-Performance In-Memory Cache for User Quotas & Rate Limits (10s TTL)
+const userUsageCache = new Map(); // userId -> { count, start, ts }
+const userImgUsageCache = new Map(); // userId -> { count, start, ts }
+const USAGE_CACHE_TTL = 10 * 1000;
+
+function invalidateUserUsageCache(userId) {
+  if (!userId) {
+    userUsageCache.clear();
+    userImgUsageCache.clear();
+  } else {
+    userUsageCache.delete(String(userId));
+    userImgUsageCache.delete(String(userId));
+  }
+}
+
 async function getUserUsageDetails(userId, windowHours) {
   const windowMs = (windowHours || 3) * 60 * 60 * 1000;
   const now = Date.now();
@@ -157,7 +172,12 @@ async function getUserUsageDetails(userId, windowHours) {
   let count = 0;
   let start = now;
 
-  if (supabase) {
+  // 1. Check in-memory cache first (<0.01ms)
+  const cached = userUsageCache.get(String(userId));
+  if (cached && (now - cached.ts) < USAGE_CACHE_TTL && (now - cached.start) < windowMs) {
+    count = cached.count || 0;
+    start = cached.start;
+  } else if (supabase) {
     try {
       const { data } = await supabase
         .from('api_keys')
@@ -172,6 +192,7 @@ async function getUserUsageDetails(userId, windowHours) {
           start = usage.start;
         }
       }
+      userUsageCache.set(String(userId), { count, start, ts: now });
     } catch (e) {}
   }
 
@@ -180,6 +201,7 @@ async function getUserUsageDetails(userId, windowHours) {
   if (memLogs.length > count) {
     count = memLogs.length;
     start = memLogs.length > 0 ? Math.min(...memLogs.map(l => new Date(l.timestamp).getTime())) : now;
+    userUsageCache.set(String(userId), { count, start, ts: now });
   }
 
   const remainingMs = Math.max(0, (start + windowMs) - now);
@@ -203,7 +225,12 @@ async function getUserImageUsageDetails(userId, windowHours) {
   let count = 0;
   let start = now;
 
-  if (supabase) {
+  // 1. Check in-memory cache first (<0.01ms)
+  const cached = userImgUsageCache.get(String(userId));
+  if (cached && (now - cached.ts) < USAGE_CACHE_TTL && (now - cached.start) < windowMs) {
+    count = cached.count || 0;
+    start = cached.start;
+  } else if (supabase) {
     try {
       const { data } = await supabase
         .from('api_keys')
@@ -218,6 +245,7 @@ async function getUserImageUsageDetails(userId, windowHours) {
           start = usage.start;
         }
       }
+      userImgUsageCache.set(String(userId), { count, start, ts: now });
     } catch (e) {}
   }
 
@@ -230,6 +258,7 @@ async function getUserImageUsageDetails(userId, windowHours) {
   if (memLogs.length > count) {
     count = memLogs.length;
     start = memLogs.length > 0 ? Math.min(...memLogs.map(l => new Date(l.timestamp).getTime())) : now;
+    userImgUsageCache.set(String(userId), { count, start, ts: now });
   }
 
   const remainingMs = Math.max(0, (start + windowMs) - now);
@@ -242,71 +271,93 @@ async function getUserImageUsageDetails(userId, windowHours) {
 }
 
 async function incrementUserImageUsage(userId, windowHours) {
+  const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+  const now = Date.now();
+  const cached = userImgUsageCache.get(String(userId));
+  let count = 1;
+  let start = now;
+  if (cached && (now - cached.start) < windowMs) {
+    count = (cached.count || 0) + 1;
+    start = cached.start;
+  }
+  userImgUsageCache.set(String(userId), { count, start, ts: now });
+
   if (!supabase) return;
-  try {
-    const windowMs = (windowHours || 3) * 60 * 60 * 1000;
-    const now = Date.now();
-    let count = 1;
-    let start = now;
+  // Non-blocking background sync to Supabase
+  (async () => {
+    try {
+      let finalCount = count;
+      let finalStart = start;
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__img_usage_' + userId + '__')
+        .limit(1);
 
-    const { data } = await supabase
-      .from('api_keys')
-      .select('api_key')
-      .eq('model_id', '__img_usage_' + userId + '__')
-      .limit(1);
+      if (data && data.length > 0 && data[0].api_key) {
+        try {
+          const prev = JSON.parse(data[0].api_key);
+          if (now - prev.start < windowMs) {
+            finalCount = Math.max(finalCount, (prev.count || 0) + 1);
+            finalStart = prev.start;
+          }
+        } catch (e) {}
+      }
 
-    if (data && data.length > 0 && data[0].api_key) {
-      try {
-        const prev = JSON.parse(data[0].api_key);
-        if (now - prev.start < windowMs) {
-          count = (prev.count || 0) + 1;
-          start = prev.start;
-        }
-      } catch (e) {}
-    }
-
-    await supabase
-      .from('api_keys')
-      .upsert({
-        model_id: '__img_usage_' + userId + '__',
-        api_key: JSON.stringify({ count, start }),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'model_id' });
-  } catch (e) {}
+      await supabase
+        .from('api_keys')
+        .upsert({
+          model_id: '__img_usage_' + userId + '__',
+          api_key: JSON.stringify({ count: finalCount, start: finalStart }),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'model_id' });
+    } catch (e) {}
+  })().catch(() => {});
 }
 
 async function incrementUserUsage(userId, windowHours) {
+  const windowMs = (windowHours || 3) * 60 * 60 * 1000;
+  const now = Date.now();
+  const cached = userUsageCache.get(String(userId));
+  let count = 1;
+  let start = now;
+  if (cached && (now - cached.start) < windowMs) {
+    count = (cached.count || 0) + 1;
+    start = cached.start;
+  }
+  userUsageCache.set(String(userId), { count, start, ts: now });
+
   if (!supabase) return;
-  try {
-    const now = Date.now();
-    const windowMs = (windowHours || 3) * 60 * 60 * 1000;
-    let count = 1;
-    let start = now;
+  // Non-blocking background sync to Supabase
+  (async () => {
+    try {
+      let finalCount = count;
+      let finalStart = start;
+      const { data } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__usage_' + userId + '__')
+        .limit(1);
 
-    const { data } = await supabase
-      .from('api_keys')
-      .select('api_key')
-      .eq('model_id', '__usage_' + userId + '__')
-      .limit(1);
+      if (data && data.length > 0 && data[0].api_key) {
+        try {
+          const prev = JSON.parse(data[0].api_key);
+          if (now - prev.start < windowMs) {
+            finalCount = Math.max(finalCount, (prev.count || 0) + 1);
+            finalStart = prev.start;
+          }
+        } catch (e) {}
+      }
 
-    if (data && data.length > 0 && data[0].api_key) {
-      try {
-        const prev = JSON.parse(data[0].api_key);
-        if (now - prev.start < windowMs) {
-          count = (prev.count || 0) + 1;
-          start = prev.start;
-        }
-      } catch (e) {}
-    }
-
-    await supabase
-      .from('api_keys')
-      .upsert({
-        model_id: '__usage_' + userId + '__',
-        api_key: JSON.stringify({ count, start }),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'model_id' });
-  } catch (e) {}
+      await supabase
+        .from('api_keys')
+        .upsert({
+          model_id: '__usage_' + userId + '__',
+          api_key: JSON.stringify({ count: finalCount, start: finalStart }),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'model_id' });
+    } catch (e) {}
+  })().catch(() => {});
 }
 
 let plansCache = null;
@@ -770,6 +821,7 @@ module.exports = {
   incrementUserUsage,
   getUserImageUsageDetails,
   incrementUserImageUsage,
+  invalidateUserUsageCache,
   getPersistedRedeemCodes,
   savePersistedRedeemCodes,
   invalidateRedeemCodesCache,

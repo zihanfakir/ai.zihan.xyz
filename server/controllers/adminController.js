@@ -7,6 +7,7 @@ const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave, saveBackup } = require('../config/memoryStore');
 const supabase = require('../config/supabase');
 const { invalidateModelKeyCache } = require('../../utils/getModelConfig');
+const { invalidateCachedUser, invalidateCachedPlans, invalidateCachedModels } = require('../config/dbCache');
 
 // Supabase তে api_key upsert করার helper
 async function upsertApiKeyToSupabase(modelId, apiKey) {
@@ -18,6 +19,7 @@ async function upsertApiKeyToSupabase(modelId, apiKey) {
     if (error) console.error('[Supabase] api_key upsert error:', error.message);
     else {
       invalidateModelKeyCache(modelId); // Cache clear করো
+      invalidateCachedModels();
       console.log(`[Supabase] api_key saved for model: ${modelId}`);
     }
   } catch (e) {
@@ -28,13 +30,14 @@ async function upsertApiKeyToSupabase(modelId, apiKey) {
 const getAdminStats = async (req, res) => {
   try {
     if (getIsMongoConnected()) {
+      // High-performance metadata counts (O(1)) and covered index scans
       const [totalUsers, proUsers, maxUsers, totalRedeemCodes, usedRedeemCodes, totalMessages] = await Promise.all([
-        User.countDocuments(),
+        User.estimatedDocumentCount(),
         User.countDocuments({ 'subscription.plan_name': 'Pro' }),
         User.countDocuments({ 'subscription.plan_name': 'Max' }),
-        RedeemCode.countDocuments(),
+        RedeemCode.estimatedDocumentCount(),
         RedeemCode.countDocuments({ is_used: true }),
-        UsageLog.countDocuments()
+        UsageLog.estimatedDocumentCount()
       ]);
 
       const stats = {
@@ -168,6 +171,9 @@ const updateUserPlan = async (req, res) => {
         console.warn('[Admin updateUserPlan Sync Warning]:', syncErr.message);
       }
 
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
+
       return res.json({
         success: true,
         message: `${user.name}-এর প্ল্যান ${plan_name} করা হয়েছে (${days} দিন)।`,
@@ -194,6 +200,9 @@ const updateUserPlan = async (req, res) => {
       };
       await savePersistedUsers(users);
       debouncedSave();
+
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
 
       return res.json({
         success: true,
@@ -251,6 +260,9 @@ const toggleBlockUser = async (req, res) => {
         console.warn('[Admin toggleBlockUser Sync Warning]:', syncErr.message);
       }
 
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
+
       return res.json({
         success: true,
         message: `ইউজার ${user.is_blocked ? 'ব্লক' : 'আনব্লক'} করা হয়েছে।`,
@@ -272,6 +284,9 @@ const toggleBlockUser = async (req, res) => {
       user.is_blocked = is_blocked !== undefined ? Boolean(is_blocked) : !user.is_blocked;
       await savePersistedUsers(users);
       debouncedSave();
+
+      invalidateCachedUser(userId);
+      if (user.email) invalidateCachedUser(user.email);
 
       return res.json({
         success: true,
@@ -381,8 +396,17 @@ const deleteUser = async (req, res) => {
     }
 
     // 5. Deep auto-purge orphaned caches & references
-    const { autoPurgeOrphanedDatabaseCaches } = require('../../utils/getModelConfig');
+    const { autoPurgeOrphanedDatabaseCaches, invalidateUserUsageCache } = require('../../utils/getModelConfig');
     await autoPurgeOrphanedDatabaseCaches().catch(() => {});
+
+    invalidateCachedUser(userId);
+    if (targetId && targetId !== userId) invalidateCachedUser(targetId);
+    if (targetEmail) invalidateCachedUser(targetEmail);
+    if (typeof invalidateUserUsageCache === 'function') {
+      invalidateUserUsageCache(userId);
+      if (targetId) invalidateUserUsageCache(targetId);
+      if (targetEmail) invalidateUserUsageCache(targetEmail);
+    }
 
     return res.json({ success: true, message: 'ইউজার অ্যাকাউন্ট ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলা হয়েছে।' });
   } catch (error) {
@@ -510,10 +534,12 @@ const updatePlanLimits = async (req, res) => {
         }
         await savePersistedPlans(plans);
         if (typeof invalidatePlansCache === 'function') invalidatePlansCache();
+        invalidateCachedPlans();
         debouncedSave();
       } catch (syncErr) {
         console.warn('[updatePlanLimits Supabase sync warn]:', syncErr.message);
       }
+      invalidateCachedPlans();
 
       return res.json({
         success: true,
@@ -551,6 +577,7 @@ const updatePlanLimits = async (req, res) => {
 
       await savePersistedPlans(plans);
       if (typeof invalidatePlansCache === 'function') invalidatePlansCache();
+      invalidateCachedPlans();
       debouncedSave();
 
       return res.json({
@@ -961,6 +988,7 @@ const updateModel = async (req, res) => {
     await savePersistedModels(models);
     invalidateModelsCache();
     invalidateModelKeyCache(modelId);
+    invalidateCachedModels();
     await saveBackup();
 
     return res.json({ success: true, message: 'মডেল ও API Key সফলভাবে আপডেট হয়েছে', model });
@@ -1036,6 +1064,7 @@ const addModel = async (req, res) => {
     await savePersistedModels(models);
     invalidateModelsCache();
     invalidateModelKeyCache(cleanModelId);
+    invalidateCachedModels();
     await saveBackup();
 
     return res.status(201).json({ success: true, message: 'নতুন মডেল সফলভাবে যোগ করা হয়েছে', model: newModel });
@@ -1126,6 +1155,7 @@ const deleteModel = async (req, res) => {
     }
     invalidateModelKeyCache(cleanModelId);
     invalidateModelKeyCache(cleanDecoded);
+    invalidateCachedModels();
     await saveBackup(); // Immediately sync memory backup to disk (critical for serverless)
     debouncedSave();
 
@@ -1221,9 +1251,11 @@ const reorderModels = async (req, res) => {
 
       await savePersistedModels(reordered);
       invalidateModelsCache();
-      invalidateModelKeyCache();
+      invalidateCachedModels();
+      debouncedSave();
       await saveBackup();
-      return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে পরিবর্তন করা হয়েছে', models: reordered });
+
+      return res.json({ success: true, message: 'মডেলের ক্রম সফলভাবে সাজানো হয়েছে', models: reordered });
     }
 
     if (modelId && direction) {
@@ -1249,6 +1281,7 @@ const reorderModels = async (req, res) => {
         await savePersistedModels(models);
         invalidateModelsCache();
         invalidateModelKeyCache();
+        invalidateCachedModels();
         await saveBackup();
         return res.json({ success: true, message: 'মডেলের অবস্থান পরিবর্তন হয়েছে', models });
       }

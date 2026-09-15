@@ -5,6 +5,7 @@ const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const { JWT_SECRET } = require('../config/jwtSecret');
+const { getCachedPlan, setCachedPlan, invalidateCachedUser } = require('../config/dbCache');
 
 const generateToken = (user) => {
   const payload = (user && typeof user === 'object') ? {
@@ -297,19 +298,25 @@ const getMe = async (req, res) => {
       const UsageLog = require('../models/UsageLog');
       const currentPlanName = (user.subscription && user.subscription.plan_name) ? user.subscription.plan_name : 'Free';
       
-      let plan;
-      if (getIsMongoConnected()) {
-        plan = await Plan.findOne({ name: currentPlanName });
-      } else {
-        const { getPersistedPlans } = require('../../utils/getModelConfig');
-        const plans = await getPersistedPlans();
-        plan = plans.find(p => p.name === currentPlanName);
+      let plan = getCachedPlan(currentPlanName);
+      if (!plan) {
+        if (getIsMongoConnected()) {
+          plan = await Plan.findOne({ name: currentPlanName }).lean();
+        } else {
+          const { getPersistedPlans } = require('../../utils/getModelConfig');
+          const plans = await getPersistedPlans();
+          plan = plans.find(p => p.name === currentPlanName);
+        }
+        if (plan) {
+          setCachedPlan(currentPlanName, plan);
+        }
       }
       
       if (!plan) {
         const defaultLimits = { 'Free': { limit: 10, window: 3 }, 'Pro': { limit: 30, window: 3 }, 'Max': { limit: 50, window: 1 } };
         const def = defaultLimits[currentPlanName] || defaultLimits['Free'];
         plan = { message_limit: def.limit, window_hours: def.window, name: currentPlanName };
+        setCachedPlan(currentPlanName, plan);
       }
 
       const planLimit = Number(plan.message_limit) || 10;
@@ -323,8 +330,11 @@ const getMe = async (req, res) => {
       let windowStartTs = windowStart.getTime();
       
       if (getIsMongoConnected()) {
-        messageCount = await UsageLog.countDocuments({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } });
-        const oldestLog = await UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 });
+        const [cnt, oldestLog] = await Promise.all([
+          UsageLog.countDocuments({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }),
+          UsageLog.findOne({ user_id: userId, model_id: { $ne: 'image-generation' }, timestamp: { $gte: windowStart } }).sort({ timestamp: 1 }).select('timestamp').lean()
+        ]);
+        messageCount = cnt;
         if (oldestLog) {
           const resetMs = new Date(oldestLog.timestamp).getTime() + planWindow * 60 * 60 * 1000;
           resetTimeMinutes = Math.max(1, Math.ceil((resetMs - Date.now()) / (60 * 1000)));
@@ -503,6 +513,9 @@ const updateProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, error: 'ব্যবহারকারী পাওয়া যায়নি' });
     }
+    invalidateCachedUser(targetUserId);
+    if (user.email) invalidateCachedUser(user.email);
+
     res.json({
       success: true,
       user: { _id: user._id || user.id, id: user._id || user.id, name: user.name, email: user.email, role: user.role, subscription: user.subscription, avatar: user.avatar }
@@ -608,6 +621,9 @@ const changePassword = async (req, res) => {
         debouncedSave();
       } catch {}
     }
+
+    invalidateCachedUser(userId);
+    if (req.user && req.user.email) invalidateCachedUser(req.user.email);
 
     return res.json({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে' });
   } catch (error) {

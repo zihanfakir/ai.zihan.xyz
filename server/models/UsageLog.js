@@ -16,10 +16,16 @@ const UsageLogSchema = new mongoose.Schema({
   }
 });
 
-// Compound index for lightning-fast rate limit queries and reset time calculations
-UsageLogSchema.index({ user_id: 1, timestamp: 1 });
+// High-Performance Compound Indexes:
+// 1. Fully covered index for message rate limit counts & oldest log lookups
+UsageLogSchema.index({ user_id: 1, model_id: 1, timestamp: 1 });
 
-// TTL index to automatically purge old logs older than 90 days (prevents infinite DB storage growth)
-UsageLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+// 2. High-speed user timestamp range query index
+UsageLogSchema.index({ user_id: 1, timestamp: 1, model_id: 1 });
+UsageLogSchema.index({ user_id: 1, timestamp: -1 });
+
+// 3. TTL index to auto-purge logs older than 14 days (keeps DB lean and working set in RAM)
+UsageLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 14 * 24 * 60 * 60 });
 
 module.exports = mongoose.model('UsageLog', UsageLogSchema);
+

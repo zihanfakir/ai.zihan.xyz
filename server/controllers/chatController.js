@@ -504,11 +504,9 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
                   memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
                 }
                 debouncedSave();
-                try {
-                  await incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-                } catch (e) {
+                incrementUserUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(e => {
                   console.error('[Increment User Usage Error]:', e.message);
-                }
+                });
               }
             }
           }
@@ -619,10 +617,8 @@ const generateImage = async (req, res) => {
           }
           debouncedSave();
         }
-        try {
-          const { incrementUserImageUsage } = require('../../utils/getModelConfig');
-          await incrementUserImageUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3);
-        } catch (e) {}
+        const { incrementUserImageUsage } = require('../../utils/getModelConfig');
+        incrementUserImageUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
       }
 
       if (item?.url) {

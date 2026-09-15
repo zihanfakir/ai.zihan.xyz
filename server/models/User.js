@@ -77,8 +77,9 @@ UserSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Database indexes for fast querying and sorting
-UserSchema.index({ createdAt: -1 });
-UserSchema.index({ 'subscription.plan_name': 1 });
+// Database indexes for fast querying, sorting, and user lookups
+UserSchema.index({ role: 1, is_blocked: 1 });
+UserSchema.index({ 'subscription.plan_name': 1, 'subscription.expires_at': 1 });
+UserSchema.index({ createdAt: -1, _id: 1 });
 
 module.exports = mongoose.model('User', UserSchema);
