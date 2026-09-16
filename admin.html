@@ -1314,7 +1314,7 @@
 
     async function loadModels() {
       try {
-        const res = await authFetch(`${API_BASE}/admin/models`);
+        const res = await authFetch(`${API_BASE}/admin/models?_t=${Date.now()}`);
         const data = await res.json();
         if (data.success && data.models) {
           currentModelsList = data.models;

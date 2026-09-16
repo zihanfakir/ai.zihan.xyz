@@ -16,6 +16,20 @@ const { getIsMongoConnected } = require('../config/db');
 const { memoryStore } = require('../config/memoryStore');
 router.get('/models', async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const { getPersistedModels, getDeletedModelIds } = require('../../utils/getModelConfig');
+    const deletedSet = await getDeletedModelIds();
+
+    const isNotDeleted = (m) => {
+      if (!m) return false;
+      const mId = String(m.id || m.model_id || '').toLowerCase().trim();
+      const mName = String(m.name || '').toLowerCase().trim();
+      return !deletedSet.has(mId) && !deletedSet.has(mName);
+    };
+
     const sanitizeModel = (m) => {
       const cleanName = (typeof m.name === 'string' && m.name.trim()) ? m.name.trim() : (m.id || m.model_id || 'Alo AI');
 
@@ -33,11 +47,10 @@ router.get('/models', async (req, res) => {
     let result = [];
     if (getIsMongoConnected()) {
       const models = await AiModel.find().sort({ order: 1, createdAt: 1 }).lean();
-      result = models.map(sanitizeModel);
+      result = models.filter(isNotDeleted).map(sanitizeModel);
     } else {
-      const { getPersistedModels } = require('../../utils/getModelConfig');
       const models = await getPersistedModels();
-      const sorted = [...models].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const sorted = [...models].filter(isNotDeleted).sort((a, b) => (a.order || 0) - (b.order || 0));
       result = sorted.map(sanitizeModel);
     }
 

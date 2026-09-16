@@ -971,6 +971,12 @@
         const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
         purgeLocalUserData();
         showAlert(d.logoutSuccess, "success");
+        if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
+          try { window.AloAndroid.logout(); return; } catch (e) {}
+        }
+        if (window.AloAI && typeof window.AloAI.logout === "function") {
+          try { window.AloAI.logout(); return; } catch (e) {}
+        }
         setTimeout(() => {
           window.location.reload();
         }, 500);
@@ -1076,6 +1082,17 @@
               localStorage.removeItem("alokpoth_plan_expiry");
               localStorage.removeItem("alokpoth_plan_expires_at");
             }
+          }
+
+          if (window.AloAndroid && typeof window.AloAndroid.saveAuth === "function") {
+            try {
+              window.AloAndroid.saveAuth(data.token, data.user?.name || '', data.user?.email || '', planName || 'Free');
+            } catch (e) {}
+          }
+          if (window.AloAI && typeof window.AloAI.saveAuth === "function") {
+            try {
+              window.AloAI.saveAuth(data.token, data.user?.name || '', data.user?.email || '', planName || 'Free');
+            } catch (e) {}
           }
 
           showAlert(currentMode === "login" ? d.loginSuccess : d.registerSuccess, "success");

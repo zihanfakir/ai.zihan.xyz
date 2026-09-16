@@ -10,6 +10,7 @@ const memoryStore = {
   ],
   redeemCodes: [],
   usageLogs: [],
+  deletedModelIds: [],
   models: [
       { id: "gemini-3.6-flash", model_id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", base_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent", api_key: process.env.GEMINI_API_KEY, premium: false, efficient: false, order: 1, type: "gemini" },
       { id: "llama-3.3-70b-versatile", model_id: "llama-3.3-70b-versatile", name: "Alo Pro", provider: "Alokpoth AI", base_url: "https://api.groq.com/openai/v1/chat/completions", api_key: process.env.GROQ_API_KEY, premium: false, efficient: false, order: 2, type: "groq" },
@@ -53,6 +54,7 @@ const saveBackup = async () => {
       redeemCodes: memoryStore.redeemCodes || [],
       usageLogs: memoryStore.usageLogs || [],
       models: memoryStore.models || [],
+      deletedModelIds: memoryStore.deletedModelIds || [],
       settings: memoryStore.settings || {}
       // chatSessions purposefully excluded
     };
@@ -84,6 +86,7 @@ const seedDefaultAdmin = async () => {
       if (Array.isArray(data.plans)) memoryStore.plans = data.plans;
       if (Array.isArray(data.redeemCodes)) memoryStore.redeemCodes = data.redeemCodes;
       if (Array.isArray(data.models)) memoryStore.models = data.models;
+      if (Array.isArray(data.deletedModelIds)) memoryStore.deletedModelIds = data.deletedModelIds;
       if (data.settings && typeof data.settings === 'object') memoryStore.settings = data.settings;
       console.log('[Memory DB] Restored data from local backup file.');
     } catch (e) {

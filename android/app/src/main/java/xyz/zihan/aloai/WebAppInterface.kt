@@ -44,14 +44,22 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
             } else {
                 Locale("bn", "BD")
             }
-            engine.setLanguage(targetLocale)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            var langResult = engine.setLanguage(targetLocale)
+            if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                // Try Indian Bengali fallback
+                langResult = engine.setLanguage(Locale("bn", "IN"))
+                if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Native TTS lacks Bengali voice data on this device. Return false to trigger web audio fallback.
+                    return false
+                }
+            }
+            val speakResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "AloAiTts_${System.currentTimeMillis()}")
             } else {
                 @Suppress("DEPRECATION")
                 engine.speak(text, TextToSpeech.QUEUE_FLUSH, null)
             }
-            true
+            speakResult == TextToSpeech.SUCCESS
         } catch (_: Exception) {
             false
         }
@@ -113,8 +121,28 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
     }
 
     @JavascriptInterface
+    fun logout() {
+        activity.runOnUiThread {
+            activity.logoutAndGoToAuth()
+        }
+    }
+
+    @JavascriptInterface
+    fun saveAuth(token: String?, name: String?, email: String?, plan: String?) {
+        if (!token.isNullOrBlank()) {
+            val prefs = activity.getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString("auth_token", token)
+                .putString("user_name", name ?: "")
+                .putString("user_email", email ?: "")
+                .putString("user_plan", plan ?: "Free")
+                .apply()
+        }
+    }
+
+    @JavascriptInterface
     fun isNativeApp(): Boolean = true
 
     @JavascriptInterface
-    fun getAppVersion(): String = "1.0.8"
+    fun getAppVersion(): String = "1.0.9"
 }

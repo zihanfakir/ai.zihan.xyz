@@ -909,14 +909,25 @@ const createCustomRedeemCode = async (req, res) => {
 
 const getModels = async (req, res) => {
   try {
-    const { getPersistedModels, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const { getPersistedModels, getApiKeyFromSupabase, getDeletedModelIds } = require('../../utils/getModelConfig');
+    const deletedSet = await getDeletedModelIds();
+
     let models = [];
     if (getIsMongoConnected()) {
       models = await AiModel.find().sort({ order: 1 }).lean();
     } else {
       models = await getPersistedModels();
     }
-    models = [...models];
+    models = [...models].filter(m => {
+      if (!m) return false;
+      const mId = String(m.id || m.model_id || '').toLowerCase().trim();
+      const mName = String(m.name || '').toLowerCase().trim();
+      return !deletedSet.has(mId) && !deletedSet.has(mName);
+    });
 
     // Ensure api_key is populated for all models
     for (let m of models) {
@@ -1184,8 +1195,12 @@ const deleteModel = async (req, res) => {
       invalidateModelsCache, 
       invalidateModelKeyCache,
       getPersistedPlans,
-      savePersistedPlans
+      savePersistedPlans,
+      addDeletedModelId
     } = require('../../utils/getModelConfig');
+
+    await addDeletedModelId(cleanModelId);
+    await addDeletedModelId(cleanDecoded);
 
     let models = await getPersistedModels();
     models = Array.isArray(models) ? models.filter(m => !isTargetModel(m)) : [];

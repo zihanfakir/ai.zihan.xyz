@@ -143,12 +143,14 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const rawEmail = (req.body && (req.body.email || req.body.username || req.body.a)) || '';
+    const rawPassword = (req.body && (req.body.password || req.body.pass || req.body.b)) || '';
+    if (!rawEmail || !rawPassword) {
       return res.status(400).json({ success: false, error: 'ইমেইল এবং পাসওয়ার্ড প্রয়োজন' });
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = String(rawEmail).toLowerCase().trim();
+    const cleanPassword = String(rawPassword);
 
     if (getIsMongoConnected()) {
       const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];

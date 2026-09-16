@@ -3744,7 +3744,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
           <a href="AloAI.apk" download="AloAI.apk" id="modalApkDownloadBtn" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 18px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>সরাসরি APK ডাউনলোড করুন (v1.0.8)</span>
+            <span>সরাসরি APK ডাউনলোড করুন (v1.0.9)</span>
           </a>
         </div>
       </div>
@@ -3851,7 +3851,7 @@
                 <span data-i18n="checkUpdates">আপডেটের জন্য চেক করুন</span>
               </div>
               <div class="settings-row-right">
-                <span>v1.0.8</span>
+                <span>v1.0.9</span>
                 <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
               </div>
             </button>
@@ -4037,7 +4037,7 @@
               <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Alokpoth AI</div>
-            <div class="settings-version-tag">Version 1.0.8 (Latest)</div>
+            <div class="settings-version-tag">Version 1.0.9 (Latest)</div>
             <div style="font-size: 0.9rem; color: var(--text-sub); margin-top: 4px;" data-i18n="versionStatus">আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।</div>
             <div style="width: 100%; margin-top: 12px;">
               <a href="AloAI.apk" download="AloAI.apk" class="settings-btn-primary" style="text-decoration: none;">
@@ -4047,12 +4047,12 @@
             </div>
           </div>
           <div class="settings-card">
-            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.8):</div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.9):</div>
             <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.6;">
-              <li>🎙️ নেটিভ হাই-স্পিড ভয়েস ও অডিও টিটিএস ইঞ্জিন ফিক্স</li>
-              <li>👤 ড্রয়ার ও অ্যাকাউন্ট সেটিংস প্রোফাইল সিঙ্ক ফিক্স</li>
-              <li>⚡ অপ্টিমাইজড 144Hz রিফ্রেশ রেট ও দ্রুততর চ্যাট ইন্টারফেস</li>
-              <li>🌐 সম্পূর্ণ দ্বিভাষিক (বাংলা ও ইংরেজি) ইউজার ইন্টারফেস</li>
+              <li>🔐 অ্যান্ড্রয়েড অ্যাপ লগইন ও ডাটা সিরিয়ালাইজেশন সম্পূর্ণ ফিক্স</li>
+              <li>📦 সম্পূর্ণ APK সাইজ পুনরুদ্ধার (Full Engine & Material UI)</li>
+              <li>🗑️ অ্যাডমিন প্যানেল থেকে মডেল ডিলিট করার স্থায়ী ব্যবস্থা</li>
+              <li>🎙️ ইউনিভার্সাল ভয়েস ও টিটিএস অটোমেটিক অডিও ফলব্যাক</li>
             </ul>
           </div>
         </div>
@@ -6016,23 +6016,24 @@
     }
 
     let MODELS = [
-      { id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false },
-      { id: "alo-pro", name: "Alo Pro", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false },
-      { id: "openai/gpt-oss-120b", name: "Alo Ultra", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: true, efficient: false },
-      { id: "qwen/qwen3.8-27b", name: "Alo Plus", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false },
-      { id: "gemini-3.5-flash-lite", name: "Alo Lite", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false },
-      { id: "openrouter/free", name: "Alo Core", provider: "Alokpoth AI", latency: null, status: "online", type: "openrouter", premium: false, efficient: false },
-      { id: "hy3", name: "Alo Vision", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: false },
-      { id: "mimo-v2.5", name: "Alo Swift", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: false },
-      { id: "openai/gpt-oss-20b", name: "Alo Turbo", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: true, efficient: true }
+      { id: "hy3", name: "Alo HY3", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: false },
+      { id: "mimo-v2.5", name: "Alo Swift", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: true }
     ];
+    try {
+      const cachedModelsStr = localStorage.getItem("alokpoth_cached_models");
+      if (cachedModelsStr) {
+        const parsed = JSON.parse(cachedModelsStr);
+        if (Array.isArray(parsed) && parsed.length > 0) MODELS = parsed;
+      }
+    } catch (e) {}
 
     async function fetchModelsFromServer() {
       try {
-        const res = await fetch(`${API_BASE}/chat/models`);
+        const res = await fetch(`${API_BASE}/chat/models?_t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.models) && data.models.length > 0) {
+          try { localStorage.setItem("alokpoth_cached_models", JSON.stringify(data.models)); } catch (e) {}
           const statusMap = new Map();
           MODELS.forEach(m => statusMap.set(m.id, { latency: m.latency, status: m.status }));
 
@@ -6072,7 +6073,7 @@
             selectedModelId = savedModel;
           } else {
             const firstAvailable = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-            selectedModelId = firstAvailable ? firstAvailable.id : "gemini-3.6-flash";
+            selectedModelId = firstAvailable ? firstAvailable.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
             try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
           }
 
@@ -6097,8 +6098,8 @@
 
     let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
     if (!initialSavedModel || !MODELS.some(m => m.id === initialSavedModel)) {
-      initialSavedModel = "gemini-3.6-flash";
-      try { localStorage.setItem("alokpoth_selected_model", "gemini-3.6-flash"); } catch (e) {}
+      initialSavedModel = MODELS[0] ? MODELS[0].id : "alo-ai";
+      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch (e) {}
     }
     let selectedModelId = initialSavedModel;
 
@@ -8098,6 +8099,12 @@
         if (!force) {
           showToast("সফলভাবে লগআউট হয়েছে!", "info");
         }
+        if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
+          try { window.AloAndroid.logout(); return; } catch (e) {}
+        }
+        if (window.AloAI && typeof window.AloAI.logout === "function") {
+          try { window.AloAI.logout(); return; } catch (e) {}
+        }
         setTimeout(() => {
           window.location.href = "login.html";
         }, 350);
@@ -8333,6 +8340,17 @@
               }
               renderCreditBalance();
             }
+          }
+
+          if (window.AloAndroid && typeof window.AloAndroid.saveAuth === "function") {
+            try {
+              window.AloAndroid.saveAuth(data.token, data.user?.name || '', data.user?.email || '', currentPlan || 'Free');
+            } catch (e) {}
+          }
+          if (window.AloAI && typeof window.AloAI.saveAuth === "function") {
+            try {
+              window.AloAI.saveAuth(data.token, data.user?.name || '', data.user?.email || '', currentPlan || 'Free');
+            } catch (e) {}
           }
 
           updateAuthUIState();

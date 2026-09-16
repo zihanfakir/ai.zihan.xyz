@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity() {
         val wai = WebAppInterface(this)
         webAppInterface = wai
         webView.addJavascriptInterface(wai, "AloAndroid")
+        webView.addJavascriptInterface(wai, "AloAI")
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
@@ -327,17 +328,25 @@ class MainActivity : AppCompatActivity() {
                 val userEmail = prefs.getString("user_email", null)
                 val userPlan = prefs.getString("user_plan", null)
                 if (token != null) {
+                    val safeName = (userName ?: "").replace("'", "\\'").replace("\"", "\\\"")
+                    val safeEmail = (userEmail ?: "").replace("'", "\\'").replace("\"", "\\\"")
+                    val userJson = "{\\\"name\\\":\\\"$safeName\\\",\\\"email\\\":\\\"$safeEmail\\\"}"
                     val js = StringBuilder()
                     js.append("localStorage.setItem('alokpoth_token', '$token');")
-                    if (!userName.isNullOrEmpty()) js.append("localStorage.setItem('alokpoth_name', '${userName.replace("'", "\\'")}');")
-                    if (!userEmail.isNullOrEmpty()) js.append("localStorage.setItem('alokpoth_email', '${userEmail.replace("'", "\\'")}');")
+                    js.append("localStorage.setItem('alokpoth_account_name', '$safeName');")
+                    js.append("localStorage.setItem('alokpoth_name', '$safeName');")
+                    js.append("localStorage.setItem('alokpoth_email', '$safeEmail');")
+                    js.append("localStorage.setItem('alokpoth_user', '$userJson');")
                     if (!userPlan.isNullOrEmpty()) {
                         js.append("localStorage.setItem('alokpoth_current_plan', '$userPlan');")
                         js.append("localStorage.setItem('alokpoth_user_plan', '$userPlan');")
                         js.append("localStorage.setItem('alokpoth_plan', '$userPlan');")
                     }
+                    js.append("if (typeof applyAccountName === 'function') applyAccountName('$safeName');")
                     js.append("if (typeof updateAuthUIState === 'function') updateAuthUIState();")
                     view.evaluateJavascript(js.toString(), null)
+                } else {
+                    view.evaluateJavascript("if (localStorage.getItem('alokpoth_token')) { localStorage.removeItem('alokpoth_token'); if (typeof updateAuthUIState === 'function') updateAuthUIState(); }", null)
                 }
 
                 if (url != null && url != "about:blank" && !url.startsWith("data:")) {
@@ -564,6 +573,25 @@ class MainActivity : AppCompatActivity() {
         super.onTrimMemory(level)
         if (level >= TRIM_MEMORY_MODERATE) {
             webView.clearCache(false)
+        }
+    }
+
+    fun logoutAndGoToAuth() {
+        try {
+            val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+
+            WebStorage.getInstance().deleteAllData()
+            CookieManager.getInstance().removeAllCookies(null)
+            CookieManager.getInstance().flush()
+
+            val intent = Intent(this, xyz.zihan.aloai.auth.AuthActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            finish()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error logging out", e)
         }
     }
 

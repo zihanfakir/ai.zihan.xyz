@@ -52,6 +52,14 @@ function resolveModelAlias(rawId) {
 async function getModelConfig(rawId) {
   const modelId = resolveModelAlias(rawId);
 
+  // Check if model was deleted by admin
+  const deletedSet = await getDeletedModelIds();
+  const cleanRaw = String(rawId || '').toLowerCase().trim();
+  const cleanAlias = String(modelId || '').toLowerCase().trim();
+  if (deletedSet.has(cleanRaw) || deletedSet.has(cleanAlias)) {
+    return null;
+  }
+
   // 1. Check persisted models (from Supabase / merged)
   const allModels = await getPersistedModels();
   let model = allModels.find(
@@ -102,11 +110,95 @@ function invalidateModelsCache() {
   modelsCacheTs = 0;
 }
 
+// Cache for deleted model IDs to permanently prevent resurrection
+let deletedModelIdsCache = null;
+let deletedModelIdsTs = 0;
+
+function invalidateDeletedModelsCache() {
+  deletedModelIdsCache = null;
+  deletedModelIdsTs = 0;
+}
+
+async function getDeletedModelIds() {
+  const now = Date.now();
+  if (deletedModelIdsCache && (now - deletedModelIdsTs) < 10000) {
+    return deletedModelIdsCache;
+  }
+  const set = new Set();
+  if (Array.isArray(memoryStore.deletedModelIds)) {
+    memoryStore.deletedModelIds.forEach(id => {
+      if (id) set.add(String(id).toLowerCase().trim());
+    });
+  }
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('api_key')
+        .eq('model_id', '__deleted_models__')
+        .limit(1);
+      if (!error && data && data.length > 0 && data[0].api_key) {
+        const parsed = JSON.parse(data[0].api_key);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(id => {
+            if (id) set.add(String(id).toLowerCase().trim());
+          });
+        }
+      }
+    } catch (e) {}
+  }
+  deletedModelIdsCache = set;
+  deletedModelIdsTs = now;
+  return set;
+}
+
+async function addDeletedModelId(modelId) {
+  if (!modelId) return;
+  const cleanId = String(modelId).toLowerCase().trim();
+  const set = await getDeletedModelIds();
+  set.add(cleanId);
+  try {
+    const decoded = decodeURIComponent(modelId).toLowerCase().trim();
+    if (decoded) set.add(decoded);
+  } catch (e) {}
+
+  if (!Array.isArray(memoryStore.deletedModelIds)) {
+    memoryStore.deletedModelIds = [];
+  }
+  const list = Array.from(set);
+  memoryStore.deletedModelIds = list;
+  debouncedSave();
+
+  if (supabase) {
+    try {
+      await supabase
+        .from('api_keys')
+        .upsert(
+          { model_id: '__deleted_models__', api_key: JSON.stringify(list), updated_at: new Date().toISOString() },
+          { onConflict: 'model_id' }
+        );
+    } catch (e) {}
+  }
+  invalidateDeletedModelsCache();
+  invalidateModelsCache();
+}
+
 async function getPersistedModels() {
   const now = Date.now();
   if (modelsCache && (now - modelsCacheTs) < 10000) { // 10s cache
     return modelsCache;
   }
+
+  const deletedSet = await getDeletedModelIds();
+  const filterDeleted = (list) => {
+    if (!Array.isArray(list)) return [];
+    return list.filter(m => {
+      if (!m) return false;
+      const mId = String(m.id || m.model_id || '').toLowerCase().trim();
+      const mName = String(m.name || '').toLowerCase().trim();
+      return !deletedSet.has(mId) && !deletedSet.has(mName);
+    });
+  };
 
   if (supabase) {
     try {
@@ -119,21 +211,11 @@ async function getPersistedModels() {
       if (!error && data && data.length > 0 && data[0].api_key) {
         const parsed = JSON.parse(data[0].api_key);
         if (Array.isArray(parsed)) {
-          // Merge with memoryStore.models so newly added models in code/backup are not dropped
-          const merged = [...parsed];
-          const existingIds = new Set(parsed.map(m => m.id || m.model_id));
-          if (Array.isArray(memoryStore.models)) {
-            for (const defModel of memoryStore.models) {
-              const defId = defModel.id || defModel.model_id;
-              if (defId && !existingIds.has(defId)) {
-                merged.push(defModel);
-                existingIds.add(defId);
-              }
-            }
-          }
-          modelsCache = merged;
+          // __models_metadata__ in Supabase is the canonical source of truth set by Admin
+          const filtered = filterDeleted(parsed);
+          modelsCache = filtered;
           modelsCacheTs = now;
-          return merged;
+          return filtered;
         }
       }
     } catch (e) {
@@ -141,8 +223,11 @@ async function getPersistedModels() {
     }
   }
 
-  // Fallback to memoryStore.models
-  return memoryStore.models;
+  // Fallback to memoryStore.models only if database has no record
+  const fallback = filterDeleted(memoryStore.models || []);
+  modelsCache = fallback;
+  modelsCacheTs = now;
+  return fallback;
 }
 
 async function savePersistedModels(models) {
@@ -852,6 +937,9 @@ module.exports = {
   invalidateUsersCache,
   getSystemSettings,
   saveSystemSettings,
-  autoPurgeOrphanedDatabaseCaches
+  autoPurgeOrphanedDatabaseCaches,
+  getDeletedModelIds,
+  addDeletedModelId,
+  invalidateDeletedModelsCache
 };
 
