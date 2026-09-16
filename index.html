@@ -452,6 +452,7 @@
       justify-content: center;
       z-index: 200;
       opacity: 0;
+      pointer-events: none !important;
       transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       padding: max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px));
       box-sizing: border-box;
@@ -460,6 +461,7 @@
     .modal-overlay.open {
       display: flex;
       opacity: 1;
+      pointer-events: auto !important;
     }
 
     .modal-sheet {
@@ -507,6 +509,7 @@
       z-index: 500 !important;
       display: none;
       opacity: 0;
+      pointer-events: none !important;
       transform: translateX(100%);
       transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
       overflow: hidden;
@@ -518,6 +521,7 @@
       align-items: stretch !important;
       justify-content: flex-start !important;
       opacity: 1 !important;
+      pointer-events: auto !important;
       transform: translateX(0) !important;
     }
 
@@ -2449,16 +2453,26 @@
     /* ===== Custom UI Popup ===== */
     #customDialogOverlay {
       z-index: 10000 !important;
+      pointer-events: none !important;
     }
     #customDialogOverlay.open {
       display: flex !important;
       opacity: 1 !important;
+      pointer-events: auto !important;
     }
     #modelModalOverlay {
       z-index: 600 !important;
+      pointer-events: none !important;
+    }
+    #modelModalOverlay.open {
+      pointer-events: auto !important;
     }
     #brandMenuOverlay {
       z-index: 600 !important;
+      pointer-events: none !important;
+    }
+    #brandMenuOverlay.open {
+      pointer-events: auto !important;
     }
     .custom-dialog-box {
       background-color: var(--bg-input);
@@ -4401,7 +4415,12 @@
       : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
     const API_BASE = BACKEND_URL + "/api";
 
+    // Global App Language (Initialized early)
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
+
     // Core Chat Elements (Initialized early to prevent Temporal Dead Zone ReferenceErrors)
+    const chatStream = document.getElementById("chatStream");
+    const scrollContainer = document.getElementById("scrollContainer");
     const chatForm = document.getElementById("chatForm");
     const userInput = document.getElementById("userInput");
     const sendBtn = document.getElementById("sendBtn");
@@ -4411,9 +4430,83 @@
     const docInput = document.getElementById("docInput");
     const filePreviewRow = document.getElementById("filePreviewRow");
     const offlineBanner = document.getElementById("offlineBanner");
+    const chatHistoryModalOverlay = document.getElementById("chatHistoryModalOverlay");
     let emptyState = document.getElementById("emptyState");
     let pendingImages = [];
     let pendingFiles = [];
+    let isGenerating = false;
+    let userScrolledUp = false;
+
+    // Scroll Helper (Defined early as a regular function so it is hoisted everywhere)
+    function scrollToBottom(force = false, behavior = "auto") {
+      if (!scrollContainer) return;
+      if (force || !userScrolledUp) {
+        if (behavior === "smooth") {
+          try {
+            scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" });
+          } catch {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        } else {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }
+    }
+
+    // System Prompt & Chat History Engine (Initialized early to eliminate TDZ ReferenceErrors)
+    function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      if (isEn) {
+        return `You are ${modelDisplayName}, an intelligent, versatile AI assistant built by Alokpoth.
+=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
+You must respond fluently and naturally in English, unless the user explicitly asks you to switch to Bengali or another language.
+- Provide clear, well-structured, polite, and comprehensive explanations in English.
+- If the user writes in Bengali or requests Bengali, seamlessly adapt and respond in Bengali. Otherwise, default to English.
+
+Identity rules:
+- Your name is "${modelDisplayName}". Built by Alokpoth.
+- All models available in this app are Alokpoth's own in-house models.
+
+Capabilities & Code Generation Instructions (CRITICAL):
+- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
+- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
+- Use proper code blocks (triple backticks with language specifier) to format code clearly.
+- You ARE able to generate and create images when requested.`;
+      }
+      return `You are ${modelDisplayName}, an AI model built by Alokpoth.
+=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
+You must respond ENTIRELY in Bengali (Bangla script), unless the user explicitly asks you to switch to a different language for that reply. This means:
+- Do NOT mix English words, phrases, or sentences into your Bengali response.
+- Do NOT switch languages mid-response or partway through a conversation.
+- Technical terms, proper nouns, or code-like tokens may stay in their original form if there is no natural Bengali equivalent, but the surrounding sentences, explanations, and structure must be in Bengali.
+- Every single reply, from the first word to the last, must be in Bengali by default. Re-check this rule before finalizing every response, especially in long conversations.
+- SCRIPT PURITY (very important): write every Bengali word using actual Bengali (Bangla) script/letters (বাংলা বর্ণ) - never write a Bengali word using Latin/English letters (no "Banglish").
+- Exception: actual code inside code blocks should stay in its programming language as-is (comments can be in Bengali or English).
+
+Identity rules (CRITICAL - follow strictly):
+- Your one and only name is "${modelDisplayName}". Built by Alokpoth.
+- All models available in this app are Alokpoth's own proprietary in-house models.
+- NEVER reveal, mention, or admit to using OpenAI, Google, Anthropic, Meta, Groq, DeepSeek, or any other third-party provider. Always state you are developed by Alokpoth AI.
+
+Capabilities & Code Generation Instructions (CRITICAL):
+- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
+- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
+- Use proper code blocks (triple backticks with language specifier) to format code clearly.
+- You ARE able to generate and create images when requested.`;
+    }
+
+    const SYSTEM_PROMPT = buildSystemPrompt("Alo Go", true, true);
+    let messagesHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+    const CHAT_SESSIONS_KEY = "alokpoth_chat_sessions";
+    const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
+    let currentSessionId = null;
+
+    let usageTotals = {
+      inputTokens: 0,
+      outputTokens: 0,
+      images: 0,
+      costUSD: 0
+    };
 
     function updateSendAvailability() {
       if (!sendBtn) return;
@@ -4978,9 +5071,9 @@
         return true;
       }
       // 2. Attach Menu Popup
-      const attachMenu = document.getElementById("attachMenu");
-      if (attachMenu && attachMenu.classList.contains("open")) {
-        attachMenu.classList.remove("open");
+      const menu = document.getElementById("attachMenu");
+      if (menu && menu.classList.contains("open")) {
+        menu.classList.remove("open");
         return true;
       }
       // 3. Auth Modal
@@ -5057,6 +5150,10 @@
     const PLAN_STORAGE_KEY = "alokpoth_current_plan";
     const PLAN_EXPIRY_KEY = "alokpoth_plan_expires_at";
     const DEFAULT_PLAN = "Free"; 
+    const USAGE_WINDOW_KEY = "alokpoth_window_usage";
+    const IMAGE_WINDOW_KEY = "alokpoth_image_window_usage";
+    const DYNAMIC_PLAN_LIMITS = {};
+    let currentPlan = "Free"; 
 
     const BENGALI_MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
     const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -5214,6 +5311,9 @@
           localStorage.removeItem(USAGE_WINDOW_KEY);
           localStorage.removeItem(IMAGE_WINDOW_KEY);
         }
+        if (typeof ensureAccessibleModelSelected === "function") {
+          ensureAccessibleModelSelected();
+        }
       } catch {}
     }
 
@@ -5272,10 +5372,7 @@
       });
     }
 
-    let currentPlan = loadCurrentPlan();
-    const DYNAMIC_PLAN_LIMITS = {};
-
-    const USAGE_WINDOW_KEY = "alokpoth_window_usage";
+    currentPlan = loadCurrentPlan();
 
     function getPlanWindowLimit() {
       const plan = currentPlan || "Free";
@@ -5306,8 +5403,6 @@
       try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
       renderCreditBalance();
     }
-
-    const IMAGE_WINDOW_KEY = "alokpoth_image_window_usage";
 
     function getImagePlanLimit() {
       const plan = currentPlan || "Free";
@@ -5473,7 +5568,6 @@
       } catch (e) {}
     }
 
-    let isGenerating = false;
     let quotaCountdownTimer = null;
 
     function startQuotaCountdownTimer() {
@@ -6008,13 +6102,6 @@
       }
     });
 
-    function updateSelectedModelUI() {
-      const current = MODELS.find(m => m.id === selectedModelId);
-      if (current && modelTriggerLabel) {
-        modelTriggerLabel.textContent = current.name;
-      }
-    }
-
     let MODELS = [
       { id: "hy3", name: "Alo HY3", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: false },
       { id: "mimo-v2.5", name: "Alo Swift", provider: "Alokpoth AI", latency: null, status: "online", type: "bai", premium: false, efficient: true }
@@ -6026,6 +6113,60 @@
         if (Array.isArray(parsed) && parsed.length > 0) MODELS = parsed;
       }
     } catch (e) {}
+
+    function isModelAccessible(m, plan = null) {
+      if (!m) return false;
+      const isUserAdmin = (typeof checkIsUserAdmin === "function") ? checkIsUserAdmin() : false;
+      const userPlan = plan || (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
+      if (isUserAdmin || userPlan === "Max") return true;
+      const isMax = Boolean(m.efficient) || m.id === "gpt-5.6";
+      const isPro = Boolean(m.premium) && !isMax;
+      if (userPlan === "Free") return !isMax && !isPro;
+      if (userPlan === "Pro") return !isMax;
+      return true;
+    }
+
+    const modelTrigger = document.getElementById("modelTrigger");
+    const modelTriggerLabel = document.getElementById("modelTriggerLabel");
+    const modelModalOverlay = document.getElementById("modelModalOverlay");
+    const modelModalClose = document.getElementById("modelModalClose");
+    const modelList = document.getElementById("modelList");
+
+    let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
+    const initialTarget = MODELS.find(m => m.id === initialSavedModel);
+    if (!initialTarget || !isModelAccessible(initialTarget)) {
+      const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
+      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
+      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch (e) {}
+    }
+    let selectedModelId = initialSavedModel;
+
+    function ensureAccessibleModelSelected() {
+      if (typeof MODELS === "undefined" || !Array.isArray(MODELS) || MODELS.length === 0) return;
+      const cur = MODELS.find(m => m.id === selectedModelId);
+      if (!cur || !isModelAccessible(cur)) {
+        const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
+        if (fallback) {
+          selectedModelId = fallback.id;
+          try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
+          if (modelTriggerLabel) modelTriggerLabel.textContent = fallback.name;
+          if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
+            if (typeof buildSystemPrompt === "function") {
+              messagesHistory[0].content = buildSystemPrompt(fallback.name, true, true);
+            }
+          }
+          if (typeof updateTriggerStatusDot === "function") updateTriggerStatusDot();
+          if (typeof renderModelList === "function") renderModelList();
+        }
+      }
+    }
+
+    function updateSelectedModelUI() {
+      const current = MODELS.find(m => m.id === selectedModelId);
+      if (current && modelTriggerLabel) {
+        modelTriggerLabel.textContent = current.name;
+      }
+    }
 
     async function fetchModelsFromServer() {
       try {
@@ -6096,13 +6237,6 @@
       }
     }
 
-    let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
-    if (!initialSavedModel || !MODELS.some(m => m.id === initialSavedModel)) {
-      initialSavedModel = MODELS[0] ? MODELS[0].id : "alo-ai";
-      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch (e) {}
-    }
-    let selectedModelId = initialSavedModel;
-
     const PING_INTERVAL_MS = 60000;
     const PING_TIMEOUT_MS = 8000;
     let pingInFlight = false;
@@ -6165,12 +6299,6 @@
         dot.title = current ? statusLabel(current.status) : "";
       }
     }
-
-    const modelTrigger = document.getElementById("modelTrigger");
-    const modelTriggerLabel = document.getElementById("modelTriggerLabel");
-    const modelModalOverlay = document.getElementById("modelModalOverlay");
-    const modelModalClose = document.getElementById("modelModalClose");
-    const modelList = document.getElementById("modelList");
 
     function statusLabel(status) {
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
@@ -7190,8 +7318,6 @@
     }
     window.showSettingsView = showSettingsView;
 
-    let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
-
     const I18N = {
       bn: {
         // App & Navigation
@@ -7755,7 +7881,8 @@
 
     function closeAccountModal(isPopstate = false) {
       if (accountModalOverlay) accountModalOverlay.classList.remove("open");
-      if (!isPopstate && history.state && history.state.page && (history.state.page === "account" || history.state.page.startsWith("account_sub_"))) {
+      const isPop = isPopstate === true;
+      if (!isPop && history.state && history.state.page && (history.state.page === "account" || history.state.page.startsWith("account_sub_"))) {
         try { history.replaceState({ page: "home" }, ""); } catch(e) {}
       }
       stopQuotaCountdownTimer();
@@ -7787,10 +7914,10 @@
         openAccountModal("limits");
       });
     }
-    if (accountModalClose) accountModalClose.addEventListener("click", closeAccountModal);
+    if (accountModalClose) accountModalClose.addEventListener("click", () => closeAccountModal(false));
     if (accountModalOverlay) {
       accountModalOverlay.addEventListener("click", (e) => {
-        if (e.target === accountModalOverlay) closeAccountModal();
+        if (e.target === accountModalOverlay) closeAccountModal(false);
       });
     }
 
@@ -8506,8 +8633,6 @@
       applyAccountName("");
     }
 
-    const chatStream = document.getElementById("chatStream");
-    const scrollContainer = document.getElementById("scrollContainer");
     function showToast(message, type = "success") {
       const container = document.getElementById("toastContainer");
       if (!container) return;
@@ -8658,13 +8783,6 @@
       const matches = text.match(/```/g);
       return matches ? Math.floor(matches.length / 2) : 0;
     }
-
-    let usageTotals = {
-      inputTokens: 0,
-      outputTokens: 0,
-      images: 0,
-      costUSD: 0
-    };
 
     const DAILY_USAGE_KEY = "alokpoth_daily_usage";
 
@@ -9021,54 +9139,6 @@
         }
       }
     });
-
-    function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      if (isEn) {
-        return `You are ${modelDisplayName}, an intelligent, versatile AI assistant built by Alokpoth.
-=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
-You must respond fluently and naturally in English, unless the user explicitly asks you to switch to Bengali or another language.
-- Provide clear, well-structured, polite, and comprehensive explanations in English.
-- If the user writes in Bengali or requests Bengali, seamlessly adapt and respond in Bengali. Otherwise, default to English.
-
-Identity rules:
-- Your name is "${modelDisplayName}". Built by Alokpoth.
-- All models available in this app are Alokpoth's own in-house models.
-
-Capabilities & Code Generation Instructions (CRITICAL):
-- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
-- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
-- Use proper code blocks (triple backticks with language specifier) to format code clearly.
-- You ARE able to generate and create images when requested.`;
-      }
-      return `You are ${modelDisplayName}, an AI model built by Alokpoth.
-=== LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
-You must respond ENTIRELY in Bengali (Bangla script), unless the user explicitly asks you to switch to a different language for that reply. This means:
-- Do NOT mix English words, phrases, or sentences into your Bengali response.
-- Do NOT switch languages mid-response or partway through a conversation.
-- Technical terms, proper nouns, or code-like tokens may stay in their original form if there is no natural Bengali equivalent, but the surrounding sentences, explanations, and structure must be in Bengali.
-- Every single reply, from the first word to the last, must be in Bengali by default. Re-check this rule before finalizing every response, especially in long conversations.
-- SCRIPT PURITY (very important): write every Bengali word using actual Bengali (Bangla) script/letters (বাংলা বর্ণ) - never write a Bengali word using Latin/English letters (no "Banglish").
-- Exception: actual code inside code blocks should stay in its programming language as-is (comments can be in Bengali or English).
-
-Identity rules (CRITICAL - follow strictly):
-- Your one and only name is "${modelDisplayName}". Built by Alokpoth.
-- All models available in this app are Alokpoth's own proprietary in-house models.
-- NEVER reveal, mention, or admit to using OpenAI, Google, Anthropic, Meta, Groq, DeepSeek, or any other third-party provider. Always state you are developed by Alokpoth AI.
-
-Capabilities & Code Generation Instructions (CRITICAL):
-- You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
-- When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
-- Use proper code blocks (triple backticks with language specifier) to format code clearly.
-- You ARE able to generate and create images when requested.`;
-    }
-
-    const SYSTEM_PROMPT = buildSystemPrompt("Alo Go", true, true);
-    let messagesHistory = [{ role: "system", content: SYSTEM_PROMPT }];
-
-    const CHAT_SESSIONS_KEY = "alokpoth_chat_sessions";
-    const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
-    let currentSessionId = null;
 
     function cleanUserMessageContent(rawContent) {
       if (!rawContent || typeof rawContent !== "string") return "";
@@ -9436,7 +9506,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     const newChatBtn = document.getElementById("newChatBtn");
     const chatHistoryBtn = document.getElementById("chatHistoryBtn");
-    const chatHistoryModalOverlay = document.getElementById("chatHistoryModalOverlay");
     const chatHistoryModalClose = document.getElementById("chatHistoryModalClose");
 
     function openChatHistoryModal() {
@@ -9477,25 +9546,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       startNewChat();
     }
 
-    let userScrolledUp = false;
-    scrollContainer.addEventListener("scroll", () => {
-      const distance = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
-      userScrolledUp = distance > 100;
-    }, { passive: true });
-
-    const scrollToBottom = (force = false, behavior = "auto") => {
-      if (force || !userScrolledUp) {
-        if (behavior === "smooth") {
-          try {
-            scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" });
-          } catch {
-            scrollContainer.scrollTop = scrollContainer.scrollHeight;
-          }
-        } else {
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        }
-      }
-    };
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", () => {
+        const distance = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
+        userScrolledUp = distance > 100;
+      }, { passive: true });
+    }
     
     userInput.addEventListener("input", () => {
       userInput.style.height = "auto";
@@ -10296,7 +10352,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                   <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
                 </div>
-                ${isLimit ? `<button type="button" class="btn btn-primary" onclick="showSettingsView('settingsLimitsView'); document.getElementById('accountModalOverlay').classList.add('visible');" style="align-self:flex-start; margin-top:6px; padding:6px 14px; font-size:0.82rem; background:var(--accent-primary); color:#fff; border-radius:8px; border:none; cursor:pointer;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
+                ${isLimit ? `<button type="button" class="btn btn-primary" onclick="openAccountModal('settingsLimitsView');" style="align-self:flex-start; margin-top:6px; padding:6px 14px; font-size:0.82rem; background:var(--accent-primary); color:#fff; border-radius:8px; border:none; cursor:pointer; touch-action:manipulation;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
               </div>
             `;
             if (!isLimit) {
@@ -10808,14 +10864,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
             ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for reset or upgrade.`
             : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
           showToast(limitMsg, "warning");
-          openAccountModal();
+          openAccountModal("limits");
           chatForm._isSubmitting = false;
           return;
         }
       } else {
         if (!hasCredit()) {
           showToast(isEn ? "Message limit reached! Please upgrade your plan or wait for reset." : "আপনার প্ল্যানের বার্তা সীমা শেষ হয়েছে! দয়া করে আপগ্রেড করুন।", "warning");
-          openAccountModal();
+          openAccountModal("limits");
           chatForm._isSubmitting = false;
           return;
         }
