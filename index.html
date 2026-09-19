@@ -3587,7 +3587,16 @@
   <!-- Sliding Sidebar Navigation Drawer & Backdrop -->
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
   <aside class="sidebar-drawer" id="sidebarDrawer" aria-label="প্রধান মেনু" style="display: flex; flex-direction: column;">
-    <div style="padding: 16px 16px 8px;">
+    <div class="drawer-top-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 8px;">
+      <button type="button" id="drawerNewChatBtn" class="drawer-new-chat-btn sheen-surface" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 99px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.28); color: var(--text-main); font-size: 0.85rem; font-weight: 600; cursor: pointer; touch-action: manipulation;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span data-i18n="newChatAria">নতুন চ্যাট</span>
+      </button>
+      <button type="button" id="drawerCloseBtn" aria-label="Close" style="background: transparent; border: none; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding: 0 16px 8px;">
       <div class="drawer-search-wrap" style="margin: 0; position: relative; width: 100%; padding: 0;">
         <svg viewBox="0 0 24 24" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--text-sub); stroke-width: 2; pointer-events: none; z-index: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাট খুঁজুন..." data-i18n-placeholder="drawerSearchPlaceholder" style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
@@ -3879,7 +3888,7 @@
           </div>
 
           <div class="settings-group" style="margin-top: 10px;">
-            <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="if(localStorage.getItem('alokpoth_token')){performAccountLogout();}else{openAuthModal('login');}">
+            <button class="settings-row" type="button" id="setMenuLogout" style="justify-content: flex-start; color: #ef4444;" onclick="handleSettingsAuthAction()">
               <div class="settings-row-left" style="color: #ef4444;">
                 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 <span id="setMenuLogoutLabel">লগ আউট / লগইন</span>
@@ -4452,6 +4461,16 @@
         }
       }
     }
+
+    // Model Picker Opener (Exported early on window for all error banners and templates)
+    window.openModelPicker = function() {
+      if (typeof openModal === "function") {
+        openModal();
+      } else {
+        const el = document.getElementById("modelModalOverlay");
+        if (el) el.classList.add("open");
+      }
+    };
 
     // System Prompt & Chat History Engine (Initialized early to eliminate TDZ ReferenceErrors)
     function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
@@ -5036,6 +5055,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
           closeCustomUI(inputEl.value);
         } else {
           closeCustomUI(true);
+        }
+      });
+    }
+    const customDialogInput = document.getElementById("customDialogInput");
+    if (customDialogInput) {
+      customDialogInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (customDialogOkBtn) customDialogOkBtn.click();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          closeCustomUI(false);
         }
       });
     }
@@ -8246,6 +8277,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
     }
 
+    function handleSettingsAuthAction() {
+      if (localStorage.getItem("alokpoth_token")) {
+        performAccountLogout();
+      } else {
+        openAuthModal("login");
+      }
+    }
+    window.handleSettingsAuthAction = handleSettingsAuthAction;
+
     const accountLogoutBtn = document.getElementById("accountLogoutBtn");
     if (accountLogoutBtn) {
       accountLogoutBtn.addEventListener("click", performAccountLogout);
@@ -10041,14 +10081,48 @@ Capabilities & Code Generation Instructions (CRITICAL):
               }
             }
           }
-          if (!isDone && fullText) {
-             console.warn("Stream ended without [DONE]. Likely Vercel 60s timeout.");
-             // We won't throw an error so the user keeps the partial text,
-             // but we could append a warning.
-             fullText += "\n\n*(সার্ভারের সময়সীমা শেষ হওয়ায় উত্তরটি অসম্পূর্ণ রয়ে গেছে)*";
-             onToken("\n\n*(সার্ভারের সময়সীমা শেষ হওয়ায় উত্তরটি অসম্পূর্ণ রয়ে গেছে)*", "", fullText, fullReasoning);
+
+        // Flush any trailing buffer payload after stream finishes
+        if (buffer && buffer.trim()) {
+          const lines = buffer.split("\n");
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith(":")) continue;
+            if (!trimmed.startsWith("data:")) continue;
+            const payload = trimmed.slice(5).trim();
+            if (payload === "[DONE]") {
+              isDone = true;
+              continue;
+            }
+            try {
+              const json = JSON.parse(payload);
+              let deltaContent = json.choices?.[0]?.delta?.content 
+                ?? json.choices?.[0]?.delta?.text 
+                ?? json.choices?.[0]?.text 
+                ?? json.text 
+                ?? json.choices?.[0]?.message?.content 
+                ?? "";
+              let deltaReasoning = json.choices?.[0]?.delta?.reasoning 
+                ?? json.choices?.[0]?.delta?.reasoning_content 
+                ?? "";
+              if (deltaContent || deltaReasoning) {
+                fullText += (deltaContent || "");
+                fullReasoning += (deltaReasoning || "");
+                onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
+              }
+            } catch (e) {}
           }
-        } catch (readErr) {
+          buffer = "";
+        }
+
+        if (isTimeoutAbort && !isDone && fullText) {
+          console.warn("Stream ended due to client/server timeout abort.");
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          const timeoutNote = isEnNow ? "\n\n*(Response incomplete due to timeout)*" : "\n\n*(সার্ভারের সময়সীমা শেষ হওয়ায় উত্তরটি অসম্পূর্ণ রয়ে গেছে)*";
+          fullText += timeoutNote;
+          onToken(timeoutNote, "", fullText, fullReasoning);
+        }
+      } catch (readErr) {
         if (isTimeoutAbort) {
           if (!fullText) {
             throw new Error("সার্ভার থেকে নির্দিষ্ট সময়ে কোনো উত্তর পাওয়া যায়নি। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।");

@@ -588,6 +588,11 @@
       <span class="admin-badge">Admin Dashboard</span>
     </div>
     <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="index.html" class="btn" id="adminBackChatBtn" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; font-size: 0.85rem; padding: 6px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>চ্যাটে ফিরে যান</span>
+      </a>
+      <button type="button" class="btn" id="adminLangToggleBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; padding: 6px 12px;">EN</button>
       <span id="adminName" style="font-size: 0.9rem; color: var(--text-sub);"></span>
       <button type="button" class="btn" id="adminChangePassBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; padding: 6px 14px;">পাসওয়ার্ড পরিবর্তন</button>
       <button type="button" class="btn btn-danger" id="logoutBtn">লগআউট</button>
@@ -1044,7 +1049,11 @@
       document.documentElement.setAttribute("lang", currentAdminLang);
 
       const backBtn = document.getElementById("adminBackChatBtn");
-      if (backBtn) backBtn.textContent = d.backChat;
+      if (backBtn) {
+        const span = backBtn.querySelector("span");
+        if (span) span.textContent = d.backChat;
+        else backBtn.textContent = d.backChat;
+      }
 
       const langBtn = document.getElementById("adminLangToggleBtn");
       if (langBtn) langBtn.textContent = d.langBtn;
