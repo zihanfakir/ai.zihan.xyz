@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="dark">
+<html lang="bn" data-theme="oled">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>অ্যাকাউন্ট ও সেটিংস — Alokpoth AI</title>
+  <meta name="theme-color" content="#000000">
+  <title>Settings — Alo AI</title>
   <link rel="icon" type="image/png" href="app_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,110 +12,57 @@
   
   <style>
     :root {
-      --bg-base: #0a0d14;
-      --bg-surface: rgba(18, 24, 38, 0.85);
-      --bg-surface-hover: rgba(26, 35, 54, 0.95);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.5);
-      --accent-primary: #6366f1;
-      --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --text-muted: #64748b;
-      --danger: #ef4444;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --radius-xl: 24px;
-      --font-main: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    [data-theme="oled"] {
+    [data-theme="dark"] {
       --bg-base: #000000;
-      --bg-surface: rgba(12, 12, 12, 0.95);
-      --border-subtle: rgba(255, 255, 255, 0.12);
-      --border-focus: rgba(255, 255, 255, 0.4);
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
     }
 
     [data-theme="sapphire"] {
-      --bg-base: #060913;
-      --bg-surface: rgba(11, 20, 38, 0.85);
-      --border-subtle: rgba(56, 189, 248, 0.12);
-      --border-focus: rgba(56, 189, 248, 0.5);
-      --accent-primary: #38bdf8;
-      --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
     }
 
     [data-theme="light"] {
-      --bg-base: #f8fafc;
-      --bg-surface: rgba(255, 255, 255, 0.95);
-      --bg-surface-hover: #f1f5f9;
-      --border-subtle: rgba(0, 0, 0, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.4);
-      --text-main: #0f172a;
-      --text-sub: #475569;
-      --text-muted: #94a3b8;
-    }
-
-    [data-theme="eyecare"] {
-      --bg-base: #f5eedc;
-      --bg-surface: rgba(251, 247, 239, 0.95);
-      --bg-surface-hover: #ede3ce;
-      --border-subtle: rgba(107, 78, 51, 0.15);
-      --border-focus: rgba(146, 64, 14, 0.4);
-      --text-main: #4a3b2c;
-      --text-sub: #7a6b5c;
-      --text-muted: #9e8e7e;
-      --accent-primary: #92400e;
-      --accent-gradient: linear-gradient(135deg, #b45309, #92400e);
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
     }
 
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-      user-select: none !important;
-      -webkit-touch-callout: none !important;
       -webkit-tap-highlight-color: transparent !important;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
-      letter-spacing: -0.011em;
-    }
-
-    ::selection {
-      background: transparent !important;
-      color: inherit !important;
-    }
-    ::-moz-selection {
-      background: transparent !important;
-      color: inherit !important;
-    }
-
-    input, textarea, [contenteditable="true"] {
-      -webkit-user-select: text !important;
-      -moz-user-select: text !important;
-      -ms-user-select: text !important;
-      user-select: text !important;
-      -webkit-touch-callout: default !important;
-    }
-    input::selection, textarea::selection {
-      background: rgba(255, 255, 255, 0.25) !important;
-      color: inherit !important;
-    }
-
-    button, input, select, textarea, .btn, .btn-primary, .action-btn {
-      touch-action: manipulation;
-    }
-
-    button:active, .btn:active, .btn-primary:active, .action-btn:active {
-      transform: scale(0.968) !important;
-      transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     body {
@@ -126,580 +74,478 @@
       flex-direction: column;
       position: relative;
       overflow-x: hidden;
-      padding-top: 0;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      padding-left: env(safe-area-inset-left, 0px);
-      padding-right: env(safe-area-inset-right, 0px);
-      box-sizing: border-box;
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
     }
 
-    /* Ambient Header Glow */
-    .ambient-glow {
-      position: absolute;
-      top: -140px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 380px;
-      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
-      pointer-events: none;
-      filter: blur(50px);
-      z-index: 0;
-    }
-
-    /* Top Navigation Bar */
-    .top-bar {
+    /* Top Navigation Bar (Screenshot 4) */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px;
-      position: relative;
-      z-index: 10;
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      border-bottom: 1px solid var(--border-subtle);
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    .brand-link {
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 4px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+    }
+
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 10px;
-      text-decoration: none;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
       color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Settings Container */
+    .settings-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 16px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Group Card */
+    .settings-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Profile Group (Special top card) */
+    .settings-profile-group {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .settings-profile-group:hover,
+    .settings-profile-group:active {
+      background: var(--bg-card-hover);
+    }
+
+    .profile-left-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .profile-avatar-large {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #27272a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
       font-weight: 700;
-      font-size: 1.15rem;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    .brand-logo {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      object-fit: cover;
+    .profile-name-text {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
     }
 
-    .top-actions {
+    /* Individual Item Rows */
+    .settings-row {
+      min-height: 52px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .settings-row:hover,
+    .settings-row:active {
+      background: var(--bg-card-hover);
+    }
+
+    .row-lead {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .back-btn:hover {
-      background: var(--bg-surface-hover);
-      transform: translateX(-2px);
-    }
-
-    @media (max-width: 640px) {
-      .top-bar {
-        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
-        padding-bottom: 12px;
-        padding-left: max(14px, env(safe-area-inset-left, 14px));
-        padding-right: max(14px, env(safe-area-inset-right, 14px));
-      }
-      .brand-link span { font-size: 1.05rem; }
-      .top-actions { gap: 6px; }
-      .back-btn span { display: none; }
-      .back-btn { padding: 8px; }
-    }
-
-    @media (max-width: 480px) {
-      #topDownloadText {
-        display: none;
-      }
-      #downloadAppTopBtn {
-        padding: 8px !important;
-      }
-      #logoutBtn {
-        padding: 6px 10px !important;
-        font-size: 0.8rem !important;
-      }
-      .lang-toggle-btn {
-        padding: 5px 8px;
-        font-size: 0.75rem;
-      }
-      .theme-toggle-btn {
-        width: 34px;
-        height: 34px;
-      }
-    }
-
-    .theme-toggle-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
+    .row-icon {
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .lang-toggle-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      transition: all 0.2s;
-    }
-    .lang-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--accent-primary);
-    }
-    
-    .theme-toggle-btn:hover {
-      background: var(--bg-surface-hover);
-    }
-
-    /* Main Container */
-    .account-layout {
-      flex: 1;
-      max-width: 1100px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 28px 20px 60px;
-      position: relative;
-      z-index: 5;
-    }
-
-    .page-header {
-      margin-bottom: 24px;
-    }
-
-    .page-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      background: linear-gradient(135deg, var(--text-main), var(--text-sub));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .page-subtitle {
-      font-size: 0.95rem;
       color: var(--text-sub);
-    }
-
-    /* Tab Navigation */
-    .account-tabs-nav {
-      display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 12px;
-      margin-bottom: 28px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .account-tabs-nav::-webkit-scrollbar { display: none; }
-
-    .tab-btn {
-      padding: 10px 18px;
-      border-radius: var(--radius-md);
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-sub);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-      white-space: nowrap;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .tab-btn.active {
-      background: var(--bg-surface);
-      color: var(--text-main);
-      border-color: var(--border-subtle);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Tab Panels */
-    .tab-panel {
-      display: none;
-      animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    @keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Cards & Components */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 26px;
-      margin-bottom: 24px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Profile Specific */
-    .profile-header-card {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      padding: 32px;
-    }
-
-    @media (max-width: 640px) {
-      .profile-header-card {
-        flex-direction: column;
-        text-align: center;
-      }
-    }
-
-    .avatar-large {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      background: var(--accent-gradient);
-      color: #ffffff;
-      font-size: 2.2rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 8px 28px rgba(99, 102, 241, 0.4);
     }
 
-    .profile-info {
-      flex: 1;
+    .row-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    .profile-name {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .profile-email {
+    .row-title {
       font-size: 0.95rem;
-      color: var(--text-sub);
-      margin-bottom: 12px;
+      font-weight: 500;
+      color: var(--text-main);
     }
 
-    .badge-pill {
-      display: inline-flex;
+    .row-tail {
+      display: flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 12px;
-      border-radius: var(--radius-full, 9999px);
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #a5b4fc;
     }
 
-    .badge-pill.plan-Pro {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.4);
-      color: #c084fc;
-    }
-
-    .badge-pill.plan-Max {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(245, 158, 11, 0.2));
-      border-color: rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
-    }
-
-    /* Plan Comparison Grid */
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 16px;
-    }
-
-    .plan-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: all 0.3s;
-    }
-
-    .plan-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 255, 255, 0.18);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
-    }
-
-    .plan-card.active-plan {
-      border-color: var(--accent-primary);
-      background: rgba(99, 102, 241, 0.05);
-      box-shadow: 0 0 0 1px var(--accent-primary);
-    }
-
-    .active-tag {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      padding: 3px 10px;
-      background: var(--accent-gradient);
-      color: #ffffff;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .plan-card-name {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .plan-card-quota {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--accent-primary);
-      margin-bottom: 12px;
-    }
-
-    .plan-card-quota span {
+    .row-tail-text {
       font-size: 0.9rem;
-      font-weight: 500;
       color: var(--text-sub);
+      font-weight: 400;
     }
 
-    .plan-features-list {
-      list-style: none;
-      margin: 16px 0 24px;
-      flex: 1;
+    .email-truncate {
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .plan-features-list li {
-      padding: 8px 0;
-      font-size: 0.92rem;
-      color: var(--text-sub);
+    .text-blue {
+      color: var(--accent-blue) !important;
+      font-weight: 600 !important;
+    }
+
+    .text-danger {
+      color: var(--accent-danger) !important;
+      font-weight: 600 !important;
+    }
+
+    .row-chevron {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-sub);
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .chevron-blue {
+      stroke: var(--accent-blue) !important;
+      opacity: 1;
+    }
+
+    .row-divider {
+      height: 1px;
+      background: var(--border-divider);
+      margin: 0;
+    }
+
+    /* iOS Style Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #3f3f46;
+      transition: background-color 0.25s;
+      border-radius: 9999px;
+    }
+
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--accent-blue);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(18px);
+    }
+
+    /* Modal Overlay (Clean Native Bottom Sheet / Centered Card) */
+    .settings-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .settings-modal-overlay.open {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .settings-modal-card {
+      background: #1c1c1f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 22px;
+      color: #ffffff;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .plan-features-list li::before {
-      content: "✓";
-      color: var(--success);
+    .modal-title {
+      font-size: 1.15rem;
       font-weight: 700;
+      color: #ffffff;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 20px;
-    }
-
-    .stat-val {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 0.88rem;
+    .modal-close-btn {
+      background: transparent;
+      border: none;
       color: var(--text-sub);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: color 0.15s;
+    }
+    .modal-close-btn:hover {
+      color: #ffffff;
     }
 
-    /* Forms */
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .form-label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 8px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
     }
 
     .form-input {
       width: 100%;
-      height: 46px;
+      height: 44px;
       padding: 0 14px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      color: var(--text-main);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #ffffff;
       font-size: 0.95rem;
       font-family: inherit;
       outline: none;
-      transition: all 0.2s;
+      transition: border-color 0.15s;
     }
-
     .form-input:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      border-color: var(--accent-blue);
     }
 
-    .btn-primary {
-      display: inline-flex;
+    .btn-submit {
+      width: 100%;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 24px;
-      background: var(--accent-gradient);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.2s;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, opacity 0.15s;
+      margin-top: 16px;
     }
-
-    .btn-primary:hover {
-      opacity: 0.95;
-      transform: translateY(-1px);
+    .btn-submit:hover {
+      background: var(--accent-blue-hover);
     }
-
-    .btn-primary:disabled {
+    .btn-submit:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
     }
 
-    .btn-danger {
-      padding: 10px 20px;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+    /* Quota Meter in Modal */
+    .quota-meter-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
 
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.2);
+    .account-quota-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin: 12px 0 10px;
     }
 
-    /* Redeem Box Special */
-    .redeem-box {
-      display: flex;
-      gap: 12px;
-      margin-top: 14px;
+    .account-quota-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #2563eb, #38bdf8);
+      border-radius: 9999px;
+      transition: width 0.4s ease;
     }
 
-    @media (max-width: 640px) {
-      .redeem-box {
-        flex-direction: column;
-      }
+    /* Stats Grid */
+    .stats-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    .redeem-input {
-      flex: 1;
-      height: 48px;
-      padding: 0 16px;
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      color: var(--text-main);
-      font-size: 1.05rem;
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat-val-num {
+      font-size: 1.3rem;
       font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      outline: none;
+      color: #ffffff;
     }
-
-    .redeem-input:focus {
-      border-color: var(--accent-primary);
+    .stat-val-label {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-top: 2px;
     }
 
     /* Toast */
     .toast {
       position: fixed;
-      bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 14px));
-      right: 24px;
-      padding: 14px 20px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
       font-weight: 500;
       color: #ffffff;
-      background: #1e293b;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
       z-index: 1000;
       display: none;
-      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
     }
-
-    .toast.success { background: #065f46; border-color: #059669; }
-    .toast.error { background: #991b1b; border-color: #dc2626; }
-
-    @keyframes toastIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
 
     #confettiCanvas {
       position: fixed;
@@ -710,309 +556,477 @@
       pointer-events: none;
       z-index: 9999;
     }
+
+    /* Hidden elements for compatibility with existing JS hooks */
+    .hidden-state {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div class="ambient-glow"></div>
   <canvas id="confettiCanvas"></canvas>
   <div id="toastEl" class="toast"></div>
 
-  <header class="top-bar">
-    <a href="index.html" class="brand-link">
-      <span>Alokpoth AI</span>
+  <!-- Top Navigation Bar: < Settings (Screenshot 4) -->
+  <header class="settings-nav">
+    <a href="index.html" class="settings-back-link" id="backToChatBtn" aria-label="Settings Back">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="settingsPageTitle">Settings</span>
     </a>
-    <div class="top-actions">
-      <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
         <span id="langBtnText">EN</span>
-      </button>
-      <a href="AloAI.apk" download="AloAI.apk" id="downloadAppTopBtn" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; padding:7px 12px; font-size:0.82rem; text-decoration:none; background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.38); color:#60a5fa; border-radius:var(--radius-md);">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span id="topDownloadText">অ্যাপ ডাউনলোড</span>
-      </a>
-      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-      </button>
-      <a href="index.html" class="back-btn" id="backToChatBtn">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span id="backToChatText">চ্যাটে ফিরে যান</span>
-      </a>
-      <button type="button" class="btn-danger" id="logoutBtn" style="padding:8px 14px; font-size:0.88rem;">
-        <span id="logoutBtnText">লগআউট</span>
       </button>
     </div>
   </header>
 
-  <main class="account-layout">
-    <div class="page-header">
-      <h1 class="page-title" id="pageTitle">অ্যাকাউন্ট ও সেটিংস</h1>
-      <p class="page-subtitle" id="pageSubtitle">আপনার প্রোফাইল, সাবস্ক্রিপশন প্ল্যান, ব্যবহার পরিসংখ্যান ও নিরাপত্তা পরিচালনা করুন</p>
-    </div>
-
-    <div class="account-tabs-nav" id="tabsNav">
-      <button type="button" class="tab-btn active" data-tab="tabProfile" id="tabBtnProfile">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>আমার প্রোফাইল</span>
-      </button>
-      <button type="button" class="tab-btn" data-tab="tabPlan" id="tabBtnPlan">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>প্ল্যান ও সাবস্ক্রিপশন</span>
-      </button>
-      <button type="button" class="tab-btn" data-tab="tabUsage" id="tabBtnUsage">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>ব্যবহার ও পরিসংখ্যান</span>
-      </button>
-      <button type="button" class="tab-btn" data-tab="tabSecurity" id="tabBtnSecurity">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span>সিকিউরিটি ও রিডিম কোড</span>
-      </button>
-    </div>
-
-    <!-- TAB 1: PROFILE -->
-    <div class="tab-panel active" id="tabProfile">
-      <div class="card profile-header-card">
-        <div class="avatar-large" id="avatarLetter">অ</div>
-        <div class="profile-info">
-          <div class="profile-name" id="profileNameDisplay">ব্যবহারকারী</div>
-          <div class="profile-email" id="profileEmailDisplay">user@example.com</div>
-          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <span class="badge-pill" id="profileRoleBadge">সদস্য</span>
-            <span class="badge-pill" id="profilePlanBadge">Free প্ল্যান</span>
-          </div>
-        </div>
+  <main class="settings-container">
+    
+    <!-- CARD 1: User Profile Card (Screenshot 4) -->
+    <div class="settings-group settings-profile-group" id="rowEditProfile" role="button" tabindex="0">
+      <div class="profile-left-meta">
+        <div class="profile-avatar-large" id="avatarLetter">Z</div>
+        <div class="profile-name-text" id="profileNameDisplay">Zihan Fakir</div>
       </div>
-
-      <div class="card">
-        <div class="card-title" id="changeNameTitle">নাম পরিবর্তন করুন</div>
-        <form id="profileUpdateForm">
-          <div class="form-group">
-            <label class="form-label" id="editNameLabel" for="editNameInput">পূর্ণ নাম</label>
-            <input type="text" class="form-input" id="editNameInput" placeholder="আপনার নাম লিখুন">
-          </div>
-          <button type="submit" class="btn-primary" id="saveNameBtn">নাম সংরক্ষণ করুন</button>
-        </form>
-      </div>
-
-      <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.06)); border: 1px solid rgba(59, 130, 246, 0.3); margin-top: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.4rem;">📱</span>
-              <span style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Alokpoth AI অ্যান্ড্রয়েড অ্যাপ</span>
-              <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #3b82f6; color: #fff; font-weight: 700;">v1.0.9</span>
-            </div>
-            <p style="font-size: 0.9rem; color: var(--text-sub); margin-top: 6px; line-height: 1.5;">
-              আপনার ফোনে সরাসরি ইনস্টল করুন। পিওর নেটিভ লগইন, অফলাইন সাপোর্ট ও আল্ট্রা-ফাস্ট AI চ্যাট সুবিধা।
-            </p>
-          </div>
-          <a href="AloAI.apk" download="AloAI.apk" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 12px 20px; font-weight: 600; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>APK ডাউনলোড করুন (~১৬ MB)</span>
-          </a>
-        </div>
+      <div class="row-tail">
+        <span class="row-tail-text" id="editProfileLabel">Edit profile</span>
+        <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
 
-    <!-- TAB 2: PLANS & LIMITS -->
-    <div class="tab-panel" id="tabPlan">
-      <div class="card" style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.05));">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-          <div>
-            <div style="font-size:0.9rem; color:var(--text-sub);" id="currentPlanLabel">বর্তমান সক্রিয় সাবস্ক্রিপশন:</div>
-            <div style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:2px;" id="currentPlanTitle">Free Plan</div>
-            <div style="font-size:0.9rem; color:var(--accent-primary); margin-top:4px;" id="currentPlanExpiry">মেয়াদ: আজীবন / মেয়াদহীন</div>
-          </div>
-          <button type="button" class="btn-primary" onclick="switchToTab('tabSecurity')">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-2px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-            <span id="unlockCodeBtnText">রিডিম কোড দিয়ে আনলক করুন</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Apple HIG Dynamic Subscription Usage Progress & Countdown Meter -->
-      <div class="card account-quota-card" id="accountQuotaCard" style="margin-top:16px;">
-        <div class="account-quota-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-          <div class="account-quota-title-wrap" style="display:inline-flex; align-items:center; gap:8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-primary);">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            <span style="font-weight:700; font-size:1rem; color:var(--text-main);" id="quotaCardTitle">বার্তা কোটা ও লাইভ রিসেট উইন্ডো</span>
-          </div>
-          <span class="account-quota-count" id="quotaCountDisplay" style="font-size:0.9rem; color:var(--text-sub);">
-            <strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">১০</strong> / <span id="quotaTotalDigits">১০</span> বার্তা বাকি
+    <!-- CARD 2: Account Card (Screenshot 4) -->
+    <div class="settings-group">
+      <div class="settings-row" id="rowAccount" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </span>
+          <span class="row-title" id="accountRowLabel">Account</span>
         </div>
-
-        <!-- Apple-style Depleting Quota Progress Track -->
-        <div class="account-quota-track" id="accountQuotaTrack" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="height:10px; margin:14px 0 12px; background:rgba(255,255,255,0.07); border-radius:999px; overflow:hidden; position:relative; box-shadow:inset 0 1px 3px rgba(0,0,0,0.3);">
-          <div class="account-quota-fill" id="accountQuotaFill" style="height:100%; width:100%; border-radius:999px; background:linear-gradient(90deg, #2563eb, #38bdf8); transition:width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease; box-shadow:0 0 12px rgba(56,189,248,0.45);"></div>
-        </div>
-
-        <!-- Real-time Dynamic Reset Countdown Bar -->
-        <div class="account-quota-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.85rem;">
-          <div class="quota-timer-wrap" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-sub);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-primary);">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span id="quotaResetLabel">রিসেট হতে বাকি:</span>
-            <span class="quota-timer-value" id="quotaLiveCountdown" style="color:var(--text-main); font-weight:700;">০৩ ঘণ্টা ০০ মিনিট</span>
-          </div>
-          <span class="quota-window-subtext" id="quotaWindowSubtext" style="color:var(--text-muted); font-size:0.82rem;">প্রতি ৩ ঘণ্টায় কোটা স্বয়ংক্রিয়ভাবে নবায়ন হয়</span>
-        </div>
-      </div>
-
-      <div class="plans-grid" style="margin-top:20px;">
-        <!-- Free Plan -->
-        <div class="plan-card" id="cardPlanFree">
-          <div class="plan-card-name">ফ্রি (Free)</div>
-          <div class="plan-card-quota">১০ <span>বার্তা / ৩ ঘণ্টা</span></div>
-          <div style="font-size:0.85rem; color:var(--text-sub);">দৈনন্দিন সাধারণ কাজ ও প্রশ্নের জন্য উপযুক্ত</div>
-          <ul class="plan-features-list">
-            <li id="accFeatFreeMsgs">১০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
-            <li id="accFeatFreeImg">৩টি ছবি তৈরি প্রতি ৩ ঘণ্টায়</li>
-            <li>সাধারণ এআই মডেল অ্যাক্সেস</li>
-            <li>স্ট্যান্ডার্ড স্পিড রেসপন্স</li>
-            <li>আজীবন ফ্রি মেয়াদ</li>
-          </ul>
-          <button type="button" class="btn-primary" style="background:rgba(255,255,255,0.08); box-shadow:none;" disabled>বর্তমান প্ল্যান</button>
-        </div>
-
-        <!-- Pro Plan -->
-        <div class="plan-card" id="cardPlanPro">
-          <div class="plan-card-name">প্রো (Pro)</div>
-          <div class="plan-card-quota">৩০ <span>বার্তা / ৩ ঘণ্টা</span></div>
-          <div style="font-size:0.85rem; color:var(--text-sub);">প্রফেশনাল ডেভেলপার ও পাওয়ার ইউজারদের জন্য</div>
-          <ul class="plan-features-list">
-            <li id="accFeatProMsgs">৩০টি বার্তা প্রতি ৩ ঘণ্টায়</li>
-            <li id="accFeatProImg">২০টি ছবি তৈরি প্রতি ৩ ঘণ্টায়</li>
-            <li>সবগুলো প্রিমিয়াম মডেলের অ্যাক্সেস</li>
-            <li>দ্রুততম স্ট্রিমিং স্পিড</li>
-            <li>কোড জেনারেশন ও ওয়েব সার্চ সাপোর্ট</li>
-          </ul>
-          <button type="button" class="btn-primary" onclick="switchToTab('tabSecurity')">প্রো আনলক করুন</button>
-        </div>
-
-        <!-- Max Plan -->
-        <div class="plan-card" id="cardPlanMax">
-          <div class="plan-card-name">ম্যাক্স (Max)</div>
-          <div class="plan-card-quota">৫০ <span>বার্তা / ১ ঘণ্টা</span></div>
-          <div style="font-size:0.85rem; color:var(--text-sub);">সর্বোচ্চ ক্ষমতা ও আনলিমিটেড কাজের জন্য</div>
-          <ul class="plan-features-list">
-            <li id="accFeatMaxMsgs">৫০টি বার্তা প্রতি ১ ঘণ্টায়</li>
-            <li id="accFeatMaxImg">১০০টি ছবি তৈরি প্রতি ১ ঘণ্টায়</li>
-            <li>সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ</li>
-            <li>সবচেয়ে বড় কনটেক্সট উইন্ডো</li>
-            <li>এক্সক্লুসিভ ফিচার ও আর্লি অ্যাক্সেস</li>
-          </ul>
-          <button type="button" class="btn-primary" style="background:linear-gradient(135deg, #ec4899, #f59e0b);" onclick="switchToTab('tabSecurity')">ম্যাক্স আনলক করুন</button>
+        <div class="row-tail">
+          <span class="row-tail-text email-truncate" id="profileEmailDisplay">user@example.com</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: USAGE & ACTIVITY -->
-    <div class="tab-panel" id="tabUsage">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-val" id="usageCountVal">০</div>
-          <div class="stat-label" id="labelUsageSent">এই উইন্ডোতে পাঠানো বার্তা</div>
+    <!-- CARD 3: Subscription & Usage Card (Screenshot 4) -->
+    <div class="settings-group">
+      <!-- Subscription Row -->
+      <div class="settings-row" id="rowSubscription" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <span class="row-title" id="subscriptionRowLabel">Subscription</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-val" id="usageRemainingVal">১০</div>
-          <div class="stat-label" id="labelUsageRemaining">অবশিষ্ট বার্তা সংখ্যা</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="usageResetVal">৩ ঘণ্টা</div>
-          <div class="stat-label" id="labelUsageReset">কোটা রিসেট হতে বাকি সময়</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="totalMessagesSent">০</div>
-          <div class="stat-label" id="labelUsageSessions">মোট চ্যাট সেশন</div>
+        <div class="row-tail">
+          <span class="row-tail-text" id="currentPlanTitle">Free</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title" id="policyTitle">কোটা উইন্ডো পলিসি</div>
-        <p style="font-size:0.92rem; color:var(--text-sub); line-height:1.6;" id="policyDesc">
-          Alokpoth AI প্রতিটি ব্যবহারকারীর ন্যায্য ব্যবহারের সুবিধার্থে একটি রোলিং উইন্ডো রেট লিমিট পরিচালনা করে। আপনার প্ল্যান অনুযায়ী নির্দিষ্ট সময় পর পর কোটা স্বয়ংক্রিয়ভাবে পূর্ণ হয়ে যায়। আপনার কাজের পরিধি বৃদ্ধি করতে আপনি যেকোনো সময় রিডিম কোডের মাধ্যমে Pro বা Max প্ল্যানে আপগ্রেড করে নিতে পারেন।
-        </p>
+      <div class="row-divider"></div>
+
+      <!-- Usage Row -->
+      <div class="settings-row" id="rowUsage" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span class="row-title" id="usageRowLabel">Usage</span>
+        </div>
+        <div class="row-tail">
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Upgrade Row -->
+      <div class="settings-row" id="rowUpgrade" role="button" tabindex="0" onclick="window.location.href='plans.html'">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <span class="row-title" id="upgradeRowLabel">Upgrade</span>
+        </div>
+        <div class="row-tail">
+          <span class="row-tail-text text-blue" id="upgradeValText">Upgrade</span>
+          <svg class="row-chevron chevron-blue" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 4: SECURITY & REDEEM -->
-    <div class="tab-panel" id="tabSecurity">
-      <!-- Redeem Code Card -->
-      <div class="card" style="border: 1px dashed rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.04);">
-        <div class="card-title" style="color:#c084fc;">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-3px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-          <span id="redeemCardTitle">রিডিম কোড দাবি করুন (Plan Upgrade)</span>
+    <!-- CARD 4: Preferences Card (Screenshot 4) -->
+    <div class="settings-group">
+      <!-- Color Theme Row -->
+      <div class="settings-row" id="rowTheme" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </span>
+          <span class="row-title" id="themeRowLabel">Color Theme</span>
         </div>
-        <p style="font-size:0.92rem; color:var(--text-sub); margin-bottom:12px;" id="redeemCardDesc">
-          আপনার ১২-অক্ষরের প্রমো কোড অথবা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি প্রবেশ করিয়ে Pro বা Max প্ল্যান আনলক করুন।
-        </p>
-        <div class="redeem-box">
-          <input type="text" class="redeem-input" id="redeemCodeInput" placeholder="যেমন: ALOAI2026 বা ABCD-EFGH-IJKL" maxlength="50">
-          <button type="button" class="btn-primary" id="claimRedeemBtn" style="background:linear-gradient(135deg, #8b5cf6, #6d28d9);">ক্লেইম করুন</button>
+        <div class="row-tail">
+          <span class="row-tail-text" id="themeValText">Dark</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
 
-      <!-- Change Password Card -->
-      <div class="card">
-        <div class="card-title">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;margin-right:6px;vertical-align:-3px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span id="changePassTitle">পাসওয়ার্ড পরিবর্তন করুন</span>
+      <div class="row-divider"></div>
+
+      <!-- App Language Row -->
+      <div class="settings-row" id="rowLanguage" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <span class="row-title" id="langRowLabel">App language</span>
         </div>
-        <form id="changePassForm">
-          <div class="form-group">
-            <label class="form-label" id="curPassLabel" for="curPassInput">বর্তমান পাসওয়ার্ড</label>
-            <input type="password" class="form-input" id="curPassInput" placeholder="আপনার বর্তমান পাসওয়ার্ড" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" id="newPassLabel" for="newPassInput">নতুন পাসওয়ার্ড</label>
-            <input type="password" class="form-input" id="newPassInput" placeholder="কমপক্ষে ৬ অক্ষরের নতুন পাসওয়ার্ড" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" id="cnfPassLabel" for="cnfPassInput">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
-            <input type="password" class="form-input" id="cnfPassInput" placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" required>
-          </div>
-          <button type="submit" class="btn-primary" id="changePassSubmitBtn">পাসওয়ার্ড আপডেট করুন</button>
-        </form>
+        <div class="row-tail">
+          <span class="row-tail-text" id="langValText">English</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Sound Row -->
+      <div class="settings-row" id="rowSound" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </span>
+          <span class="row-title" id="soundRowLabel">Sound</span>
+        </div>
+        <div class="row-tail">
+          <span class="row-tail-text" id="soundValText">Default</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Model Row -->
+      <div class="settings-row" id="rowModel" role="button" tabindex="0" onclick="window.location.href='index.html'">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          <span class="row-title" id="modelRowLabel">Model</span>
+        </div>
+        <div class="row-tail">
+          <span class="row-tail-text" id="modelValText">Alo AI</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Personalization Row -->
+      <div class="settings-row" id="rowPersonalization" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          </span>
+          <span class="row-title" id="personalizationRowLabel">Personalization</span>
+        </div>
+        <div class="row-tail">
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Haptic Feedback Row (Toggle) -->
+      <div class="settings-row" id="rowHaptic" style="cursor: default;">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </span>
+          <span class="row-title" id="hapticRowLabel">Haptic feedback</span>
+        </div>
+        <div class="row-tail">
+          <label class="toggle-switch">
+            <input type="checkbox" id="hapticToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
     </div>
+
+    <!-- CARD 5: Help Center & Redeem Card (Screenshot 4) -->
+    <div class="settings-group">
+      <!-- Help Center Row -->
+      <div class="settings-row" id="rowHelp" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          </span>
+          <span class="row-title" id="helpRowLabel">Help center</span>
+        </div>
+        <div class="row-tail">
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Redeem Promo Code Row -->
+      <div class="settings-row" id="rowRedeem" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3h6a3 3 0 1 0-3-3"/></svg>
+          </span>
+          <span class="row-title" id="redeemRowLabel">Redeem Code</span>
+        </div>
+        <div class="row-tail">
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 6: Log out Card -->
+    <div class="settings-group">
+      <div class="settings-row" id="logoutBtn" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon text-danger">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </span>
+          <span class="row-title text-danger" id="logoutBtnText">Log out</span>
+        </div>
+      </div>
+    </div>
+
   </main>
 
+  <!-- MODAL: Edit Profile -->
+  <div class="settings-modal-overlay" id="modalEditProfile">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="changeNameTitle">Edit Profile</span>
+        <button type="button" class="modal-close-btn" data-close="modalEditProfile">&times;</button>
+      </div>
+      <form id="profileUpdateForm">
+        <div class="form-group">
+          <label class="form-label" id="editNameLabel" for="editNameInput">Full Name</label>
+          <input type="text" class="form-input" id="editNameInput" placeholder="Enter your full name" required>
+        </div>
+        <button type="submit" class="btn-submit" id="saveNameBtn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Account & Security -->
+  <div class="settings-modal-overlay" id="modalAccount">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="accountModalTitle">Account & Security</span>
+        <button type="button" class="modal-close-btn" data-close="modalAccount">&times;</button>
+      </div>
+      <div style="margin-bottom: 18px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+        <div style="font-size: 0.82rem; color: var(--text-sub);">Signed in as</div>
+        <div style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 2px;" id="modalEmailDisplay">user@example.com</div>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <span id="profileRoleBadge" style="font-size: 0.75rem; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 8px; border-radius: 999px; font-weight: 600;">Member</span>
+          <span id="profilePlanBadge" style="font-size: 0.75rem; background: rgba(255,255,255,0.1); color: #e4e4e7; padding: 2px 8px; border-radius: 999px; font-weight: 600;">Free Plan</span>
+        </div>
+      </div>
+      <div class="modal-title" style="font-size: 1rem; margin-bottom: 12px;" id="changePassTitle">Change Password</div>
+      <form id="changePassForm">
+        <div class="form-group">
+          <label class="form-label" id="curPassLabel" for="curPassInput">Current Password</label>
+          <input type="password" class="form-input" id="curPassInput" placeholder="Your current password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="newPassLabel" for="newPassInput">New Password</label>
+          <input type="password" class="form-input" id="newPassInput" placeholder="At least 6 characters" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="cnfPassLabel" for="cnfPassInput">Confirm Password</label>
+          <input type="password" class="form-input" id="cnfPassInput" placeholder="Re-enter new password" required autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-submit" id="changePassSubmitBtn">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Subscription Info -->
+  <div class="settings-modal-overlay" id="modalSubscription">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="subscriptionModalTitle">Subscription</span>
+        <button type="button" class="modal-close-btn" data-close="modalSubscription">&times;</button>
+      </div>
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; text-align: center;">
+        <div style="font-size: 0.85rem; color: var(--text-sub);" id="currentPlanLabel">Active Subscription</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #fff; margin: 4px 0 2px;" id="currentPlanTitleModal">Free Plan</div>
+        <div style="font-size: 0.88rem; color: var(--accent-blue);" id="currentPlanExpiry">Validity: Lifetime / No Expiry</div>
+      </div>
+      <button type="button" class="btn-submit" onclick="window.location.href='plans.html'">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span>View All Plans & Upgrade</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Usage & Quota -->
+  <div class="settings-modal-overlay" id="modalUsage">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="usageModalTitle">Usage & Quota</span>
+        <button type="button" class="modal-close-btn" data-close="modalUsage">&times;</button>
+      </div>
+      <div class="quota-meter-box" id="accountQuotaCard">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <span style="font-weight: 600;" id="quotaCardTitle">Message Quota</span>
+          <span id="quotaCountDisplay"><strong id="quotaRemainingDigits">10</strong> / <span id="quotaTotalDigits">10</span> left</span>
+        </div>
+        <div class="account-quota-track" id="accountQuotaTrack">
+          <div class="account-quota-fill" id="accountQuotaFill"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-sub);">
+          <span id="quotaResetLabel">Reset in:</span>
+          <span id="quotaLiveCountdown" style="font-weight: 600; color: #fff;">3h 00m</span>
+        </div>
+      </div>
+      <div class="stats-2col">
+        <div class="stat-pill">
+          <div class="stat-val-num" id="usageCountVal">0</div>
+          <div class="stat-val-label" id="labelUsageSent">Sent this window</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val-num" id="usageRemainingVal">10</div>
+          <div class="stat-val-label" id="labelUsageRemaining">Messages left</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val-num" id="usageResetVal">3h</div>
+          <div class="stat-val-label" id="labelUsageReset">Refresh cycle</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val-num" id="totalMessagesSent">1</div>
+          <div class="stat-val-label" id="labelUsageSessions">Total sessions</div>
+        </div>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 14px; line-height: 1.5;" id="quotaWindowSubtext">
+        Fair usage quota automatically refreshes every cycle.
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Redeem Code -->
+  <div class="settings-modal-overlay" id="modalRedeem">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="redeemCardTitle">Redeem Code</span>
+        <button type="button" class="modal-close-btn" data-close="modalRedeem">&times;</button>
+      </div>
+      <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5;" id="redeemCardDesc">
+        Enter your 12-character promo code or voucher to unlock Pro or Max plan privileges.
+      </p>
+      <div class="form-group">
+        <input type="text" class="form-input" id="redeemCodeInput" placeholder="e.g. ALOAI2026 or ABCD-EFGH" maxlength="50" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
+      </div>
+      <button type="button" class="btn-submit" id="claimRedeemBtn">Claim Code</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Help Center -->
+  <div class="settings-modal-overlay" id="modalHelp">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="helpModalTitle">Help & Support</span>
+        <button type="button" class="modal-close-btn" data-close="modalHelp">&times;</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.92rem; color: var(--text-dim); line-height: 1.6;">
+        <div>
+          <strong style="color: #fff;">Alo AI Platform</strong><br>
+          Native, intelligent AI assistant designed with privacy, multi-model failover, and high speed.
+        </div>
+        <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px;">
+          <div style="font-size: 0.82rem; color: var(--text-sub);">Support Contact</div>
+          <div style="color: #60a5fa; font-weight: 600;">x@zihan.uk</div>
+        </div>
+        <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px;">
+          <div style="font-size: 0.82rem; color: var(--text-sub);">Official Portal</div>
+          <div style="color: #60a5fa; font-weight: 600;">https://ai.zihan.xyz</div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-sub); text-align: center; margin-top: 8px;">
+          Version 2.0.0 (Native AMOLED Edition)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Personalization -->
+  <div class="settings-modal-overlay" id="modalPersonalization">
+    <div class="settings-modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="personalizationModalTitle">Personalization</span>
+        <button type="button" class="modal-close-btn" data-close="modalPersonalization">&times;</button>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.6;">
+        Alo AI remembers your preferred language (Bengali or English), model selection, sound effects, and haptic feedback across sessions.
+      </p>
+    </div>
+  </div>
+
+  <!-- Hidden cards container to satisfy plan checks if needed -->
+  <div class="hidden-state">
+    <div id="cardPlanFree"><button type="button"></button></div>
+    <div id="cardPlanPro"><button type="button"></button></div>
+    <div id="cardPlanMax"><button type="button"></button></div>
+    <div id="policyTitle"></div>
+    <div id="policyDesc"></div>
+    <div id="pageTitle"></div>
+    <div id="pageSubtitle"></div>
+    <div id="unlockCodeBtnText"></div>
+    <div id="topDownloadText"></div>
+    <div id="downloadAppTopBtn"></div>
+    <div id="themeToggleBtn"></div>
+    <div id="tabBtnProfile"><span></span></div>
+    <div id="tabBtnPlan"><span></span></div>
+    <div id="tabBtnUsage"><span></span></div>
+    <div id="tabBtnSecurity"><span></span></div>
+  </div>
+
   <script>
-    // i18n Dictionary for Account Page
+    // i18n Dictionary for Settings Page
     const I18N_ACCOUNT = {
       bn: {
-        pageTitle: "অ্যাকাউন্ট ও সেটিংস — Alokpoth AI",
-        pageHeading: "অ্যাকাউন্ট ও সেটিংস",
-        pageSubheading: "আপনার প্রোফাইল, সাবস্ক্রিপশন প্ল্যান, ব্যবহার পরিসংখ্যান ও নিরাপত্তা পরিচালনা করুন",
-        backToChat: "চ্যাটে ফিরে যান",
-        topDownload: "অ্যাপ ডাউনলোড",
+        pageTitle: "সেটিংস — Alo AI",
+        settingsHeading: "সেটিংস",
+        editProfile: "প্রোফাইল পরিবর্তন",
+        accountLabel: "অ্যাকাউন্ট",
+        subscriptionLabel: "সাবস্ক্রিপশন",
+        usageLabel: "ব্যবহার",
+        upgradeLabel: "আপগ্রেড",
+        themeLabel: "কালার থিম",
+        langLabel: "ভাষার পছন্দ",
+        soundLabel: "শব্দ",
+        modelLabel: "মডেল",
+        personalizationLabel: "ব্যক্তিগতকরণ",
+        hapticLabel: "হ্যাপটিক ফিডব্যাক",
+        helpLabel: "হেল্প সেন্টার",
+        redeemLabel: "রিডিম কোড",
         logout: "লগআউট",
-        tabProfile: "আমার প্রোফাইল",
-        tabPlan: "প্ল্যান ও সাবস্ক্রিপশন",
-        tabUsage: "ব্যবহার ও পরিসংখ্যান",
-        tabSecurity: "সিকিউরিটি ও রিডিম কোড",
         changeNameTitle: "নাম পরিবর্তন করুন",
         editNameLabel: "পূর্ণ নাম",
-        editNamePlaceholder: "আপনার নাম লিখুন",
-        saveNameBtn: "নাম সংরক্ষণ করুন",
+        editNamePlaceholder: "আপনার পূর্ণ নাম লিখুন",
+        saveNameBtn: "সংরক্ষণ করুন",
         savingName: "সংরক্ষণ হচ্ছে...",
-        currentPlanLabel: "বর্তমান সক্রিয় সাবস্ক্রিপশন:",
+        currentPlanLabel: "সক্রিয় সাবস্ক্রিপশন:",
         lifetimeExpiry: "মেয়াদ: আজীবন / মেয়াদহীন",
-        unlockCodeBtn: "রিডিম কোড দিয়ে আনলক করুন",
-        quotaCardTitle: "বার্তা কোটা ও লাইভ রিসেট উইন্ডো",
-        quotaResetLabel: "রিসেট হতে বাকি:",
+        quotaCardTitle: "বার্তা কোটা",
+        quotaResetLabel: "রিসেট বাকি:",
         labelUsageSent: "এই উইন্ডোতে পাঠানো বার্তা",
         labelUsageRemaining: "অবশিষ্ট বার্তা সংখ্যা",
-        labelUsageReset: "কোটা রিসেট হতে বাকি সময়",
+        labelUsageReset: "কোটা সাইকেল",
         labelUsageSessions: "মোট চ্যাট সেশন",
-        policyTitle: "কোটা উইন্ডো পলিসি",
-        policyDesc: "Alokpoth AI প্রতিটি ব্যবহারকারীর ন্যায্য ব্যবহারের সুবিধার্থে একটি রোলিং উইন্ডো রেট লিমিট পরিচালনা করে। আপনার প্ল্যান অনুযায়ী নির্দিষ্ট সময় পর পর কোটা স্বয়ংক্রিয়ভাবে পূর্ণ হয়ে যায়। আপনার কাজের পরিধি বৃদ্ধি করতে আপনি যেকোনো সময় রিডিম কোডের মাধ্যমে Pro বা Max প্ল্যানে আপগ্রেড করে নিতে পারেন।",
-        redeemCardTitle: "রিডিম কোড দাবি করুন (Plan Upgrade)",
-        redeemCardDesc: "আপনার ১২-অক্ষরের প্রমো কোড অথবা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি প্রবেশ করিয়ে Pro বা Max প্ল্যান আনলক করুন।",
-        redeemPlaceholder: "যেমন: ALOAI2026 বা ABCD-EFGH-IJKL",
+        redeemCardTitle: "রিডিম কোড ক্লেইম করুন",
+        redeemCardDesc: "আপনার ১২-অক্ষরের প্রমো কোড প্রবেশ করিয়ে প্রো বা ম্যাক্স প্ল্যান আনলক করুন।",
+        redeemPlaceholder: "যেমন: ALOAI2026",
         claimBtn: "ক্লেইম করুন",
         claimVerifying: "যাচাই হচ্ছে...",
         changePassTitle: "পাসওয়ার্ড পরিবর্তন করুন",
@@ -1023,11 +1037,11 @@
         cnfPassLabel: "নতুন পাসওয়ার্ড নিশ্চিত করুন",
         cnfPassPlaceholder: "পুনরায় নতুন পাসওয়ার্ড লিখুন",
         changePassSubmitBtn: "পাসওয়ার্ড আপডেট করুন",
-        passUpdating: "পাসওয়ার্ড আপডেট হচ্ছে...",
+        passUpdating: "আপডেট হচ্ছে...",
         logoutSuccess: "লগআউট সফল হয়েছে!",
         nameUpdated: "আপনার নাম সফলভাবে আপডেট হয়েছে!",
         nameEmpty: "নাম ফাঁকা রাখা যাবে না",
-        passSuccess: "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!",
+        passSuccess: "পাসওয়ার্ড পরিবর্তন সফল হয়েছে!",
         passEmpty: "সবগুলো ঘর পূরণ করুন",
         passMismatch: "নতুন পাসওয়ার্ড দুটি মিলছে না",
         passShort: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
@@ -1035,35 +1049,38 @@
         serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
       },
       en: {
-        pageTitle: "Account & Settings — Alokpoth AI",
-        pageHeading: "Account & Settings",
-        pageSubheading: "Manage your profile, subscription plans, usage analytics, and account security",
-        backToChat: "Back to Chat",
-        topDownload: "Download App",
-        logout: "Log Out",
-        tabProfile: "My Profile",
-        tabPlan: "Plans & Subscription",
-        tabUsage: "Usage & Analytics",
-        tabSecurity: "Security & Redeem",
-        changeNameTitle: "Change Name",
+        pageTitle: "Settings — Alo AI",
+        settingsHeading: "Settings",
+        editProfile: "Edit profile",
+        accountLabel: "Account",
+        subscriptionLabel: "Subscription",
+        usageLabel: "Usage",
+        upgradeLabel: "Upgrade",
+        themeLabel: "Color Theme",
+        langLabel: "App language",
+        soundLabel: "Sound",
+        modelLabel: "Model",
+        personalizationLabel: "Personalization",
+        hapticLabel: "Haptic feedback",
+        helpLabel: "Help center",
+        redeemLabel: "Redeem Code",
+        logout: "Log out",
+        changeNameTitle: "Edit Profile",
         editNameLabel: "Full Name",
         editNamePlaceholder: "Enter your full name",
-        saveNameBtn: "Save Name",
+        saveNameBtn: "Save Changes",
         savingName: "Saving...",
-        currentPlanLabel: "Current Active Subscription:",
+        currentPlanLabel: "Active Subscription:",
         lifetimeExpiry: "Validity: Lifetime / No Expiry",
-        unlockCodeBtn: "Unlock with Redeem Code",
-        quotaCardTitle: "Message Quota & Live Reset Window",
+        quotaCardTitle: "Message Quota",
         quotaResetLabel: "Reset in:",
-        labelUsageSent: "Messages Sent This Window",
-        labelUsageRemaining: "Remaining Message Quota",
-        labelUsageReset: "Time Until Quota Reset",
-        labelUsageSessions: "Total Chat Sessions",
-        policyTitle: "Quota Window Policy",
-        policyDesc: "Alokpoth AI operates a fair-use rolling window rate limit. Your message quota refreshes automatically after each window period. You can upgrade to Pro or Max anytime using a valid redeem code.",
-        redeemCardTitle: "Claim Redeem Code (Plan Upgrade)",
-        redeemCardDesc: "Enter your 12-character promo code or custom administrative voucher to upgrade to Pro or Max.",
-        redeemPlaceholder: "e.g. ALOAI2026 or ABCD-EFGH-IJKL",
+        labelUsageSent: "Sent this window",
+        labelUsageRemaining: "Remaining messages",
+        labelUsageReset: "Refresh cycle",
+        labelUsageSessions: "Total sessions",
+        redeemCardTitle: "Redeem Code",
+        redeemCardDesc: "Enter your 12-character promo code or voucher to unlock Pro or Max plan privileges.",
+        redeemPlaceholder: "e.g. ALOAI2026",
         claimBtn: "Claim Code",
         claimVerifying: "Verifying...",
         changePassTitle: "Change Password",
@@ -1071,10 +1088,10 @@
         curPassPlaceholder: "Your current password",
         newPassLabel: "New Password",
         newPassPlaceholder: "At least 6 characters",
-        cnfPassLabel: "Confirm New Password",
+        cnfPassLabel: "Confirm Password",
         cnfPassPlaceholder: "Re-enter new password",
         changePassSubmitBtn: "Update Password",
-        passUpdating: "Updating password...",
+        passUpdating: "Updating...",
         logoutSuccess: "Logged out successfully!",
         nameUpdated: "Your name has been updated successfully!",
         nameEmpty: "Name cannot be empty",
@@ -1091,47 +1108,64 @@
     document.documentElement.setAttribute("lang", currentLanguage);
 
     function applyAccountI18n() {
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const isEn = (currentLanguage === "en");
 
       document.title = d.pageTitle;
       document.documentElement.setAttribute("lang", currentLanguage);
 
       const langBtnText = document.getElementById("langBtnText");
-      if (langBtnText) langBtnText.textContent = isEn ? "বাংলা" : "English";
+      if (langBtnText) langBtnText.textContent = isEn ? "EN" : "বাং";
 
-      const topDownloadText = document.getElementById("topDownloadText");
-      if (topDownloadText) topDownloadText.textContent = d.topDownload;
+      const settingsPageTitle = document.getElementById("settingsPageTitle");
+      if (settingsPageTitle) settingsPageTitle.textContent = d.settingsHeading;
 
-      const themeBtn = document.getElementById("themeToggleBtn");
-      if (themeBtn) {
-        themeBtn.title = isEn ? "Toggle theme" : "থিম পরিবর্তন";
-        themeBtn.setAttribute("aria-label", isEn ? "Toggle theme" : "থিম পরিবর্তন");
-      }
+      const editProfileLabel = document.getElementById("editProfileLabel");
+      if (editProfileLabel) editProfileLabel.textContent = d.editProfile;
 
-      const backToChatText = document.getElementById("backToChatText");
-      if (backToChatText) backToChatText.textContent = d.backToChat;
+      const accountRowLabel = document.getElementById("accountRowLabel");
+      if (accountRowLabel) accountRowLabel.textContent = d.accountLabel;
+
+      const subscriptionRowLabel = document.getElementById("subscriptionRowLabel");
+      if (subscriptionRowLabel) subscriptionRowLabel.textContent = d.subscriptionLabel;
+
+      const usageRowLabel = document.getElementById("usageRowLabel");
+      if (usageRowLabel) usageRowLabel.textContent = d.usageLabel;
+
+      const upgradeRowLabel = document.getElementById("upgradeRowLabel");
+      if (upgradeRowLabel) upgradeRowLabel.textContent = d.upgradeLabel;
+
+      const themeRowLabel = document.getElementById("themeRowLabel");
+      if (themeRowLabel) themeRowLabel.textContent = d.themeLabel;
+
+      const langRowLabel = document.getElementById("langRowLabel");
+      if (langRowLabel) langRowLabel.textContent = d.langLabel;
+
+      const soundRowLabel = document.getElementById("soundRowLabel");
+      if (soundRowLabel) soundRowLabel.textContent = d.soundLabel;
+
+      const modelRowLabel = document.getElementById("modelRowLabel");
+      if (modelRowLabel) modelRowLabel.textContent = d.modelLabel;
+
+      const personalizationRowLabel = document.getElementById("personalizationRowLabel");
+      if (personalizationRowLabel) personalizationRowLabel.textContent = d.personalizationLabel;
+
+      const hapticRowLabel = document.getElementById("hapticRowLabel");
+      if (hapticRowLabel) hapticRowLabel.textContent = d.hapticLabel;
+
+      const helpRowLabel = document.getElementById("helpRowLabel");
+      if (helpRowLabel) helpRowLabel.textContent = d.helpLabel;
+
+      const redeemRowLabel = document.getElementById("redeemRowLabel");
+      if (redeemRowLabel) redeemRowLabel.textContent = d.redeemLabel;
 
       const logoutBtnText = document.getElementById("logoutBtnText");
       if (logoutBtnText) logoutBtnText.textContent = d.logout;
 
-      const pageTitle = document.getElementById("pageTitle");
-      if (pageTitle) pageTitle.textContent = d.pageHeading;
+      const langValText = document.getElementById("langValText");
+      if (langValText) langValText.textContent = isEn ? "English" : "বাংলা";
 
-      const pageSubtitle = document.getElementById("pageSubtitle");
-      if (pageSubtitle) pageSubtitle.textContent = d.pageSubheading;
-
-      // Nav Tabs
-      const tabBtnProfile = document.querySelector("#tabBtnProfile span");
-      if (tabBtnProfile) tabBtnProfile.textContent = d.tabProfile;
-      const tabBtnPlan = document.querySelector("#tabBtnPlan span");
-      if (tabBtnPlan) tabBtnPlan.textContent = d.tabPlan;
-      const tabBtnUsage = document.querySelector("#tabBtnUsage span");
-      if (tabBtnUsage) tabBtnUsage.textContent = d.tabUsage;
-      const tabBtnSecurity = document.querySelector("#tabBtnSecurity span");
-      if (tabBtnSecurity) tabBtnSecurity.textContent = d.tabSecurity;
-
-      // Profile
+      // Form text updates
       const changeNameTitle = document.getElementById("changeNameTitle");
       if (changeNameTitle) changeNameTitle.textContent = d.changeNameTitle;
       const editNameLabel = document.getElementById("editNameLabel");
@@ -1141,31 +1175,6 @@
       const saveNameBtn = document.getElementById("saveNameBtn");
       if (saveNameBtn && !saveNameBtn.disabled) saveNameBtn.textContent = d.saveNameBtn;
 
-      // Plan
-      const currentPlanLabel = document.getElementById("currentPlanLabel");
-      if (currentPlanLabel) currentPlanLabel.textContent = d.currentPlanLabel;
-      const unlockCodeBtnText = document.getElementById("unlockCodeBtnText");
-      if (unlockCodeBtnText) unlockCodeBtnText.textContent = d.unlockCodeBtn;
-      const quotaCardTitle = document.getElementById("quotaCardTitle");
-      if (quotaCardTitle) quotaCardTitle.textContent = d.quotaCardTitle;
-      const quotaResetLabel = document.getElementById("quotaResetLabel");
-      if (quotaResetLabel) quotaResetLabel.textContent = d.quotaResetLabel;
-
-      // Usage
-      const labelUsageSent = document.getElementById("labelUsageSent");
-      if (labelUsageSent) labelUsageSent.textContent = d.labelUsageSent;
-      const labelUsageRemaining = document.getElementById("labelUsageRemaining");
-      if (labelUsageRemaining) labelUsageRemaining.textContent = d.labelUsageRemaining;
-      const labelUsageReset = document.getElementById("labelUsageReset");
-      if (labelUsageReset) labelUsageReset.textContent = d.labelUsageReset;
-      const labelUsageSessions = document.getElementById("labelUsageSessions");
-      if (labelUsageSessions) labelUsageSessions.textContent = d.labelUsageSessions;
-      const policyTitle = document.getElementById("policyTitle");
-      if (policyTitle) policyTitle.textContent = d.policyTitle;
-      const policyDesc = document.getElementById("policyDesc");
-      if (policyDesc) policyDesc.textContent = d.policyDesc;
-
-      // Security
       const redeemCardTitle = document.getElementById("redeemCardTitle");
       if (redeemCardTitle) redeemCardTitle.textContent = d.redeemCardTitle;
       const redeemCardDesc = document.getElementById("redeemCardDesc");
@@ -1193,244 +1202,148 @@
       if (changePassSubmitBtn && !changePassSubmitBtn.disabled) changePassSubmitBtn.textContent = d.changePassSubmitBtn;
     }
 
-    const langToggleBtn = document.getElementById("langToggleBtn");
-    if (langToggleBtn) {
-      langToggleBtn.addEventListener("click", () => {
-        currentLanguage = (currentLanguage === "en" ? "bn" : "en");
-        try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
-        applyAccountI18n();
-        renderUserData();
-        syncDynamicPlans();
-      });
+    // Modal Control Helpers
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("open");
     }
 
-    // Theme sync
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("open");
+    }
+
+    document.querySelectorAll(".settings-modal-overlay").forEach(overlay => {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.classList.remove("open");
+      });
+    });
+
+    document.querySelectorAll(".modal-close-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-close");
+        if (targetId) closeModal(targetId);
+      });
+    });
+
+    // Row Click Listeners
+    document.getElementById("rowEditProfile")?.addEventListener("click", () => openModal("modalEditProfile"));
+    document.getElementById("rowAccount")?.addEventListener("click", () => openModal("modalAccount"));
+    document.getElementById("rowSubscription")?.addEventListener("click", () => openModal("modalSubscription"));
+    document.getElementById("rowUsage")?.addEventListener("click", () => openModal("modalUsage"));
+    document.getElementById("rowRedeem")?.addEventListener("click", () => openModal("modalRedeem"));
+    document.getElementById("rowHelp")?.addEventListener("click", () => openModal("modalHelp"));
+    document.getElementById("rowPersonalization")?.addEventListener("click", () => openModal("modalPersonalization"));
+
+    // Language Toggle
+    const toggleLanguage = () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyAccountI18n();
+      renderUserData();
+      syncDynamicPlans();
+      showToast(currentLanguage === "en" ? "Language set to English" : "ভাষা বাংলায় পরিবর্তিত হয়েছে", "info");
+    };
+
+    document.getElementById("langToggleBtn")?.addEventListener("click", toggleLanguage);
+    document.getElementById("rowLanguage")?.addEventListener("click", toggleLanguage);
+
+    // Theme Switch
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    const THEME_META_COLORS = {
-      dark: "#09090b",
-      sapphire: "#070d19",
-      oled: "#000000",
-      eyecare: "#f5eedc",
-      light: "#f9fafb"
+    const THEME_NAMES = {
+      dark: "Dark",
+      oled: "OLED Black",
+      sapphire: "Sapphire",
+      light: "Light"
     };
 
-    function updateThemeMetaColor(t) {
-      let meta = document.querySelector('meta[name="theme-color"]');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', THEME_META_COLORS[t] || '#09090b');
+    function updateThemeDisplay(t) {
+      const themeValText = document.getElementById("themeValText");
+      if (themeValText) themeValText.textContent = THEME_NAMES[t] || "Dark";
     }
-    updateThemeMetaColor(savedTheme);
+    updateThemeDisplay(savedTheme);
 
-    const themeToggleBtn = document.getElementById("themeToggleBtn");
-    if (themeToggleBtn) {
-      const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
-      themeToggleBtn.addEventListener("click", () => {
-        const cur = document.documentElement.getAttribute("data-theme") || "dark";
-        const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-        document.documentElement.setAttribute("data-theme", next);
-        localStorage.setItem("alokpoth_theme", next);
-        localStorage.setItem("alokpoth-theme", next);
-        updateThemeMetaColor(next);
-        const labels = currentLanguage === "en" ? {
-          dark: "Dark theme", sapphire: "Sapphire theme", oled: "OLED Black theme", eyecare: "Eye Care theme", light: "Light theme"
-        } : {
-          dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম"
-        };
-        showToast(currentLanguage === "en" ? `${labels[next] || next} activated` : `${labels[next] || next} সক্রিয় করা হয়েছে`);
+    document.getElementById("rowTheme")?.addEventListener("click", () => {
+      const themes = ["dark", "oled", "sapphire", "light"];
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("alokpoth_theme", next);
+      localStorage.setItem("alokpoth-theme", next);
+      updateThemeDisplay(next);
+      showToast(`${THEME_NAMES[next] || next} theme enabled`, "info");
+    });
+
+    // Haptic Feedback Switch
+    const hapticToggle = document.getElementById("hapticToggle");
+    const hapticEnabled = localStorage.getItem("alokpoth_haptic") !== "false";
+    if (hapticToggle) {
+      hapticToggle.checked = hapticEnabled;
+      hapticToggle.addEventListener("change", () => {
+        localStorage.setItem("alokpoth_haptic", hapticToggle.checked ? "true" : "false");
+        showToast(hapticToggle.checked ? "Haptic feedback enabled" : "Haptic feedback disabled", "info");
       });
     }
 
-    // Smart API Base
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const BACKEND_URL = (isLocal && window.location.port === '5000') 
-      ? window.location.origin 
-      : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
-    const API_BASE = BACKEND_URL + "/api";
+    // Sound Switch
+    const soundValText = document.getElementById("soundValText");
+    let soundEnabled = localStorage.getItem("alokpoth_sound") !== "false";
+    if (soundValText) soundValText.textContent = soundEnabled ? "Default" : "Muted";
+    document.getElementById("rowSound")?.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem("alokpoth_sound", soundEnabled ? "true" : "false");
+      if (soundValText) soundValText.textContent = soundEnabled ? "Default" : "Muted";
+      showToast(soundEnabled ? "Sound enabled" : "Sound muted", "info");
+    });
 
-    // Authentication Guard
+    // API & Auth Config
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
       window.location.href = "login.html";
     }
 
-    // Sound Synthesizer Engine (Completely Muted per user request)
-    const soundEngine = {
-      getCtx() { return null; },
-      playSend() {},
-      playReceive() {},
-      playClick() {},
-      playSuccess() {},
-      playError() {}
-    };
-
-    // Confetti Engine
-    let confettiAnimId = null;
-    function triggerConfetti() {
-      const canvas = document.getElementById("confettiCanvas");
-      if (!canvas) return;
-      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
-      const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      const particles = [];
-      const colors = ["#6366f1", "#a855f7", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"];
-
-      for (let i = 0; i < 70; i++) {
-        particles.push({
-          x: canvas.width / 2 + (Math.random() - 0.5) * 80,
-          y: canvas.height * 0.4 + (Math.random() - 0.5) * 40,
-          vx: (Math.random() - 0.5) * 16,
-          vy: -Math.random() * 14 - 4,
-          size: Math.random() * 8 + 4,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          rotation: Math.random() * 360,
-          rotSpeed: (Math.random() - 0.5) * 10,
-          alpha: 1
-        });
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let alive = false;
-        particles.forEach(p => {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += 0.4;
-          p.rotation += p.rotSpeed;
-          p.alpha -= 0.012;
-          if (p.alpha > 0) {
-            alive = true;
-            ctx.save();
-            ctx.globalAlpha = p.alpha;
-            ctx.translate(p.x, p.y);
-            ctx.rotate((p.rotation * Math.PI) / 180);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-            ctx.restore();
-          }
-        });
-        if (alive) {
-          confettiAnimId = requestAnimationFrame(animate);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-      }
-      animate();
-    }
-
-    // Toast
-    const toastEl = document.getElementById("toastEl");
-    function showToast(msg, type = "success") {
-      toastEl.textContent = msg;
-      toastEl.className = "toast " + type;
-      toastEl.style.display = "block";
-      setTimeout(() => { toastEl.style.display = "none"; }, 3500);
-    }
-
-    // Tab Switching
-    function switchToTab(tabId, pushHistory = true) {
-      document.querySelectorAll(".tab-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.tab === tabId);
-      });
-      document.querySelectorAll(".tab-panel").forEach(p => {
-        p.classList.toggle("active", p.id === tabId);
-      });
-      if (pushHistory) {
-        try {
-          if (history.state?.tab !== tabId) {
-            history.pushState({ tab: tabId }, "", "?tab=" + tabId);
-          }
-        } catch {}
-      }
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        switchToTab(btn.dataset.tab);
-      });
-    });
-
-    window.addEventListener("popstate", (e) => {
-      const stateTab = e.state?.tab;
-      const urlTab = new URLSearchParams(window.location.search).get("tab");
-      const activeTab = stateTab || urlTab || "tabProfile";
-      if (document.getElementById(activeTab)) {
-        switchToTab(activeTab, false);
-      }
-    });
-
-    // Handle URL param tab
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetTab = urlParams.get("tab");
-    if (targetTab && document.getElementById(targetTab)) {
-      switchToTab(targetTab, false);
-    }
-
-    // Convert digits based on language
-    function formatDigits(num) {
-      if (currentLanguage === "en") return String(num);
-      const bn = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-      return String(num).replace(/\d/g, (d) => bn[parseInt(d, 10)]);
-    }
-
-    function escapeHtml(str) {
-      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-
     let dynamicPlanLimits = {
-      Free: { limit: 10, hours: 3, image_limit: 3 },
-      Pro: { limit: 30, hours: 3, image_limit: 20 },
-      Max: { limit: 50, hours: 1, image_limit: 100 }
+      Free: { limit: 10, hours: 3 },
+      Pro: { limit: 30, hours: 3 },
+      Max: { limit: 50, hours: 1 }
     };
+
     let accountLiveTimerInterval = null;
 
+    function showToast(msg, type = "success") {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 3000);
+    }
+
+    function formatDigits(num) {
+      if (currentLanguage !== "bn") return String(num);
+      const bnDigits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+      return String(num).replace(/[0-9]/g, d => bnDigits[Number(d)] || d);
+    }
+
+    // Dynamic Plans Sync
     async function syncDynamicPlans() {
       try {
-        const res = await fetch(`${API_BASE}/plans?_t=${Date.now()}`, {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" }
+        const res = await fetch(`${API_BASE}/plans`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
         });
-        if (!res.ok) return;
         const data = await res.json();
-        if (data.success && Array.isArray(data.plans)) {
-          const isEn = (currentLanguage === "en");
+        if (res.ok && data.success && Array.isArray(data.plans)) {
           data.plans.forEach(p => {
-            const lim = Number(p.message_limit) || 10;
-            const hrs = Number(p.window_hours) || 3;
-            const imgLim = (p.image_limit !== undefined && p.image_limit !== null && !isNaN(Number(p.image_limit)))
-              ? Number(p.image_limit) : (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
-
-            dynamicPlanLimits[p.name] = { limit: lim, hours: hrs, image_limit: imgLim };
-
-            const card = document.getElementById("cardPlan" + p.name);
-            if (card) {
-              const quotaDiv = card.querySelector(".plan-card-quota");
-              if (quotaDiv) {
-                const safeLimit = escapeHtml(String(lim));
-                const safeHours = escapeHtml(String(hrs));
-                const unit = isEn ? `msgs / ${safeHours} hr${hrs > 1 ? 's' : ''}` : `বার্তা / ${formatDigits(safeHours)} ঘণ্টা`;
-                quotaDiv.innerHTML = `${formatDigits(safeLimit)} <span>${unit}</span>`;
-              }
-              const msgLi = document.getElementById(`accFeat${p.name}Msgs`);
-              if (msgLi) {
-                msgLi.textContent = isEn 
-                  ? `${lim} messages per ${hrs} hour${hrs > 1 ? 's' : ''}`
-                  : `${formatDigits(lim)}টি বার্তা প্রতি ${formatDigits(hrs)} ঘণ্টায়`;
-              }
-              const imgLi = document.getElementById(`accFeat${p.name}Img`);
-              if (imgLi) {
-                imgLi.textContent = isEn
-                  ? `${imgLim} image generations per ${hrs} hour${hrs > 1 ? 's' : ''}`
-                  : `${formatDigits(imgLim)}টি ছবি তৈরি প্রতি ${formatDigits(hrs)} ঘণ্টায়`;
-              }
+            if (dynamicPlanLimits[p.name]) {
+              dynamicPlanLimits[p.name] = {
+                limit: Number(p.message_limit) || dynamicPlanLimits[p.name].limit,
+                hours: Number(p.window_hours) || dynamicPlanLimits[p.name].hours
+              };
             }
           });
           renderUserData();
@@ -1438,91 +1351,60 @@
       } catch (e) {}
     }
 
+    // User Data Server Sync
     async function syncUserDataFromServer() {
-      const t = localStorage.getItem("alokpoth_token");
-      if (!t) return;
+      if (!token) return;
       try {
-        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
-          cache: "no-store",
-          headers: {
-            "Authorization": `Bearer ${t}`,
-            "Cache-Control": "no-cache"
-          }
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { "Authorization": `Bearer ${token}` }
         });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.user) {
-            if (data.token) {
-              try { localStorage.setItem("alokpoth_token", data.token); } catch {}
-            }
-            const u = data.user;
-            localStorage.setItem("alokpoth_user", JSON.stringify(u));
-            const nameToSave = (u.name && u.name.trim()) || (u.email ? u.email.split('@')[0].trim() : "ব্যবহারকারী");
-            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch {}
-            const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
-            const isAdminUser = u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim()));
-            let planName = isAdminUser ? "Max" : ((u.subscription && u.subscription.plan_name) || "Free");
-            if (!isAdminUser && u.subscription && u.subscription.expires_at) {
-              const expTime = new Date(u.subscription.expires_at).getTime();
-              if (!isNaN(expTime) && Date.now() >= expTime) {
-                planName = "Free";
-                localStorage.removeItem("alokpoth_plan_expiry");
-                localStorage.removeItem("alokpoth_plan_expires_at");
-              } else {
-                localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
-                localStorage.setItem("alokpoth_plan_expires_at", u.subscription.expires_at);
-              }
-            } else {
-              localStorage.removeItem("alokpoth_plan_expiry");
-              localStorage.removeItem("alokpoth_plan_expires_at");
-            }
-            localStorage.setItem("alokpoth_current_plan", planName);
-            localStorage.setItem("alokpoth_user_plan", planName);
-            localStorage.setItem("alokpoth_plan", planName);
-            if (u.rateLimit || u.usage) {
-              const lim = u.rateLimit || u.usage;
-              const curPlan = planName;
-              const curImgLim = (lim.image_limit !== undefined || lim.imageLimit !== undefined)
-                ? Number(lim.image_limit ?? lim.imageLimit)
-                : (dynamicPlanLimits[curPlan]?.image_limit || (curPlan === 'Max' ? 100 : (curPlan === 'Pro' ? 20 : 3)));
-
-              if (lim.limit && lim.windowHours) {
-                dynamicPlanLimits[curPlan] = { limit: Number(lim.limit), hours: Number(lim.windowHours), image_limit: curImgLim };
-              }
-              const startTimestamp = lim.start || (lim.resetAt ? (new Date(lim.resetAt).getTime() - (lim.windowHours * 60 * 60 * 1000)) : Date.now());
-              const usageData = {
-                count: (lim.count !== undefined ? lim.count : lim.used) || 0,
-                start: startTimestamp,
-                resetAt: lim.resetAt || (lim.resetInMinutes ? new Date(Date.now() + lim.resetInMinutes * 60 * 1000).toISOString() : null)
-              };
-              localStorage.setItem("alokpoth_window_usage", JSON.stringify(usageData));
-              localStorage.setItem("alokpoth_usage_window", JSON.stringify(usageData));
-            }
-            renderUserData();
-          }
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          const freshUser = data.user;
+          localStorage.setItem("alokpoth_user", JSON.stringify(freshUser));
+          const pName = (freshUser.subscription && freshUser.subscription.plan_name) || freshUser.plan || "Free";
+          localStorage.setItem("alokpoth_current_plan", pName);
+          localStorage.setItem("alokpoth_user_plan", pName);
+          localStorage.setItem("alokpoth_plan", pName);
+          renderUserData();
         }
       } catch (e) {}
     }
 
-    // Render User Info to DOM
+    // Render User Data in UI
     function renderUserData() {
       const userStr = localStorage.getItem("alokpoth_user");
       if (!userStr) return;
       const isEn = (currentLanguage === "en");
       try {
         const user = JSON.parse(userStr);
-        document.getElementById("profileNameDisplay").textContent = user.name || (isEn ? "User" : "ব্যবহারকারী");
-        document.getElementById("profileEmailDisplay").textContent = user.email || "";
-        document.getElementById("editNameInput").value = user.name || "";
-        document.getElementById("avatarLetter").textContent = (user.name || user.email || "U").charAt(0).toUpperCase();
+        const userName = user.name || (isEn ? "User" : "ব্যবহারকারী");
+        const userEmail = user.email || "";
+
+        const nameDisp = document.getElementById("profileNameDisplay");
+        if (nameDisp) nameDisp.textContent = userName;
+
+        const emailDisp = document.getElementById("profileEmailDisplay");
+        if (emailDisp) emailDisp.textContent = userEmail;
+
+        const modalEmailDisp = document.getElementById("modalEmailDisplay");
+        if (modalEmailDisp) modalEmailDisp.textContent = userEmail;
+
+        const editNameInp = document.getElementById("editNameInput");
+        if (editNameInp && !editNameInp.value) editNameInp.value = user.name || "";
+
+        const avatarEl = document.getElementById("avatarLetter");
+        if (avatarEl) avatarEl.textContent = (userName || userEmail || "U").charAt(0).toUpperCase();
 
         const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
         const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
-        document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
+        
+        const roleBadge = document.getElementById("profileRoleBadge");
+        if (roleBadge) roleBadge.textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
 
-        let currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || localStorage.getItem("alokpoth_plan") || "Free");
+        let currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || "Free");
 
-        const expiryStr = !isAdmin ? (localStorage.getItem("alokpoth_plan_expiry") || localStorage.getItem("alokpoth_plan_expires_at") || (user.subscription && user.subscription.expires_at)) : null;
+        const expiryStr = !isAdmin ? (localStorage.getItem("alokpoth_plan_expiry") || (user.subscription && user.subscription.expires_at)) : null;
         let isExpired = false;
         let daysLeft = 0;
         if (expiryStr) {
@@ -1531,77 +1413,34 @@
             if (Date.now() >= expDate.getTime()) {
               isExpired = true;
               currentPlan = "Free";
-              try {
-                localStorage.removeItem("alokpoth_plan_expiry");
-                localStorage.removeItem("alokpoth_plan_expires_at");
-                localStorage.setItem("alokpoth_current_plan", "Free");
-                localStorage.setItem("alokpoth_user_plan", "Free");
-                localStorage.setItem("alokpoth_plan", "Free");
-              } catch {}
             } else {
               daysLeft = Math.max(0, Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
             }
           }
         }
 
-        const badge = document.getElementById("profilePlanBadge");
-        badge.textContent = isEn ? `${currentPlan} Plan` : `${currentPlan} প্ল্যান`;
-        badge.className = `badge-pill plan-${currentPlan}`;
+        const planBadge = document.getElementById("profilePlanBadge");
+        if (planBadge) planBadge.textContent = `${currentPlan} Plan`;
 
-        document.getElementById("currentPlanTitle").textContent = `${currentPlan} Plan`;
+        const planTitle = document.getElementById("currentPlanTitle");
+        if (planTitle) planTitle.textContent = currentPlan;
+
+        const planTitleModal = document.getElementById("currentPlanTitleModal");
+        if (planTitleModal) planTitleModal.textContent = `${currentPlan} Plan`;
 
         const expiryEl = document.getElementById("currentPlanExpiry");
-        if (currentPlan === "Free" || isExpired || !expiryStr) {
-          expiryEl.textContent = isEn ? "Validity: Lifetime / No Expiry" : "মেয়াদ: আজীবন / মেয়াদহীন";
-        } else {
-          const expDate = new Date(expiryStr);
-          expiryEl.textContent = isEn 
-            ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
-            : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
+        if (expiryEl) {
+          if (currentPlan === "Free" || isExpired || !expiryStr) {
+            expiryEl.textContent = isEn ? "Validity: Lifetime / No Expiry" : "মেয়াদ: আজীবন / মেয়াদহীন";
+          } else {
+            const expDate = new Date(expiryStr);
+            expiryEl.textContent = isEn 
+              ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
+              : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
+          }
         }
 
-        // Highlight active plan card and update button text/state
-        ["Free", "Pro", "Max"].forEach(p => {
-          const c = document.getElementById("cardPlan" + p);
-          if (c) {
-            const isActive = (p === currentPlan);
-            c.classList.toggle("active-plan", isActive);
-            const btn = c.querySelector("button");
-            if (btn) {
-              if (isActive) {
-                btn.disabled = true;
-                btn.textContent = isEn ? "Current Plan" : "বর্তমান প্ল্যান";
-                btn.style.background = "rgba(255,255,255,0.08)";
-                btn.style.boxShadow = "none";
-              } else {
-                btn.disabled = false;
-                if (p === "Free") {
-                  btn.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
-                  btn.style.background = "rgba(255,255,255,0.12)";
-                  btn.onclick = () => { window.location.href = "index.html"; };
-                } else if (p === "Pro") {
-                  btn.textContent = isEn ? "Unlock Pro" : "প্রো আনলক করুন";
-                  btn.style.background = "var(--accent-gradient)";
-                  btn.onclick = () => {
-                    switchToTab('tabSecurity');
-                    const inp = document.getElementById('redeemCodeInput');
-                    if (inp) setTimeout(() => { inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); inp.focus(); }, 250);
-                  };
-                } else if (p === "Max") {
-                  btn.textContent = isEn ? "Unlock Max" : "ম্যাক্স আনলক করুন";
-                  btn.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
-                  btn.onclick = () => {
-                    switchToTab('tabSecurity');
-                    const inp = document.getElementById('redeemCodeInput');
-                    if (inp) setTimeout(() => { inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); inp.focus(); }, 250);
-                  };
-                }
-              }
-            }
-          }
-        });
-
-        // Dynamic limits & usage calculation
+        // Usage & Quota calculation
         const planConf = dynamicPlanLimits[currentPlan] || dynamicPlanLimits.Free;
         const limit = planConf.limit;
         const hours = planConf.hours;
@@ -1614,16 +1453,18 @@
         } catch {}
 
         const remaining = Math.max(0, limit - used);
-        document.getElementById("usageCountVal").textContent = formatDigits(used);
-        document.getElementById("usageRemainingVal").textContent = formatDigits(remaining);
 
-        // Progress bar & countdown meter in Tab 2
+        const countValEl = document.getElementById("usageCountVal");
+        if (countValEl) countValEl.textContent = formatDigits(used);
+
+        const remValEl = document.getElementById("usageRemainingVal");
+        if (remValEl) remValEl.textContent = formatDigits(remaining);
+
+        // Progress bar & countdown meter
         const fillEl = document.getElementById("accountQuotaFill");
         const remDigitsEl = document.getElementById("quotaRemainingDigits");
         const totDigitsEl = document.getElementById("quotaTotalDigits");
-        const countWrapEl = document.getElementById("quotaCountDisplay");
         const timerEl = document.getElementById("quotaLiveCountdown");
-        const subtextEl = document.getElementById("quotaWindowSubtext");
 
         const windowMs = hours * 60 * 60 * 1000;
         let msRemaining = 0;
@@ -1635,13 +1476,6 @@
 
         if (msRemaining <= 0 && used > 0) {
           used = 0;
-          if (usage) {
-            usage.count = 0;
-            usage.start = Date.now();
-            usage.resetAt = null;
-            localStorage.setItem("alokpoth_window_usage", JSON.stringify(usage));
-            localStorage.setItem("alokpoth_usage_window", JSON.stringify(usage));
-          }
           msRemaining = windowMs;
         }
 
@@ -1654,67 +1488,37 @@
         if (used === 0) {
           timeLeftStr = isEn ? "Full quota available" : "কোটা সম্পূর্ণ পূর্ণ";
         } else if (hLeft > 0) {
-          timeLeftStr = isEn 
-            ? `${hLeft}h ${mLeft}m ${sLeft}s`
-            : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn ? `${hLeft}h ${mLeft}m ${sLeft}s` : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট`;
         } else if (mLeft > 0) {
-          timeLeftStr = isEn
-            ? `${mLeft}m ${sLeft}s`
-            : `${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn ? `${mLeft}m ${sLeft}s` : `${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
         } else {
-          timeLeftStr = isEn
-            ? `${sLeft}s`
-            : `${formatDigits(sLeft)} সেকেন্ড`;
+          timeLeftStr = isEn ? `${sLeft}s` : `${formatDigits(sLeft)} সেকেন্ড`;
         }
 
         if (isAdmin) {
-          if (remDigitsEl) remDigitsEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
+          if (remDigitsEl) remDigitsEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
           if (totDigitsEl) totDigitsEl.textContent = "∞";
-          if (countWrapEl) countWrapEl.innerHTML = isEn ? "<strong>Unlimited</strong> messages (Admin)" : "<strong>আনলিমিটেড</strong> বার্তা (অ্যাডমিন)";
-          if (fillEl) { fillEl.style.width = "100%"; fillEl.style.background = "linear-gradient(90deg, #2563eb, #38bdf8)"; }
+          if (fillEl) fillEl.style.width = "100%";
           if (timerEl) timerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
-          if (subtextEl) subtextEl.textContent = isEn ? "No rate limit applied" : "কোনো রেট লিমিট প্রযোজ্য নয়";
         } else {
           const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
-          if (fillEl) {
-            fillEl.style.width = `${pct}%`;
-            if (remaining <= 0 || pct <= 15) {
-              fillEl.style.background = "linear-gradient(90deg, #dc2626, #f87171)";
-              fillEl.style.boxShadow = "0 0 14px rgba(248, 113, 113, 0.55)";
-            } else if (pct <= 35) {
-              fillEl.style.background = "linear-gradient(90deg, #d97706, #fbbf24)";
-              fillEl.style.boxShadow = "0 0 12px rgba(251, 191, 36, 0.45)";
-            } else {
-              fillEl.style.background = "linear-gradient(90deg, #2563eb, #38bdf8)";
-              fillEl.style.boxShadow = "0 0 12px rgba(56, 189, 248, 0.45)";
-            }
-          }
+          if (fillEl) fillEl.style.width = `${pct}%`;
           if (remDigitsEl) remDigitsEl.textContent = formatDigits(remaining);
           if (totDigitsEl) totDigitsEl.textContent = formatDigits(limit);
-          if (countWrapEl) {
-            countWrapEl.innerHTML = isEn 
-              ? `<strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> msgs left`
-              : `<strong id="quotaRemainingDigits" style="font-size:1.15rem; color:var(--text-main);">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> বার্তা বাকি`;
-          }
           if (timerEl) timerEl.textContent = timeLeftStr;
-          if (subtextEl) {
-            subtextEl.textContent = isEn 
-              ? `${formatDigits(limit)} messages refresh every ${formatDigits(hours)} hours`
-              : `প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা নবায়ন হয়`;
-          }
         }
 
         const usageResetEl = document.getElementById("usageResetVal");
-        if (usageResetEl) {
-          usageResetEl.textContent = isAdmin ? (isEn ? "Unlimited" : "সীমাহীন") : (timeLeftStr || (isEn ? "Full quota available" : "কোটা সম্পূর্ণ পূর্ণ"));
-        }
+        if (usageResetEl) usageResetEl.textContent = isAdmin ? (isEn ? "Unlimited" : "সীমাহীন") : `${hours}h`;
 
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
         let sessionCount = 1;
         if (allSessions) {
           try { sessionCount = JSON.parse(allSessions).length || 1; } catch {}
         }
-        document.getElementById("totalMessagesSent").textContent = formatDigits(sessionCount);
+        const totalMsgEl = document.getElementById("totalMessagesSent");
+        if (totalMsgEl) totalMsgEl.textContent = formatDigits(sessionCount);
+
       } catch (e) {
         console.error(e);
       }
@@ -1730,9 +1534,9 @@
       renderUserData();
     }, 1000);
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+    // Logout Action
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const keysToPurge = [
         "alokpoth_token", "alokpoth_user", "alokpoth_account_name",
         "alokpoth_chat_sessions", "alokpoth_current_session_id",
@@ -1745,13 +1549,13 @@
         try { localStorage.removeItem(k); } catch {}
       });
       showToast(d.logoutSuccess, "success");
-      setTimeout(() => { window.location.href = "login.html"; }, 500);
+      setTimeout(() => { window.location.href = "login.html"; }, 400);
     });
 
     // Profile Name Save
-    document.getElementById("profileUpdateForm").addEventListener("submit", async (e) => {
+    document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const newName = document.getElementById("editNameInput").value.trim();
       if (!newName) {
         showToast(d.nameEmpty, "error");
@@ -1779,9 +1583,10 @@
             localStorage.setItem("alokpoth_user", JSON.stringify(user));
           }
           renderUserData();
+          closeModal("modalEditProfile");
           showToast(d.nameUpdated, "success");
         } else {
-          showToast(data.error || (currentLanguage === "en" ? "Failed to update name" : "নাম পরিবর্তন করতে সমস্যা হয়েছে"), "error");
+          showToast(data.error || "Failed to update profile", "error");
         }
       } catch {
         showToast(d.serverErr, "error");
@@ -1792,8 +1597,8 @@
     });
 
     // Redeem Code Claim
-    document.getElementById("claimRedeemBtn").addEventListener("click", async () => {
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+    document.getElementById("claimRedeemBtn")?.addEventListener("click", async () => {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const codeInput = document.getElementById("redeemCodeInput");
       const rawCode = codeInput.value.trim().toUpperCase();
       if (!rawCode) {
@@ -1826,13 +1631,8 @@
           if (expiresAt) {
             localStorage.setItem("alokpoth_plan_expiry", expiresAt);
             localStorage.setItem("alokpoth_plan_expires_at", expiresAt);
-          } else {
-            localStorage.removeItem("alokpoth_plan_expiry");
-            localStorage.removeItem("alokpoth_plan_expires_at");
           }
-          if (data.token) {
-            localStorage.setItem("alokpoth_token", data.token);
-          }
+          if (data.token) localStorage.setItem("alokpoth_token", data.token);
 
           const userStr = localStorage.getItem("alokpoth_user");
           if (userStr) {
@@ -1847,21 +1647,14 @@
           }
 
           codeInput.value = "";
+          closeModal("modalRedeem");
           renderUserData();
           syncUserDataFromServer();
-          syncDynamicPlans();
-          triggerConfetti();
-          soundEngine.playSuccess();
-          const succMsg = currentLanguage === "en"
-            ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
-            : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
-          showToast(succMsg, "success");
+          showToast(currentLanguage === "en" ? `Congratulations! '${newPlan}' plan is active.` : `অভিনন্দন! '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`, "success");
         } else {
-          soundEngine.playError();
-          showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
+          showToast(data.error || "Invalid code", "error");
         }
       } catch {
-        soundEngine.playError();
         showToast(d.serverErr, "error");
       } finally {
         claimBtn.disabled = false;
@@ -1870,9 +1663,9 @@
     });
 
     // Password Change
-    document.getElementById("changePassForm").addEventListener("submit", async (e) => {
+    document.getElementById("changePassForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.bn;
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const current_password = document.getElementById("curPassInput").value;
       const new_password = document.getElementById("newPassInput").value;
       const confirm_password = document.getElementById("cnfPassInput").value;
@@ -1908,14 +1701,12 @@
           document.getElementById("curPassInput").value = "";
           document.getElementById("newPassInput").value = "";
           document.getElementById("cnfPassInput").value = "";
-          soundEngine.playSuccess();
+          closeModal("modalAccount");
           showToast(data.message || d.passSuccess, "success");
         } else {
-          soundEngine.playError();
-          showToast(data.error || (currentLanguage === "en" ? "Password update failed" : "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে"), "error");
+          showToast(data.error || "Password update failed", "error");
         }
       } catch {
-        soundEngine.playError();
         showToast(d.serverErr, "error");
       } finally {
         submitBtn.disabled = false;

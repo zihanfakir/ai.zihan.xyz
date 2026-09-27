@@ -38,17 +38,17 @@
       --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.28);
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-      /* Premium Dark Theme (Default) */
-      --bg-main: #09090b;
-      --bg-input: #18181b;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+      /* Premium Dark Theme (Default AMOLED / ChatGPT Style) */
+      --bg-main: #000000;
+      --bg-input: #1c1c1f;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-sub: #9ca3af;
       --btn-send: #ffffff;
-      --btn-send-disabled: #334155;
-      --bubble-user-bg: linear-gradient(135deg, #27272a 0%, #18181b 100%);
+      --btn-send-disabled: #27272a;
+      --bubble-user-bg: #0f2b5c;
       --accent-color: #3b82f6;
-      --glass-bg: rgba(9, 9, 11, 0.85);
+      --glass-bg: rgba(0, 0, 0, 0.95);
       --download-btn-bg: rgba(255, 255, 255, 0.08);
       --download-btn-bg-hover: rgba(255, 255, 255, 0.15);
       --download-btn-text: #e2e8f0;
@@ -262,19 +262,63 @@
       transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Navbar with Apple Liquid Glassmorphism */
+    /* Clean Native Mobile Navbar (Screenshot 1 & 2) */
     .navbar {
-      height: 56px;
+      height: 54px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
-      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-main, #000000);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       flex-shrink: 0;
       z-index: 10;
+      position: relative;
+    }
+
+    .nav-left, .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .nav-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .model-selector-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 1.12rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      transition: background 0.15s;
+    }
+
+    .model-selector-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .model-selector-btn .chevron {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      opacity: 0.7;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .brand-name {
@@ -282,12 +326,6 @@
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: 0.02em;
-    }
-
-    .navbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
 
@@ -984,16 +1022,16 @@
     }
 
     .user-bubble {
-      background: linear-gradient(145deg, #2a2d36 0%, #1c1e24 100%);
+      background: var(--bubble-user-bg, #0f2b5c);
       color: #ffffff;
-      padding: 14px 22px;
-      border-radius: 26px 26px 6px 26px;
+      padding: 12px 18px;
+      border-radius: 18px 18px 4px 18px;
       max-width: 85%;
       font-size: 0.98rem;
       line-height: 1.55;
       word-break: break-word;
       white-space: pre-wrap;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.08);
       position: relative;
     }
@@ -1266,39 +1304,51 @@
 
     .msg-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 12px;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+      width: 100%;
       flex-wrap: wrap;
     }
 
     .action-icon-btn {
       display: none;
       align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      color: var(--text-sub);
-      font-size: 0.85rem;
-      font-family: inherit;
-      font-weight: 500;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: #9ca3af;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: color 0.15s, background 0.15s;
     }
 
     .action-icon-btn:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      transform: none;
+      box-shadow: none;
     }
 
     .action-icon-btn svg {
-      width: 15px;
-      height: 15px;
-      fill: currentColor;
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .action-icon-btn span {
+      display: none !important;
+    }
+
+    .action-icon-btn.btn-regen {
+      margin-left: auto;
     }
 
     .status-indicator {
@@ -1374,45 +1424,60 @@
       font-style: italic;
     }
     .thought-block {
-      display: none !important;
+      display: block !important;
       margin-bottom: 12px;
+      width: 100%;
     }
     .thought-block summary {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 14px 6px 10px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-sub);
+      gap: 6px;
+      padding: 4px 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #9ca3af;
       cursor: pointer;
       user-select: none;
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm);
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      transition: color 0.15s ease;
     }
     .thought-block summary:hover {
-      background: rgba(128, 128, 128, 0.1);
-      color: var(--text-main);
+      color: #ffffff;
     }
     .thought-block summary::-webkit-details-marker {
       display: none;
     }
+    .thought-bulb-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+      display: inline-block;
+    }
+    .thought-chevron {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      opacity: 0.75;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .thought-block[open] .thought-chevron {
+      transform: rotate(90deg);
+    }
     .thought-content {
-      margin-top: 10px;
-      padding-left: 14px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      padding: 12px 16px;
       font-size: 0.88rem;
-      color: var(--text-sub);
-      border-left: 2px solid rgba(128, 128, 128, 0.2);
-      opacity: 0.85;
+      line-height: 1.6;
+      color: #9ca3af;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
     }
     .thought-content p:last-child {
       margin-bottom: 0;
-    }
-    .thought-block[open] .thought-chevron {
-      transform: rotate(180deg);
     }
 
     .action-icon-btn.regen-btn-highlight {
@@ -1496,12 +1561,67 @@
     }
 
     .input-wrapper {
-      padding: 0 16px 24px;
-      background: linear-gradient(0deg, var(--bg-main) 60%, transparent 100%);
+      padding: 0 16px 20px;
+      background: linear-gradient(0deg, var(--bg-main) 70%, transparent 100%);
       flex-shrink: 0;
       z-index: 10;
       touch-action: manipulation;
       overscroll-behavior: none;
+    }
+
+    /* Quick Action Pills Row (Above Input Bar - Screenshot 1 & 2) */
+    .quick-action-pills-wrap {
+      max-width: 800px;
+      margin: 0 auto 10px;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 4px;
+    }
+    .quick-action-pills-wrap::-webkit-scrollbar {
+      display: none;
+    }
+    .quick-action-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      padding: 2px 0;
+    }
+    .quick-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1c1c1f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e4e4e7;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      touch-action: manipulation;
+    }
+    .quick-pill-btn:hover {
+      background: #27272a;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .quick-pill-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+    .quick-pill-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
     }
 
     .input-card, .chat-textarea, .attach-menu, .image-preview-row, .file-preview-row {
@@ -1511,24 +1631,119 @@
     .input-card {
       max-width: 800px;
       margin: 0 auto;
-      background-color: var(--bg-input);
-      border-radius: 99px; /* Pill shape */
-      padding: 6px 6px;
+      background-color: #1c1c1f;
+      border-radius: 28px; /* Clean rounded capsule */
+      padding: 4px 6px 4px 10px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .input-card:focus-within {
-      border-color: rgba(128,128,128,0.4);
-      box-shadow: 0 12px 50px rgba(0,0,0,0.25);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .native-mic-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .native-mic-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+    .native-mic-btn.recording {
+      color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.15) !important;
+      animation: pulseRecord 1.5s infinite;
+    }
+
+    .native-tool-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .native-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    /* Generated Image Card with Overlays (Screenshot 5) */
+    .generated-image-wrap {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 8px 0;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .generated-image {
+      display: block;
+      width: 100%;
+      max-height: 480px;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+    .image-overlay-btn {
+      position: absolute;
+      bottom: 12px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .image-overlay-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.06);
+    }
+    .image-overlay-btn.btn-edit {
+      left: 12px;
+    }
+    .image-overlay-btn.btn-download {
+      right: 12px;
+    }
+    .image-overlay-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
     }
 
     .composer-tools {
       display: flex;
       align-items: center;
+      gap: 2px;
       flex-shrink: 0;
     }
 
@@ -1539,18 +1754,17 @@
       width: 36px;
       height: 36px;
       flex-shrink: 0;
-      background: rgba(128, 128, 128, 0.1);
+      background: transparent;
       border: none;
       border-radius: 50%;
-      color: var(--text-sub);
+      color: #9ca3af;
       cursor: pointer;
       transition: all 0.2s;
-      margin-left: 4px;
     }
 
     .attach-btn:hover {
-      background-color: rgba(128, 128, 128, 0.1);
-      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
     }
 
     .attach-btn:disabled {
@@ -2435,18 +2649,51 @@
     }
 
     .action-btn {
-      width: 36px; height: 36px; border-radius: 50%; border: none;
-      background: linear-gradient(135deg, #a78bfa, #818cf8, #60a5fa); color: #fff; display: flex;
-      align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
-      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffff;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       margin-bottom: 0;
-      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
-    .action-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 6px 18px rgba(96, 165, 250, 0.5); }
-    .action-btn:disabled { background: var(--btn-send-disabled); cursor: not-allowed; opacity: 0.5; box-shadow: none; color: #888; }
-    .action-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .action-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: #f4f4f5;
+    }
+    .action-btn:disabled {
+      background: #27272a;
+      cursor: not-allowed;
+      opacity: 0.5;
+      box-shadow: none;
+      color: #71717a;
+      transform: none;
+    }
+    .action-btn svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-    .footer-note { display: none; }
+    .footer-note {
+      display: block;
+      text-align: center;
+      font-size: 11px;
+      color: #71717a;
+      margin-top: 8px;
+      letter-spacing: 0.01em;
+    }
     
     button, .brand-menu-item, .quick-prompt-chip, .icon-btn { -webkit-user-select: none; user-select: none; }
 
@@ -2837,16 +3084,14 @@
       left: 0;
       width: 320px;
       max-width: 85vw;
-      background: var(--glass-bg);
-      backdrop-filter: blur(36px) saturate(190%);
-      -webkit-backdrop-filter: blur(36px) saturate(190%);
-      border-right: 1px solid var(--border-color);
+      background: #000000;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
       z-index: 101;
       transform: translateX(-100%);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       overflow: hidden;
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -2862,9 +3107,7 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
-      background: var(--glass-bg);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: #000000;
     }
     .drawer-brand {
       display: flex;
@@ -2904,9 +3147,9 @@
       justify-content: center;
       gap: 8px;
       padding: 11px 16px;
-      background: var(--bubble-user-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
+      background: #1c1c1f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
       color: var(--text-main);
       font-size: 0.92rem;
       font-weight: 600;
@@ -2914,7 +3157,8 @@
       transition: all 0.2s;
     }
     .drawer-new-chat-btn:hover {
-      border-color: var(--accent-color);
+      background: #27272a;
+      border-color: rgba(255, 255, 255, 0.16);
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
     }
@@ -2963,11 +3207,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
-      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      border-radius: 8px;
       background: transparent;
       border: 1px solid transparent;
-      color: var(--text-main);
+      color: #e4e4e7;
       cursor: pointer;
       transition: all 0.15s;
       text-align: left;
@@ -2975,12 +3219,12 @@
       gap: 8px;
     }
     .drawer-session-item:hover {
-      background: rgba(128, 128, 128, 0.1);
+      background: rgba(255, 255, 255, 0.06);
     }
     .drawer-session-item.active {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: var(--accent-color);
+      background: #262629;
+      border-color: transparent;
+      color: #ffffff;
       font-weight: 600;
     }
     .drawer-session-title {
@@ -3587,19 +3831,54 @@
   <!-- Sliding Sidebar Navigation Drawer & Backdrop -->
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
   <aside class="sidebar-drawer" id="sidebarDrawer" aria-label="প্রধান মেনু" style="display: flex; flex-direction: column;">
-    <div class="drawer-top-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 8px;">
-      <button type="button" id="drawerNewChatBtn" class="drawer-new-chat-btn sheen-surface" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 99px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.28); color: var(--text-main); font-size: 0.85rem; font-weight: 600; cursor: pointer; touch-action: manipulation;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span data-i18n="newChatAria">নতুন চ্যাট</span>
-      </button>
-      <button type="button" id="drawerCloseBtn" aria-label="Close" style="background: transparent; border: none; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <div class="drawer-top-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px;">
+      <div style="font-size: 1.2rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">Alo AI</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" id="drawerSearchToggleBtn" aria-label="Search chats" style="background: transparent; border: none; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button type="button" id="drawerCloseBtn" aria-label="Close" style="background: transparent; border: none; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- New Chat prominent pill button (Screenshot 3) -->
+    <div style="padding: 0 16px 12px;">
+      <button type="button" id="drawerNewChatBtn" class="drawer-new-chat-btn" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 9999px; background: #1c1c1f; border: 1px solid rgba(255, 255, 255, 0.08); color: #ffffff; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        <span>New Chat</span>
       </button>
     </div>
-    <div style="padding: 0 16px 8px;">
+
+    <div style="padding: 0 16px 8px; display: none;" id="drawerSearchBoxWrap">
       <div class="drawer-search-wrap" style="margin: 0; position: relative; width: 100%; padding: 0;">
         <svg viewBox="0 0 24 24" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--text-sub); stroke-width: 2; pointer-events: none; z-index: 2;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাট খুঁজুন..." data-i18n-placeholder="drawerSearchPlaceholder" style="background: rgba(128,128,128,0.1); border: 1px solid transparent; width: 100%;">
+        <input type="text" class="drawer-search-input" id="drawerSearchInput" placeholder="চ্যাট খুঁজুন..." style="background: #1c1c1f; border: 1px solid rgba(255,255,255,0.08); width: 100%;">
+      </div>
+    </div>
+
+    <!-- Quick Navigation Links (Screenshot 3) -->
+    <div style="padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 4px;">
+      <button type="button" class="drawer-session-item" id="drawerLibraryBtn" style="padding: 10px 12px; font-weight: 500; color: #e4e4e7;" onclick="showToast('My Library', 'info')">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>My Library</span>
+        </div>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6;"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <div style="font-size: 0.78rem; font-weight: 600; color: #71717a; padding: 10px 12px 4px; text-transform: uppercase; letter-spacing: 0.05em;">Project</div>
+      <button type="button" class="drawer-session-item" id="drawerNewProjectBtn" style="padding: 8px 12px; font-weight: 500; color: #e4e4e7;" onclick="showToast('New Project', 'info')">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>New Project</span>
+        </div>
+      </button>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 4px; color: #71717a; font-size: 0.8rem; font-weight: 600;">
+        <span>Chats</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
     </div>
 
@@ -3608,61 +3887,40 @@
     </div>
     
     <div id="drawerEmptyState" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 32px 24px; text-align: center;">
-      <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;" data-i18n="drawerNoChatsTitle">কোনো চ্যাট নেই</div>
-      <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;" data-i18n="drawerNoChatsSub">আপনার Alokpoth-এর সাথে চ্যাট এখানে প্রদর্শিত হবে।</div>
-      <button type="button" id="drawerEmptyNewChatBtn" style="background: var(--accent-color); color: #fff; border: none; border-radius: 99px; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer;">নতুন চ্যাট</button>
+      <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px;" data-i18n="drawerNoChatsTitle">কোনো চ্যাট নেই</div>
+      <div style="font-size: 0.82rem; color: var(--text-sub); margin-bottom: 16px;" data-i18n="drawerNoChatsSub">আপনার Alo AI-এর সাথে চ্যাট এখানে প্রদর্শিত হবে।</div>
     </div>
 
-    <div class="drawer-download-row" id="drawerDownloadAppWrap" style="padding: 0 16px 12px; display: none;">
-      <button type="button" class="drawer-download-btn sheen-surface" id="drawerDownloadAppBtn" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; color: var(--text-main); font-size: 13px; font-weight: 500; cursor: pointer;">
-        <span style="display: flex; align-items: center; gap: 8px;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>অ্যাপ ডাউনলোড</span>
-        </span>
-        <span style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #3b82f6; color: #fff; font-weight: 600;">APK</span>
-      </button>
-    </div>
-
-    <div style="padding: 0 16px 8px;" id="drawerLimitsWrap">
-      <button type="button" class="drawer-download-btn sheen-surface" id="drawerLimitsBtn" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; color: var(--text-main); font-size: 13px; font-weight: 500; cursor: pointer;">
-        <span style="display: flex; align-items: center; gap: 8px;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-color);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-          <span data-i18n="usageLimits">ব্যবহারের সীমা ও কোটা</span>
-        </span>
-        <span id="drawerLimitBadge" style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--accent-color); color: #fff; font-weight: 600;">View Limits</span>
-      </button>
-    </div>
-
-    <div class="drawer-footer" style="padding: 12px 16px; border-top: none; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="drawerUserCardWrap" role="button" tabindex="0" aria-label="সেটিংস ও একাউন্ট" onclick="handleDrawerUserCardClick(event)">
-      <div style="display: flex; align-items: center; gap: 12px; width: calc(100% - 36px); pointer-events: none;">
-        <div class="drawer-avatar" id="drawerAvatar" style="width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; background: rgba(128,128,128,0.2); flex-shrink: 0;">অ</div>
-        <div style="display: flex; flex-direction: column; width: 100%; overflow: hidden;">
-          <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Not Logged In</div>
-          <div id="drawerUserPlan" style="font-size: 0.72rem; color: var(--text-sub); white-space: nowrap;">Sign in to unlock all features</div>
-          <div class="drawer-quota-track">
-            <div class="drawer-quota-fill" id="drawerQuotaFill" style="width: 0%;"></div>
-          </div>
+    <!-- Bottom User Row (Screenshot 3) -->
+    <div class="drawer-footer" style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #000000;" id="drawerUserCardWrap" role="button" tabindex="0" aria-label="সেটিংস ও একাউন্ট" onclick="handleDrawerUserCardClick(event)">
+      <div style="display: flex; align-items: center; gap: 12px; width: 100%; pointer-events: none;">
+        <div class="drawer-avatar" id="drawerAvatar" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; background: #27272a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">Z</div>
+        <div style="display: flex; flex-direction: column; overflow: hidden;">
+          <div class="drawer-user-name" id="drawerUserName" style="font-size: 0.95rem; font-weight: 600; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Zihan Fakir</div>
         </div>
       </div>
-      <button type="button" style="background: transparent; border: none; color: var(--text-sub); padding: 8px; pointer-events: none;" tabindex="-1" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-      </button>
     </div>
   </aside>
 
-  <nav class="navbar" style="background: transparent; border-bottom: none;">
-    <div class="nav-left" style="display: flex; align-items: center; gap: 8px;">
-      <button class="icon-btn" id="brandMenuBtn" type="button" aria-label="মেনু" style="background: transparent; border: none; color: var(--text-main); padding: 8px; margin-left: -8px;">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
-      </button>
-      <button class="model-selector" id="modelTrigger" type="button" style="background: transparent; border: none; font-size: 1.15rem; font-weight: 700; padding: 0; box-shadow: none; color: var(--text-main);">
-        <span id="modelTriggerLabel" class="trigger-label">Alo Flash</span>
-        <svg class="chevron" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M7 10l5 5 5-5z"/></svg>
+  <nav class="navbar" id="mainNavbar">
+    <div class="nav-left">
+      <button class="icon-btn" id="brandMenuBtn" type="button" aria-label="মেনু" style="background: transparent; border: none; color: var(--text-main); padding: 8px;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
     </div>
-    <div class="navbar-right" style="display: flex; align-items: center; gap: 8px;">
-      <button class="icon-btn" id="quickNewChatNavBtn" type="button" aria-label="নতুন চ্যাট" style="background: transparent; border: none; color: var(--text-main); padding: 8px; margin-right: -8px;">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="12" y1="9" x2="12" y2="15"/></svg>
+    <div class="nav-center">
+      <button class="model-selector-btn" id="modelTrigger" type="button" aria-label="মডেল নির্বাচন করুন">
+        <span id="modelTriggerLabel" class="trigger-label">Alo AI</span>
+        <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+    </div>
+    <div class="navbar-right">
+      <button class="icon-btn" id="navSoundToggleBtn" type="button" aria-label="অডিও টগল" title="ভয়েস আউটপুট নিঃশব্দ / চালু" style="background: transparent; border: none; color: var(--text-main); padding: 8px;">
+        <svg id="navSoundIconOff" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        <svg id="navSoundIconOn" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <button class="icon-btn" id="quickNewChatNavBtn" type="button" aria-label="নতুন চ্যাট" title="নতুন চ্যাট শুরু করুন" style="background: transparent; border: none; color: var(--text-main); padding: 8px;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
       </button>
     </div>
   </nav>
@@ -4346,14 +4604,14 @@
     
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        <div id="heroGreetingText" style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em;">How can I help you today?</div>
-        
-        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 0; display: none;">
-          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0;">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </span>
-          <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);"><span data-i18n="heroDownloadBannerText">Use Android App — </span><strong style="color: #60a5fa; text-decoration: underline;" data-i18n="heroDownloadBannerBtn">Download APK</strong></span>
-        </div>
+        <svg class="empty-state-logo" viewBox="0 0 100 100" width="58" height="58" fill="none">
+          <g fill="#3b82f6">
+            <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z"/>
+            <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(120 50 50)"/>
+            <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(240 50 50)"/>
+          </g>
+        </svg>
+        <div id="heroGreetingText" style="font-size: 1.35rem; font-weight: 600; color: #ffffff; letter-spacing: -0.01em; margin-top: 4px;">How can I help you?</div>
       </div>
     </div>
   </div>
@@ -4366,13 +4624,63 @@
     <div class="image-preview-row" id="imagePreviewRow"></div>
     <div class="file-preview-row" id="filePreviewRow"></div>
 
+    <!-- Quick Action Pills Row (Screenshot 1 & 2) -->
+    <div class="quick-action-pills-wrap" id="quickActionPillsWrap">
+      <div class="quick-action-pills-row">
+        <button type="button" class="quick-pill-btn" id="pillImageBtn" data-action="image">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Image</span>
+        </button>
+        <button type="button" class="quick-pill-btn" id="pillVideoBtn" data-action="video">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="17" y1="2" x2="17" y2="6"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
+          <span>Video</span>
+        </button>
+        <button type="button" class="quick-pill-btn" id="pillHomeworkBtn" data-action="homework">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Homework</span>
+        </button>
+        <button type="button" class="quick-pill-btn" id="pillCallBtn" data-action="call">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Call</span>
+        </button>
+        <button type="button" class="quick-pill-btn" id="pillWebBtn" data-action="web">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="pillWebLabel">Web</span>
+        </button>
+      </div>
+    </div>
+
     <form class="input-card" id="chatForm">
       <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
       <input type="file" id="docInput" accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.css,.js,.jsx,.ts,.tsx" style="display:none" multiple>
+      
+      <!-- Left Audio Waveform Icon ((•)) (Screenshot 1) -->
+      <button type="button" class="native-mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড বা কল" title="Voice Mode">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+          <path d="M16.24 7.76a6 6 0 0 1 0 8.49"/>
+          <path d="M7.76 16.24a6 6 0 0 1 0-8.49"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          <path d="M4.93 19.07a10 10 0 0 1 0-14.14"/>
+        </svg>
+      </button>
+
+      <textarea 
+        class="chat-textarea" 
+        id="userInput" 
+        placeholder="Ask Alo AI..." 
+        rows="1"
+      ></textarea>
+
+      <!-- Right Action Tools: Camera, Attach (+), Send (↑) -->
       <div class="composer-tools">
+        <button type="button" class="native-tool-btn" id="cameraBtn" aria-label="ছবি তুলুন বা নির্বাচন করুন" title="ক্যামেরা বা ছবি যোগ করুন">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+
         <div class="attach-menu-wrap" id="attachMenuWrap">
-          <button type="button" class="attach-btn" id="attachBtn" aria-label="যুক্ত করুন" title="ছবি বা ফাইল যুক্ত করুন">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <button type="button" class="native-tool-btn attach-btn" id="attachBtn" aria-label="যুক্ত করুন" title="ছবি বা ফাইল যুক্ত করুন">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           </button>
           <div class="attach-menu" id="attachMenu">
             <button type="button" class="attach-menu-item" id="attachImageOption">
@@ -4399,21 +4707,13 @@
             </button>
           </div>
         </div>
+
+        <button type="submit" class="action-btn" id="sendBtn" aria-label="Send" title="পাঠান">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </button>
       </div>
-      <textarea 
-        class="chat-textarea" 
-        id="userInput" 
-        placeholder="Ask Alo AI anything..." 
-        rows="1"
-      ></textarea>
-      <button type="button" class="mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড করুন" title="কথা বলে লিখুন">
-        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-      </button>
-      <button type="submit" class="action-btn" id="sendBtn" aria-label="Send">
-        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>
-      </button>
     </form>
-    <div class="footer-note">AI can make mistakes. Verify important info.</div>
+    <div class="footer-note" id="footerNote">Generated by AI. Please verify.</div>
   </div>
 
   <script>
@@ -9480,7 +9780,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           let userText = typeof m.content === "string" ? cleanUserMessageContent(m.content) : "";
           createUserBubble(userText, m.images || [], m.files || []);
         } else if (m.role === "assistant") {
-          const { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
+          const { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn, likeBtn, dislikeBtn, moreBtn } = createAIBubble();
           textDiv.classList.remove("streaming", "no-children");
           const rawText = typeof m.content === "string" ? m.content : "";
           
@@ -9500,16 +9800,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
             finalContent = rawText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
           }
 
-          // if (finalReasoning) {
-          //    html += `<details class="thought-block">
-          //      <summary>
-          //        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-          //        <span class="thought-duration" style="opacity:0.9">Thought process</span>
-          //        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          //      </summary>
-          //      <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
-          //    </details>`;
-          // }
+          if (finalReasoning) {
+             const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+             const thinkTitle = isEn ? "Thinking completed" : "চিন্তাভাবনা সমাপ্ত";
+             html += `<details class="thought-block">
+               <summary>
+                 <span class="thought-bulb-icon">💡</span>
+                 <span>${thinkTitle}</span>
+                 <svg class="thought-chevron" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
+               </summary>
+               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+             </details>`;
+          }
           if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
           } else if (!finalContent && finalReasoning) {
@@ -9528,15 +9830,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
             copyBtn.dataset.text = finalContent || rawText;
             copyBtn.style.display = "inline-flex";
           }
-          if (ttsBtn) {
-            ttsBtn.style.display = "inline-flex";
-          }
-          if (shareBtn) {
-            shareBtn.style.display = "inline-flex";
-          }
-          if (regenBtn) {
-            regenBtn.style.display = "inline-flex";
-          }
+          if (ttsBtn) ttsBtn.style.display = "inline-flex";
+          if (likeBtn) likeBtn.style.display = "inline-flex";
+          if (dislikeBtn) dislikeBtn.style.display = "inline-flex";
+          if (shareBtn) shareBtn.style.display = "inline-flex";
+          if (moreBtn) moreBtn.style.display = "inline-flex";
+          if (regenBtn) regenBtn.style.display = "inline-flex";
         }
       });
       scrollToBottom();
@@ -9652,15 +9951,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.className = "action-icon-btn";
       copyBtn.style.display = "none";
       copyBtn.title = isEn ? "Copy response" : "উত্তর কপি করুন";
-      copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span>${dCopy}</span>`;
+      const copyIconSvg = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      const checkIconSvg = `<svg viewBox="0 0 24 24" style="color:#10b981;"><polyline points="20 6 9 17 4 12"/></svg>`;
+      copyBtn.innerHTML = copyIconSvg;
       copyBtn.addEventListener("click", () => {
         const textToCopy = copyBtn.dataset.text || "";
         copyTextToClipboard(textToCopy).then((ok) => {
           triggerHaptic("light");
-          const label = copyBtn.querySelector("span");
-          const original = label ? label.textContent : dCopy;
-          if (label) label.textContent = ok ? (isEn ? "Copied!" : "কপি হয়েছে") : (isEn ? "Failed" : "কপি ব্যর্থ হয়েছে");
-          setTimeout(() => { if (label) label.textContent = original; }, 1500);
+          copyBtn.innerHTML = ok ? checkIconSvg : copyIconSvg;
+          showToast(ok ? (isEn ? "Copied to clipboard" : "কপি হয়েছে") : (isEn ? "Copy failed" : "কপি ব্যর্থ হয়েছে"), ok ? "success" : "warning");
+          setTimeout(() => { copyBtn.innerHTML = copyIconSvg; }, 1500);
         });
       });
       
@@ -9669,11 +9969,37 @@ Capabilities & Code Generation Instructions (CRITICAL):
       ttsBtn.className = "action-icon-btn";
       ttsBtn.style.display = "none";
       ttsBtn.title = isEn ? "Listen to response" : "ভয়েস শুনুন";
-      ttsBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span>${dTTS}</span>`;
+      ttsBtn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
       ttsBtn.addEventListener("click", () => {
         const textToRead = copyBtn.dataset.text || textDiv.textContent || "";
         speakBengaliText(textToRead);
         triggerHaptic("light");
+      });
+
+      const likeBtn = document.createElement("button");
+      likeBtn.type = "button";
+      likeBtn.className = "action-icon-btn";
+      likeBtn.style.display = "none";
+      likeBtn.title = isEn ? "Good response" : "ভালো উত্তর";
+      likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+      likeBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        likeBtn.style.color = "#3b82f6";
+        dislikeBtn.style.color = "";
+        showToast(isEn ? "Thanks for your feedback!" : "মতামতের জন্য ধন্যবাদ!", "success");
+      });
+
+      const dislikeBtn = document.createElement("button");
+      dislikeBtn.type = "button";
+      dislikeBtn.className = "action-icon-btn";
+      dislikeBtn.style.display = "none";
+      dislikeBtn.title = isEn ? "Bad response" : "খারাপ উত্তর";
+      dislikeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
+      dislikeBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        dislikeBtn.style.color = "#ef4444";
+        likeBtn.style.color = "";
+        showToast(isEn ? "Thanks for your feedback" : "মতামতের জন্য ধন্যবাদ", "info");
       });
 
       const shareBtn = document.createElement("button");
@@ -9681,27 +10007,41 @@ Capabilities & Code Generation Instructions (CRITICAL):
       shareBtn.className = "action-icon-btn";
       shareBtn.style.display = "none";
       shareBtn.title = isEn ? "Share response" : "উত্তর শেয়ার করুন";
-      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span>${dShare}</span>`;
+      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
       shareBtn.addEventListener("click", () => {
         const textToShare = copyBtn.dataset.text || textDiv.textContent || "";
         if (navigator.share) {
-          navigator.share({ title: "Alokpoth AI", text: textToShare }).catch(() => {});
+          navigator.share({ title: "Alo AI", text: textToShare }).catch(() => {});
         } else {
           copyTextToClipboard(textToShare).then(() => showToast(isEn ? "Text copied for sharing" : "শেয়ারের জন্য টেক্সট কপি হয়েছে", "success"));
         }
       });
 
+      const moreBtn = document.createElement("button");
+      moreBtn.type = "button";
+      moreBtn.className = "action-icon-btn";
+      moreBtn.style.display = "none";
+      moreBtn.title = isEn ? "More options" : "আরও অপশন";
+      moreBtn.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>`;
+      moreBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        showToast(isEn ? "Feedback noted" : "মতামত নথিভুক্ত করা হয়েছে", "info");
+      });
+
       const regenBtn = document.createElement("button");
       regenBtn.type = "button";
-      regenBtn.className = "action-icon-btn";
+      regenBtn.className = "action-icon-btn btn-regen";
       regenBtn.style.display = "none";
       regenBtn.title = isEn ? "Regenerate response" : "পুনরায় লিখুন";
-      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${dRegen}</span>`;
+      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`;
       regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
       
       actionRow.appendChild(copyBtn);
       actionRow.appendChild(ttsBtn);
+      actionRow.appendChild(likeBtn);
+      actionRow.appendChild(dislikeBtn);
       actionRow.appendChild(shareBtn);
+      actionRow.appendChild(moreBtn);
       actionRow.appendChild(regenBtn);
       contentCol.appendChild(textDiv);
       contentCol.appendChild(actionRow);
@@ -9709,7 +10049,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       row.appendChild(container);
       chatStream.appendChild(row);
       scrollToBottom();
-      return { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn };
+      return { textDiv, copyBtn, regenBtn, ttsBtn, shareBtn, likeBtn, dislikeBtn, moreBtn };
     }
 
     const CODE_LANG_EXT = {
@@ -10270,13 +10610,33 @@ Capabilities & Code Generation Instructions (CRITICAL):
       img.alt = prompt || "ছবি";
       img.className = "generated-image";
 
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "image-overlay-btn btn-edit";
+      editBtn.title = "Edit Image";
+      editBtn.setAttribute("aria-label", "Edit Image");
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
+      editBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        if (userInput) {
+          userInput.value = `Modify image: ${prompt || ""}`;
+          userInput.focus();
+        }
+      });
+
       const dlBtn = document.createElement("button");
       dlBtn.type = "button";
-      dlBtn.className = "image-download-btn sheen-surface";
-      dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>ছবি ডাউনলোড</span>`;
-      dlBtn.addEventListener("click", () => downloadGeneratedImage(imageUrl));
+      dlBtn.className = "image-overlay-btn btn-download";
+      dlBtn.title = "Download Image";
+      dlBtn.setAttribute("aria-label", "Download Image");
+      dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+      dlBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        downloadGeneratedImage(imageUrl);
+      });
 
       wrap.appendChild(img);
+      wrap.appendChild(editBtn);
       wrap.appendChild(dlBtn);
       aiTextElement.appendChild(wrap);
     }
@@ -10287,7 +10647,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           resolve();
           return;
         }
-        const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn } = createAIBubble();
+        const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn, likeBtn, dislikeBtn, moreBtn } = createAIBubble();
         const currentModel = MODELS.find((m) => m.id === selectedModelId);
 
         const userPlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
@@ -10579,18 +10939,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
            const finalReasoning = renderedReasoning + (renderedReasoning && extracted.extractedReasoning ? "\n\n" : "") + extracted.extractedReasoning;
            const finalContent = extracted.cleanContent;
 
-           // if (finalReasoning) {
-           //   const timeSecs = !apiFinished ? Math.floor((Date.now() - thinkStartTime) / 1000) : null;
-           //   const timeText = timeSecs !== null ? `Thought for ${timeSecs}s` : "Thought process";
-           //   html += `<details class="thought-block" ${!apiFinished ? 'open' : ''}>
-           //     <summary>
-           //       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-           //       <span class="thought-duration" style="opacity:0.9">${timeText}</span>
-           //       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6; transition: transform 0.2s" class="thought-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
-           //     </summary>
-           //     <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
-           //   </details>`;
-           // }
+           if (finalReasoning) {
+             const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+             const thinkTitle = !apiFinished && !finalContent ? (isEn ? "Thinking..." : "চিন্তা করা হচ্ছে...") : (isEn ? "Thinking completed" : "চিন্তাভাবনা সমাপ্ত");
+             html += `<details class="thought-block" ${!apiFinished && !finalContent ? 'open' : ''}>
+               <summary>
+                 <span class="thought-bulb-icon">💡</span>
+                 <span>${thinkTitle}</span>
+                 <svg class="thought-chevron" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
+               </summary>
+               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+             </details>`;
+           }
            if (finalContent) {
              html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
            } else if (!apiFinished) {
@@ -10667,10 +11027,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
               copyBtn.dataset.text = extracted.cleanContent || finalSavedContent;
               copyBtn.style.display = "inline-flex";
               if (ttsBtn) ttsBtn.style.display = "inline-flex";
+              if (likeBtn) likeBtn.style.display = "inline-flex";
+              if (dislikeBtn) dislikeBtn.style.display = "inline-flex";
               if (shareBtn) shareBtn.style.display = "inline-flex";
-              const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+              if (moreBtn) moreBtn.style.display = "inline-flex";
               regenBtn.classList.remove("regen-btn-highlight");
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Regenerate" : "আবার লিখুন"}</span>`;
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`;
               regenBtn.style.display = "inline-flex";
               
               messagesHistory.push({ role: "assistant", content: finalSavedContent });
@@ -10882,6 +11244,108 @@ Capabilities & Code Generation Instructions (CRITICAL):
       });
     }
 
+    function initNativeChatGPTControls() {
+      const pillImageBtn = document.getElementById("pillImageBtn");
+      const pillVideoBtn = document.getElementById("pillVideoBtn");
+      const pillHomeworkBtn = document.getElementById("pillHomeworkBtn");
+      const pillCallBtn = document.getElementById("pillCallBtn");
+      const pillWebBtn = document.getElementById("pillWebBtn");
+      const cameraBtn = document.getElementById("cameraBtn");
+      const navSoundToggleBtn = document.getElementById("navSoundToggleBtn");
+      const navSoundIconOff = document.getElementById("navSoundIconOff");
+      const navSoundIconOn = document.getElementById("navSoundIconOn");
+      const quickNewChatNavBtn = document.getElementById("quickNewChatNavBtn");
+      const drawerSearchToggleBtn = document.getElementById("drawerSearchToggleBtn");
+      const drawerSearchBoxWrap = document.getElementById("drawerSearchBoxWrap");
+      const drawerSearchInput = document.getElementById("drawerSearchInput");
+
+      if (pillImageBtn) {
+        pillImageBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (imageInput) imageInput.click();
+        });
+      }
+
+      if (pillVideoBtn) {
+        pillVideoBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (userInput) {
+            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            userInput.value = isEn ? "Create a video script for " : "একটি ভিডিও চিত্রনাট্য তৈরি করুন: ";
+            userInput.focus();
+            userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+          }
+        });
+      }
+
+      if (pillHomeworkBtn) {
+        pillHomeworkBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (userInput) {
+            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            userInput.value = isEn ? "Help me solve this homework step-by-step: " : "ধাপে ধাপে এই হোমওয়ার্কটি সমাধান করে দিন: ";
+            userInput.focus();
+            userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+          }
+        });
+      }
+
+      if (pillCallBtn) {
+        pillCallBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (micBtn) micBtn.click();
+        });
+      }
+
+      if (pillWebBtn) {
+        pillWebBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (attachWebSearchOption) {
+            attachWebSearchOption.click();
+            pillWebBtn.classList.toggle("active", isWebSearchEnabled);
+          }
+        });
+      }
+
+      if (cameraBtn) {
+        cameraBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (imageInput) imageInput.click();
+        });
+      }
+
+      if (navSoundToggleBtn) {
+        navSoundToggleBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (typeof soundEngine !== "undefined") {
+            soundEngine.muted = !soundEngine.muted;
+            if (navSoundIconOff && navSoundIconOn) {
+              navSoundIconOff.style.display = soundEngine.muted ? "block" : "none";
+              navSoundIconOn.style.display = soundEngine.muted ? "none" : "block";
+            }
+            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            showToast(soundEngine.muted ? (isEn ? "Audio muted" : "শব্দ বন্ধ করা হয়েছে") : (isEn ? "Audio unmuted" : "শব্দ চালু করা হয়েছে"), "info");
+          }
+        });
+      }
+
+      if (quickNewChatNavBtn) {
+        quickNewChatNavBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          if (typeof createNewSession === "function") createNewSession();
+        });
+      }
+
+      if (drawerSearchToggleBtn && drawerSearchBoxWrap) {
+        drawerSearchToggleBtn.addEventListener("click", () => {
+          triggerHaptic("light");
+          const isVisible = drawerSearchBoxWrap.style.display !== "none";
+          drawerSearchBoxWrap.style.display = isVisible ? "none" : "block";
+          if (!isVisible && drawerSearchInput) drawerSearchInput.focus();
+        });
+      }
+    }
+
     updateTokenCounter();
 
     // Initialize luxury UI engines
@@ -10890,6 +11354,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     initDragAndDrop();
     initComposerQuickBar();
     initVoiceInput();
+    initNativeChatGPTControls();
     updateNavbarCreditBadge();
 
     syncModelStatuses();
