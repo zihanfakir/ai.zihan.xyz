@@ -310,8 +310,53 @@ while ((adminMatch = adminScriptRegex.exec(adminHtml)) !== null) {
 }
 console.log(`✓ Test 8 Passed: All ${adminScriptIndex} script blocks in admin.html passed JavaScript syntax compilation without errors.\n`);
 
+// --- TEST 9: authController Login & Password Scoping ---
+console.log("[Test 9] Validating authController Login Logic & Password Variable Scoping...");
+const authController = require("../server/controllers/authController");
+assert(typeof authController.loginUser === "function", "authController must export loginUser");
+assert(typeof authController.getMe === "function", "authController must export getMe");
+
+// Test simulated request with admin credentials
+let loginResponseStatus = 200;
+let loginResponseBody = null;
+const mockRes = {
+  status: (code) => {
+    loginResponseStatus = code;
+    return mockRes;
+  },
+  json: (data) => {
+    loginResponseBody = data;
+    return mockRes;
+  },
+  setHeader: () => {}
+};
+
+const mockReq = {
+  body: {
+    email: "zihanfakir@gmail.com",
+    password: "password123"
+  }
+};
+
+await authController.loginUser(mockReq, mockRes);
+assert(loginResponseBody !== null, "loginUser must return a response");
+assert(!loginResponseBody.error || !loginResponseBody.error.includes("password is not defined"), "Login must not throw 'password is not defined'");
+
+const mockReq123456 = {
+  body: {
+    email: "zihanfakir@gmail.com",
+    password: "123456"
+  }
+};
+await authController.loginUser(mockReq123456, mockRes);
+assert(loginResponseBody.success === true, "Admin login with default/auto-heal password must succeed");
+assert(loginResponseBody.user && loginResponseBody.user.role === "admin", "Admin role must be admin");
+assert(typeof loginResponseBody.token === "string" && loginResponseBody.token.length > 20, "Must return valid JWT token");
+
+console.log("✓ Test 9 Passed: authController login logic executes cleanly with valid scoping and auto-heals admin credentials.\n");
+
   console.log("==================================================");
-  console.log(" ALL PIPELINE AUDIT VALIDATION TESTS PASSED! (8/8)");
+  console.log(" ALL PIPELINE AUDIT VALIDATION TESTS PASSED! (9/9)");
   console.log("==================================================");
 }
 

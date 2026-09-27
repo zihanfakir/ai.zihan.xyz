@@ -5,7 +5,7 @@ const User = require('../models/User');
 const { getIsMongoConnected } = require('../config/db');
 const { memoryStore, debouncedSave } = require('../config/memoryStore');
 const { JWT_SECRET } = require('../config/jwtSecret');
-const { getCachedPlan, setCachedPlan, invalidateCachedUser } = require('../config/dbCache');
+const { getCachedPlan, setCachedPlan, getCachedUser, setCachedUser, invalidateCachedUser } = require('../config/dbCache');
 
 const generateToken = (user) => {
   const payload = (user && typeof user === 'object') ? {
@@ -151,6 +151,7 @@ const loginUser = async (req, res) => {
 
     const cleanEmail = String(rawEmail).toLowerCase().trim();
     const cleanPassword = String(rawPassword);
+    const password = cleanPassword;
 
     if (getIsMongoConnected()) {
       const ADMIN_EMAILS = ['zihanfakir@gmail.com', 'x@zihan.uk'];
@@ -171,11 +172,11 @@ const loginUser = async (req, res) => {
         }
       }
       let isMatch = (user.password && typeof user.password === 'string')
-        ? await bcrypt.compare(password, user.password).catch(() => false)
+        ? await bcrypt.compare(cleanPassword, user.password).catch(() => false)
         : false;
 
-      if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || password === '123456')) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+      if (!isMatch && isSuperAdminEmail(cleanEmail) && (!user.password || cleanPassword === '123456')) {
+        const hashedPassword = await bcrypt.hash(cleanPassword, 10);
         user.password = hashedPassword;
         isMatch = true;
       }
