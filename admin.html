@@ -565,6 +565,110 @@
     </div>
   </div>
 
+  <!-- Model 3-API Configuration Modal -->
+  <div class="custom-modal-overlay" id="modelApiModalOverlay">
+    <div class="custom-modal-card" style="max-width: 640px; width: 95%;">
+      <div class="custom-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 class="custom-modal-title" id="modalModelTitle">৩টি API কনফিগারেশন</h3>
+          <p id="modalModelSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">মডেলের অভ্যন্তরীণ ৩টি API স্লট সেট বা ক্লিয়ার করুন</p>
+        </div>
+        <button type="button" class="btn-icon" id="modelApiModalCloseX" title="বন্ধ করুন" style="font-size: 1rem; width: 32px; height: 32px;">✕</button>
+      </div>
+      <div class="custom-modal-body" style="display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; padding-right: 4px;">
+        <input type="hidden" id="modalTargetModelId">
+
+        <!-- API 1: Primary API Card -->
+        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+              <span>🔹 API ১ (প্রধান / Primary API)</span>
+            </div>
+            <span class="tag" style="background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); font-size: 0.7rem;">প্রথম অগ্রাধিকার</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex: 1; min-width: 180px;">
+              <label>আপস্ট্রিম মডেল আইডি *</label>
+              <input type="text" id="modalApiModel1" placeholder="e.g. gpt-4o-mini / gemini-1.5-flash">
+            </div>
+            <div class="form-group" style="flex: 1.5; min-width: 220px;">
+              <label>API Base URL</label>
+              <input type="text" id="modalApiUrl1" placeholder="https://api.openai.com/v1/chat/completions" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="password" id="modalApiKey1" placeholder="sk-..." style="flex: 1;">
+              <button type="button" class="btn-icon" title="API Key দেখুন" onclick="toggleKeyVisibility(this)"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API 2: Fallback 1 Card -->
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+              <span>🔸 API ২ (প্রথম ফলব্যাক / Fallback API 1)</span>
+            </div>
+            <button type="button" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.75rem;" onclick="clearModelModalSlot(2)">✕ মুছুন / ক্লিয়ার</button>
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-muted); margin: -4px 0 2px 0;">API ১ ফেইল হলে মডেলটি স্বয়ংক্রিয়ভাবে এই API ব্যবহার করবে। URL/Key ফাঁকা রাখলে প্রধান API-এর সেটিংস বজায় থাকবে।</p>
+          <div class="form-row">
+            <div class="form-group" style="flex: 1; min-width: 180px;">
+              <label>ফলব্যাক মডেল আইডি</label>
+              <input type="text" id="modalApiModel2" placeholder="e.g. llama-3.3-70b-versatile">
+            </div>
+            <div class="form-group" style="flex: 1.5; min-width: 220px;">
+              <label>ফলব্যাক Base URL (ঐচ্ছিক)</label>
+              <input type="text" id="modalApiUrl2" placeholder="e.g. https://api.groq.com/openai/v1/chat/completions" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ফলব্যাক API Key (ঐচ্ছিক)</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="password" id="modalApiKey2" placeholder="gsk-... বা ফাঁকা রাখুন" style="flex: 1;">
+              <button type="button" class="btn-icon" title="API Key দেখুন" onclick="toggleKeyVisibility(this)"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API 3: Fallback 2 Card -->
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #34d399; display: flex; align-items: center; gap: 6px;">
+              <span>🔹 API ৩ (দ্বিতীয় ফলব্যাক / Fallback API 2)</span>
+            </div>
+            <button type="button" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.75rem;" onclick="clearModelModalSlot(3)">✕ মুছুন / ক্লিয়ার</button>
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-muted); margin: -4px 0 2px 0;">API ১ এবং API ২ উভয়ই ব্যর্থ হলে এই API ৩ সক্রিয় হবে।</p>
+          <div class="form-row">
+            <div class="form-group" style="flex: 1; min-width: 180px;">
+              <label>ফলব্যাক মডেল আইডি</label>
+              <input type="text" id="modalApiModel3" placeholder="e.g. openrouter/free">
+            </div>
+            <div class="form-group" style="flex: 1.5; min-width: 220px;">
+              <label>ফলব্যাক Base URL (ঐচ্ছিক)</label>
+              <input type="text" id="modalApiUrl3" placeholder="e.g. https://openrouter.ai/api/v1/chat/completions" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ফলব্যাক API Key (ঐচ্ছিক)</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="password" id="modalApiKey3" placeholder="sk-or-... বা ফাঁকা রাখুন" style="flex: 1;">
+              <button type="button" class="btn-icon" title="API Key দেখুন" onclick="toggleKeyVisibility(this)"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="custom-modal-footer">
+        <button type="button" class="btn" style="background: rgba(255,255,255,0.1); color: #fff;" id="modelApiModalCancelBtn">বাতিল</button>
+        <button type="button" class="btn btn-primary" id="modelApiModalSaveBtn">৩টি API সংরক্ষণ করুন</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Admin Login Overlay -->
   <div class="login-overlay" id="loginOverlay">
     <form class="login-box" id="adminLoginForm">
@@ -758,6 +862,8 @@
       <!-- Add New Model Form -->
       <form id="addModelForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 14px; display: flex; flex-direction: column; gap: 14px;">
         <h4 style="color: var(--accent); font-size: 1rem;">+ নতুন AI মডেল যোগ করুন</h4>
+        
+        <!-- Basic Info -->
         <div class="form-row">
           <div class="form-group" style="flex: 1; min-width: 180px;">
             <label>মডেল আইডি (Model ID) *</label>
@@ -767,31 +873,7 @@
             <label>প্রদর্শিত নাম (Display Name) *</label>
             <input type="text" id="newModelName" required placeholder="e.g. Alo GPT-4o Mini">
           </div>
-          <div class="form-group" style="flex: 1.5; min-width: 220px;">
-            <label>API Base URL <span style="font-size: 0.72rem; color: #10b981; font-weight: normal;">(/chat/completions auto থাকবে)</span></label>
-            <input type="text" id="newModelUrl" placeholder="https://api.openai.com/v1/chat/completions">
-          </div>
-          <div class="form-group" style="flex: 1; min-width: 160px;">
-            <label>API Key</label>
-            <input type="password" id="newModelKey" placeholder="sk-...">
-          </div>
-        </div>
-        <div class="form-row" style="margin-top: 8px;">
-          <div class="form-group" style="flex: 1; min-width: 200px;">
-            <label>ফলব্যাক মডেল ১ (Fallback 1)</label>
-            <select id="newModelFb1" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
-              <option value="">কোনোটি নয় (None)</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex: 1; min-width: 200px;">
-            <label>ফলব্যাক মডেল ২ (Fallback 2)</label>
-            <select id="newModelFb2" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
-              <option value="">কোনোটি নয় (None)</option>
-            </select>
-          </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 6px;">
-          <div style="display: flex; gap: 20px; align-items: center;">
+          <div class="form-group" style="display: flex; flex-direction: row; gap: 16px; align-items: center; padding-top: 20px;">
             <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
               <input type="checkbox" id="newModelPrem"> <span class="tag tag-pro">PRO</span> ব্যাজ
             </label>
@@ -799,7 +881,72 @@
               <input type="checkbox" id="newModelEff"> <span class="tag tag-max">MAX</span> ব্যাজ
             </label>
           </div>
-          <button type="submit" class="btn btn-primary" style="padding: 8px 20px;">+ মডেল যোগ করুন</button>
+        </div>
+
+        <!-- 3 Internal APIs Container -->
+        <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: #93c5fd;">⚙️ মডেলের অভ্যন্তরীণ ৩টি API স্লট কনফিগারেশন:</div>
+          
+          <!-- API 1: Primary -->
+          <div style="background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #60a5fa;">🔹 API ১ (প্রধান / Primary)</span>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; min-width: 160px;">
+                <label>আপস্ট্রিম মডেল আইডি</label>
+                <input type="text" id="newModelApiModel1" placeholder="e.g. gpt-4o-mini / gemini-1.5-flash">
+              </div>
+              <div class="form-group" style="flex: 1.5; min-width: 220px;">
+                <label>API Base URL</label>
+                <input type="text" id="newModelUrl" placeholder="https://api.openai.com/v1/chat/completions">
+              </div>
+              <div class="form-group" style="flex: 1; min-width: 150px;">
+                <label>API Key</label>
+                <input type="password" id="newModelKey" placeholder="sk-...">
+              </div>
+            </div>
+          </div>
+
+          <!-- API 2: Fallback 1 -->
+          <div style="background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">🔸 API ২ (প্রথম ব্যাকআপ / Fallback 1 - ঐচ্ছিক)</span>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; min-width: 160px;">
+                <label>ফলব্যাক মডেল আইডি</label>
+                <input type="text" id="newModelFb1" placeholder="e.g. llama-3.3-70b-versatile">
+              </div>
+              <div class="form-group" style="flex: 1.5; min-width: 220px;">
+                <label>ফলব্যাক Base URL (ঐচ্ছিক)</label>
+                <input type="text" id="newModelFbUrl1" placeholder="e.g. https://api.groq.com/openai/v1/chat/completions">
+              </div>
+              <div class="form-group" style="flex: 1; min-width: 150px;">
+                <label>ফলব্যাক API Key (ঐচ্ছিক)</label>
+                <input type="password" id="newModelFbKey1" placeholder="gsk-... বা ফাঁকা রাখুন">
+              </div>
+            </div>
+          </div>
+
+          <!-- API 3: Fallback 2 -->
+          <div style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #34d399;">🔹 API ৩ (দ্বিতীয় ব্যাকআপ / Fallback 2 - ঐচ্ছিক)</span>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; min-width: 160px;">
+                <label>ফলব্যাক মডেল আইডি</label>
+                <input type="text" id="newModelFb2" placeholder="e.g. openrouter/free">
+              </div>
+              <div class="form-group" style="flex: 1.5; min-width: 220px;">
+                <label>ফলব্যাক Base URL (ঐচ্ছিক)</label>
+                <input type="text" id="newModelFbUrl2" placeholder="e.g. https://openrouter.ai/api/v1/chat/completions">
+              </div>
+              <div class="form-group" style="flex: 1; min-width: 150px;">
+                <label>ফলব্যাক API Key (ঐচ্ছিক)</label>
+                <input type="password" id="newModelFbKey2" placeholder="sk-or-... বা ফাঁকা রাখুন">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 4px;">
+          <button type="submit" class="btn btn-primary" style="padding: 9px 24px;">+ মডেল যোগ করুন</button>
         </div>
       </form>
 
@@ -810,16 +957,15 @@
               <th style="width: 70px; text-align: center;">ক্রম</th>
               <th>মডেল আইডি</th>
               <th>প্রদর্শিত নাম</th>
-              <th>API Base URL</th>
-              <th>API Key</th>
-              <th>ফলব্যাক ১</th>
-              <th>ফলব্যাক ২</th>
+              <th>প্রধান API URL</th>
+              <th>প্রধান API Key</th>
+              <th>অভ্যন্তরীণ ৩টি API</th>
               <th>ব্যাজ (Pro / Max)</th>
               <th>অ্যাকশন</th>
             </tr>
           </thead>
           <tbody id="modelTableBody">
-            <tr><td colspan="9" style="text-align: center;">লোড হচ্ছে...</td></tr>
+            <tr><td colspan="8" style="text-align: center;">লোড হচ্ছে...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1283,6 +1429,132 @@
       return list;
     }
 
+    function openModelApiModal(modelId) {
+      const modal = document.getElementById("modelApiModalOverlay");
+      if (!modal) return;
+      const m = currentModelsList.find(item => (item.id === modelId || item.model_id === modelId));
+      if (!m) return;
+
+      document.getElementById("modalTargetModelId").value = modelId;
+      document.getElementById("modalModelTitle").textContent = `মডেল: ${m.name || modelId}`;
+      document.getElementById("modalModelSubtitle").textContent = `মডেল আইডি: ${modelId} | অভ্যন্তরীণ ৩টি API স্লট সেটিংস`;
+
+      // API 1
+      document.getElementById("modalApiModel1").value = m.api_model_1 || m.model_id || m.id || "";
+      document.getElementById("modalApiUrl1").value = m.base_url || "";
+      document.getElementById("modalApiKey1").value = m.api_key || "";
+
+      // API 2
+      document.getElementById("modalApiModel2").value = m.api_model_2 || m.fallback_model_1 || "";
+      document.getElementById("modalApiUrl2").value = m.fallback_url_1 || "";
+      document.getElementById("modalApiKey2").value = m.fallback_key_1 || "";
+
+      // API 3
+      document.getElementById("modalApiModel3").value = m.api_model_3 || m.fallback_model_2 || "";
+      document.getElementById("modalApiUrl3").value = m.fallback_url_2 || "";
+      document.getElementById("modalApiKey3").value = m.fallback_key_2 || "";
+
+      modal.classList.add("open");
+    }
+
+    function closeModelApiModal() {
+      const modal = document.getElementById("modelApiModalOverlay");
+      if (modal) modal.classList.remove("open");
+    }
+
+    function clearModelModalSlot(slot) {
+      if (slot === 2) {
+        document.getElementById("modalApiModel2").value = "";
+        document.getElementById("modalApiUrl2").value = "";
+        document.getElementById("modalApiKey2").value = "";
+        showToast("API ২ (ফলব্যাক ১) এর তথ্য মুছে দেওয়া হয়েছে। সেভ করতে সংরক্ষণে ক্লিক করুন।", "info");
+      } else if (slot === 3) {
+        document.getElementById("modalApiModel3").value = "";
+        document.getElementById("modalApiUrl3").value = "";
+        document.getElementById("modalApiKey3").value = "";
+        showToast("API ৩ (ফলব্যাক ২) এর তথ্য মুছে দেওয়া হয়েছে। সেভ করতে সংরক্ষণে ক্লিক করুন।", "info");
+      }
+    }
+
+    async function saveModelApiConfig() {
+      const modelId = document.getElementById("modalTargetModelId").value;
+      if (!modelId) return;
+
+      const saveBtn = document.getElementById("modelApiModalSaveBtn");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "সংরক্ষণ হচ্ছে...";
+      }
+
+      const api_model_1 = document.getElementById("modalApiModel1").value.trim();
+      const base_url = normalizeApiUrl(document.getElementById("modalApiUrl1").value.trim());
+      const api_key = document.getElementById("modalApiKey1").value.trim();
+
+      const api_model_2 = document.getElementById("modalApiModel2").value.trim();
+      const fallback_model_1 = api_model_2;
+      const raw_fb_url_1 = document.getElementById("modalApiUrl2").value.trim();
+      const fallback_url_1 = raw_fb_url_1 ? normalizeApiUrl(raw_fb_url_1) : "";
+      const fallback_key_1 = document.getElementById("modalApiKey2").value.trim();
+
+      const api_model_3 = document.getElementById("modalApiModel3").value.trim();
+      const fallback_model_2 = api_model_3;
+      const raw_fb_url_2 = document.getElementById("modalApiUrl3").value.trim();
+      const fallback_url_2 = raw_fb_url_2 ? normalizeApiUrl(raw_fb_url_2) : "";
+      const fallback_key_2 = document.getElementById("modalApiKey3").value.trim();
+
+      const payload = {
+        api_model_1,
+        base_url,
+        api_key,
+        clear_api_key: !api_key,
+        api_model_2,
+        fallback_model_1,
+        fallback_url_1,
+        fallback_key_1,
+        clear_fallback_key_1: !fallback_key_1,
+        api_model_3,
+        fallback_model_2,
+        fallback_url_2,
+        fallback_key_2,
+        clear_fallback_key_2: !fallback_key_2
+      };
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
+          method: "PUT",
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`'${modelId}' এর ৩টি API সফলভাবে সংরক্ষিত হয়েছে!`, "success");
+          closeModelApiModal();
+          loadModels();
+        } else {
+          showToast(data.error || "সংরক্ষণ ব্যর্থ হয়েছে", "error");
+        }
+      } catch (err) {
+        showToast("সার্ভারে সংযোগ করা যায়নি", "error");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "৩টি API সংরক্ষণ করুন";
+        }
+      }
+    }
+
+    const modelApiCloseX = document.getElementById("modelApiModalCloseX");
+    if (modelApiCloseX) modelApiCloseX.addEventListener("click", closeModelApiModal);
+    const modelApiCancelBtn = document.getElementById("modelApiModalCancelBtn");
+    if (modelApiCancelBtn) modelApiCancelBtn.addEventListener("click", closeModelApiModal);
+    const modelApiSaveBtn = document.getElementById("modelApiModalSaveBtn");
+    if (modelApiSaveBtn) modelApiSaveBtn.addEventListener("click", saveModelApiConfig);
+    const modelApiOverlay = document.getElementById("modelApiModalOverlay");
+    if (modelApiOverlay) {
+      modelApiOverlay.addEventListener("click", (e) => {
+        if (e.target === modelApiOverlay) closeModelApiModal();
+      });
+    }
+
     function renderModelsTable(models) {
       const tbody = document.getElementById("modelTableBody");
       if (!tbody) return;
@@ -1293,18 +1565,11 @@
         const isFirst = idx === 0;
         const isLast = idx === models.length - 1;
 
-        const otherModels = models.filter(other => (other.id || other.model_id) !== mId);
-        let fb1Options = `<option value="">কোনোটি নয় (None)</option>`;
-        let fb2Options = `<option value="">কোনোটি নয় (None)</option>`;
-        const curFb1 = m.fallback_model_1 || "";
-        const curFb2 = m.fallback_model_2 || "";
-
-        otherModels.forEach(o => {
-          const oId = o.id || o.model_id;
-          const oName = o.name || oId;
-          fb1Options += `<option value="${escapeHtml(oId)}" ${oId === curFb1 ? 'selected' : ''}>${escapeHtml(oName)}</option>`;
-          fb2Options += `<option value="${escapeHtml(oId)}" ${oId === curFb2 ? 'selected' : ''}>${escapeHtml(oName)}</option>`;
-        });
+        const curFb1 = (m.api_model_2 || m.fallback_model_1 || '').trim();
+        const curFb2 = (m.api_model_3 || m.fallback_model_2 || '').trim();
+        const curApi1 = (m.api_model_1 || mId).trim();
+        const hasFb1 = Boolean(curFb1 || m.fallback_url_1);
+        const hasFb2 = Boolean(curFb2 || m.fallback_url_2);
 
         const tr = document.createElement("tr");
         tr.setAttribute("data-model-id", mId);
@@ -1313,29 +1578,29 @@
             <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
               <span class="tag" style="font-weight: 700; font-size: 0.75rem; min-width: 32px; text-align: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 2px 5px;">#${idx + 1}</span>
               <div style="display: flex; flex-direction: column; gap: 2px;">
-                <button type="button" class="btn-icon" title="উপরে নিন" onclick="moveModel('${escapeHtml(mId)}', 'up')" ${isFirst ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>▲</button>
-                <button type="button" class="btn-icon" title="নিচে নিন" onclick="moveModel('${escapeHtml(mId)}', 'down')" ${isLast ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>▼</button>
+                <button type="button" class="btn-icon btn-move" title="উপরে নিন" onclick="moveModel('${escapeHtml(mId)}', 'up')" ${isFirst ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>▲</button>
+                <button type="button" class="btn-icon btn-move" title="নিচে নিন" onclick="moveModel('${escapeHtml(mId)}', 'down')" ${isLast ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>▼</button>
               </div>
             </div>
           </td>
           <td><div class="code-chip" style="font-size: 0.75rem;">${escapeHtml(mId)}</div></td>
           <td><input type="text" class="model-input-name" value="${escapeHtml(m.name || '')}" style="width: 130px; padding: 6px 8px; font-size: 0.82rem;"></td>
-          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)" style="width: 150px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
           <td>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <input type="password" class="model-input-key" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 100px; padding: 6px 8px; font-size: 0.82rem;">
+              <input type="password" class="model-input-key" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 90px; padding: 6px 8px; font-size: 0.82rem;">
               <button type="button" class="btn-icon" style="padding: 4px 6px; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center;" title="API Key দেখুন" onclick="toggleKeyVisibility(this)"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </td>
           <td>
-            <select class="model-input-fb1" style="width: 120px; padding: 6px 4px; font-size: 0.78rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;">
-              ${fb1Options}
-            </select>
-          </td>
-          <td>
-            <select class="model-input-fb2" style="width: 120px; padding: 6px 4px; font-size: 0.78rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;">
-              ${fb2Options}
-            </select>
+            <div style="display: flex; flex-direction: column; gap: 4px; min-width: 180px;">
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <span class="tag" style="background: rgba(59,130,246,0.15); color: #93c5fd; font-size: 0.68rem;" title="API ১ (প্রধান): ${escapeHtml(curApi1)}">১: ${escapeHtml(curApi1).slice(0, 11)}</span>
+                <span class="tag" style="background: ${hasFb1 ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.05)'}; color: ${hasFb1 ? '#fbbf24' : '#64748b'}; font-size: 0.68rem;" title="API ২ (ফলব্যাক ১): ${hasFb1 ? escapeHtml(curFb1) : 'খালি'}">২: ${hasFb1 ? escapeHtml(curFb1).slice(0, 11) : '—'}</span>
+                <span class="tag" style="background: ${hasFb2 ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)'}; color: ${hasFb2 ? '#34d399' : '#64748b'}; font-size: 0.68rem;" title="API ৩ (ফলব্যাক ২): ${hasFb2 ? escapeHtml(curFb2) : 'খালি'}">৩: ${hasFb2 ? escapeHtml(curFb2).slice(0, 11) : '—'}</span>
+              </div>
+              <button type="button" class="btn" style="padding: 4px 8px; font-size: 0.74rem; background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); border-radius: 6px;" onclick="openModelApiModal('${escapeHtml(mId)}')">⚙️ ৩টি API কনফিগার</button>
+            </div>
           </td>
           <td>
             <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 3px;"><input type="checkbox" class="model-input-prem" ${m.premium ? 'checked' : ''}> <span class="tag tag-pro" style="padding: 1px 5px; font-size: 0.65rem;">PRO</span></label><br>
@@ -1364,26 +1629,6 @@
       });
     }
 
-    function populateNewModelFallbackOptions(models) {
-      const fb1 = document.getElementById("newModelFb1");
-      const fb2 = document.getElementById("newModelFb2");
-      if (!fb1 || !fb2) return;
-      const prev1 = fb1.value;
-      const prev2 = fb2.value;
-
-      let optionsHtml = '<option value="">কোনোটি নয় (None)</option>';
-      (models || []).forEach(m => {
-        const id = m.id || m.model_id;
-        const name = m.name || id;
-        optionsHtml += `<option value="${escapeHtml(id)}">${escapeHtml(name)} (${escapeHtml(id)})</option>`;
-      });
-
-      fb1.innerHTML = optionsHtml;
-      fb2.innerHTML = optionsHtml;
-      fb1.value = prev1;
-      fb2.value = prev2;
-    }
-
     async function loadModels() {
       try {
         const res = await authFetch(`${API_BASE}/admin/models?_t=${Date.now()}`);
@@ -1391,7 +1636,6 @@
         if (data.success && data.models) {
           currentModelsList = data.models;
           renderModelsTable(data.models);
-          populateNewModelFallbackOptions(data.models);
         }
       } catch (err) {
         console.error(err);
@@ -1562,10 +1806,30 @@
       const urlInput = tr.querySelector(".model-input-url");
       if (urlInput && base_url) urlInput.value = base_url;
       const api_key = tr.querySelector(".model-input-key")?.value.trim() || "";
-      const fallback_model_1 = tr.querySelector(".model-input-fb1")?.value || "";
-      const fallback_model_2 = tr.querySelector(".model-input-fb2")?.value || "";
       const premium = tr.querySelector(".model-input-prem")?.checked || false;
       const efficient = tr.querySelector(".model-input-eff")?.checked || false;
+
+      const currentMod = currentModelsList.find(m => (m.id === modelId || m.model_id === modelId)) || {};
+      const payload = {
+        name,
+        base_url,
+        premium,
+        efficient
+      };
+      if (api_key) payload.api_key = api_key;
+      if (currentMod.api_model_1) payload.api_model_1 = currentMod.api_model_1;
+      if (currentMod.api_model_2 || currentMod.fallback_model_1) {
+        payload.api_model_2 = currentMod.api_model_2 || currentMod.fallback_model_1;
+        payload.fallback_model_1 = payload.api_model_2;
+      }
+      if (currentMod.fallback_url_1) payload.fallback_url_1 = currentMod.fallback_url_1;
+      if (currentMod.fallback_key_1) payload.fallback_key_1 = currentMod.fallback_key_1;
+      if (currentMod.api_model_3 || currentMod.fallback_model_2) {
+        payload.api_model_3 = currentMod.api_model_3 || currentMod.fallback_model_2;
+        payload.fallback_model_2 = payload.api_model_3;
+      }
+      if (currentMod.fallback_url_2) payload.fallback_url_2 = currentMod.fallback_url_2;
+      if (currentMod.fallback_key_2) payload.fallback_key_2 = currentMod.fallback_key_2;
 
       const saveBtn = tr.querySelector(".model-save-btn");
       if (saveBtn) {
@@ -1576,7 +1840,7 @@
       try {
         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
           method: "PUT",
-          body: JSON.stringify({ name, base_url, api_key, fallback_model_1, fallback_model_2, premium, efficient })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (data.success) {
@@ -1587,8 +1851,6 @@
             target.name = name;
             target.base_url = base_url;
             if (api_key) target.api_key = api_key;
-            target.fallback_model_1 = fallback_model_1;
-            target.fallback_model_2 = fallback_model_2;
             target.premium = premium;
             target.efficient = efficient;
           }
@@ -1641,14 +1903,29 @@
       const submitBtn = e.target.querySelector("button[type='submit']");
       const model_id = document.getElementById("newModelId").value.trim();
       const name = document.getElementById("newModelName").value.trim();
+      const premium = document.getElementById("newModelPrem").checked;
+      const efficient = document.getElementById("newModelEff").checked;
+
+      // API 1
+      const api_model_1 = document.getElementById("newModelApiModel1")?.value.trim() || model_id;
       const raw_url = document.getElementById("newModelUrl").value.trim();
       const base_url = normalizeApiUrl(raw_url);
       document.getElementById("newModelUrl").value = base_url;
       const api_key = document.getElementById("newModelKey").value.trim();
-      const fallback_model_1 = document.getElementById("newModelFb1")?.value || "";
-      const fallback_model_2 = document.getElementById("newModelFb2")?.value || "";
-      const premium = document.getElementById("newModelPrem").checked;
-      const efficient = document.getElementById("newModelEff").checked;
+
+      // API 2
+      const api_model_2 = document.getElementById("newModelFb1")?.value.trim() || "";
+      const fallback_model_1 = api_model_2;
+      const raw_fb_url_1 = document.getElementById("newModelFbUrl1")?.value.trim() || "";
+      const fallback_url_1 = raw_fb_url_1 ? normalizeApiUrl(raw_fb_url_1) : "";
+      const fallback_key_1 = document.getElementById("newModelFbKey1")?.value.trim() || "";
+
+      // API 3
+      const api_model_3 = document.getElementById("newModelFb2")?.value.trim() || "";
+      const fallback_model_2 = api_model_3;
+      const raw_fb_url_2 = document.getElementById("newModelFbUrl2")?.value.trim() || "";
+      const fallback_url_2 = raw_fb_url_2 ? normalizeApiUrl(raw_fb_url_2) : "";
+      const fallback_key_2 = document.getElementById("newModelFbKey2")?.value.trim() || "";
 
       if (!model_id || !name) {
         showToast("মডেল আইডি এবং নাম অবশ্যই পূরণ করুন", "error");
@@ -1663,11 +1940,27 @@
       try {
         const res = await authFetch(`${API_BASE}/admin/models`, {
           method: "POST",
-          body: JSON.stringify({ model_id, name, base_url, api_key, fallback_model_1, fallback_model_2, premium, efficient })
+          body: JSON.stringify({
+            model_id,
+            name,
+            premium,
+            efficient,
+            api_model_1,
+            base_url,
+            api_key,
+            api_model_2,
+            fallback_model_1,
+            fallback_url_1,
+            fallback_key_1,
+            api_model_3,
+            fallback_model_2,
+            fallback_url_2,
+            fallback_key_2
+          })
         });
         const data = await res.json();
         if (data.success) {
-          showToast("নতুন মডেল সফলভাবে যোগ করা হয়েছে!", "success");
+          showToast("নতুন মডেল ও ৩টি API সফলভাবে যোগ করা হয়েছে!", "success");
           document.getElementById("addModelForm").reset();
           loadModels();
         } else {
@@ -2185,6 +2478,8 @@
         if (activeConfirmCancel) { activeConfirmCancel.click(); return; }
         const activePassCancel = document.querySelector("#adminPasswordModalOverlay.open #adminPassCancelBtn");
         if (activePassCancel) { activePassCancel.click(); return; }
+        const activeModelApiCancel = document.querySelector("#modelApiModalOverlay.open #modelApiModalCancelBtn");
+        if (activeModelApiCancel) { activeModelApiCancel.click(); return; }
         document.querySelectorAll(".custom-modal-overlay.open").forEach(o => o.classList.remove("open"));
       }
     });

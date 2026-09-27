@@ -41,8 +41,11 @@ router.get('/models', async (req, res) => {
         premium: !!m.premium,
         efficient: !!m.efficient,
         order: m.order,
-        fallback_model_1: m.fallback_model_1 || '',
-        fallback_model_2: m.fallback_model_2 || ''
+        api_model_1: m.api_model_1 || m.model_id || m.id || '',
+        api_model_2: m.api_model_2 || m.fallback_model_1 || '',
+        api_model_3: m.api_model_3 || m.fallback_model_2 || '',
+        fallback_model_1: m.fallback_model_1 || m.api_model_2 || '',
+        fallback_model_2: m.fallback_model_2 || m.api_model_3 || ''
       };
     };
 

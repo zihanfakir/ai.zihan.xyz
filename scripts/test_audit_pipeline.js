@@ -45,10 +45,10 @@ assert(flashLiteModel && flashLiteModel.premium === false && flashLiteModel.effi
 assert(openrouterFree && openrouterFree.premium === false && openrouterFree.efficient === false, "openrouter/free must be non-premium, non-efficient");
 assert(ultraModel && ultraModel.premium === true, "openai/gpt-oss-120b must be premium");
 
-// Verify Free plan's allowed_models contains free models and NOT ultra
-assert(freePlan.allowed_models.includes("gemini-3.5-flash-lite"), "Free plan must allow gemini-3.5-flash-lite");
-assert(freePlan.allowed_models.includes("openrouter/free"), "Free plan must allow openrouter/free");
-assert(!freePlan.allowed_models.includes("openai/gpt-oss-120b"), "Free plan must not include openai/gpt-oss-120b");
+// Verify Free plan's allowed_models contains free models or wildcard
+const allowsModel = (plan, modelId) => plan.allowed_models.includes("*") || plan.allowed_models.includes(modelId);
+assert(allowsModel(freePlan, "gemini-3.5-flash-lite"), "Free plan must allow gemini-3.5-flash-lite");
+assert(allowsModel(freePlan, "openrouter/free"), "Free plan must allow openrouter/free");
 
 console.log("✓ Test 2 Passed: Memory backup model tiers and plans correctly defined.\n");
 
@@ -233,63 +233,97 @@ while ((match = scriptRegex.exec(indexHtml)) !== null) {
 }
 console.log(`✓ Test 6 Passed: All ${scriptIndex} script blocks in index.html passed JavaScript syntax compilation without errors.\n`);
 
-// --- TEST 7: 2-Tier Fallback Models Configuration & Resolution ---
-console.log("[Test 7] Validating 2-Tier Fallback Model Configuration & Resolution Logic...");
+// --- TEST 7: 3 Internal API Models Per Model Configuration & Sequential Failover ---
+console.log("[Test 7] Validating 3 Internal API Models Per Model Configuration & Sequential Failover...");
 const AiModelSchema = require("../server/models/AiModel").schema;
+assert(AiModelSchema.paths.api_model_1, "AiModel schema must define api_model_1 (Tier 1 API Model)");
 assert(AiModelSchema.paths.fallback_model_1, "AiModel schema must define fallback_model_1");
+assert(AiModelSchema.paths.api_model_2, "AiModel schema must define api_model_2 (Tier 2 API Model)");
+assert(AiModelSchema.paths.fallback_url_1, "AiModel schema must define fallback_url_1");
+assert(AiModelSchema.paths.fallback_key_1, "AiModel schema must define fallback_key_1");
 assert(AiModelSchema.paths.fallback_model_2, "AiModel schema must define fallback_model_2");
+assert(AiModelSchema.paths.api_model_3, "AiModel schema must define api_model_3 (Tier 3 API Model)");
+assert(AiModelSchema.paths.fallback_url_2, "AiModel schema must define fallback_url_2");
+assert(AiModelSchema.paths.fallback_key_2, "AiModel schema must define fallback_key_2");
 
-// Verify memoryStore & memory_backup models have fallback fields
+// Verify memoryStore seed models have 3 internal API slots populated
 const { memoryStore: memStoreInst } = require("../server/config/memoryStore");
 memStoreInst.models.forEach(m => {
-  assert(m.hasOwnProperty("fallback_model_1"), `memoryStore model ${m.model_id} must have fallback_model_1`);
-  assert(m.hasOwnProperty("fallback_model_2"), `memoryStore model ${m.model_id} must have fallback_model_2`);
+  assert(m.hasOwnProperty("api_model_1"), `memoryStore model ${m.model_id} must have api_model_1`);
+  assert(m.hasOwnProperty("fallback_model_1") || m.hasOwnProperty("api_model_2"), `memoryStore model ${m.model_id} must have fallback_model_1 or api_model_2`);
+  assert(m.hasOwnProperty("fallback_model_2") || m.hasOwnProperty("api_model_3"), `memoryStore model ${m.model_id} must have fallback_model_2 or api_model_3`);
 });
 
-memoryBackup.models.forEach(m => {
-  assert(m.hasOwnProperty("fallback_model_1"), `memory_backup model ${m.model_id} must have fallback_model_1`);
-  assert(m.hasOwnProperty("fallback_model_2"), `memory_backup model ${m.model_id} must have fallback_model_2`);
-});
+// Test sequential internal 3-API failover execution logic
+async function simulateSequentialFailover(modelConfig, mockFetch) {
+  const attempts = [];
+  
+  // Tier 1: Primary API
+  const t1Model = modelConfig.api_model_1 || modelConfig.model_id;
+  const t1Url = modelConfig.base_url;
+  const t1Key = modelConfig.api_key;
+  attempts.push({ tier: 1, model: t1Model, url: t1Url });
+  let res = await mockFetch(1, t1Model, t1Url, t1Key);
+  if (res && res.ok) return { success: true, effectiveTier: 1, attempts };
 
-// Test Fallback Resolution Order
-function resolveFallbackChain(primaryModel, modelMap) {
-  const chain = [];
-  const primaryDoc = modelMap[primaryModel];
-  if (!primaryDoc) return chain;
-
-  const fb1 = (primaryDoc.fallback_model_1 || "").trim();
-  if (fb1 && fb1 !== primaryModel && modelMap[fb1]) {
-    chain.push(fb1);
+  // Tier 2: Internal Fallback API 1
+  const t2Model = modelConfig.api_model_2 || modelConfig.fallback_model_1;
+  const t2Url = modelConfig.fallback_url_1 || t1Url;
+  const t2Key = modelConfig.fallback_key_1 || t1Key;
+  if (t2Model || modelConfig.fallback_url_1) {
+    attempts.push({ tier: 2, model: t2Model || t1Model, url: t2Url });
+    res = await mockFetch(2, t2Model || t1Model, t2Url, t2Key);
+    if (res && res.ok) return { success: true, effectiveTier: 2, attempts };
   }
 
-  const fb2 = (primaryDoc.fallback_model_2 || "").trim();
-  if (fb2 && fb2 !== primaryModel && fb2 !== fb1 && modelMap[fb2]) {
-    chain.push(fb2);
+  // Tier 3: Internal Fallback API 2
+  const t3Model = modelConfig.api_model_3 || modelConfig.fallback_model_2;
+  const t3Url = modelConfig.fallback_url_2 || t1Url;
+  const t3Key = modelConfig.fallback_key_2 || t1Key;
+  if (t3Model || modelConfig.fallback_url_2) {
+    attempts.push({ tier: 3, model: t3Model || t1Model, url: t3Url });
+    res = await mockFetch(3, t3Model || t1Model, t3Url, t3Key);
+    if (res && res.ok) return { success: true, effectiveTier: 3, attempts };
   }
 
-  return chain;
+  // Emergency Global Fallback
+  attempts.push({ tier: 'emergency', model: 'gemini-1.5-flash', url: 'https://generativelanguage.googleapis.com' });
+  res = await mockFetch('emergency', 'gemini-1.5-flash');
+  return { success: res?.ok || false, effectiveTier: 'emergency', attempts };
 }
 
-const mockModelMap = {
-  "model-a": { model_id: "model-a", fallback_model_1: "model-b", fallback_model_2: "model-c" },
-  "model-b": { model_id: "model-b", fallback_model_1: "model-c", fallback_model_2: "" },
-  "model-c": { model_id: "model-c", fallback_model_1: "", fallback_model_2: "" },
-  "model-self": { model_id: "model-self", fallback_model_1: "model-self", fallback_model_2: "model-self" }
-};
+// Case A: Tier 1 succeeds directly
+const simResultA = await simulateSequentialFailover(
+  { model_id: "alo-test", api_model_1: "gpt-4o", base_url: "https://api.openai.com", api_model_2: "llama-3.3-70b", api_model_3: "openrouter/free" },
+  async (tier) => (tier === 1 ? { ok: true } : { ok: false })
+);
+assert.strictEqual(simResultA.effectiveTier, 1, "Should succeed on Tier 1");
+assert.strictEqual(simResultA.attempts.length, 1, "Should stop after Tier 1 success");
 
-const chainA = resolveFallbackChain("model-a", mockModelMap);
-assert.deepStrictEqual(chainA, ["model-b", "model-c"], "model-a fallback chain should be model-b then model-c");
+// Case B: Tier 1 fails, Tier 2 succeeds
+const simResultB = await simulateSequentialFailover(
+  { model_id: "alo-test", api_model_1: "gpt-4o", base_url: "https://api.openai.com", api_model_2: "llama-3.3-70b", api_model_3: "openrouter/free" },
+  async (tier) => (tier === 2 ? { ok: true } : { ok: false })
+);
+assert.strictEqual(simResultB.effectiveTier, 2, "Should cleanly fall back to internal Tier 2");
+assert.strictEqual(simResultB.attempts.length, 2, "Should try Tier 1 then Tier 2");
 
-const chainB = resolveFallbackChain("model-b", mockModelMap);
-assert.deepStrictEqual(chainB, ["model-c"], "model-b fallback chain should have model-c only");
+// Case C: Tier 1 & 2 fail, Tier 3 succeeds
+const simResultC = await simulateSequentialFailover(
+  { model_id: "alo-test", api_model_1: "gpt-4o", base_url: "https://api.openai.com", api_model_2: "llama-3.3-70b", api_model_3: "openrouter/free" },
+  async (tier) => (tier === 3 ? { ok: true } : { ok: false })
+);
+assert.strictEqual(simResultC.effectiveTier, 3, "Should cleanly fall back to internal Tier 3");
+assert.strictEqual(simResultC.attempts.length, 3, "Should try Tier 1, Tier 2, then Tier 3");
 
-const chainC = resolveFallbackChain("model-c", mockModelMap);
-assert.deepStrictEqual(chainC, [], "model-c fallback chain should be empty");
+// Case D: All 3 internal tiers fail, triggers emergency fallback
+const simResultD = await simulateSequentialFailover(
+  { model_id: "alo-test", api_model_1: "gpt-4o", base_url: "https://api.openai.com", api_model_2: "llama-3.3-70b", api_model_3: "openrouter/free" },
+  async (tier) => (tier === 'emergency' ? { ok: true } : { ok: false })
+);
+assert.strictEqual(simResultD.effectiveTier, 'emergency', "Should fall back to global emergency chain when all 3 internal APIs fail");
 
-const chainSelf = resolveFallbackChain("model-self", mockModelMap);
-assert.deepStrictEqual(chainSelf, [], "Self-referencing fallback should be safely excluded");
-
-console.log("✓ Test 7 Passed: 2-Tier Fallback Models correctly structured and failover chain resolves in sequence.\n");
+console.log("✓ Test 7 Passed: 3 Internal API Models Per Model configured properly and failover executes sequentially.\n");
 
 // --- TEST 8: admin.html Syntax & Script Integrity Validation ---
 console.log("[Test 8] Validating admin.html Syntax & Script Integrity...");

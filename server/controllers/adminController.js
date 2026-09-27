@@ -929,15 +929,22 @@ const getModels = async (req, res) => {
       return !deletedSet.has(mId) && !deletedSet.has(mName);
     });
 
-    // Ensure api_key and fallback model fields are populated for all models
+    // Ensure api_key and all 3 API tier fields are populated for all models
     for (let m of models) {
       const mId = m.id || m.model_id;
       if (!m.api_key) {
         const k = await getApiKeyFromSupabase(mId);
         if (k) m.api_key = k;
       }
-      m.fallback_model_1 = m.fallback_model_1 || '';
-      m.fallback_model_2 = m.fallback_model_2 || '';
+      m.api_model_1 = m.api_model_1 || m.model_id || m.id || '';
+      m.fallback_url_1 = m.fallback_url_1 || '';
+      m.fallback_key_1 = m.fallback_key_1 || '';
+      m.fallback_model_1 = m.fallback_model_1 || m.api_model_2 || '';
+      m.api_model_2 = m.api_model_2 || m.fallback_model_1 || '';
+      m.fallback_url_2 = m.fallback_url_2 || '';
+      m.fallback_key_2 = m.fallback_key_2 || '';
+      m.fallback_model_2 = m.fallback_model_2 || m.api_model_3 || '';
+      m.api_model_3 = m.api_model_3 || m.fallback_model_2 || '';
     }
 
     const sorted = models.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -967,19 +974,31 @@ const updateModel = async (req, res) => {
   try {
     let { modelId } = req.params;
     try { modelId = decodeURIComponent(modelId); } catch {}
-    const { premium, efficient, name, base_url, api_key, clear_api_key, fallback_model_1, fallback_model_2 } = req.body;
+    const {
+      premium, efficient, name,
+      base_url, api_key, clear_api_key, api_model_1,
+      fallback_url_1, fallback_key_1, fallback_model_1, api_model_2, clear_fallback_key_1,
+      fallback_url_2, fallback_key_2, fallback_model_2, api_model_3, clear_fallback_key_2
+    } = req.body;
 
     const hasValidKey = typeof api_key === 'string' && api_key.trim().length > 0;
     const shouldClearKey = clear_api_key === true || (typeof api_key === 'string' && api_key.trim() === '');
     const cleanBaseUrl = base_url !== undefined ? normalizeBaseUrl(base_url) : undefined;
+    const cleanApiModel1 = api_model_1 !== undefined ? String(api_model_1).trim() : undefined;
 
-    // Sanitize fallback models (cannot fallback to self)
-    const cleanFb1 = fallback_model_1 !== undefined
-      ? (typeof fallback_model_1 === 'string' && fallback_model_1.trim() && fallback_model_1.trim() !== modelId ? fallback_model_1.trim() : '')
+    const cleanFbUrl1 = fallback_url_1 !== undefined ? (fallback_url_1.trim() ? normalizeBaseUrl(fallback_url_1) : '') : undefined;
+    const cleanFbModel1 = (api_model_2 !== undefined || fallback_model_1 !== undefined)
+      ? String(api_model_2 !== undefined ? api_model_2 : fallback_model_1).trim()
       : undefined;
-    const cleanFb2 = fallback_model_2 !== undefined
-      ? (typeof fallback_model_2 === 'string' && fallback_model_2.trim() && fallback_model_2.trim() !== modelId ? fallback_model_2.trim() : '')
+    const hasFbKey1 = typeof fallback_key_1 === 'string' && fallback_key_1.trim().length > 0;
+    const shouldClearFbKey1 = clear_fallback_key_1 === true || (typeof fallback_key_1 === 'string' && fallback_key_1.trim() === '');
+
+    const cleanFbUrl2 = fallback_url_2 !== undefined ? (fallback_url_2.trim() ? normalizeBaseUrl(fallback_url_2) : '') : undefined;
+    const cleanFbModel2 = (api_model_3 !== undefined || fallback_model_2 !== undefined)
+      ? String(api_model_3 !== undefined ? api_model_3 : fallback_model_2).trim()
       : undefined;
+    const hasFbKey2 = typeof fallback_key_2 === 'string' && fallback_key_2.trim().length > 0;
+    const shouldClearFbKey2 = clear_fallback_key_2 === true || (typeof fallback_key_2 === 'string' && fallback_key_2.trim() === '');
 
     // 1. Save api_key in Supabase api_keys table only if non-empty or explicitly requested to clear
     if (hasValidKey) {
@@ -996,10 +1015,28 @@ const updateModel = async (req, res) => {
         if (efficient !== undefined) mongoModel.efficient = Boolean(efficient);
         if (name !== undefined) mongoModel.name = (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI');
         if (cleanBaseUrl !== undefined) mongoModel.base_url = cleanBaseUrl;
-        if (cleanFb1 !== undefined) mongoModel.fallback_model_1 = cleanFb1;
-        if (cleanFb2 !== undefined) mongoModel.fallback_model_2 = cleanFb2;
+        if (cleanApiModel1 !== undefined) mongoModel.api_model_1 = cleanApiModel1;
         if (hasValidKey) mongoModel.api_key = api_key.trim();
         else if (shouldClearKey) mongoModel.api_key = '';
+
+        // Fallback 1 (API 2)
+        if (cleanFbUrl1 !== undefined) mongoModel.fallback_url_1 = cleanFbUrl1;
+        if (cleanFbModel1 !== undefined) {
+          mongoModel.fallback_model_1 = cleanFbModel1;
+          mongoModel.api_model_2 = cleanFbModel1;
+        }
+        if (hasFbKey1) mongoModel.fallback_key_1 = fallback_key_1.trim();
+        else if (shouldClearFbKey1) mongoModel.fallback_key_1 = '';
+
+        // Fallback 2 (API 3)
+        if (cleanFbUrl2 !== undefined) mongoModel.fallback_url_2 = cleanFbUrl2;
+        if (cleanFbModel2 !== undefined) {
+          mongoModel.fallback_model_2 = cleanFbModel2;
+          mongoModel.api_model_3 = cleanFbModel2;
+        }
+        if (hasFbKey2) mongoModel.fallback_key_2 = fallback_key_2.trim();
+        else if (shouldClearFbKey2) mongoModel.fallback_key_2 = '';
+
         await mongoModel.save();
       } else {
         await AiModel.create({
@@ -1007,10 +1044,17 @@ const updateModel = async (req, res) => {
           name: (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI'),
           base_url: cleanBaseUrl || '',
           api_key: hasValidKey ? api_key.trim() : '',
+          api_model_1: cleanApiModel1 || modelId,
+          fallback_url_1: cleanFbUrl1 || '',
+          fallback_key_1: hasFbKey1 ? fallback_key_1.trim() : '',
+          fallback_model_1: cleanFbModel1 || '',
+          api_model_2: cleanFbModel1 || '',
+          fallback_url_2: cleanFbUrl2 || '',
+          fallback_key_2: hasFbKey2 ? fallback_key_2.trim() : '',
+          fallback_model_2: cleanFbModel2 || '',
+          api_model_3: cleanFbModel2 || '',
           premium: Boolean(premium),
           efficient: Boolean(efficient),
-          fallback_model_1: cleanFb1 || '',
-          fallback_model_2: cleanFb2 || '',
           provider: 'Alokpoth',
           type: 'custom',
           order: 99
@@ -1031,10 +1075,17 @@ const updateModel = async (req, res) => {
         name: (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI'),
         base_url: cleanBaseUrl || '',
         api_key: hasValidKey ? api_key.trim() : (dbKey || ''),
+        api_model_1: cleanApiModel1 || modelId,
+        fallback_url_1: cleanFbUrl1 || '',
+        fallback_key_1: hasFbKey1 ? fallback_key_1.trim() : '',
+        fallback_model_1: cleanFbModel1 || '',
+        api_model_2: cleanFbModel1 || '',
+        fallback_url_2: cleanFbUrl2 || '',
+        fallback_key_2: hasFbKey2 ? fallback_key_2.trim() : '',
+        fallback_model_2: cleanFbModel2 || '',
+        api_model_3: cleanFbModel2 || '',
         premium: Boolean(premium),
         efficient: Boolean(efficient),
-        fallback_model_1: cleanFb1 || '',
-        fallback_model_2: cleanFb2 || '',
         provider: 'Alokpoth',
         type: 'custom',
         order: models.length + 1
@@ -1045,16 +1096,31 @@ const updateModel = async (req, res) => {
       model.model_id = modelId;
       if (name !== undefined) model.name = (typeof name === 'string' && name.trim()) ? name.trim().slice(0, 100) : (modelId || 'Alo AI');
       if (cleanBaseUrl !== undefined) model.base_url = cleanBaseUrl;
+      if (cleanApiModel1 !== undefined) model.api_model_1 = cleanApiModel1;
       if (premium !== undefined) model.premium = Boolean(premium);
       if (efficient !== undefined) model.efficient = Boolean(efficient);
-      if (cleanFb1 !== undefined) model.fallback_model_1 = cleanFb1;
-      if (cleanFb2 !== undefined) model.fallback_model_2 = cleanFb2;
+
+      if (cleanFbUrl1 !== undefined) model.fallback_url_1 = cleanFbUrl1;
+      if (cleanFbModel1 !== undefined) {
+        model.fallback_model_1 = cleanFbModel1;
+        model.api_model_2 = cleanFbModel1;
+      }
+      if (hasFbKey1) model.fallback_key_1 = fallback_key_1.trim();
+      else if (shouldClearFbKey1) model.fallback_key_1 = '';
+
+      if (cleanFbUrl2 !== undefined) model.fallback_url_2 = cleanFbUrl2;
+      if (cleanFbModel2 !== undefined) {
+        model.fallback_model_2 = cleanFbModel2;
+        model.api_model_3 = cleanFbModel2;
+      }
+      if (hasFbKey2) model.fallback_key_2 = fallback_key_2.trim();
+      else if (shouldClearFbKey2) model.fallback_key_2 = '';
+
       if (hasValidKey) {
         model.api_key = api_key.trim();
       } else if (shouldClearKey) {
         model.api_key = '';
       } else if (!model.api_key) {
-        // preserve from db if missing
         const dbKey = await getApiKeyFromSupabase(modelId);
         if (dbKey) model.api_key = dbKey;
       }
@@ -1066,7 +1132,7 @@ const updateModel = async (req, res) => {
     invalidateCachedModels();
     await saveBackup();
 
-    return res.json({ success: true, message: 'মডেল ও API Key সফলভাবে আপডেট হয়েছে', model });
+    return res.json({ success: true, message: 'মডেল ও ৩টি API কনফিগারেশন সফলভাবে আপডেট হয়েছে', model });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -1074,7 +1140,13 @@ const updateModel = async (req, res) => {
 
 const addModel = async (req, res) => {
   try {
-    const { model_id, name, base_url, api_key, premium, efficient, provider, type, fallback_model_1, fallback_model_2 } = req.body;
+    const {
+      model_id, name,
+      base_url, api_key, api_model_1,
+      fallback_url_1, fallback_key_1, fallback_model_1, api_model_2,
+      fallback_url_2, fallback_key_2, fallback_model_2, api_model_3,
+      premium, efficient, provider, type
+    } = req.body;
     if (!model_id || !name || typeof model_id !== 'string' || typeof name !== 'string') {
       return res.status(400).json({ success: false, error: 'মডেল আইডি এবং নাম আবশ্যক' });
     }
@@ -1086,8 +1158,15 @@ const addModel = async (req, res) => {
     }
 
     const cleanBaseUrl = normalizeBaseUrl(base_url);
-    const cleanFb1 = typeof fallback_model_1 === 'string' && fallback_model_1.trim() && fallback_model_1.trim() !== cleanModelId ? fallback_model_1.trim() : '';
-    const cleanFb2 = typeof fallback_model_2 === 'string' && fallback_model_2.trim() && fallback_model_2.trim() !== cleanModelId ? fallback_model_2.trim() : '';
+    const cleanApiModel1 = typeof api_model_1 === 'string' && api_model_1.trim() ? api_model_1.trim() : cleanModelId;
+
+    const cleanFbUrl1 = typeof fallback_url_1 === 'string' && fallback_url_1.trim() ? normalizeBaseUrl(fallback_url_1) : '';
+    const cleanFbModel1 = typeof (api_model_2 || fallback_model_1) === 'string' ? String(api_model_2 || fallback_model_1).trim() : '';
+    const cleanFbKey1 = typeof fallback_key_1 === 'string' ? fallback_key_1.trim() : '';
+
+    const cleanFbUrl2 = typeof fallback_url_2 === 'string' && fallback_url_2.trim() ? normalizeBaseUrl(fallback_url_2) : '';
+    const cleanFbModel2 = typeof (api_model_3 || fallback_model_2) === 'string' ? String(api_model_3 || fallback_model_2).trim() : '';
+    const cleanFbKey2 = typeof fallback_key_2 === 'string' ? fallback_key_2.trim() : '';
 
     // 1. Save api_key in Supabase api_keys table
     if (api_key) {
@@ -1115,10 +1194,17 @@ const addModel = async (req, res) => {
           name: cleanName,
           base_url: cleanBaseUrl,
           api_key: api_key ? api_key.trim() : '',
+          api_model_1: cleanApiModel1,
+          fallback_url_1: cleanFbUrl1,
+          fallback_key_1: cleanFbKey1,
+          fallback_model_1: cleanFbModel1,
+          api_model_2: cleanFbModel1,
+          fallback_url_2: cleanFbUrl2,
+          fallback_key_2: cleanFbKey2,
+          fallback_model_2: cleanFbModel2,
+          api_model_3: cleanFbModel2,
           premium: Boolean(premium),
           efficient: Boolean(efficient),
-          fallback_model_1: cleanFb1,
-          fallback_model_2: cleanFb2,
           provider: provider || 'Alokpoth',
           type: type || 'custom',
           order: newOrder
@@ -1133,10 +1219,17 @@ const addModel = async (req, res) => {
       name: cleanName,
       base_url: cleanBaseUrl,
       api_key: api_key ? api_key.trim() : '',
+      api_model_1: cleanApiModel1,
+      fallback_url_1: cleanFbUrl1,
+      fallback_key_1: cleanFbKey1,
+      fallback_model_1: cleanFbModel1,
+      api_model_2: cleanFbModel1,
+      fallback_url_2: cleanFbUrl2,
+      fallback_key_2: cleanFbKey2,
+      fallback_model_2: cleanFbModel2,
+      api_model_3: cleanFbModel2,
       premium: Boolean(premium),
       efficient: Boolean(efficient),
-      fallback_model_1: cleanFb1,
-      fallback_model_2: cleanFb2,
       provider: provider || 'Alokpoth',
       type: type || 'custom',
       order: newOrder

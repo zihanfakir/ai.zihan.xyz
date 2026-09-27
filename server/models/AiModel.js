@@ -10,8 +10,18 @@ const AiModelSchema = new mongoose.Schema({
   premium: { type: Boolean, default: false },
   efficient: { type: Boolean, default: false },
   order: { type: Number, default: 0 },
+  // Tier 1: Primary API
+  api_model_1: { type: String, default: '' },
+  // Tier 2: Fallback API 1
+  fallback_url_1: { type: String, default: '' },
+  fallback_key_1: { type: String, default: '' },
   fallback_model_1: { type: String, default: '' },
-  fallback_model_2: { type: String, default: '' }
+  api_model_2: { type: String, default: '' },
+  // Tier 3: Fallback API 2
+  fallback_url_2: { type: String, default: '' },
+  fallback_key_2: { type: String, default: '' },
+  fallback_model_2: { type: String, default: '' },
+  api_model_3: { type: String, default: '' }
 }, { timestamps: true });
 
 AiModelSchema.index({ order: 1, createdAt: 1 });

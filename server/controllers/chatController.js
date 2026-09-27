@@ -12,100 +12,72 @@ const DEFAULT_OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const DEFAULT_BAI_KEY = process.env.BAI_API_KEY || '';
 const DEFAULT_VYCE_KEY = process.env.VYCE_API_KEY || '';
 
-const resolveModelTarget = async (targetModelId, targetModelConfig) => {
-  let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-  let targetKey = (targetModelConfig && targetModelConfig.api_key) || null;
-  let actualModel = targetModelId || 'gemini-3.6-flash';
-  let providerType = 'openrouter';
+const resolveModelTarget = async (targetModelId, customUrl, customKey, targetModelConfig) => {
+  if (customUrl && typeof customUrl === 'object' && !targetModelConfig) {
+    targetModelConfig = customUrl;
+    customUrl = null;
+    customKey = null;
+  }
+  let targetUrl = (typeof customUrl === 'string' && customUrl) ? customUrl : ((targetModelConfig && targetModelConfig.base_url) || null);
+  let targetKey = (typeof customKey === 'string' && customKey) ? customKey : ((targetModelConfig && targetModelConfig.api_key) || null);
+  let actualModel = (typeof targetModelId === 'string' && targetModelId) ? targetModelId : ((targetModelConfig && (targetModelConfig.api_model_1 || targetModelConfig.model_id)) || 'gemini-3.6-flash');
+  let providerType = 'custom';
 
   const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY;
 
-  // 1. Model ID Normalization & Provider Resolution
-  if (targetModelId.startsWith('gemini-') || targetModelId.includes('gemini') || targetModelConfig?.type === 'gemini') {
+  if ((targetUrl && (targetUrl.includes('googleapis.com') || targetUrl.includes('streamGenerateContent'))) || (!customUrl && (actualModel.startsWith('gemini-') || actualModel.includes('gemini') || targetModelConfig?.type === 'gemini'))) {
     providerType = 'gemini';
-    let gMod = targetModelId;
+    let gMod = actualModel;
     if (gMod === 'gemini-3.5-flash-lite' || gMod === 'gemini-flash' || gMod === 'gemini-1.5-flash') {
       gMod = 'gemini-1.5-flash';
     } else if (gMod === 'gemini-3.6-flash' || gMod === 'gemini-2.5-flash' || gMod === 'gemini-pro') {
       gMod = 'gemini-1.5-flash';
     }
     actualModel = gMod;
-    if (!targetKey) targetKey = geminiKey;
-    targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${actualModel}:streamGenerateContent?key=${targetKey}&alt=sse`;
-  } else if (targetModelId === 'openai/gpt-oss-120b' || targetModelId === 'llama-3.3-70b-versatile' || targetModelId === 'alo-pro') {
+    if (!targetKey) targetKey = geminiKey || (await getApiKeyFromSupabase('__gemini_key__')) || (await getApiKeyFromSupabase('gemini-3.6-flash'));
+    targetUrl = (targetUrl && targetUrl.includes('googleapis.com'))
+      ? (targetKey && targetUrl.includes('key=') ? targetUrl.replace(/key=[^&]+/, 'key=' + targetKey) : (targetUrl.includes('?') ? `${targetUrl}&key=${targetKey}` : `${targetUrl}?key=${targetKey}&alt=sse`))
+      : `https://generativelanguage.googleapis.com/v1beta/models/${actualModel}:streamGenerateContent?key=${targetKey}&alt=sse`;
+  } else if ((targetUrl && targetUrl.includes('groq.com')) || (!customUrl && (actualModel === 'openai/gpt-oss-120b' || actualModel === 'llama-3.3-70b-versatile' || actualModel === 'alo-pro' || actualModel.includes('deepseek') || actualModel.includes('qwen') || actualModel.includes('llama-3.1-8b')))) {
     providerType = 'groq';
-    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'llama-3.3-70b-versatile';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-  } else if (targetModelId === 'qwen/qwen3.8-27b' || targetModelId === 'qwen3.8-27b' || targetModelId === 'deepseek' || targetModelId === 'deepseek-r1' || targetModelId === 'deepseek-r1-distill-llama-70b') {
-    providerType = 'groq';
-    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'deepseek-r1-distill-llama-70b';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-  } else if (targetModelId === 'openai/gpt-oss-20b' || targetModelId === 'llama-3.1-8b-instant' || targetModelId === 'llama-3.1-8b') {
-    providerType = 'groq';
-    targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    actualModel = 'llama-3.1-8b-instant';
-    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
-  } else if (targetModelId === 'openrouter/free' || !targetModelId) {
+    targetUrl = targetUrl || 'https://api.groq.com/openai/v1/chat/completions';
+    if (actualModel === 'alo-pro') actualModel = 'llama-3.3-70b-versatile';
+    else if (actualModel.includes('deepseek') || actualModel.includes('qwen')) actualModel = 'deepseek-r1-distill-llama-70b';
+    else if (actualModel === 'openai/gpt-oss-20b') actualModel = 'llama-3.1-8b-instant';
+    if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));
+  } else if ((targetUrl && targetUrl.includes('openrouter.ai')) || (!customUrl && (actualModel === 'openrouter/free' || !actualModel))) {
     providerType = 'openrouter';
-    targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    actualModel = 'openrouter/free';
-    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
-  } else if (targetModelId === 'claude-sonnet-4-6') {
-    providerType = 'vyce';
-    targetUrl = 'https://vyceai.com/v1/chat/completions';
-    actualModel = 'claude-sonnet-4-6';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
-  } else if (targetModelId === 'gpt-5.6') {
-    providerType = 'vyce';
-    targetUrl = 'https://vyceai.com/v1/chat/completions';
-    actualModel = 'gpt-5.6-new';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
-  } else if (targetModelId === 'nemotron-ultra-550b') {
-    providerType = 'vyce';
-    targetUrl = 'https://vyceai.com/v1/chat/completions';
-    actualModel = 'deepseek-v4-flash-lr';
-    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY;
-  } else if (targetModelId === 'mimo-v2.5' || targetModelId === 'hy3') {
+    targetUrl = targetUrl || 'https://openrouter.ai/api/v1/chat/completions';
+    actualModel = actualModel || 'openrouter/free';
+    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
+  } else if ((targetUrl && targetUrl.includes('b.ai')) || (!customUrl && (actualModel === 'mimo-v2.5' || actualModel === 'hy3'))) {
     providerType = 'bai';
-    targetUrl = 'https://api.b.ai/v1/chat/completions';
-    actualModel = targetModelId;
-    if (!targetKey) targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY;
-  } else if (targetModelConfig && targetModelConfig.base_url) {
-    let bUrl = targetModelConfig.base_url.trim();
+    targetUrl = targetUrl || 'https://api.b.ai/v1/chat/completions';
+    if (!targetKey) targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY || (await getApiKeyFromSupabase('__bai_key__')) || (await getApiKeyFromSupabase('mimo-v2.5'));
+  } else if ((targetUrl && targetUrl.includes('vyceai.com')) || (!customUrl && (actualModel === 'claude-sonnet-4-6' || actualModel === 'gpt-5.6' || actualModel === 'nemotron-ultra-550b'))) {
+    providerType = 'vyce';
+    targetUrl = targetUrl || 'https://vyceai.com/v1/chat/completions';
+    if (actualModel === 'gpt-5.6') actualModel = 'gpt-5.6-new';
+    else if (actualModel === 'nemotron-ultra-550b') actualModel = 'deepseek-v4-flash-lr';
+    if (!targetKey) targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY || (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6'));
+  } else if (targetUrl) {
+    providerType = 'custom';
+    let bUrl = targetUrl.trim();
     if (!bUrl.endsWith('/chat/completions') && !bUrl.endsWith('/completions') && !bUrl.includes('streamGenerateContent')) {
       bUrl = bUrl.replace(/\/+$/, '') + '/chat/completions';
     }
     targetUrl = bUrl;
-    actualModel = targetModelConfig.id || targetModelId;
-    providerType = targetModelConfig.type || 'custom';
-  }
-
-  // 2. Global Key Fallback from Supabase if not found
-  if (!targetKey) {
-    targetKey = await getApiKeyFromSupabase(targetModelId);
-    if (!targetKey && actualModel !== targetModelId) {
+    if (!targetKey) {
       targetKey = await getApiKeyFromSupabase(actualModel);
+      if (!targetKey && targetModelId) targetKey = await getApiKeyFromSupabase(targetModelId);
     }
+  } else {
+    providerType = 'openrouter';
+    targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
+    actualModel = actualModel || 'openrouter/free';
+    if (!targetKey) targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
   }
 
-  // 3. Provider Default Key Fallback & Key Format Validation
-  if (!targetKey || (providerType === 'gemini' && !targetKey.startsWith('AIza')) || (providerType === 'groq' && !targetKey.startsWith('gsk_'))) {
-    if (providerType === 'gemini' || targetUrl.includes('googleapis.com')) {
-      targetKey = geminiKey || (await getApiKeyFromSupabase('__gemini_key__')) || (await getApiKeyFromSupabase('gemini-3.6-flash'));
-    } else if (providerType === 'groq' || targetUrl.includes('groq.com')) {
-      targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));
-    } else if (providerType === 'bai' || targetUrl.includes('b.ai')) {
-      targetKey = process.env.BAI_API_KEY || DEFAULT_BAI_KEY || (await getApiKeyFromSupabase('__bai_key__')) || (await getApiKeyFromSupabase('mimo-v2.5'));
-    } else if (providerType === 'vyce' || targetUrl.includes('vyceai.com')) {
-      targetKey = process.env.VYCE_API_KEY || DEFAULT_VYCE_KEY || (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6'));
-    } else if (targetUrl.includes('openrouter.ai')) {
-      targetKey = process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
-    }
-  }
-
-  // Final sanity check for Gemini URL query param
   if (providerType === 'gemini' && targetKey && targetUrl.includes('key=')) {
     targetUrl = targetUrl.replace(/key=[^&]+/, 'key=' + targetKey);
   }
@@ -161,7 +133,10 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
 - NEVER mention, reveal, or admit to being Google, Gemini, OpenAI, ChatGPT, Anthropic, Claude, Meta, Llama, Groq, DeepSeek, or any other third-party company.
 - You have NO other name. Your name is ONLY "${adminModelName}".`;
 
-    let { targetUrl, targetKey, actualModel, providerType } = await resolveModelTarget(cleanModel, aiModelConfig);
+    const t1Model = (aiModelConfig?.api_model_1 || aiModelConfig?.model_id || cleanModel);
+    const t1Url = aiModelConfig?.base_url || null;
+    const t1Key = aiModelConfig?.api_key || null;
+    let { targetUrl, targetKey, actualModel, providerType } = await resolveModelTarget(t1Model, t1Url, t1Key, aiModelConfig);
 
     // Upstream abort controller: triggered ONLY if client terminates response stream early
     const abortController = new AbortController();
@@ -285,57 +260,72 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
     let effectiveModel = cleanModel || 'gemini-3.6-flash';
     let isGeminiStream = (providerType === 'gemini');
 
-    // Helper to resolve fallback model configuration
-    const resolveFallbackModel = async (fbModelId) => {
-      if (!fbModelId || typeof fbModelId !== 'string' || !fbModelId.trim()) return null;
-      const cleanFbId = fbModelId.trim();
-      let fbConfig = null;
-      if (getIsMongoConnected()) {
-        fbConfig = await AiModel.findOne({ $or: [{ model_id: cleanFbId }, { id: cleanFbId }] });
-        if (fbConfig && !fbConfig.api_key) {
-          const supabaseConfig = await getModelConfig(cleanFbId);
-          if (supabaseConfig && supabaseConfig.api_key) {
-            fbConfig = { ...fbConfig.toObject(), api_key: supabaseConfig.api_key };
+    // Helper to resolve an internal API tier or reference model
+    const resolveTierTarget = async (tierModelId, tierUrl, tierKey) => {
+      const cleanModId = (tierModelId || '').trim();
+      const cleanUrl = (tierUrl || '').trim();
+      const cleanKey = (tierKey || '').trim();
+      if (!cleanModId && !cleanUrl) return null;
+
+      // Check if tierModelId refers to another saved model configuration in DB
+      let refModelConfig = null;
+      if (cleanModId && cleanModId !== cleanModel) {
+        if (getIsMongoConnected()) {
+          refModelConfig = await AiModel.findOne({ $or: [{ model_id: cleanModId }, { id: cleanModId }] });
+          if (refModelConfig && !refModelConfig.api_key) {
+            const supabaseConfig = await getModelConfig(cleanModId);
+            if (supabaseConfig && supabaseConfig.api_key) {
+              refModelConfig = { ...refModelConfig.toObject(), api_key: supabaseConfig.api_key };
+            }
           }
+        } else {
+          refModelConfig = await getModelConfig(cleanModId);
         }
-      } else {
-        fbConfig = await getModelConfig(cleanFbId);
       }
-      const resolved = await resolveModelTarget(cleanFbId, fbConfig);
-      return { id: cleanFbId, ...resolved };
+
+      const effectiveMod = cleanModId || (refModelConfig?.api_model_1 || refModelConfig?.model_id) || actualModel;
+      const effectiveUrl = cleanUrl || (refModelConfig?.base_url) || targetUrl;
+      const effectiveKey = cleanKey || (refModelConfig?.api_key) || targetKey;
+
+      return await resolveModelTarget(effectiveMod, effectiveUrl, effectiveKey, refModelConfig || aiModelConfig);
     };
 
-    // 1. First failover: Attempt Admin-configured Fallback Model 1
+    // 1. First failover: Attempt Internal Fallback API 2 (Fallback 1)
     if (!response || !response.ok) {
-      const fb1Id = aiModelConfig?.fallback_model_1 ? String(aiModelConfig.fallback_model_1).trim() : '';
-      if (fb1Id && fb1Id !== cleanModel && !(res.writableEnded || res.destroyed)) {
-        console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying configured Fallback Model 1 (${fb1Id})...`);
-        const fb1 = await resolveFallbackModel(fb1Id);
+      const fb1Model = (aiModelConfig?.api_model_2 || aiModelConfig?.fallback_model_1 || '').trim();
+      const fb1Url = (aiModelConfig?.fallback_url_1 || '').trim();
+      const fb1Key = (aiModelConfig?.fallback_key_1 || '').trim();
+
+      if ((fb1Model || fb1Url) && !(res.writableEnded || res.destroyed)) {
+        console.warn(`[Chat Primary Failed] Model ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying internal Fallback API 2 (${fb1Model || actualModel})...`);
+        const fb1 = await resolveTierTarget(fb1Model, fb1Url, fb1Key);
         if (fb1) {
           const fb1Resp = await tryFetchTarget(fb1.providerType, fb1.targetUrl, fb1.targetKey, fb1.actualModel, 25000);
           if (fb1Resp && fb1Resp.ok) {
-            console.log(`[Chat Fallback 1 Success] Switched cleanly from ${cleanModel} to ${fb1.id}`);
+            console.log(`[Chat Internal API 2 Success] Model ${cleanModel} cleanly recovered using internal API 2 (${fb1.actualModel})`);
             response = fb1Resp;
-            effectiveModel = fb1.id;
+            effectiveModel = cleanModel;
             isGeminiStream = (fb1.providerType === 'gemini');
           }
         }
       }
     }
 
-    // 2. Second failover: Attempt Admin-configured Fallback Model 2
+    // 2. Second failover: Attempt Internal Fallback API 3 (Fallback 2)
     if (!response || !response.ok) {
-      const fb2Id = aiModelConfig?.fallback_model_2 ? String(aiModelConfig.fallback_model_2).trim() : '';
-      const fb1Id = aiModelConfig?.fallback_model_1 ? String(aiModelConfig.fallback_model_1).trim() : '';
-      if (fb2Id && fb2Id !== cleanModel && fb2Id !== fb1Id && !(res.writableEnded || res.destroyed)) {
-        console.warn(`[Chat Fallback 1 Failed] Trying configured Fallback Model 2 (${fb2Id})...`);
-        const fb2 = await resolveFallbackModel(fb2Id);
+      const fb2Model = (aiModelConfig?.api_model_3 || aiModelConfig?.fallback_model_2 || '').trim();
+      const fb2Url = (aiModelConfig?.fallback_url_2 || '').trim();
+      const fb2Key = (aiModelConfig?.fallback_key_2 || '').trim();
+
+      if ((fb2Model || fb2Url) && !(res.writableEnded || res.destroyed)) {
+        console.warn(`[Chat Fallback 1 Failed] Model ${cleanModel}, trying internal Fallback API 3 (${fb2Model || actualModel})...`);
+        const fb2 = await resolveTierTarget(fb2Model, fb2Url, fb2Key);
         if (fb2) {
           const fb2Resp = await tryFetchTarget(fb2.providerType, fb2.targetUrl, fb2.targetKey, fb2.actualModel, 25000);
           if (fb2Resp && fb2Resp.ok) {
-            console.log(`[Chat Fallback 2 Success] Switched cleanly from ${cleanModel} to ${fb2.id}`);
+            console.log(`[Chat Internal API 3 Success] Model ${cleanModel} cleanly recovered using internal API 3 (${fb2.actualModel})`);
             response = fb2Resp;
-            effectiveModel = fb2.id;
+            effectiveModel = cleanModel;
             isGeminiStream = (fb2.providerType === 'gemini');
           }
         }
