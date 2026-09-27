@@ -1569,61 +1569,6 @@
       overscroll-behavior: none;
     }
 
-    /* Quick Action Pills Row (Above Input Bar - Screenshot 1 & 2) */
-    .quick-action-pills-wrap {
-      max-width: 800px;
-      margin: 0 auto 10px;
-      width: 100%;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      -webkit-overflow-scrolling: touch;
-      padding: 0 4px;
-    }
-    .quick-action-pills-wrap::-webkit-scrollbar {
-      display: none;
-    }
-    .quick-action-pills-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: max-content;
-      padding: 2px 0;
-    }
-    .quick-pill-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #1c1c1f;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #e4e4e7;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      font-size: 0.84rem;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      touch-action: manipulation;
-    }
-    .quick-pill-btn:hover {
-      background: #27272a;
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-    .quick-pill-btn.active {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: #3b82f6;
-      color: #60a5fa;
-    }
-    .quick-pill-btn svg {
-      width: 15px;
-      height: 15px;
-      stroke: currentColor;
-      fill: none;
-      flex-shrink: 0;
-    }
-
     .input-card, .chat-textarea, .attach-menu, .image-preview-row, .file-preview-row {
       touch-action: pan-y;
     }
@@ -4623,32 +4568,6 @@
   <div class="input-wrapper">
     <div class="image-preview-row" id="imagePreviewRow"></div>
     <div class="file-preview-row" id="filePreviewRow"></div>
-
-    <!-- Quick Action Pills Row (Screenshot 1 & 2) -->
-    <div class="quick-action-pills-wrap" id="quickActionPillsWrap">
-      <div class="quick-action-pills-row">
-        <button type="button" class="quick-pill-btn" id="pillImageBtn" data-action="image">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span>Image</span>
-        </button>
-        <button type="button" class="quick-pill-btn" id="pillVideoBtn" data-action="video">
-          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="17" y1="2" x2="17" y2="6"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
-          <span>Video</span>
-        </button>
-        <button type="button" class="quick-pill-btn" id="pillHomeworkBtn" data-action="homework">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <span>Homework</span>
-        </button>
-        <button type="button" class="quick-pill-btn" id="pillCallBtn" data-action="call">
-          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <span>Call</span>
-        </button>
-        <button type="button" class="quick-pill-btn" id="pillWebBtn" data-action="web">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <span id="pillWebLabel">Web</span>
-        </button>
-      </div>
-    </div>
 
     <form class="input-card" id="chatForm">
       <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
@@ -11245,11 +11164,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function initNativeChatGPTControls() {
-      const pillImageBtn = document.getElementById("pillImageBtn");
-      const pillVideoBtn = document.getElementById("pillVideoBtn");
-      const pillHomeworkBtn = document.getElementById("pillHomeworkBtn");
-      const pillCallBtn = document.getElementById("pillCallBtn");
-      const pillWebBtn = document.getElementById("pillWebBtn");
       const cameraBtn = document.getElementById("cameraBtn");
       const navSoundToggleBtn = document.getElementById("navSoundToggleBtn");
       const navSoundIconOff = document.getElementById("navSoundIconOff");
@@ -11258,54 +11172,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const drawerSearchToggleBtn = document.getElementById("drawerSearchToggleBtn");
       const drawerSearchBoxWrap = document.getElementById("drawerSearchBoxWrap");
       const drawerSearchInput = document.getElementById("drawerSearchInput");
-
-      if (pillImageBtn) {
-        pillImageBtn.addEventListener("click", () => {
-          triggerHaptic("light");
-          if (imageInput) imageInput.click();
-        });
-      }
-
-      if (pillVideoBtn) {
-        pillVideoBtn.addEventListener("click", () => {
-          triggerHaptic("light");
-          if (userInput) {
-            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-            userInput.value = isEn ? "Create a video script for " : "একটি ভিডিও চিত্রনাট্য তৈরি করুন: ";
-            userInput.focus();
-            userInput.setSelectionRange(userInput.value.length, userInput.value.length);
-          }
-        });
-      }
-
-      if (pillHomeworkBtn) {
-        pillHomeworkBtn.addEventListener("click", () => {
-          triggerHaptic("light");
-          if (userInput) {
-            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-            userInput.value = isEn ? "Help me solve this homework step-by-step: " : "ধাপে ধাপে এই হোমওয়ার্কটি সমাধান করে দিন: ";
-            userInput.focus();
-            userInput.setSelectionRange(userInput.value.length, userInput.value.length);
-          }
-        });
-      }
-
-      if (pillCallBtn) {
-        pillCallBtn.addEventListener("click", () => {
-          triggerHaptic("light");
-          if (micBtn) micBtn.click();
-        });
-      }
-
-      if (pillWebBtn) {
-        pillWebBtn.addEventListener("click", () => {
-          triggerHaptic("light");
-          if (attachWebSearchOption) {
-            attachWebSearchOption.click();
-            pillWebBtn.classList.toggle("active", isWebSearchEnabled);
-          }
-        });
-      }
 
       if (cameraBtn) {
         cameraBtn.addEventListener("click", () => {
