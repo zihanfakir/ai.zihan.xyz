@@ -285,9 +285,66 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
     let effectiveModel = cleanModel || 'gemini-3.6-flash';
     let isGeminiStream = (providerType === 'gemini');
 
-    // Multi-provider fallback chain if primary fails or runs out of quota
+    // Helper to resolve fallback model configuration
+    const resolveFallbackModel = async (fbModelId) => {
+      if (!fbModelId || typeof fbModelId !== 'string' || !fbModelId.trim()) return null;
+      const cleanFbId = fbModelId.trim();
+      let fbConfig = null;
+      if (getIsMongoConnected()) {
+        fbConfig = await AiModel.findOne({ $or: [{ model_id: cleanFbId }, { id: cleanFbId }] });
+        if (fbConfig && !fbConfig.api_key) {
+          const supabaseConfig = await getModelConfig(cleanFbId);
+          if (supabaseConfig && supabaseConfig.api_key) {
+            fbConfig = { ...fbConfig.toObject(), api_key: supabaseConfig.api_key };
+          }
+        }
+      } else {
+        fbConfig = await getModelConfig(cleanFbId);
+      }
+      const resolved = await resolveModelTarget(cleanFbId, fbConfig);
+      return { id: cleanFbId, ...resolved };
+    };
+
+    // 1. First failover: Attempt Admin-configured Fallback Model 1
     if (!response || !response.ok) {
-      console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying multi-provider fallback chain...`);
+      const fb1Id = aiModelConfig?.fallback_model_1 ? String(aiModelConfig.fallback_model_1).trim() : '';
+      if (fb1Id && fb1Id !== cleanModel && !(res.writableEnded || res.destroyed)) {
+        console.warn(`[Chat Primary Failed] ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying configured Fallback Model 1 (${fb1Id})...`);
+        const fb1 = await resolveFallbackModel(fb1Id);
+        if (fb1) {
+          const fb1Resp = await tryFetchTarget(fb1.providerType, fb1.targetUrl, fb1.targetKey, fb1.actualModel, 25000);
+          if (fb1Resp && fb1Resp.ok) {
+            console.log(`[Chat Fallback 1 Success] Switched cleanly from ${cleanModel} to ${fb1.id}`);
+            response = fb1Resp;
+            effectiveModel = fb1.id;
+            isGeminiStream = (fb1.providerType === 'gemini');
+          }
+        }
+      }
+    }
+
+    // 2. Second failover: Attempt Admin-configured Fallback Model 2
+    if (!response || !response.ok) {
+      const fb2Id = aiModelConfig?.fallback_model_2 ? String(aiModelConfig.fallback_model_2).trim() : '';
+      const fb1Id = aiModelConfig?.fallback_model_1 ? String(aiModelConfig.fallback_model_1).trim() : '';
+      if (fb2Id && fb2Id !== cleanModel && fb2Id !== fb1Id && !(res.writableEnded || res.destroyed)) {
+        console.warn(`[Chat Fallback 1 Failed] Trying configured Fallback Model 2 (${fb2Id})...`);
+        const fb2 = await resolveFallbackModel(fb2Id);
+        if (fb2) {
+          const fb2Resp = await tryFetchTarget(fb2.providerType, fb2.targetUrl, fb2.targetKey, fb2.actualModel, 25000);
+          if (fb2Resp && fb2Resp.ok) {
+            console.log(`[Chat Fallback 2 Success] Switched cleanly from ${cleanModel} to ${fb2.id}`);
+            response = fb2Resp;
+            effectiveModel = fb2.id;
+            isGeminiStream = (fb2.providerType === 'gemini');
+          }
+        }
+      }
+    }
+
+    // 3. Multi-provider emergency backup chain if primary and both configured fallbacks fail or are not set
+    if (!response || !response.ok) {
+      console.warn(`[Chat Fallbacks Exhausted] Trying global multi-provider backup chain...`);
 
       const geminiKey = process.env.GEMINI_API_KEY || (process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',')[0].trim() : '') || DEFAULT_GEMINI_KEY || (await getApiKeyFromSupabase('__gemini_key__')) || (await getApiKeyFromSupabase('gemini-3.6-flash'));
       const groqKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));

@@ -40,7 +40,9 @@ router.get('/models', async (req, res) => {
         type: m.type,
         premium: !!m.premium,
         efficient: !!m.efficient,
-        order: m.order
+        order: m.order,
+        fallback_model_1: m.fallback_model_1 || '',
+        fallback_model_2: m.fallback_model_2 || ''
       };
     };
 

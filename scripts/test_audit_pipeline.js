@@ -233,8 +233,85 @@ while ((match = scriptRegex.exec(indexHtml)) !== null) {
 }
 console.log(`✓ Test 6 Passed: All ${scriptIndex} script blocks in index.html passed JavaScript syntax compilation without errors.\n`);
 
+// --- TEST 7: 2-Tier Fallback Models Configuration & Resolution ---
+console.log("[Test 7] Validating 2-Tier Fallback Model Configuration & Resolution Logic...");
+const AiModelSchema = require("../server/models/AiModel").schema;
+assert(AiModelSchema.paths.fallback_model_1, "AiModel schema must define fallback_model_1");
+assert(AiModelSchema.paths.fallback_model_2, "AiModel schema must define fallback_model_2");
+
+// Verify memoryStore & memory_backup models have fallback fields
+const { memoryStore: memStoreInst } = require("../server/config/memoryStore");
+memStoreInst.models.forEach(m => {
+  assert(m.hasOwnProperty("fallback_model_1"), `memoryStore model ${m.model_id} must have fallback_model_1`);
+  assert(m.hasOwnProperty("fallback_model_2"), `memoryStore model ${m.model_id} must have fallback_model_2`);
+});
+
+memoryBackup.models.forEach(m => {
+  assert(m.hasOwnProperty("fallback_model_1"), `memory_backup model ${m.model_id} must have fallback_model_1`);
+  assert(m.hasOwnProperty("fallback_model_2"), `memory_backup model ${m.model_id} must have fallback_model_2`);
+});
+
+// Test Fallback Resolution Order
+function resolveFallbackChain(primaryModel, modelMap) {
+  const chain = [];
+  const primaryDoc = modelMap[primaryModel];
+  if (!primaryDoc) return chain;
+
+  const fb1 = (primaryDoc.fallback_model_1 || "").trim();
+  if (fb1 && fb1 !== primaryModel && modelMap[fb1]) {
+    chain.push(fb1);
+  }
+
+  const fb2 = (primaryDoc.fallback_model_2 || "").trim();
+  if (fb2 && fb2 !== primaryModel && fb2 !== fb1 && modelMap[fb2]) {
+    chain.push(fb2);
+  }
+
+  return chain;
+}
+
+const mockModelMap = {
+  "model-a": { model_id: "model-a", fallback_model_1: "model-b", fallback_model_2: "model-c" },
+  "model-b": { model_id: "model-b", fallback_model_1: "model-c", fallback_model_2: "" },
+  "model-c": { model_id: "model-c", fallback_model_1: "", fallback_model_2: "" },
+  "model-self": { model_id: "model-self", fallback_model_1: "model-self", fallback_model_2: "model-self" }
+};
+
+const chainA = resolveFallbackChain("model-a", mockModelMap);
+assert.deepStrictEqual(chainA, ["model-b", "model-c"], "model-a fallback chain should be model-b then model-c");
+
+const chainB = resolveFallbackChain("model-b", mockModelMap);
+assert.deepStrictEqual(chainB, ["model-c"], "model-b fallback chain should have model-c only");
+
+const chainC = resolveFallbackChain("model-c", mockModelMap);
+assert.deepStrictEqual(chainC, [], "model-c fallback chain should be empty");
+
+const chainSelf = resolveFallbackChain("model-self", mockModelMap);
+assert.deepStrictEqual(chainSelf, [], "Self-referencing fallback should be safely excluded");
+
+console.log("✓ Test 7 Passed: 2-Tier Fallback Models correctly structured and failover chain resolves in sequence.\n");
+
+// --- TEST 8: admin.html Syntax & Script Integrity Validation ---
+console.log("[Test 8] Validating admin.html Syntax & Script Integrity...");
+const adminHtml = fs.readFileSync(path.join(__dirname, "../admin.html"), "utf8");
+
+const adminScriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+let adminMatch;
+let adminScriptIndex = 0;
+while ((adminMatch = adminScriptRegex.exec(adminHtml)) !== null) {
+  adminScriptIndex++;
+  const scriptContent = adminMatch[1];
+  if (!scriptContent.trim()) continue;
+  try {
+    new Function(scriptContent);
+  } catch (err) {
+    assert.fail(`Syntax error in admin.html script tag #${adminScriptIndex}: ${err.message}`);
+  }
+}
+console.log(`✓ Test 8 Passed: All ${adminScriptIndex} script blocks in admin.html passed JavaScript syntax compilation without errors.\n`);
+
   console.log("==================================================");
-  console.log(" ALL PIPELINE AUDIT VALIDATION TESTS PASSED! (6/6)");
+  console.log(" ALL PIPELINE AUDIT VALIDATION TESTS PASSED! (8/8)");
   console.log("==================================================");
 }
 

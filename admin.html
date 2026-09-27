@@ -776,7 +776,21 @@
             <input type="password" id="newModelKey" placeholder="sk-...">
           </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div class="form-row" style="margin-top: 8px;">
+          <div class="form-group" style="flex: 1; min-width: 200px;">
+            <label>ফলব্যাক মডেল ১ (Fallback 1)</label>
+            <select id="newModelFb1" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
+              <option value="">কোনোটি নয় (None)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 200px;">
+            <label>ফলব্যাক মডেল ২ (Fallback 2)</label>
+            <select id="newModelFb2" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
+              <option value="">কোনোটি নয় (None)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 6px;">
           <div style="display: flex; gap: 20px; align-items: center;">
             <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
               <input type="checkbox" id="newModelPrem"> <span class="tag tag-pro">PRO</span> ব্যাজ
@@ -798,12 +812,14 @@
               <th>প্রদর্শিত নাম</th>
               <th>API Base URL</th>
               <th>API Key</th>
+              <th>ফলব্যাক ১</th>
+              <th>ফলব্যাক ২</th>
               <th>ব্যাজ (Pro / Max)</th>
               <th>অ্যাকশন</th>
             </tr>
           </thead>
           <tbody id="modelTableBody">
-            <tr><td colspan="7" style="text-align: center;">লোড হচ্ছে...</td></tr>
+            <tr><td colspan="9" style="text-align: center;">লোড হচ্ছে...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1244,6 +1260,8 @@
         const raw_url = tr.querySelector(".model-input-url")?.value.trim() || "";
         const base_url = normalizeApiUrl(raw_url);
         const api_key = tr.querySelector(".model-input-key")?.value.trim() || "";
+        const fallback_model_1 = tr.querySelector(".model-input-fb1")?.value || "";
+        const fallback_model_2 = tr.querySelector(".model-input-fb2")?.value || "";
         const premium = tr.querySelector(".model-input-prem")?.checked || false;
         const efficient = tr.querySelector(".model-input-eff")?.checked || false;
 
@@ -1255,6 +1273,8 @@
           name: name || original.name || mId,
           base_url: base_url,
           api_key: api_key || original.api_key || "",
+          fallback_model_1,
+          fallback_model_2,
           premium,
           efficient,
           order: idx + 1
@@ -1273,6 +1293,19 @@
         const isFirst = idx === 0;
         const isLast = idx === models.length - 1;
 
+        const otherModels = models.filter(other => (other.id || other.model_id) !== mId);
+        let fb1Options = `<option value="">কোনোটি নয় (None)</option>`;
+        let fb2Options = `<option value="">কোনোটি নয় (None)</option>`;
+        const curFb1 = m.fallback_model_1 || "";
+        const curFb2 = m.fallback_model_2 || "";
+
+        otherModels.forEach(o => {
+          const oId = o.id || o.model_id;
+          const oName = o.name || oId;
+          fb1Options += `<option value="${escapeHtml(oId)}" ${oId === curFb1 ? 'selected' : ''}>${escapeHtml(oName)}</option>`;
+          fb2Options += `<option value="${escapeHtml(oId)}" ${oId === curFb2 ? 'selected' : ''}>${escapeHtml(oName)}</option>`;
+        });
+
         const tr = document.createElement("tr");
         tr.setAttribute("data-model-id", mId);
         tr.innerHTML = `
@@ -1286,13 +1319,23 @@
             </div>
           </td>
           <td><div class="code-chip" style="font-size: 0.75rem;">${escapeHtml(mId)}</div></td>
-          <td><input type="text" class="model-input-name" value="${escapeHtml(m.name || '')}" style="width: 140px; padding: 6px 8px; font-size: 0.82rem;"></td>
-          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)" style="width: 170px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" class="model-input-name" value="${escapeHtml(m.name || '')}" style="width: 130px; padding: 6px 8px; font-size: 0.82rem;"></td>
+          <td><input type="text" class="model-input-url" value="${escapeHtml(m.base_url || '')}" placeholder="API Base URL" onblur="if(this.value.trim()) this.value = normalizeApiUrl(this.value)" style="width: 150px; padding: 6px 8px; font-size: 0.82rem;"></td>
           <td>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <input type="password" class="model-input-key" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 110px; padding: 6px 8px; font-size: 0.82rem;">
+              <input type="password" class="model-input-key" value="${escapeHtml(m.api_key || '')}" placeholder="API Key" style="width: 100px; padding: 6px 8px; font-size: 0.82rem;">
               <button type="button" class="btn-icon" style="padding: 4px 6px; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center;" title="API Key দেখুন" onclick="toggleKeyVisibility(this)"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
+          </td>
+          <td>
+            <select class="model-input-fb1" style="width: 120px; padding: 6px 4px; font-size: 0.78rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;">
+              ${fb1Options}
+            </select>
+          </td>
+          <td>
+            <select class="model-input-fb2" style="width: 120px; padding: 6px 4px; font-size: 0.78rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;">
+              ${fb2Options}
+            </select>
           </td>
           <td>
             <label style="font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 3px;"><input type="checkbox" class="model-input-prem" ${m.premium ? 'checked' : ''}> <span class="tag tag-pro" style="padding: 1px 5px; font-size: 0.65rem;">PRO</span></label><br>
@@ -1321,6 +1364,26 @@
       });
     }
 
+    function populateNewModelFallbackOptions(models) {
+      const fb1 = document.getElementById("newModelFb1");
+      const fb2 = document.getElementById("newModelFb2");
+      if (!fb1 || !fb2) return;
+      const prev1 = fb1.value;
+      const prev2 = fb2.value;
+
+      let optionsHtml = '<option value="">কোনোটি নয় (None)</option>';
+      (models || []).forEach(m => {
+        const id = m.id || m.model_id;
+        const name = m.name || id;
+        optionsHtml += `<option value="${escapeHtml(id)}">${escapeHtml(name)} (${escapeHtml(id)})</option>`;
+      });
+
+      fb1.innerHTML = optionsHtml;
+      fb2.innerHTML = optionsHtml;
+      fb1.value = prev1;
+      fb2.value = prev2;
+    }
+
     async function loadModels() {
       try {
         const res = await authFetch(`${API_BASE}/admin/models?_t=${Date.now()}`);
@@ -1328,6 +1391,7 @@
         if (data.success && data.models) {
           currentModelsList = data.models;
           renderModelsTable(data.models);
+          populateNewModelFallbackOptions(data.models);
         }
       } catch (err) {
         console.error(err);
@@ -1498,6 +1562,8 @@
       const urlInput = tr.querySelector(".model-input-url");
       if (urlInput && base_url) urlInput.value = base_url;
       const api_key = tr.querySelector(".model-input-key")?.value.trim() || "";
+      const fallback_model_1 = tr.querySelector(".model-input-fb1")?.value || "";
+      const fallback_model_2 = tr.querySelector(".model-input-fb2")?.value || "";
       const premium = tr.querySelector(".model-input-prem")?.checked || false;
       const efficient = tr.querySelector(".model-input-eff")?.checked || false;
 
@@ -1510,7 +1576,7 @@
       try {
         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(modelId)}`, {
           method: "PUT",
-          body: JSON.stringify({ name, base_url, api_key, premium, efficient })
+          body: JSON.stringify({ name, base_url, api_key, fallback_model_1, fallback_model_2, premium, efficient })
         });
         const data = await res.json();
         if (data.success) {
@@ -1521,6 +1587,8 @@
             target.name = name;
             target.base_url = base_url;
             if (api_key) target.api_key = api_key;
+            target.fallback_model_1 = fallback_model_1;
+            target.fallback_model_2 = fallback_model_2;
             target.premium = premium;
             target.efficient = efficient;
           }
@@ -1577,6 +1645,8 @@
       const base_url = normalizeApiUrl(raw_url);
       document.getElementById("newModelUrl").value = base_url;
       const api_key = document.getElementById("newModelKey").value.trim();
+      const fallback_model_1 = document.getElementById("newModelFb1")?.value || "";
+      const fallback_model_2 = document.getElementById("newModelFb2")?.value || "";
       const premium = document.getElementById("newModelPrem").checked;
       const efficient = document.getElementById("newModelEff").checked;
 
@@ -1593,7 +1663,7 @@
       try {
         const res = await authFetch(`${API_BASE}/admin/models`, {
           method: "POST",
-          body: JSON.stringify({ model_id, name, base_url, api_key, premium, efficient })
+          body: JSON.stringify({ model_id, name, base_url, api_key, fallback_model_1, fallback_model_2, premium, efficient })
         });
         const data = await res.json();
         if (data.success) {

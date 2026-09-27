@@ -9,7 +9,9 @@ const AiModelSchema = new mongoose.Schema({
   api_key: { type: String, default: '' },
   premium: { type: Boolean, default: false },
   efficient: { type: Boolean, default: false },
-  order: { type: Number, default: 0 }
+  order: { type: Number, default: 0 },
+  fallback_model_1: { type: String, default: '' },
+  fallback_model_2: { type: String, default: '' }
 }, { timestamps: true });
 
 AiModelSchema.index({ order: 1, createdAt: 1 });
