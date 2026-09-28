@@ -7,22 +7,37 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg-main: #09090b;
-      --bg-card: #18181b;
-      --border-color: rgba(255, 255, 255, 0.1);
+      --bg-main: #07080a;
+      --bg-card: #0f1015;
+      --bg-card-hover: #14151c;
+      --bg-surface: #121319;
+      --bg-surface-elevated: #161720;
+      --border-color: rgba(255, 255, 255, 0.07);
       --border: var(--border-color);
+      --border-focus: rgba(96, 165, 250, 0.55);
+      --border-hover: rgba(255, 255, 255, 0.12);
       --surface: var(--bg-card);
       --bg-surface: var(--bg-card);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+      --text-main: #f4f4f6;
+      --text-sub: #71717a;
+      --text-muted: #52525b;
       --text-primary: var(--text-main);
-      --text-muted: var(--text-sub);
       --accent: #3b82f6;
       --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.25);
       --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --danger-border: rgba(239, 68, 68, 0.24);
       --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --success-border: rgba(16, 185, 129, 0.24);
       --warning: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
     }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -37,19 +52,13 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
-      letter-spacing: -0.011em;
+      letter-spacing: -0.012em;
       scrollbar-width: thin;
       scrollbar-color: rgba(160, 160, 160, 0.22) transparent;
     }
 
-    ::selection {
-      background: transparent !important;
-      color: inherit !important;
-    }
-    ::-moz-selection {
-      background: transparent !important;
-      color: inherit !important;
-    }
+    ::selection { background: transparent !important; color: inherit !important; }
+    ::-moz-selection { background: transparent !important; color: inherit !important; }
 
     input, textarea, [contenteditable="true"] {
       -webkit-user-select: text !important;
@@ -69,88 +78,490 @@
       transform: scale(0.968) !important;
       transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-    ::-webkit-scrollbar-button {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent !important;
-    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-button { display: none !important; width: 0 !important; height: 0 !important; }
+    ::-webkit-scrollbar-track { background: transparent !important; }
     ::-webkit-scrollbar-thumb {
       background: rgba(160, 160, 160, 0.25) !important;
       border-radius: 999px !important;
       transition: background-color 0.2s ease;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(160, 160, 160, 0.45) !important;
+    ::-webkit-scrollbar-thumb:hover { background: rgba(160, 160, 160, 0.45) !important; }
+
+    body {
+      background-color: var(--bg-main);
+      background-image: 
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(59, 130, 246, 0.07), transparent 75%),
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.03), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-    
-    .navbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border-color); background: rgba(24,24,27,0.72); backdrop-filter: blur(28px) saturate(190%); -webkit-backdrop-filter: blur(28px) saturate(190%); }
-    .logo-area { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.2rem; }
-    .admin-badge { background: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-    
-    .container { max-width: 1240px; margin: 0 auto; width: 100%; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22); }
-    .stat-val { font-size: 1.8rem; font-weight: 700; color: #fff; }
-    .stat-lbl { font-size: 0.85rem; color: var(--text-sub); }
-    
-    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; overflow-x: auto; }
-    .tab-btn { background: none; border: none; color: var(--text-sub); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; }
-    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .tab-btn.active { color: #fff; background: var(--accent); }
-    
-    .section { display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25); }
-    .section.active { display: flex; flex-direction: column; gap: 20px; }
-    
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
-    th { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-sub); font-weight: 600; white-space: nowrap; }
-    td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0; vertical-align: middle; }
-    tr:hover { background: rgba(255,255,255,0.02); }
-    
-    .btn { padding: 7px 16px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-    .btn-danger:hover { background: #ef4444; color: white; }
-    .btn-success { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-    .btn-success:hover { background: #10b981; color: white; }
-    
-    .btn-icon { width: 30px; height: 30px; padding: 0; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.06); color: var(--text-sub); border: 1px solid var(--border-color); transition: all 0.15s ease; }
-    .btn-icon:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; }
-    
-    input, select { background: #27272a; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 8px; outline: none; }
-    input:focus, select:focus { border-color: var(--accent); }
-    
-    .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 0.8rem; color: var(--text-sub); }
-    
-    .code-chip { font-family: monospace; background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; color: #fbbf24; display: inline-block; }
-    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-    .tag-free { background: rgba(148,163,184,0.15); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.08); }
-    .tag-pro { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: #fff; box-shadow: 0 2px 6px rgba(59,130,246,0.35); border: 1px solid rgba(255,255,255,0.2); }
-    .tag-max { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #fff; box-shadow: 0 2px 6px rgba(245,158,11,0.35); border: 1px solid rgba(255,255,255,0.2); }
-    
+
+    /* Modern Frosted Header */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(7, 8, 10, 0.78);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .logo-icon-box svg {
+      width: 17px;
+      height: 17px;
+      color: #60a5fa;
+    }
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #ffffff 40%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: #cbd5e1;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      display: inline-block;
+      animation: pulseLiveDot 2.2s infinite ease-in-out;
+    }
+    @keyframes pulseLiveDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Executive KPI Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stat-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 8px 28px -4px rgba(0, 0, 0, 0.65);
+    }
+    .stat-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stat-lbl {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+    .stat-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .stat-val {
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.035em;
+      margin-top: 4px;
+    }
+
+    /* Floating Tab Controller */
+    .tabs-wrap {
+      display: flex;
+      justify-content: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      overflow-x: auto;
+    }
+    .tabs {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 3px;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-sub);
+      padding: 7px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.85rem;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      font-weight: 600;
+    }
+
+    /* Section Cards */
+    .section {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 26px 28px;
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+    .section.active {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      animation: sectionFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes sectionFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-header-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .section h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+
+    /* Tables */
+    .table-container {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.25);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    th {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-sub);
+      font-size: 0.73rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.015);
+    }
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e4e4e7;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.025); }
+
+    /* Button System */
+    .btn {
+      padding: 7px 16px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: #ffffff;
+      color: #09090b;
+      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+    }
+    .btn-primary:hover {
+      background: #e4e4e7;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
+    }
+    .btn-danger {
+      background: var(--danger-bg);
+      color: #f87171;
+      border-color: var(--danger-border);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    .btn-success {
+      background: var(--success-bg);
+      color: #34d399;
+      border-color: var(--success-border);
+    }
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+      color: #d4d4d8;
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: #ffffff;
+      border-color: var(--border-hover);
+    }
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-sub);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border-color: var(--border-hover);
+    }
+    .btn-icon:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Inputs, Selects & Forms */
+    input, select, textarea {
+      background: #14151b;
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      padding: 9px 13px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+    }
+    input::placeholder, textarea::placeholder {
+      color: #52525b;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* Tags & Badges */
+    .code-chip {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #fbbf24;
+      font-size: 0.82rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: inline-block;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .tag-free {
+      background: rgba(148, 163, 184, 0.12);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .tag-pro {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .tag-max {
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Status Dot Capsule */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+    .status-pill-active {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .status-pill-blocked {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
     /* Switch Toggle */
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch { position: relative; display: inline-block; width: 42px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .25s; border-radius: 999px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; }
-    input:checked + .slider { background-color: #10b981; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #27272a; transition: .22s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .22s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    input:checked + .slider { background-color: #10b981; border-color: #10b981; }
     input:checked + .slider:before { transform: translateX(20px); }
-    
+
     /* Login Overlay */
-    .login-overlay { position: fixed; inset: 0; background: rgba(9,9,11,0.9); backdrop-filter: blur(16px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-    .login-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 8, 10, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .login-box {
+      background: #0f1015;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 36px 32px;
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 390px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 24px 60px rgba(0, 0, 0, 0.8);
+    }
 
     /* Toast Notification System */
     .toast-container {
@@ -167,61 +578,48 @@
       pointer-events: auto;
       min-width: 280px;
       max-width: 400px;
-      padding: 14px 18px;
+      padding: 13px 18px;
       border-radius: 14px;
-      background: rgba(24, 24, 27, 0.95);
-      backdrop-filter: blur(20px);
+      background: rgba(15, 16, 21, 0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border-color);
       color: #fff;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(0, 0, 0, 0.7);
       animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       transition: all 0.3s ease;
     }
-    .toast.hide {
-      opacity: 0;
-      transform: translateX(40px);
-    }
-    .toast-success {
-      border-color: rgba(16, 185, 129, 0.4);
-      background: rgba(6, 78, 59, 0.9);
-    }
-    .toast-error {
-      border-color: rgba(239, 68, 68, 0.4);
-      background: rgba(127, 29, 29, 0.9);
-    }
-    .toast-info {
-      border-color: rgba(59, 130, 246, 0.4);
-      background: rgba(30, 58, 138, 0.9);
-    }
+    .toast.hide { opacity: 0; transform: translateX(40px); }
+    .toast-success { border-color: rgba(16, 185, 129, 0.4); background: rgba(6, 78, 59, 0.92); }
+    .toast-error { border-color: rgba(239, 68, 68, 0.4); background: rgba(127, 29, 29, 0.92); }
+    .toast-info { border-color: rgba(59, 130, 246, 0.4); background: rgba(30, 58, 138, 0.92); }
     .toast-icon {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.15);
     }
-    .toast-msg {
-      flex: 1;
-      line-height: 1.4;
-    }
+    .toast-msg { flex: 1; line-height: 1.4; }
     @keyframes toastSlideIn {
       from { opacity: 0; transform: translateY(-15px) scale(0.95); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Modal Dialogs (Confirm & Prompt) */
+    /* Modal Dialogs (Confirm, Prompt, API Slot) */
     .custom-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(9, 9, 11, 0.85);
-      backdrop-filter: blur(14px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       z-index: 99990;
       display: none;
       align-items: center;
@@ -230,20 +628,20 @@
     }
     .custom-modal-overlay.open {
       display: flex;
-      animation: modalFadeIn 0.25s ease-out;
+      animation: modalFadeIn 0.22s ease-out;
     }
     .custom-modal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
+      background: #111218;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
       width: 100%;
-      max-width: 440px;
-      padding: 24px;
+      max-width: 450px;
+      padding: 26px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
-      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 24px 60px rgba(0, 0, 0, 0.85);
+      animation: modalPop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .custom-modal-header {
       display: flex;
@@ -251,12 +649,13 @@
       justify-content: space-between;
     }
     .custom-modal-title {
-      font-size: 1.2rem;
+      font-size: 1.18rem;
       font-weight: 700;
       color: #fff;
+      letter-spacing: -0.015em;
     }
     .custom-modal-body {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       color: var(--text-sub);
       line-height: 1.5;
       display: flex;
@@ -267,81 +666,57 @@
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      margin-top: 8px;
+      margin-top: 6px;
     }
     .preset-chips {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
     }
     .preset-chip {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 12px;
+      padding: 5px 11px;
       border-radius: 8px;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
     .preset-chip:hover {
-      background: var(--accent);
+      background: rgba(255, 255, 255, 0.14);
       color: #fff;
-      border-color: var(--accent);
+      border-color: rgba(255, 255, 255, 0.2);
     }
-    @keyframes modalFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalPop {
-      from { transform: scale(0.92); opacity: 0; }
+      from { transform: scale(0.94); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
 
     /* ==========================================================================
-       ADMIN DASHBOARD RESPONSIVE STYLES FOR ALL DEVICES (Mobile, Tablet, Desktop)
+       RESPONSIVE DESIGN (Tablets, Mobile, Desktop)
        ========================================================================== */
-
-    html {
-      -webkit-text-size-adjust: 100%;
-      scroll-behavior: smooth;
-    }
-
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
     body {
       padding-top: 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Tablets and Small Desktops (<= 900px) */
     @media (max-width: 900px) {
-      .container {
-        padding: 16px 12px;
-        gap: 18px;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-      .stat-card {
-        padding: 16px;
-      }
-      .stat-val {
-        font-size: 1.5rem;
-      }
-      .section {
-        padding: 18px;
-        border-radius: 14px;
-      }
+      .container { padding: 18px 14px; gap: 18px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .stat-card { padding: 16px 18px; }
+      .stat-val { font-size: 1.7rem; }
+      .section { padding: 20px; border-radius: 16px; }
     }
 
-    /* Mobile Phones (<= 640px) */
     @media (max-width: 640px) {
       .navbar {
-        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+        padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 8px));
         padding-bottom: 12px;
         padding-left: max(14px, env(safe-area-inset-left, 14px));
         padding-right: max(14px, env(safe-area-inset-right, 14px));
@@ -355,136 +730,49 @@
         width: 100%;
       }
       #adminName {
-        max-width: 150px;
+        max-width: 130px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 0.8rem !important;
+        font-size: 0.78rem !important;
       }
-      .logo-area {
-        font-size: 1.05rem;
-      }
-      .admin-badge {
-        font-size: 0.68rem;
-        padding: 2px 6px;
-      }
-      .container {
-        padding: 12px 10px;
-        gap: 14px;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .stat-card {
-        padding: 12px 14px;
-        border-radius: 12px;
-      }
-      .stat-val {
-        font-size: 1.3rem;
-      }
-      .stat-lbl {
-        font-size: 0.76rem;
-      }
-      .tabs {
-        gap: 4px;
-        padding-bottom: 8px;
-        -webkit-overflow-scrolling: touch;
-      }
-      .tab-btn {
-        padding: 7px 12px;
-        font-size: 0.8rem;
-      }
-      .section {
-        padding: 14px 12px;
-        border-radius: 12px;
-        gap: 14px;
-      }
-      .section h3 {
-        font-size: 1.02rem;
-        line-height: 1.4;
-      }
-      .form-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-      .form-group input, .form-group select {
-        width: 100%;
-      }
-      #planCardsContainer {
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
-      }
-      table {
-        font-size: 0.82rem;
-      }
-      th, td {
-        padding: 9px 10px;
-      }
-      .btn {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-      }
-      .custom-modal-card {
-        padding: 20px 16px;
-        border-radius: 16px;
-      }
-      .login-box {
-        padding: 24px 18px;
-        margin: 0 12px;
-        border-radius: 16px;
-      }
+      .container { padding: 14px 10px; gap: 14px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stat-card { padding: 14px 16px; border-radius: 14px; }
+      .stat-val { font-size: 1.45rem; }
+      .stat-lbl { font-size: 0.7rem; }
+      .tabs { gap: 2px; }
+      .tab-btn { padding: 6px 12px; font-size: 0.8rem; }
+      .section { padding: 16px 14px; border-radius: 14px; gap: 16px; }
+      .section h3 { font-size: 1.05rem; }
+      .form-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .form-group input, .form-group select { width: 100%; }
+      #planCardsContainer { grid-template-columns: 1fr !important; gap: 14px !important; }
+      table { font-size: 0.82rem; }
+      th, td { padding: 10px 12px; }
+      .btn { padding: 6px 12px; font-size: 0.82rem; }
+      .custom-modal-card { padding: 22px 18px; border-radius: 18px; }
+      .login-box { padding: 26px 20px; border-radius: 18px; }
       .toast-container {
         top: max(16px, calc(env(safe-area-inset-top, 0px) + 10px));
-        right: 10px;
-        left: 10px;
-        width: auto;
+        right: 10px; left: 10px; width: auto;
       }
-      .toast {
-        min-width: 0;
-        width: 100%;
-        max-width: 100%;
-        font-size: 0.85rem;
-        padding: 10px 14px;
-      }
+      .toast { min-width: 0; width: 100%; max-width: 100%; font-size: 0.84rem; padding: 11px 14px; }
     }
 
-    /* Extra Narrow Mobile (<= 380px) */
     @media (max-width: 380px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      .navbar {
-        padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 10px));
-        padding-bottom: 10px;
-        padding-left: max(10px, env(safe-area-inset-left, 10px));
-        padding-right: max(10px, env(safe-area-inset-right, 10px));
-      }
-      #adminChangePassBtn {
-        padding: 5px 8px !important;
-        font-size: 0.76rem !important;
-      }
-      #logoutBtn {
-        padding: 5px 10px !important;
-        font-size: 0.76rem !important;
-      }
-      .logo-area span:first-child {
-        font-size: 0.95rem;
-      }
-      .tab-btn {
-        padding: 6px 9px;
-        font-size: 0.75rem;
-      }
+      .stats-grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: 5px 9px; font-size: 0.75rem; }
     }
 
-    /* Custom Scrollbar for touch & tables */
     div[style*="overflow-x: auto"]::-webkit-scrollbar,
-    .tabs::-webkit-scrollbar {
+    .tabs::-webkit-scrollbar,
+    .tabs-wrap::-webkit-scrollbar {
       height: 4px;
     }
     div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb,
-    .tabs::-webkit-scrollbar-thumb {
+    .tabs::-webkit-scrollbar-thumb,
+    .tabs-wrap::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.15);
       border-radius: 4px;
     }
@@ -688,17 +976,26 @@
 
   <div class="navbar">
     <div class="logo-area">
-      <span>Alokpoth AI</span>
-      <span class="admin-badge">Admin Dashboard</span>
+      <a href="index.html" class="logo-brand-wrap" title="চ্যাট হোমে যান">
+        <div class="logo-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <span class="logo-text">Alokpoth AI</span>
+      </a>
+      <span class="admin-badge"><span class="live-dot"></span> Admin Dashboard</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <a href="index.html" class="btn" id="adminBackChatBtn" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; font-size: 0.85rem; padding: 6px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="index.html" class="btn btn-ghost" id="adminBackChatBtn" title="চ্যাটে ফিরে যান">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         <span>চ্যাটে ফিরে যান</span>
       </a>
-      <button type="button" class="btn" id="adminLangToggleBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; padding: 6px 12px;">EN</button>
-      <span id="adminName" style="font-size: 0.9rem; color: var(--text-sub);"></span>
-      <button type="button" class="btn" id="adminChangePassBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; padding: 6px 14px;">পাসওয়ার্ড পরিবর্তন</button>
+      <button type="button" class="btn btn-ghost" id="adminLangToggleBtn" title="ভাষা পরিবর্তন করুন">EN</button>
+      <span id="adminName" style="font-size: 0.84rem; color: var(--text-sub); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+      <button type="button" class="btn btn-ghost" id="adminChangePassBtn">পাসওয়ার্ড পরিবর্তন</button>
       <button type="button" class="btn btn-danger" id="logoutBtn">লগআউট</button>
     </div>
   </div>
@@ -706,45 +1003,65 @@
   <div class="container">
     <!-- Top Stats -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card" style="border-top: 2px solid #3b82f6;">
+        <div class="stat-top-bar">
+          <span class="stat-lbl">মোট ইউজার</span>
+          <span class="stat-pill-dot" style="background:#3b82f6; box-shadow:0 0 8px rgba(59,130,246,0.6);"></span>
+        </div>
         <span class="stat-val" id="statTotalUsers">0</span>
-        <span class="stat-lbl">মোট ইউজার</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="border-top: 2px solid #8b5cf6;">
+        <div class="stat-top-bar">
+          <span class="stat-lbl">Pro সাবস্ক্রাইবার</span>
+          <span class="stat-pill-dot" style="background:#8b5cf6; box-shadow:0 0 8px rgba(139,92,246,0.6);"></span>
+        </div>
         <span class="stat-val" id="statProUsers">0</span>
-        <span class="stat-lbl">Pro সাবস্ক্রাইবার</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="border-top: 2px solid #f59e0b;">
+        <div class="stat-top-bar">
+          <span class="stat-lbl">Max সাবস্ক্রাইবার</span>
+          <span class="stat-pill-dot" style="background:#f59e0b; box-shadow:0 0 8px rgba(245,158,11,0.6);"></span>
+        </div>
         <span class="stat-val" id="statMaxUsers">0</span>
-        <span class="stat-lbl">Max সাবস্ক্রাইবার</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="border-top: 2px solid #10b981;">
+        <div class="stat-top-bar">
+          <span class="stat-lbl">রিডিম কোড (ব্যবহৃত / মোট)</span>
+          <span class="stat-pill-dot" style="background:#10b981; box-shadow:0 0 8px rgba(16,185,129,0.6);"></span>
+        </div>
         <span class="stat-val" id="statRedeemCodes">0</span>
-        <span class="stat-lbl">রিডিম কোড (ব্যবহৃত / মোট)</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="border-top: 2px solid #06b6d4;">
+        <div class="stat-top-bar">
+          <span class="stat-lbl">মোট মেসেজ হিস্ট্রি</span>
+          <span class="stat-pill-dot" style="background:#06b6d4; box-shadow:0 0 8px rgba(6,182,212,0.6);"></span>
+        </div>
         <span class="stat-val" id="statMessages">0</span>
-        <span class="stat-lbl">মোট মেসেজ হিস্ট্রি</span>
       </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="tabs">
-      <button type="button" class="tab-btn active" data-target="secUsers">ইউজার ম্যানেজমেন্ট</button>
-      <button type="button" class="tab-btn" data-target="secPlans">ডাইনামিক প্ল্যান সেটিংস</button>
-      <button type="button" class="tab-btn" data-target="secRedeem">রিডিম কোড জেনারেটর</button>
-      <button type="button" class="tab-btn" data-target="secModels">মডেল সেটিংস</button>
-      <button type="button" class="tab-btn" data-target="secSettings">ইমেজ ও সার্চ API</button>
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-target="secUsers">👥 ইউজার ম্যানেজমেন্ট</button>
+        <button type="button" class="tab-btn" data-target="secPlans">⚡ ডাইনামিক প্ল্যান সেটিংস</button>
+        <button type="button" class="tab-btn" data-target="secRedeem">🎟️ রিডিম কোড জেনারেটর</button>
+        <button type="button" class="tab-btn" data-target="secModels">🧠 মডেল সেটিংস</button>
+        <button type="button" class="tab-btn" data-target="secSettings">🌸 ইমেজ ও সার্চ API</button>
+      </div>
     </div>
 
     <!-- Section 1: User Management -->
     <div class="section active" id="secUsers">
-      <h3>ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ</h3>
-      <div style="margin-bottom: 14px; display: flex; gap: 10px; align-items: center;">
-        <input type="text" id="userSearchInput" placeholder="ইউজার খুঁজুন (নাম, ইমেইল বা প্ল্যান)..." style="flex: 1; max-width: 340px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.85rem;">
+      <div class="section-header-wrap">
+        <h3>👥 ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ</h3>
+        <span class="section-subtitle">সকল ইউজারের তথ্য, সাবস্ক্রিপশন প্ল্যান ও অ্যাকাউন্টের অ্যাক্টিভ স্ট্যাটাস পরিচালনা করুন</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="userSearchInput" placeholder="ইউজার খুঁজুন (নাম, ইমেইল বা প্ল্যান)..." style="flex: 1; max-width: 360px;">
         <span id="userCountBadge" style="font-size: 0.8rem; color: var(--text-muted);"></span>
       </div>
-      <div style="overflow-x: auto;">
+      <div class="table-container">
         <table>
           <thead>
             <tr>
@@ -765,7 +1082,10 @@
 
     <!-- Section 2: Dynamic Plan Editing -->
     <div class="section" id="secPlans">
-      <h3>ডাইনামিক সাবস্ক্রিপশন লিমিট ও রেট-লিমিটিং পরিবর্তন</h3>
+      <div class="section-header-wrap">
+        <h3>⚡ ডাইনামিক সাবস্ক্রিপশন লিমিট ও রেট-লিমিটিং</h3>
+        <span class="section-subtitle">Free, Pro এবং Max টায়ারের জন্য উইন্ডো লিমিট, মেসেজ ও ইমেজ কোটা পরিবর্তন করুন</span>
+      </div>
       <div id="planCardsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
         <!-- Dynamically rendered -->
       </div>
@@ -773,8 +1093,11 @@
 
     <!-- Section 3: Redeem Code Generator -->
     <div class="section" id="secRedeem">
-      <h3>রিডিম কোড জেনারেটর (Single & Bulk)</h3>
-      <form id="generateCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 14px;">
+      <div class="section-header-wrap">
+        <h3>🎟️ রিডিম কোড জেনারেটর (Single & Bulk)</h3>
+        <span class="section-subtitle">একক বা বাল্ক রিডিম ভাউচার তৈরি করুন যা ইউজাররা ব্যবহার করে তাৎক্ষণিক আপগ্রেড করতে পারবে</span>
+      </div>
+      <form id="generateCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
         <div class="form-group">
           <label>প্ল্যান বেছে নিন</label>
           <select id="codePlan">
@@ -798,11 +1121,11 @@
           <label>সংখ্যা (কয়টি কোড বানাবেন)</label>
           <input type="number" id="codeCount" value="1" min="1" max="100">
         </div>
-        <button type="submit" class="btn btn-primary" style="height: 42px;">কোড জেনারেট করুন</button>
+        <button type="submit" class="btn btn-primary" style="height: 40px;">কোড জেনারেট করুন</button>
       </form>
 
-      <h4 style="margin-top: 20px;">কাস্টম রিডিম কোড তৈরি করুন (Multi-Use)</h4>
-      <form id="customCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+      <h4 style="margin-top: 14px; font-size: 0.95rem; color: #cbd5e1;">কাস্টম রিডিম কোড তৈরি করুন (Multi-Use)</h4>
+      <form id="customCodeForm" class="form-row" style="background: rgba(255,255,255,0.02); padding: 18px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.12);">
         <div class="form-group">
           <label>কাস্টম কোড (আপনার পছন্দের শব্দ)</label>
           <input type="text" id="customCodeWord" placeholder="যেমন: ALOAI2026" maxlength="50" style="text-transform: uppercase;">
@@ -830,11 +1153,11 @@
           <label>সর্বোচ্চ কতজন ব্যবহার করতে পারবে</label>
           <input type="number" id="customMaxUses" value="10" min="1" max="100000">
         </div>
-        <button type="submit" class="btn btn-primary" style="height: 42px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">কাস্টম কোড তৈরি করুন</button>
+        <button type="submit" class="btn btn-primary" style="height: 40px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff;">কাস্টম কোড তৈরি করুন</button>
       </form>
 
-      <h4 style="margin-top: 16px;">বিদ্যমান রিডিম কোডসমূহ</h4>
-      <div style="overflow-x: auto; max-height: 400px;">
+      <h4 style="margin-top: 12px; font-size: 0.95rem; color: #cbd5e1;">বিদ্যমান রিডিম কোডসমূহ</h4>
+      <div class="table-container" style="max-height: 420px;">
         <table>
           <thead>
             <tr>
@@ -856,8 +1179,9 @@
 
     <!-- Section 4: Model Settings -->
     <div class="section" id="secModels">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-        <h3>AI মডেল সেটিংস ও কনফিগারেশন</h3>
+      <div class="section-header-wrap">
+        <h3>🧠 AI মডেল সেটিংস ও ট্রিপল-ফলব্যাক কনফিগারেশন</h3>
+        <span class="section-subtitle">সিস্টেমের সমস্ত AI মডেলের অগ্রাধিকার, আপস্ট্রিম API এবং ৩টি অভ্যন্তরীণ স্লট পরিচালনা করুন</span>
       </div>
 
       <!-- Add New Model Form -->
@@ -951,7 +1275,7 @@
         </div>
       </form>
 
-      <div style="overflow-x: auto; margin-top: 8px;">
+      <div class="table-container" style="margin-top: 12px;">
         <table>
           <thead>
             <tr>
@@ -974,8 +1298,9 @@
 
     <!-- Section 5: System & API Settings (Image Model & Web Search API) -->
     <div class="section" id="secSettings">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
-        <h3 id="settingsSectionHeader">ইমেজ মডেল ও ওয়েব সার্চ API কনফিগারেশন</h3>
+      <div class="section-header-wrap">
+        <h3 id="settingsSectionHeader">🌸 ইমেজ মডেল ও ওয়েব সার্চ API কনফিগারেশন</h3>
+        <span class="section-subtitle">Pollinations.ai সহ বিভিন্ন ইমেজ ইঞ্জিন ও ওয়েব সার্চ ইঞ্জিনের লাইভ কনফিগারেশন ও টেস্ট</span>
       </div>
 
       <!-- Card 1: Image Generation Model & API Settings -->
@@ -1319,11 +1644,11 @@
         statMax: "Max Subscribers",
         statRedeem: "Used Redeem Codes",
         statMessages: "Total Message History",
-        tabUsers: "User Management",
-        tabPlans: "Plan Settings",
-        tabRedeem: "Redeem Codes",
-        tabModels: "AI Models",
-        tabSettings: "Image & Search APIs",
+        tabUsers: "👥 User Management",
+        tabPlans: "⚡ Plan Settings",
+        tabRedeem: "🎟️ Redeem Codes",
+        tabModels: "🧠 AI Models",
+        tabSettings: "🌸 Image & Search APIs",
         usersHeader: "User Directory & Account Controls",
         plansHeader: "Dynamic Plan Settings",
         redeemHeader: "Redeem Code Generator",
@@ -1347,11 +1672,11 @@
         statMax: "Max সাবস্ক্রাইবার",
         statRedeem: "ব্যবহৃত রিডিম কোড",
         statMessages: "মোট মেসেজ হিস্ট্রি",
-        tabUsers: "ইউজার ম্যানেজমেন্ট",
-        tabPlans: "প্ল্যান সেটিংস",
-        tabRedeem: "রিডিম কোড",
-        tabModels: "AI মডেল",
-        tabSettings: "ইমেজ ও সার্চ API",
+        tabUsers: "👥 ইউজার ম্যানেজমেন্ট",
+        tabPlans: "⚡ প্ল্যান সেটিংস",
+        tabRedeem: "🎟️ রিডিম কোড",
+        tabModels: "🧠 AI মডেল",
+        tabSettings: "🌸 ইমেজ ও সার্চ API",
         usersHeader: "ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ",
         plansHeader: "ডাইনামিক প্ল্যান সেটিংস",
         redeemHeader: "রিডিম কোড জেনারেটর",
@@ -2188,7 +2513,7 @@
           <td>${escapeHtml(u.email)}</td>
           <td>${planBadge}</td>
           <td>${exp}</td>
-          <td>${u.is_blocked ? '<span style="color:var(--danger)">ব্লকড</span>' : '<span style="color:var(--success)">সক্রিয়</span>'}</td>
+          <td>${u.is_blocked ? '<span class="status-pill status-pill-blocked"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;"></span> ব্লকড</span>' : '<span class="status-pill status-pill-active"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span> সক্রিয়</span>'}</td>
           <td>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <select class="user-plan-select" data-user-id="${escapeHtml(uId)}" style="padding: 4px 8px; font-size: 0.8rem;">
@@ -2563,17 +2888,17 @@
             const useCount = c.use_count || 0;
             const maxUses = c.max_uses || 1;
             status = useCount >= maxUses 
-              ? `<span style="color:var(--danger)">পূর্ণ (${useCount}/${maxUses})</span>` 
-              : `<span style="color:var(--success)">উপলব্ধ (${useCount}/${maxUses})</span>`;
-            codeType = `<span style="color:#8b5cf6; font-weight:600;">কাস্টম</span>`;
+              ? `<span class="status-pill status-pill-blocked">পূর্ণ (${useCount}/${maxUses})</span>` 
+              : `<span class="status-pill status-pill-active">উপলব্ধ (${useCount}/${maxUses})</span>`;
+            codeType = `<span class="tag" style="background:rgba(139,92,246,0.15);color:#c084fc;border:1px solid rgba(139,92,246,0.3);">কাস্টম</span>`;
             if (Array.isArray(c.used_by_list) && c.used_by_list.length > 0) {
               usedBy = c.used_by_list.map(u => u.email || String(u.user_id)).join(', ');
             } else {
               usedBy = '—';
             }
           } else {
-            status = c.is_used ? `<span style="color:var(--danger)">ব্যবহৃত</span>` : `<span style="color:var(--success)">উপলব্ধ</span>`;
-            codeType = `<span style="color:#60a5fa;">সাধারণ</span>`;
+            status = c.is_used ? `<span class="status-pill status-pill-blocked">ব্যবহৃত</span>` : `<span class="status-pill status-pill-active">উপলব্ধ</span>`;
+            codeType = `<span class="tag" style="background:rgba(59,130,246,0.15);color:#93c5fd;border:1px solid rgba(59,130,246,0.3);">সাধারণ</span>`;
             usedBy = c.used_by
               ? (typeof c.used_by === 'object' && c.used_by.name
                   ? `${c.used_by.name} (${c.used_by.email || ''})`
