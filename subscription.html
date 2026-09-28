@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Subscription — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hero-plan-card {
+      background: linear-gradient(145deg, #1e1e24, #121215);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-plan-card::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .plan-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin-bottom: 12px;
+    }
+
+    .plan-title-giant {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .plan-validity-text {
+      font-size: 0.92rem;
+      color: #93c5fd;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-blue);
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .feature-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .feature-check svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    .action-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-action-primary {
+      width: 100%;
+      height: 50px;
+      border-radius: 14px;
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .btn-action-primary:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .btn-action-secondary {
+      width: 100%;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-action-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .btn-action-secondary:active {
+      transform: scale(0.98);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Subscription</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <!-- Active Subscription Hero Card -->
+    <div class="hero-plan-card">
+      <div class="plan-status-pill">
+        <span>●</span>
+        <span id="subStatusText">Active Plan</span>
+      </div>
+      <div class="plan-title-giant" id="currentPlanTitle">Free Plan</div>
+      <div class="plan-validity-text" id="currentPlanExpiry">Validity: Lifetime / No Expiry</div>
+    </div>
+
+    <!-- Features Card -->
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="featuresTitle">Included Benefits</span>
+      </div>
+      <ul class="features-list">
+        <li class="feature-item">
+          <div class="feature-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span id="featMessages">Standard message quota per refresh window</span>
+        </li>
+        <li class="feature-item">
+          <div class="feature-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span id="featImages">Generative AI image synthesis</span>
+        </li>
+        <li class="feature-item">
+          <div class="feature-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span id="featModels">Curated AI models & web search grounding</span>
+        </li>
+        <li class="feature-item">
+          <div class="feature-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span id="featSpeed">Real-time ultra low-latency response stream</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Upgrade & Actions Card -->
+    <div class="action-btns">
+      <a href="plans.html" class="btn-action-primary" id="btnUpgrade">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="btnUpgradeText">View All Plans &amp; Pricing</span>
+      </a>
+      <a href="redeem.html" class="btn-action-secondary" id="btnRedeem">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3h6a3 3 0 1 0-3-3"/></svg>
+        <span id="btnRedeemText">Redeem Promo Code</span>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+
+    const token = localStorage.getItem("alokpoth_token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "সাবস্ক্রিপশন",
+        subStatus: "সক্রিয় সাবস্ক্রিপশন",
+        lifetimeExpiry: "মেয়াদ: আজীবন / মেয়াদহীন",
+        adminExpiry: "মেয়াদ: আজীবন অ্যাডমিন অ্যাক্সেস",
+        featuresTitle: "প্ল্যানের অন্তর্ভুক্ত সুবিধাসমূহ",
+        featMessagesAdmin: "সীমাহীন বার্তা কোটা (কোনো রেট লিমিট নেই)",
+        featMessagesFree: "১০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featMessagesPro: "৩০টি বার্তা প্রতি ৩ ঘণ্টায়",
+        featMessagesMax: "৫০টি বার্তা প্রতি ১ ঘণ্টায়",
+        featImagesAdmin: "সীমাহীন ছবি তৈরির সুবিধা",
+        featImagesFree: "৩টি ছবি প্রতি ৩ ঘণ্টায়",
+        featImagesPro: "২০টি ছবি প্রতি ৩ ঘণ্টায়",
+        featImagesMax: "১০০টি ছবি প্রতি ১ ঘণ্টায়",
+        featModelsAdmin: "সমস্ত ফ্ল্যাগশিপ মডেল ও লাইভ সার্চ এক্সেস",
+        featModelsFree: "ফ্রি এআই মডেলসমূহ ও লাইভ ওয়েব সার্চ",
+        featModelsPro: "সকল প্রো ও অ্যাডভান্সড মডেল",
+        featModelsMax: "সর্বোচ্চ ফ্ল্যাগশিপ ও প্রাইম মডেল অ্যাক্সেস",
+        featSpeedAdmin: "সর্বোচ্চ প্রায়োরিটি ও আনলিমিটেড ব্যান্ডউইথ",
+        featSpeedUser: "আল্ট্রাফাস্ট স্ট্রিমিং ও দ্রুত রেসপন্স",
+        btnUpgrade: "সকল প্ল্যান ও মূল্য তালিকা দেখুন",
+        btnRedeem: "রিডিম কোড দিয়ে আপগ্রেড করুন"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Subscription",
+        subStatus: "Active Plan",
+        lifetimeExpiry: "Validity: Lifetime / No Expiry",
+        adminExpiry: "Validity: Lifetime Admin Access",
+        featuresTitle: "Included Benefits",
+        featMessagesAdmin: "Unlimited message quota (No rate limits apply)",
+        featMessagesFree: "10 messages every 3 hours",
+        featMessagesPro: "30 messages every 3 hours",
+        featMessagesMax: "50 messages every 1 hour",
+        featImagesAdmin: "Unlimited generative image creation",
+        featImagesFree: "3 images every 3 hours",
+        featImagesPro: "20 images every 3 hours",
+        featImagesMax: "100 images every 1 hour",
+        featModelsAdmin: "All Flagship models with live web grounding",
+        featModelsFree: "Core AI models & live search access",
+        featModelsPro: "All Pro & advanced reasoning models",
+        featModelsMax: "Exclusive flagship models & prime bandwidth",
+        featSpeedAdmin: "Maximum priority bandwidth with zero queuing",
+        featSpeedUser: "Real-time ultra fast response stream",
+        btnUpgrade: "View All Plans & Pricing",
+        btnRedeem: "Redeem Promo Voucher"
+      }
+    };
+
+    function formatDigits(num) {
+      if (currentLanguage !== "bn") return String(num);
+      const bnDigits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+      return String(num).replace(/[0-9]/g, d => bnDigits[Number(d)] || d);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("subStatusText").textContent = d.subStatus;
+      document.getElementById("featuresTitle").textContent = d.featuresTitle;
+      document.getElementById("btnUpgradeText").textContent = d.btnUpgrade;
+      document.getElementById("btnRedeemText").textContent = d.btnRedeem;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    function renderUserData() {
+      const userStr = localStorage.getItem("alokpoth_user");
+      if (!userStr) return;
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      try {
+        const user = JSON.parse(userStr);
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
+
+        let currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || "Free");
+
+        const expiryStr = !isAdmin ? (localStorage.getItem("alokpoth_plan_expiry") || (user.subscription && user.subscription.expires_at)) : null;
+        let isExpired = false;
+        let daysLeft = 0;
+        if (expiryStr) {
+          const expDate = new Date(expiryStr);
+          if (!isNaN(expDate.getTime())) {
+            if (Date.now() >= expDate.getTime()) {
+              isExpired = true;
+              currentPlan = "Free";
+            } else {
+              daysLeft = Math.max(0, Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+            }
+          }
+        }
+
+        const planTitle = document.getElementById("currentPlanTitle");
+        if (planTitle) {
+          planTitle.textContent = isAdmin 
+            ? (isEn ? "Admin (Unlimited)" : "অ্যাডমিন (আনলিমিটেড)") 
+            : `${currentPlan} Plan`;
+        }
+
+        const expiryEl = document.getElementById("currentPlanExpiry");
+        if (expiryEl) {
+          if (isAdmin) {
+            expiryEl.textContent = d.adminExpiry;
+          } else if (currentPlan === "Free" || isExpired || !expiryStr) {
+            expiryEl.textContent = d.lifetimeExpiry;
+          } else {
+            const expDate = new Date(expiryStr);
+            expiryEl.textContent = isEn 
+              ? `Expires: ${expDate.toLocaleDateString('en-US')} (${daysLeft} days left)`
+              : `মেয়াদ: ${expDate.toLocaleDateString('bn-BD')} (বাকি ${formatDigits(daysLeft)} দিন)`;
+          }
+        }
+
+        // Feature bullet updates
+        const featMsgEl = document.getElementById("featMessages");
+        const featImgEl = document.getElementById("featImages");
+        const featModEl = document.getElementById("featModels");
+        const featSpdEl = document.getElementById("featSpeed");
+
+        if (isAdmin) {
+          if (featMsgEl) featMsgEl.textContent = d.featMessagesAdmin;
+          if (featImgEl) featImgEl.textContent = d.featImagesAdmin;
+          if (featModEl) featModEl.textContent = d.featModelsAdmin;
+          if (featSpdEl) featSpdEl.textContent = d.featSpeedAdmin;
+        } else if (currentPlan === "Pro") {
+          if (featMsgEl) featMsgEl.textContent = d.featMessagesPro;
+          if (featImgEl) featImgEl.textContent = d.featImagesPro;
+          if (featModEl) featModEl.textContent = d.featModelsPro;
+          if (featSpdEl) featSpdEl.textContent = d.featSpeedUser;
+        } else if (currentPlan === "Max") {
+          if (featMsgEl) featMsgEl.textContent = d.featMessagesMax;
+          if (featImgEl) featImgEl.textContent = d.featImagesMax;
+          if (featModEl) featModEl.textContent = d.featModelsMax;
+          if (featSpdEl) featSpdEl.textContent = d.featSpeedAdmin;
+        } else {
+          if (featMsgEl) featMsgEl.textContent = d.featMessagesFree;
+          if (featImgEl) featImgEl.textContent = d.featImagesFree;
+          if (featModEl) featModEl.textContent = d.featModelsFree;
+          if (featSpdEl) featSpdEl.textContent = d.featSpeedUser;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+      renderUserData();
+    });
+
+    applyI18n();
+    renderUserData();
+  </script>
+</body>
+</html>

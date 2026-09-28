@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Color Theme — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #09090b;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="oled"] {
+      --bg-base: #000000;
+      --bg-card: #111113;
+      --bg-card-hover: #1c1c1f;
+      --border-card: rgba(255, 255, 255, 0.12);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="eyecare"] {
+      --bg-base: #f5eedc;
+      --bg-card: #eadeca;
+      --bg-card-hover: #dfcfb8;
+      --border-card: rgba(146, 64, 14, 0.15);
+      --border-divider: rgba(146, 64, 14, 0.08);
+      --text-main: #4a3b2c;
+      --text-sub: #7a6b5c;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .themes-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-item {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .theme-item:hover, .theme-item:active {
+      background: var(--bg-card-hover);
+    }
+
+    .theme-lead {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .theme-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    .theme-swatch.dark { background: #18181b; }
+    .theme-swatch.oled { background: #000000; border-color: #3f3f46; }
+    .theme-swatch.sapphire { background: #070d19; border-color: #38bdf8; }
+    .theme-swatch.eyecare { background: #f5eedc; border-color: #92400e; }
+    .theme-swatch.light { background: #f4f4f5; border-color: #cbd5e1; }
+
+    .theme-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .theme-name {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .theme-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .theme-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .theme-check svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .theme-item.active .theme-check {
+      display: flex;
+    }
+
+    .row-divider {
+      height: 1px;
+      background: var(--border-divider);
+      margin: 0;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Color Theme</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <div class="themes-group">
+      <!-- Dark -->
+      <div class="theme-item" data-theme-id="dark">
+        <div class="theme-lead">
+          <div class="theme-swatch dark"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameDark">Dark (Standard)</span>
+            <span class="theme-desc" id="descDark">Balanced charcoal night mode</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- OLED Black -->
+      <div class="theme-item" data-theme-id="oled">
+        <div class="theme-lead">
+          <div class="theme-swatch oled"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameOled">OLED Black</span>
+            <span class="theme-desc" id="descOled">Pure AMOLED black for high battery efficiency</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Sapphire -->
+      <div class="theme-item" data-theme-id="sapphire">
+        <div class="theme-lead">
+          <div class="theme-swatch sapphire"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameSapphire">Sapphire</span>
+            <span class="theme-desc" id="descSapphire">Deep cosmic navy with vibrant accents</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Eye Care -->
+      <div class="theme-item" data-theme-id="eyecare">
+        <div class="theme-lead">
+          <div class="theme-swatch eyecare"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameEyecare">Eye Care</span>
+            <span class="theme-desc" id="descEyecare">Warm paper sepia tones for zero eye fatigue</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Light -->
+      <div class="theme-item" data-theme-id="light">
+        <div class="theme-lead">
+          <div class="theme-swatch light"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameLight">Light</span>
+            <span class="theme-desc" id="descLight">Crisp, clean minimalist daytime mode</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    let activeTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", activeTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "কালার থিম",
+        nameDark: "ডার্ক (স্ট্যান্ডার্ড)",
+        descDark: "সুষম চারকোল ডার্ক মোড",
+        nameOled: "OLED ব্ল্যাক",
+        descOled: "পিওর অ্যামোলেড কালো (সর্বোচ্চ ব্যাটারি সেভিং)",
+        nameSapphire: "স্যাফায়ার",
+        descSapphire: "ডিপ কসমিক নেভি ব্লু ও মডার্ন অ্যাকসেন্ট",
+        nameEyecare: "আই কেয়ার",
+        descEyecare: "ওয়ার্ম সেপিয়া টোন (চোখের ক্লান্তিহীন পড়া)",
+        nameLight: "লাইট",
+        descLight: "পরিচ্ছন্ন ও উজ্জ্বল ডে-লাইট মোড",
+        applied: "থিম সক্রিয় করা হয়েছে"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Color Theme",
+        nameDark: "Dark (Standard)",
+        descDark: "Balanced charcoal night mode",
+        nameOled: "OLED Black",
+        descOled: "Pure AMOLED black for high battery efficiency",
+        nameSapphire: "Sapphire",
+        descSapphire: "Deep cosmic navy with vibrant accents",
+        nameEyecare: "Eye Care",
+        descEyecare: "Warm paper sepia tones for zero eye fatigue",
+        nameLight: "Light",
+        descLight: "Crisp, clean minimalist daytime mode",
+        applied: "Theme applied successfully"
+      }
+    };
+
+    function showToast(msg) {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = "toast success";
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 2500);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("nameDark").textContent = d.nameDark;
+      document.getElementById("descDark").textContent = d.descDark;
+      document.getElementById("nameOled").textContent = d.nameOled;
+      document.getElementById("descOled").textContent = d.descOled;
+      document.getElementById("nameSapphire").textContent = d.nameSapphire;
+      document.getElementById("descSapphire").textContent = d.descSapphire;
+      document.getElementById("nameEyecare").textContent = d.nameEyecare;
+      document.getElementById("descEyecare").textContent = d.descEyecare;
+      document.getElementById("nameLight").textContent = d.nameLight;
+      document.getElementById("descLight").textContent = d.descLight;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    function syncActiveThemeUI() {
+      document.querySelectorAll(".theme-item").forEach(item => {
+        const t = item.getAttribute("data-theme-id");
+        item.classList.toggle("active", t === activeTheme);
+      });
+    }
+
+    document.querySelectorAll(".theme-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const themeId = item.getAttribute("data-theme-id");
+        if (!themeId) return;
+        activeTheme = themeId;
+        document.documentElement.setAttribute("data-theme", activeTheme);
+        localStorage.setItem("alokpoth_theme", activeTheme);
+        localStorage.setItem("alokpoth-theme", activeTheme);
+        syncActiveThemeUI();
+        const d = I18N[currentLanguage] || I18N.en;
+        showToast(d.applied);
+      });
+    });
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+    });
+
+    applyI18n();
+    syncActiveThemeUI();
+  </script>
+</body>
+</html>

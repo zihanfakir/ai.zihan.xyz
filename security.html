@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Account &amp; Security — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-blue);
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .meta-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .meta-label {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+    }
+    .meta-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .badge-pill {
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .badge-pill.plan {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e4e4e7;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      border: none;
+      font-size: 0.98rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+      margin-top: 14px;
+    }
+    .btn-submit:hover {
+      background: var(--accent-blue-hover);
+    }
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .security-note {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Account &amp; Security</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <!-- Account Information Card -->
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="accountInfoTitle">Account Identity</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label" id="labelEmail">Email Address</span>
+        <span class="meta-value" id="profileEmailDisplay">user@example.com</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label" id="labelRole">User Role</span>
+        <span class="badge-pill" id="profileRoleBadge">Member</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label" id="labelPlan">Active Tier</span>
+        <span class="badge-pill plan" id="profilePlanBadge">Free Plan</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label" id="labelStatus">Account Status</span>
+        <span class="meta-value" style="color:#10b981;" id="valStatus">● Active</span>
+      </div>
+    </div>
+
+    <!-- Password Update Card -->
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="changePassTitle">Change Password</span>
+      </div>
+      <form id="changePassForm">
+        <div class="form-group">
+          <label class="form-label" id="curPassLabel" for="curPassInput">Current Password</label>
+          <input type="password" class="form-input" id="curPassInput" placeholder="Your current password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="newPassLabel" for="newPassInput">New Password</label>
+          <input type="password" class="form-input" id="newPassInput" placeholder="At least 6 characters" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="cnfPassLabel" for="cnfPassInput">Confirm Password</label>
+          <input type="password" class="form-input" id="cnfPassInput" placeholder="Re-enter new password" required autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-submit" id="changePassSubmitBtn">
+          <span id="changePassBtnText">Update Password</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Security Tips Card -->
+    <div class="settings-card">
+      <p class="security-note" id="securityTipsText">
+        🔒 Alo AI uses industry standard bcrypt encryption and hardened tokens to safeguard your conversations and profile. Never share your password or auth tokens with anyone.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+
+    const token = localStorage.getItem("alokpoth_token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "অ্যাকাউন্ট ও নিরাপত্তা",
+        accountInfoTitle: "অ্যাকাউন্ট পরিচয়",
+        labelEmail: "ইমেইল ঠিকানা",
+        labelRole: "ইউজার রোল",
+        labelPlan: "বর্তমান প্ল্যান",
+        labelStatus: "অ্যাকাউন্ট অবস্থা",
+        valStatus: "● সক্রিয়",
+        changePassTitle: "পাসওয়ার্ড পরিবর্তন করুন",
+        curPassLabel: "বর্তমান পাসওয়ার্ড",
+        curPassPlaceholder: "আপনার বর্তমান পাসওয়ার্ড",
+        newPassLabel: "নতুন পাসওয়ার্ড",
+        newPassPlaceholder: "কমপক্ষে ৬ অক্ষরের নতুন পাসওয়ার্ড",
+        cnfPassLabel: "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+        cnfPassPlaceholder: "পুনরায় নতুন পাসওয়ার্ড লিখুন",
+        changePassBtn: "পাসওয়ার্ড আপডেট করুন",
+        updating: "আপডেট হচ্ছে...",
+        securityTips: "🔒 Alo AI আপনার চ্যাট ও ব্যক্তিগত তথ্য সুরক্ষিত রাখতে আধুনিক এনক্রিপশন ও সিকিউর টোকেন ব্যবহার করে। আপনার পাসওয়ার্ড কারো সাথে শেয়ার করবেন না।",
+        success: "পাসওয়ার্ড পরিবর্তন সফল হয়েছে!",
+        passEmpty: "সবগুলো ঘর পূরণ করুন",
+        passMismatch: "নতুন পাসওয়ার্ড দুটি মিলছে না",
+        passShort: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Account & Security",
+        accountInfoTitle: "Account Identity",
+        labelEmail: "Email Address",
+        labelRole: "User Role",
+        labelPlan: "Active Tier",
+        labelStatus: "Account Status",
+        valStatus: "● Active",
+        changePassTitle: "Change Password",
+        curPassLabel: "Current Password",
+        curPassPlaceholder: "Your current password",
+        newPassLabel: "New Password",
+        newPassPlaceholder: "At least 6 characters",
+        cnfPassLabel: "Confirm Password",
+        cnfPassPlaceholder: "Re-enter new password",
+        changePassBtn: "Update Password",
+        updating: "Updating...",
+        securityTips: "🔒 Alo AI uses industry standard bcrypt encryption and hardened tokens to safeguard your conversations and profile. Never share your password or auth tokens with anyone.",
+        success: "Password changed successfully!",
+        passEmpty: "Please fill out all password fields",
+        passMismatch: "New passwords do not match",
+        passShort: "New password must be at least 6 characters",
+        serverErr: "Could not connect to server"
+      }
+    };
+
+    function showToast(msg, type = "success") {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 3000);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("accountInfoTitle").textContent = d.accountInfoTitle;
+      document.getElementById("labelEmail").textContent = d.labelEmail;
+      document.getElementById("labelRole").textContent = d.labelRole;
+      document.getElementById("labelPlan").textContent = d.labelPlan;
+      document.getElementById("labelStatus").textContent = d.labelStatus;
+      document.getElementById("valStatus").textContent = d.valStatus;
+      document.getElementById("changePassTitle").textContent = d.changePassTitle;
+      document.getElementById("curPassLabel").textContent = d.curPassLabel;
+      document.getElementById("curPassInput").placeholder = d.curPassPlaceholder;
+      document.getElementById("newPassLabel").textContent = d.newPassLabel;
+      document.getElementById("newPassInput").placeholder = d.newPassPlaceholder;
+      document.getElementById("cnfPassLabel").textContent = d.cnfPassLabel;
+      document.getElementById("cnfPassInput").placeholder = d.cnfPassPlaceholder;
+      document.getElementById("changePassBtnText").textContent = d.changePassBtn;
+      document.getElementById("securityTipsText").textContent = d.securityTips;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    function renderUserData() {
+      const userStr = localStorage.getItem("alokpoth_user");
+      if (!userStr) return;
+      const isEn = (currentLanguage === "en");
+      try {
+        const user = JSON.parse(userStr);
+        document.getElementById("profileEmailDisplay").textContent = user.email || "";
+
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
+        
+        document.getElementById("profileRoleBadge").textContent = isAdmin ? "Admin" : (isEn ? "Member" : "সদস্য");
+
+        const pName = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || "Free");
+        document.getElementById("profilePlanBadge").textContent = isAdmin ? (isEn ? "Admin (Unlimited)" : "অ্যাডমিন (আনলিমিটেড)") : `${pName} Plan`;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+      renderUserData();
+    });
+
+    // Password Update Handler
+    document.getElementById("changePassForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const d = I18N[currentLanguage] || I18N.en;
+      const currentPassword = document.getElementById("curPassInput").value;
+      const newPassword = document.getElementById("newPassInput").value;
+      const confirmPassword = document.getElementById("cnfPassInput").value;
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast(d.passEmpty, "error");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showToast(d.passMismatch, "error");
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast(d.passShort, "error");
+        return;
+      }
+
+      const submitBtn = document.getElementById("changePassSubmitBtn");
+      const btnText = document.getElementById("changePassBtnText");
+      submitBtn.disabled = true;
+      btnText.textContent = d.updating;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/change-password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(d.success, "success");
+          document.getElementById("changePassForm").reset();
+        } else {
+          showToast(data.error || d.serverErr, "error");
+        }
+      } catch {
+        showToast(d.serverErr, "error");
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = d.changePassBtn;
+      }
+    });
+
+    applyI18n();
+    renderUserData();
+  </script>
+</body>
+</html>

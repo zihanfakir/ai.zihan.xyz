@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Sound Settings — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .settings-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .settings-row {
+      min-height: 52px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .row-lead {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .row-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .row-desc {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+
+    .row-divider {
+      height: 1px;
+      background: var(--border-divider);
+      margin: 0;
+    }
+
+    /* iOS Style Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #3f3f46;
+      transition: background-color 0.25s;
+      border-radius: 9999px;
+    }
+
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--accent-blue);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(18px);
+    }
+
+    .btn-test-sound {
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+      margin: 8px 16px 16px;
+    }
+    .btn-test-sound:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .btn-test-sound:active {
+      transform: scale(0.98);
+    }
+
+    .tone-select {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Sound Settings</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <div class="settings-group">
+      <!-- Main Sound Effects Toggle -->
+      <div class="settings-row">
+        <div class="row-lead">
+          <span class="row-title" id="labelSoundEffects">Sound Effects</span>
+          <span class="row-desc" id="descSoundEffects">Play audio feedback for messages &amp; actions</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="soundToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Completion Chime Toggle -->
+      <div class="settings-row">
+        <div class="row-lead">
+          <span class="row-title" id="labelCompletionChime">Completion Chime</span>
+          <span class="row-desc" id="descCompletionChime">Gentle notification when AI finishes generating</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="chimeToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Audio Tone Style -->
+      <div class="settings-row">
+        <div class="row-lead">
+          <span class="row-title" id="labelTone">Audio Tone</span>
+          <span class="row-desc" id="descTone">Select preferred tone character</span>
+        </div>
+        <select class="tone-select" id="toneSelect">
+          <option value="subtle">Subtle Pop</option>
+          <option value="chime">Soft Chime</option>
+          <option value="cosmic">Cosmic Pulse</option>
+        </select>
+      </div>
+
+      <!-- Test Sound Action -->
+      <button type="button" class="btn-test-sound" id="testSoundBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span id="btnTestText">Test Audio Sound</span>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const soundToggle = document.getElementById("soundToggle");
+    const chimeToggle = document.getElementById("chimeToggle");
+    const toneSelect = document.getElementById("toneSelect");
+
+    const soundEnabled = localStorage.getItem("alokpoth_sound_enabled") !== "false";
+    const chimeEnabled = localStorage.getItem("alokpoth_chime_enabled") !== "false";
+    const savedTone = localStorage.getItem("alokpoth_sound_tone") || "subtle";
+
+    if (soundToggle) soundToggle.checked = soundEnabled;
+    if (chimeToggle) chimeToggle.checked = chimeEnabled;
+    if (toneSelect) toneSelect.value = savedTone;
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "শব্দ সেটিংস",
+        labelSoundEffects: "সাউন্ড ইফেক্ট",
+        descSoundEffects: "বার্তা পাঠানো ও মূল অ্যাকশনে অডিও ফিডব্যাক",
+        labelCompletionChime: "কমপ্লিশন চাইম",
+        descCompletionChime: "এআই উত্তর সম্পূর্ণ হলে মৃদু সংকেত বাজবে",
+        labelTone: "শব্দের টোন",
+        descTone: "আপনার পছন্দের অডিও টোন বেছে নিন",
+        btnTest: "শব্দ পরীক্ষা করুন",
+        saved: "সেটিংস সংরক্ষিত হয়েছে"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Sound Settings",
+        labelSoundEffects: "Sound Effects",
+        descSoundEffects: "Play audio feedback for messages & actions",
+        labelCompletionChime: "Completion Chime",
+        descCompletionChime: "Gentle notification when AI finishes generating",
+        labelTone: "Audio Tone",
+        descTone: "Select preferred tone character",
+        btnTest: "Test Audio Sound",
+        saved: "Settings updated successfully"
+      }
+    };
+
+    function showToast(msg) {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = "toast success";
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 2000);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("labelSoundEffects").textContent = d.labelSoundEffects;
+      document.getElementById("descSoundEffects").textContent = d.descSoundEffects;
+      document.getElementById("labelCompletionChime").textContent = d.labelCompletionChime;
+      document.getElementById("descCompletionChime").textContent = d.descCompletionChime;
+      document.getElementById("labelTone").textContent = d.labelTone;
+      document.getElementById("descTone").textContent = d.descTone;
+      document.getElementById("btnTestText").textContent = d.btnTest;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    function playTone(tone) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (tone === "chime") {
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (tone === "cosmic") {
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(640, now + 0.2);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else {
+          // Subtle Pop
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        }
+      } catch (e) {
+        console.warn("WebAudio preview not supported", e);
+      }
+    }
+
+    document.getElementById("soundToggle")?.addEventListener("change", (e) => {
+      localStorage.setItem("alokpoth_sound_enabled", String(e.target.checked));
+      showToast((I18N[currentLanguage] || I18N.en).saved);
+    });
+
+    document.getElementById("chimeToggle")?.addEventListener("change", (e) => {
+      localStorage.setItem("alokpoth_chime_enabled", String(e.target.checked));
+      showToast((I18N[currentLanguage] || I18N.en).saved);
+    });
+
+    document.getElementById("toneSelect")?.addEventListener("change", (e) => {
+      localStorage.setItem("alokpoth_sound_tone", e.target.value);
+      playTone(e.target.value);
+      showToast((I18N[currentLanguage] || I18N.en).saved);
+    });
+
+    document.getElementById("testSoundBtn")?.addEventListener("click", () => {
+      const selected = document.getElementById("toneSelect")?.value || "subtle";
+      playTone(selected);
+    });
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+    });
+
+    applyI18n();
+  </script>
+</body>
+</html>

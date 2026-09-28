@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Redeem Code — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-purple-gradient: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .redeem-hero-card {
+      background: linear-gradient(145deg, #1f1435, #141026);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 20px;
+      padding: 26px 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .redeem-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+    }
+    .redeem-icon-box svg {
+      width: 32px;
+      height: 32px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .redeem-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .redeem-desc {
+      font-size: 0.9rem;
+      color: #c4b5fd;
+      line-height: 1.5;
+      max-width: 440px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+
+    .code-input {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .code-input:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+
+    .btn-claim {
+      width: 100%;
+      height: 50px;
+      border-radius: 14px;
+      background: var(--accent-purple-gradient);
+      color: #ffffff;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+      transition: opacity 0.15s, transform 0.15s;
+      margin-top: 10px;
+    }
+    .btn-claim:hover {
+      opacity: 0.95;
+    }
+    .btn-claim:active {
+      transform: scale(0.98);
+    }
+    .btn-claim:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Redeem Code</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <div class="redeem-hero-card">
+      <div class="redeem-icon-box">
+        <svg viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2V12H22V7Z"/><path d="M12 22V7"/><path d="M12 7H7.5A2.5 2.5 0 0 1 7.5 2C11 2 12 7 12 7Z"/><path d="M12 7H16.5A2.5 2.5 0 0 0 16.5 2C13 2 12 7 12 7Z"/></svg>
+      </div>
+      <div class="redeem-title" id="heroTitle">Unlock Premium Privileges</div>
+      <p class="redeem-desc" id="heroDesc">
+        Enter your 12-character promotional voucher or gift code to immediately activate Pro or Max plan advantages on your account.
+      </p>
+    </div>
+
+    <div class="settings-card">
+      <form id="redeemForm">
+        <div class="form-group">
+          <label class="form-label" id="labelCode" for="redeemCodeInput">Redeem Voucher Code</label>
+          <input type="text" class="code-input" id="redeemCodeInput" placeholder="e.g. ALOAI2026" maxlength="50" required autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        </div>
+        <button type="submit" class="btn-claim" id="claimRedeemBtn">
+          <span id="btnClaimText">Claim &amp; Upgrade</span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+
+    const token = localStorage.getItem("alokpoth_token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "রিডিম কোড",
+        heroTitle: "প্রিমিয়াম সুবিধা আনলক করুন",
+        heroDesc: "আপনার ১২-অক্ষরের প্রমো ভাউচার বা গিফট কোড প্রবেশ করিয়ে অবিলম্বে Pro বা Max প্ল্যান চালু করুন।",
+        labelCode: "রিডিম ভাউচার কোড",
+        placeholder: "যেমন: ALOAI2026",
+        btnClaim: "ক্লেইম ও আপগ্রেড করুন",
+        verifying: "যাচাই হচ্ছে...",
+        emptyCode: "অনুগ্রহ করে রিডিম কোডটি লিখুন",
+        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Redeem Code",
+        heroTitle: "Unlock Premium Privileges",
+        heroDesc: "Enter your 12-character promotional voucher or gift code to immediately activate Pro or Max plan advantages on your account.",
+        labelCode: "Redeem Voucher Code",
+        placeholder: "e.g. ALOAI2026",
+        btnClaim: "Claim & Upgrade",
+        verifying: "Verifying...",
+        emptyCode: "Please enter a redeem code",
+        serverErr: "Could not connect to server"
+      }
+    };
+
+    function showToast(msg, type = "success") {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 3500);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("heroTitle").textContent = d.heroTitle;
+      document.getElementById("heroDesc").textContent = d.heroDesc;
+      document.getElementById("labelCode").textContent = d.labelCode;
+      document.getElementById("redeemCodeInput").placeholder = d.placeholder;
+      document.getElementById("btnClaimText").textContent = d.btnClaim;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    // Confetti Engine
+    let confettiAnimId = null;
+    function triggerConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      if (!canvas) return;
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ["#8b5cf6", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          w: Math.random() * 8 + 4,
+          h: Math.random() * 6 + 4,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // gravity
+          p.rotation += p.rotSpeed;
+          p.opacity -= 0.012;
+
+          if (p.opacity > 0) {
+            alive = true;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, p.opacity);
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+          }
+        });
+
+        if (alive) {
+          confettiAnimId = requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+
+    // Code input uppercase auto-format
+    const inputEl = document.getElementById("redeemCodeInput");
+    inputEl?.addEventListener("input", (e) => {
+      e.target.value = e.target.value.toUpperCase().replace(/\s+/g, "");
+    });
+
+    // Form submit
+    document.getElementById("redeemForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const d = I18N[currentLanguage] || I18N.en;
+      const code = inputEl.value.trim();
+      if (!code) {
+        showToast(d.emptyCode, "error");
+        return;
+      }
+
+      const claimBtn = document.getElementById("claimRedeemBtn");
+      const btnText = document.getElementById("btnClaimText");
+      claimBtn.disabled = true;
+      btnText.textContent = d.verifying;
+
+      try {
+        const res = await fetch(`${API_BASE}/redeem`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
+          const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
+
+          localStorage.setItem("alokpoth_current_plan", newPlan);
+          localStorage.setItem("alokpoth_user_plan", newPlan);
+          localStorage.setItem("alokpoth_plan", newPlan);
+          if (expiresAt) {
+            localStorage.setItem("alokpoth_plan_expiry", expiresAt);
+            localStorage.setItem("alokpoth_plan_expires_at", expiresAt);
+          }
+          if (data.token) localStorage.setItem("alokpoth_token", data.token);
+
+          const userStr = localStorage.getItem("alokpoth_user");
+          if (userStr) {
+            try {
+              const u = JSON.parse(userStr);
+              if (!u.subscription) u.subscription = {};
+              u.subscription.plan_name = newPlan;
+              u.subscription.expires_at = expiresAt;
+              u.plan = newPlan;
+              localStorage.setItem("alokpoth_user", JSON.stringify(u));
+            } catch {}
+          }
+
+          inputEl.value = "";
+          triggerConfetti();
+          const successMsg = currentLanguage === "en" 
+            ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
+            : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
+          showToast(successMsg, "success");
+          setTimeout(() => { window.location.href = "subscription.html"; }, 1600);
+        } else {
+          showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
+        }
+      } catch {
+        showToast(d.serverErr, "error");
+      } finally {
+        claimBtn.disabled = false;
+        btnText.textContent = d.btnClaim;
+      }
+    });
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+    });
+
+    applyI18n();
+  </script>
+</body>
+</html>

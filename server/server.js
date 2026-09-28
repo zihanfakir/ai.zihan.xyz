@@ -140,6 +140,17 @@ app.get('/AloAI.apk', (req, res) => {
 app.get('/favicon.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'favicon.png')));
 app.get('/app_logo.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'app_logo.png')));
 
+// Dedicated settings pages
+app.get('/profile.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'profile.html')));
+app.get('/security.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'security.html')));
+app.get('/subscription.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'subscription.html')));
+app.get('/usage.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'usage.html')));
+app.get('/theme.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'theme.html')));
+app.get('/sound.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'sound.html')));
+app.get('/personalization.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'personalization.html')));
+app.get('/help.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'help.html')));
+app.get('/redeem.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'redeem.html')));
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, error: 'Route not found' });

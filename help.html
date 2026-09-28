@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Help Center — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-blue);
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .faq-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .faq-item:first-child {
+      padding-top: 0;
+    }
+
+    .faq-q {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .faq-a {
+      font-size: 0.86rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-divider);
+      font-size: 0.9rem;
+    }
+    .contact-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .contact-label {
+      color: var(--text-sub);
+    }
+    .contact-val {
+      color: var(--accent-blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .version-stamp {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Help Center</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <!-- FAQ Card -->
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span id="faqHeading">Frequently Asked Questions</span>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" id="faqQ1">What is Alo AI?</div>
+        <div class="faq-a" id="faqA1">Alo AI is a high-speed intelligence platform built for coding, academic research, generative image synthesis, and Bengali language conversational mastery.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" id="faqQ2">How does the fair usage quota work?</div>
+        <div class="faq-a" id="faqA2">Each user plan includes a rolling window (e.g. Free: 10 messages / 3 hours, Pro: 30 / 3 hours, Max: 50 / 1 hour). When your limit is reached, your quota automatically resets as the window expires.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" id="faqQ3">How can I redeem a code?</div>
+        <div class="faq-a" id="faqA3">Navigate to the Redeem Code page from Settings, enter your 12-character promo code, and your account will immediately upgrade to Pro or Max.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" id="faqQ4">Are Admin accounts rate-limited?</div>
+        <div class="faq-a" id="faqA4">No. Verified admin accounts enjoy unlimited messages, unrestricted image generation, and instant access to all AI models without queuing or rate limits.</div>
+      </div>
+    </div>
+
+    <!-- Official Portal & Support Card -->
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="supportHeading">Support &amp; Community</span>
+      </div>
+
+      <div class="contact-item">
+        <span class="contact-label" id="labelPortal">Official Website</span>
+        <a href="https://ai.zihan.xyz" target="_blank" class="contact-val">ai.zihan.xyz</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label" id="labelEmail">Contact Developer</span>
+        <a href="mailto:zihanfakir@gmail.com" class="contact-val">zihanfakir@gmail.com</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label" id="labelSecurity">Security Status</span>
+        <span style="color:#10b981; font-weight:600;" id="valSecStatus">Verified &amp; Hardened</span>
+      </div>
+    </div>
+
+    <div class="version-stamp" id="versionText">
+      Alo AI v2.0.0 (Native AMOLED Edition)
+    </div>
+  </main>
+
+  <script>
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "সহায়তা কেন্দ্র",
+        faqHeading: "সাধারণ প্রশ্নোত্তর (FAQ)",
+        faqQ1: "Alo AI কী?",
+        faqA1: "Alo AI হলো একটি দ্রুতগতির কৃত্রিম বুদ্ধিমত্তা প্ল্যাটফর্ম যা কোডিং, গবেষণা, ছবি তৈরি ও সাবলীল বাংলা কথোপকথনের জন্য বিশেষভাবে তৈরি।",
+        faqQ2: "মেসেজ কোটা কীভাবে কাজ করে?",
+        faqA2: "প্রতিটি প্ল্যানে একটি নির্দিষ্ট উইন্ডো থাকে (যেমন ফ্রি প্ল্যানে ১০টি বার্তা প্রতি ৩ ঘণ্টায়, প্রো প্ল্যানে ৩০টি বার্তা প্রতি ৩ ঘণ্টায় এবং ম্যাক্সে ৫০টি বার্তা প্রতি ১ ঘণ্টায়)। উইন্ডো শেষ হলে কোটা স্বয়ংক্রিয়ভাবে নবায়ন হয়।",
+        faqQ3: "রিডিম কোড কীভাবে ব্যবহার করব?",
+        faqA3: "সেটিংস থেকে রিডিম কোড পেজে যান, আপনার ১২-অক্ষরের কোডটি লিখুন এবং আপগ্রেড করুন বাটনে চাপলেই আপনার অ্যাকাউন্ট Pro বা Max-এ আপগ্রেড হয়ে যাবে।",
+        faqQ4: "অ্যাডমিন অ্যাকাউন্টে কোনো সীমাবদ্ধতা আছে কি?",
+        faqA4: "না। অ্যাডমিন অ্যাকাউন্টে সীমাহীন বার্তা, সীমাহীন ছবি তৈরি এবং সকল এআই মডেলে কোনো রেট লিমিট ছাড়াই নিরবচ্ছিন্ন অ্যাক্সেস থাকে।",
+        supportHeading: "সহায়তা ও যোগাযোগ",
+        labelPortal: "অফিসিয়াল পোর্টাল",
+        labelEmail: "ডেভেলপারের সাথে যোগাযোগ",
+        labelSecurity: "নিরাপত্তা স্ট্যাটাস",
+        valSecStatus: "ভেরিফায়েড ও নিরাপদ",
+        version: "Alo AI সংস্করণ ২.০.০ (অ্যামোলেড এডিশন)"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Help Center",
+        faqHeading: "Frequently Asked Questions",
+        faqQ1: "What is Alo AI?",
+        faqA1: "Alo AI is a high-speed intelligence platform built for coding, academic research, generative image synthesis, and Bengali language conversational mastery.",
+        faqQ2: "How does the fair usage quota work?",
+        faqA2: "Each user plan includes a rolling window (e.g. Free: 10 messages / 3 hours, Pro: 30 / 3 hours, Max: 50 / 1 hour). When your limit is reached, your quota automatically resets as the window expires.",
+        faqQ3: "How can I redeem a code?",
+        faqA3: "Navigate to the Redeem Code page from Settings, enter your 12-character promo code, and your account will immediately upgrade to Pro or Max.",
+        faqQ4: "Are Admin accounts rate-limited?",
+        faqA4: "No. Verified admin accounts enjoy unlimited messages, unrestricted image generation, and instant access to all AI models without queuing or rate limits.",
+        supportHeading: "Support & Community",
+        labelPortal: "Official Website",
+        labelEmail: "Contact Developer",
+        labelSecurity: "Security Status",
+        valSecStatus: "Verified & Hardened",
+        version: "Alo AI v2.0.0 (Native AMOLED Edition)"
+      }
+    };
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("faqHeading").textContent = d.faqHeading;
+      document.getElementById("faqQ1").textContent = d.faqQ1;
+      document.getElementById("faqA1").textContent = d.faqA1;
+      document.getElementById("faqQ2").textContent = d.faqQ2;
+      document.getElementById("faqA2").textContent = d.faqA2;
+      document.getElementById("faqQ3").textContent = d.faqQ3;
+      document.getElementById("faqA3").textContent = d.faqA3;
+      document.getElementById("faqQ4").textContent = d.faqQ4;
+      document.getElementById("faqA4").textContent = d.faqA4;
+      document.getElementById("supportHeading").textContent = d.supportHeading;
+      document.getElementById("labelPortal").textContent = d.labelPortal;
+      document.getElementById("labelEmail").textContent = d.labelEmail;
+      document.getElementById("labelSecurity").textContent = d.labelSecurity;
+      document.getElementById("valSecStatus").textContent = d.valSecStatus;
+      document.getElementById("versionText").textContent = d.version;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+    });
+
+    applyI18n();
+  </script>
+</body>
+</html>

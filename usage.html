@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Usage &amp; Quota — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-danger: #ef4444;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Quota Card */
+    .quota-meter-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .account-quota-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin: 12px 0 10px;
+    }
+
+    .account-quota-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #2563eb, #38bdf8);
+      border-radius: 9999px;
+      transition: width 0.4s ease;
+    }
+    .account-quota-fill.warning {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .account-quota-fill.danger {
+      background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+
+    /* Stats Grid */
+    .stats-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat-val-num {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .stat-val-label {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .quota-subtext {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">Usage &amp; Quota</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <!-- Message Quota Card -->
+    <div class="settings-card">
+      <div class="quota-meter-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
+          <span style="font-weight: 700;" id="quotaCardTitle">Message Quota</span>
+          <span id="quotaCountDisplay"><strong id="quotaRemainingDigits">10</strong> / <span id="quotaTotalDigits">10</span> left</span>
+        </div>
+        <div class="account-quota-track">
+          <div class="account-quota-fill" id="accountQuotaFill"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-sub);">
+          <span id="quotaResetLabel">Reset in:</span>
+          <span id="quotaLiveCountdown" style="font-weight: 600; color: #fff;">Full quota available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Stats Grid -->
+    <div class="stats-2col">
+      <div class="stat-pill">
+        <div class="stat-val-num" id="usageCountVal">0</div>
+        <div class="stat-val-label" id="labelUsageSent">Sent this window</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val-num" id="usageRemainingVal">10</div>
+        <div class="stat-val-label" id="labelUsageRemaining">Messages left</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val-num" id="usageResetVal">3h</div>
+        <div class="stat-val-label" id="labelUsageReset">Refresh cycle</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val-num" id="totalMessagesSent">1</div>
+        <div class="stat-val-label" id="labelUsageSessions">Total sessions</div>
+      </div>
+    </div>
+
+    <!-- Fair Usage Policy Card -->
+    <div class="settings-card">
+      <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 6px;" id="fairUsageTitle">
+        Fair Usage Policy
+      </div>
+      <p class="quota-subtext" id="quotaWindowSubtext">
+        Fair usage quota automatically refreshes every cycle.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+
+    const token = localStorage.getItem("alokpoth_token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    let dynamicPlanLimits = {
+      Free: { limit: 10, hours: 3 },
+      Pro: { limit: 30, hours: 3 },
+      Max: { limit: 50, hours: 1 }
+    };
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "ব্যবহার ও কোটা",
+        quotaCardTitle: "বার্তা কোটা",
+        quotaResetLabel: "রিসেট বাকি:",
+        labelUsageSent: "এই উইন্ডোতে পাঠানো",
+        labelUsageRemaining: "অবশিষ্ট বার্তা সংখ্যা",
+        labelUsageReset: "কোটা সাইকেল",
+        labelUsageSessions: "মোট চ্যাট সেশন",
+        fairUsageTitle: "ফেয়ার ইউসেজ পলিসি",
+        fullQuota: "কোটা সম্পূর্ণ পূর্ণ",
+        adminUnlimitedNotice: "অ্যাডমিন অ্যাকাউন্টে সমস্ত এআই মডেল এবং বার্তায় কোনো সীমা ছাড়াই পূর্ণ এক্সেস রয়েছে।",
+        adminUnlimitedBadge: "সীমাহীন (কোনো সীমা নেই)",
+        adminAccess: "সীমাহীন এক্সেস"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "Usage & Quota",
+        quotaCardTitle: "Message Quota",
+        quotaResetLabel: "Reset in:",
+        labelUsageSent: "Sent this window",
+        labelUsageRemaining: "Messages left",
+        labelUsageReset: "Refresh cycle",
+        labelUsageSessions: "Total sessions",
+        fairUsageTitle: "Fair Usage Policy",
+        fullQuota: "Full quota available",
+        adminUnlimitedNotice: "Admin account has unlimited access to all AI models and messages without rate limits.",
+        adminUnlimitedBadge: "Unlimited (No Limit)",
+        adminAccess: "Unlimited Access"
+      }
+    };
+
+    function formatDigits(num) {
+      if (currentLanguage !== "bn") return String(num);
+      const bnDigits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+      return String(num).replace(/[0-9]/g, d => bnDigits[Number(d)] || d);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("quotaCardTitle").textContent = d.quotaCardTitle;
+      document.getElementById("quotaResetLabel").textContent = d.quotaResetLabel;
+      document.getElementById("labelUsageSent").textContent = d.labelUsageSent;
+      document.getElementById("labelUsageRemaining").textContent = d.labelUsageRemaining;
+      document.getElementById("labelUsageReset").textContent = d.labelUsageReset;
+      document.getElementById("labelUsageSessions").textContent = d.labelUsageSessions;
+      document.getElementById("fairUsageTitle").textContent = d.fairUsageTitle;
+      document.title = `${d.pageTitle} — Alo AI`;
+    }
+
+    function renderUserData() {
+      const userStr = localStorage.getItem("alokpoth_user");
+      if (!userStr) return;
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      try {
+        const user = JSON.parse(userStr);
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
+
+        let currentPlan = isAdmin ? "Max" : ((user.subscription && user.subscription.plan_name) || user.plan || localStorage.getItem("alokpoth_current_plan") || "Free");
+
+        const planConf = dynamicPlanLimits[currentPlan] || dynamicPlanLimits.Free;
+        const limit = planConf.limit;
+        const hours = planConf.hours;
+
+        let used = 0;
+        let usage = null;
+        try {
+          usage = JSON.parse(localStorage.getItem("alokpoth_window_usage") || localStorage.getItem("alokpoth_usage_window") || "null");
+          if (usage && usage.count) used = Number(usage.count) || 0;
+        } catch {}
+
+        const remaining = Math.max(0, limit - used);
+
+        const countValEl = document.getElementById("usageCountVal");
+        if (countValEl) countValEl.textContent = formatDigits(used);
+
+        const remValEl = document.getElementById("usageRemainingVal");
+        const fillEl = document.getElementById("accountQuotaFill");
+        const timerEl = document.getElementById("quotaLiveCountdown");
+        const quotaCountDisplayEl = document.getElementById("quotaCountDisplay");
+        const usageResetEl = document.getElementById("usageResetVal");
+        const quotaWindowSubtextEl = document.getElementById("quotaWindowSubtext");
+
+        const windowMs = hours * 60 * 60 * 1000;
+        let msRemaining = 0;
+        if (usage && usage.resetAt) {
+          msRemaining = Math.max(0, new Date(usage.resetAt).getTime() - Date.now());
+        } else if (usage && usage.start) {
+          msRemaining = Math.max(0, (usage.start + windowMs) - Date.now());
+        }
+
+        if (msRemaining <= 0 && used > 0) {
+          used = 0;
+          msRemaining = windowMs;
+        }
+
+        const totalSec = Math.max(0, Math.floor(msRemaining / 1000));
+        const hLeft = Math.floor(totalSec / 3600);
+        const mLeft = Math.floor((totalSec % 3600) / 60);
+        const sLeft = totalSec % 60;
+
+        let timeLeftStr = "";
+        if (used === 0) {
+          timeLeftStr = d.fullQuota;
+        } else if (hLeft > 0) {
+          timeLeftStr = isEn ? `${hLeft}h ${mLeft}m ${sLeft}s` : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট`;
+        } else if (mLeft > 0) {
+          timeLeftStr = isEn ? `${mLeft}m ${sLeft}s` : `${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
+        } else {
+          timeLeftStr = isEn ? `${sLeft}s` : `${formatDigits(sLeft)} সেকেন্ড`;
+        }
+
+        if (isAdmin) {
+          if (quotaCountDisplayEl) {
+            quotaCountDisplayEl.innerHTML = `<strong id="quotaRemainingDigits" style="color:var(--accent-blue);">${isEn ? "Unlimited" : "সীমাহীন"}</strong> (No Limit)`;
+          }
+          if (remValEl) remValEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
+          if (usageResetEl) usageResetEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
+          if (fillEl) {
+            fillEl.style.width = "100%";
+            fillEl.className = "account-quota-fill";
+          }
+          if (timerEl) timerEl.textContent = d.adminAccess;
+          if (quotaWindowSubtextEl) {
+            quotaWindowSubtextEl.textContent = d.adminUnlimitedNotice;
+          }
+        } else {
+          if (quotaCountDisplayEl) {
+            quotaCountDisplayEl.innerHTML = isEn
+              ? `<strong id="quotaRemainingDigits">${remaining}</strong> / <span id="quotaTotalDigits">${limit}</span> left`
+              : `<strong id="quotaRemainingDigits">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> বাকি`;
+          }
+          if (remValEl) remValEl.textContent = formatDigits(remaining);
+          if (usageResetEl) usageResetEl.textContent = isEn ? `${hours}h` : `${formatDigits(hours)} ঘণ্টা`;
+          const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
+          if (fillEl) {
+            fillEl.style.width = `${pct}%`;
+            if (remaining <= 0 || pct <= 15) {
+              fillEl.className = "account-quota-fill danger";
+            } else if (pct <= 35) {
+              fillEl.className = "account-quota-fill warning";
+            } else {
+              fillEl.className = "account-quota-fill";
+            }
+          }
+          if (timerEl) timerEl.textContent = timeLeftStr;
+          if (quotaWindowSubtextEl) {
+            quotaWindowSubtextEl.textContent = isEn
+              ? `Fair usage quota automatically refreshes ${limit} messages every ${hours} hour${hours > 1 ? "s" : ""}.`
+              : `ফেয়ার ইউসেজ কোটা প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা স্বয়ংক্রিয়ভাবে নবায়ন হয়।`;
+          }
+        }
+
+        const allSessions = localStorage.getItem("alokpoth_chat_sessions");
+        let sessionCount = 1;
+        if (allSessions) {
+          try { sessionCount = JSON.parse(allSessions).length || 1; } catch {}
+        }
+        const totalMsgEl = document.getElementById("totalMessagesSent");
+        if (totalMsgEl) totalMsgEl.textContent = formatDigits(sessionCount);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function syncDynamicPlans() {
+      try {
+        const res = await fetch(`${API_BASE}/plans`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.plans)) {
+          data.plans.forEach(p => {
+            dynamicPlanLimits[p.name] = {
+              limit: Number(p.message_limit) || (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50)),
+              hours: Number(p.window_hours) || (p.name === 'Max' ? 1 : 3)
+            };
+          });
+          renderUserData();
+        }
+      } catch (e) {}
+    }
+
+    async function syncUserDataFromServer() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
+          if (data.usage) {
+            try {
+              localStorage.setItem("alokpoth_window_usage", JSON.stringify(data.usage));
+              localStorage.setItem("alokpoth_usage_window", JSON.stringify(data.usage));
+            } catch {}
+          }
+          renderUserData();
+        }
+      } catch (e) {}
+    }
+
+    // Toggle Language
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      currentLanguage = (currentLanguage === "en" ? "bn" : "en");
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      applyI18n();
+      renderUserData();
+    });
+
+    applyI18n();
+    renderUserData();
+    syncDynamicPlans();
+    syncUserDataFromServer();
+
+    setInterval(() => {
+      renderUserData();
+    }, 1000);
+  </script>
+</body>
+</html>

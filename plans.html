@@ -1258,7 +1258,7 @@
             ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
             : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
           showToast(successMsg, "success");
-          setTimeout(() => { window.location.href = "account.html?tab=tabPlan"; }, 1500);
+          setTimeout(() => { window.location.href = "subscription.html"; }, 1500);
         } else {
           showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
         }
@@ -1405,7 +1405,7 @@
           btnPro.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
           btnPro.style.background = "rgba(99, 102, 241, 0.25)";
           btnPro.style.boxShadow = "none";
-          btnPro.onclick = () => { window.location.href = "account.html?tab=tabPlan"; };
+          btnPro.onclick = () => { window.location.href = "subscription.html"; };
         } else {
           btnPro.textContent = isEn ? "Unlock with Redeem Code" : "রিডিম কোড দিয়ে আনলক করুন";
           btnPro.style.background = "var(--accent-gradient)";
@@ -1431,7 +1431,7 @@
             : (isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)");
           btnMax.style.background = "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(245,158,11,0.3))";
           btnMax.style.border = "1px solid #f59e0b";
-          btnMax.onclick = () => { window.location.href = "account.html?tab=tabPlan"; };
+          btnMax.onclick = () => { window.location.href = "subscription.html"; };
         } else {
           btnMax.textContent = isEn ? "Claim Max with Code" : "ম্যাক্স কোড রিডিম করুন";
           btnMax.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";

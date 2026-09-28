@@ -1250,14 +1250,16 @@
       });
     });
 
-    // Row Click Listeners
-    document.getElementById("rowEditProfile")?.addEventListener("click", () => openModal("modalEditProfile"));
-    document.getElementById("rowAccount")?.addEventListener("click", () => openModal("modalAccount"));
-    document.getElementById("rowSubscription")?.addEventListener("click", () => openModal("modalSubscription"));
-    document.getElementById("rowUsage")?.addEventListener("click", () => openModal("modalUsage"));
-    document.getElementById("rowRedeem")?.addEventListener("click", () => openModal("modalRedeem"));
-    document.getElementById("rowHelp")?.addEventListener("click", () => openModal("modalHelp"));
-    document.getElementById("rowPersonalization")?.addEventListener("click", () => openModal("modalPersonalization"));
+    // Row Click Listeners - Navigate to dedicated standalone pages
+    document.getElementById("rowEditProfile")?.addEventListener("click", () => { window.location.href = "profile.html"; });
+    document.getElementById("rowAccount")?.addEventListener("click", () => { window.location.href = "security.html"; });
+    document.getElementById("rowSubscription")?.addEventListener("click", () => { window.location.href = "subscription.html"; });
+    document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage.html"; });
+    document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme.html"; });
+    document.getElementById("rowSound")?.addEventListener("click", () => { window.location.href = "sound.html"; });
+    document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization.html"; });
+    document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help.html"; });
+    document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem.html"; });
 
     // Language Toggle
     const toggleLanguage = () => {
@@ -1591,21 +1593,25 @@
       renderUserData();
     }, 1000);
 
-    // Auto-open requested modal from URL parameter
+    // Redirect URL tab parameters to dedicated standalone pages
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const tab = urlParams.get("tab");
       if (tab) {
-        if (tab === "tabPlan" || tab === "subscription" || tab === "settingsPlanView") {
-          openModal("modalSubscription");
-        } else if (tab === "limits" || tab === "settingsLimitsView" || tab === "usage") {
-          openModal("modalUsage");
-        } else if (tab === "redeem" || tab === "settingsRedeemView") {
-          openModal("modalRedeem");
-        } else if (tab === "account" || tab === "settingsAccountView") {
-          openModal("modalAccount");
-        } else if (tab === "help") {
-          openModal("modalHelp");
+        const tabRedirects = {
+          "tabPlan": "subscription.html", "subscription": "subscription.html", "settingsPlanView": "subscription.html",
+          "limits": "usage.html", "settingsLimitsView": "usage.html", "usage": "usage.html",
+          "redeem": "redeem.html", "settingsRedeemView": "redeem.html",
+          "account": "security.html", "settingsAccountView": "security.html", "security": "security.html",
+          "help": "help.html",
+          "profile": "profile.html",
+          "theme": "theme.html",
+          "sound": "sound.html",
+          "personalization": "personalization.html"
+        };
+        if (tabRedirects[tab]) {
+          window.location.replace(tabRedirects[tab]);
+          return;
         }
       }
     } catch (e) {}
