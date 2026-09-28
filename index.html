@@ -6878,23 +6878,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         modelList.appendChild(card);
       });
-
-      if (!isUserAdmin && userPlan !== "Max") {
-        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        const footerBanner = document.createElement("div");
-        footerBanner.className = "model-upgrade-banner";
-        footerBanner.style.cssText = "margin-top:14px; padding:12px 14px; border-radius:10px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); display:flex; align-items:center; justify-content:space-between; gap:10px;";
-        footerBanner.innerHTML = `
-          <div style="font-size:0.8rem; color:var(--text-sub); line-height:1.4;">
-            <strong style="color:var(--text-main); display:block; margin-bottom:2px;">${isEn ? "Unlock All Premium Models" : "সব প্রিমিয়াম মডেল আনলক করুন"}</strong>
-            ${isEn ? "Upgrade your plan to access Alo Ultra and high-tier models." : "Alo Ultra সহ সর্বোচ্চ ক্ষমতার মডেল পেতে প্ল্যান আপগ্রেড করুন।"}
-          </div>
-          <a href="plans.html" style="display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; font-size:0.8rem; font-weight:600; text-decoration:none; white-space:nowrap; touch-action:manipulation;">
-            ${isEn ? "Upgrade" : "আপগ্রেড"}
-          </a>
-        `;
-        modelList.appendChild(footerBanner);
-      }
     }
 
     function pushPageState(name) {
