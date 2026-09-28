@@ -1414,9 +1414,21 @@
       }
 
       // Max Button
+      let isUserAdmin = false;
+      try {
+        const uStr = localStorage.getItem("alokpoth_user");
+        if (uStr) {
+          const userObj = JSON.parse(uStr);
+          const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+          isUserAdmin = userObj.role === "admin" || (userObj.email && adminEmails.includes(userObj.email.toLowerCase().trim()));
+        }
+      } catch {}
+
       if (btnMax) {
-        if (userCurrentPlan === "Max") {
-          btnMax.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
+        if (userCurrentPlan === "Max" || isUserAdmin) {
+          btnMax.textContent = isUserAdmin
+            ? (isEn ? "Admin Active (Unlimited)" : "অ্যাডমিন সক্রিয় (আনলিমিটেড)")
+            : (isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)");
           btnMax.style.background = "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(245,158,11,0.3))";
           btnMax.style.border = "1px solid #f59e0b";
           btnMax.onclick = () => { window.location.href = "account.html?tab=tabPlan"; };

@@ -498,6 +498,12 @@
       border-radius: 9999px;
       transition: width 0.4s ease;
     }
+    .account-quota-fill.warning {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .account-quota-fill.danger {
+      background: linear-gradient(90deg, #ef4444, #f87171);
+    }
 
     /* Stats Grid */
     .stats-2col {
@@ -1018,6 +1024,7 @@
         savingName: "সংরক্ষণ হচ্ছে...",
         currentPlanLabel: "সক্রিয় সাবস্ক্রিপশন:",
         lifetimeExpiry: "মেয়াদ: আজীবন / মেয়াদহীন",
+        usageModalTitle: "ব্যবহার ও কোটা",
         quotaCardTitle: "বার্তা কোটা",
         quotaResetLabel: "রিসেট বাকি:",
         labelUsageSent: "এই উইন্ডোতে পাঠানো বার্তা",
@@ -1072,6 +1079,7 @@
         savingName: "Saving...",
         currentPlanLabel: "Active Subscription:",
         lifetimeExpiry: "Validity: Lifetime / No Expiry",
+        usageModalTitle: "Usage & Quota",
         quotaCardTitle: "Message Quota",
         quotaResetLabel: "Reset in:",
         labelUsageSent: "Sent this window",
@@ -1200,6 +1208,22 @@
       if (cnfPassInput) cnfPassInput.placeholder = d.cnfPassPlaceholder;
       const changePassSubmitBtn = document.getElementById("changePassSubmitBtn");
       if (changePassSubmitBtn && !changePassSubmitBtn.disabled) changePassSubmitBtn.textContent = d.changePassSubmitBtn;
+
+      // Usage modal labels
+      const usageModalTitle = document.getElementById("usageModalTitle");
+      if (usageModalTitle) usageModalTitle.textContent = d.usageModalTitle || (isEn ? "Usage & Quota" : "ব্যবহার ও কোটা");
+      const quotaCardTitle = document.getElementById("quotaCardTitle");
+      if (quotaCardTitle) quotaCardTitle.textContent = d.quotaCardTitle;
+      const quotaResetLabel = document.getElementById("quotaResetLabel");
+      if (quotaResetLabel) quotaResetLabel.textContent = d.quotaResetLabel;
+      const labelUsageSent = document.getElementById("labelUsageSent");
+      if (labelUsageSent) labelUsageSent.textContent = d.labelUsageSent;
+      const labelUsageRemaining = document.getElementById("labelUsageRemaining");
+      if (labelUsageRemaining) labelUsageRemaining.textContent = d.labelUsageRemaining;
+      const labelUsageReset = document.getElementById("labelUsageReset");
+      if (labelUsageReset) labelUsageReset.textContent = d.labelUsageReset;
+      const labelUsageSessions = document.getElementById("labelUsageSessions");
+      if (labelUsageSessions) labelUsageSessions.textContent = d.labelUsageSessions;
     }
 
     // Modal Control Helpers
@@ -1339,12 +1363,10 @@
         const data = await res.json();
         if (res.ok && data.success && Array.isArray(data.plans)) {
           data.plans.forEach(p => {
-            if (dynamicPlanLimits[p.name]) {
-              dynamicPlanLimits[p.name] = {
-                limit: Number(p.message_limit) || dynamicPlanLimits[p.name].limit,
-                hours: Number(p.window_hours) || dynamicPlanLimits[p.name].hours
-              };
-            }
+            dynamicPlanLimits[p.name] = {
+              limit: Number(p.message_limit) || (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50)),
+              hours: Number(p.window_hours) || (p.name === 'Max' ? 1 : 3)
+            };
           });
           renderUserData();
         }
@@ -1366,6 +1388,12 @@
           localStorage.setItem("alokpoth_current_plan", pName);
           localStorage.setItem("alokpoth_user_plan", pName);
           localStorage.setItem("alokpoth_plan", pName);
+          if (data.usage) {
+            try {
+              localStorage.setItem("alokpoth_window_usage", JSON.stringify(data.usage));
+              localStorage.setItem("alokpoth_usage_window", JSON.stringify(data.usage));
+            } catch {}
+          }
           renderUserData();
         }
       } catch (e) {}
@@ -1420,17 +1448,19 @@
         }
 
         const planBadge = document.getElementById("profilePlanBadge");
-        if (planBadge) planBadge.textContent = `${currentPlan} Plan`;
+        if (planBadge) planBadge.textContent = isAdmin ? (isEn ? "Admin (Unlimited)" : "অ্যাডমিন (আনলিমিটেড)") : `${currentPlan} Plan`;
 
         const planTitle = document.getElementById("currentPlanTitle");
-        if (planTitle) planTitle.textContent = currentPlan;
+        if (planTitle) planTitle.textContent = isAdmin ? (isEn ? "Admin (Unlimited)" : "অ্যাডমিন (সীমাহীন)") : currentPlan;
 
         const planTitleModal = document.getElementById("currentPlanTitleModal");
-        if (planTitleModal) planTitleModal.textContent = `${currentPlan} Plan`;
+        if (planTitleModal) planTitleModal.textContent = isAdmin ? (isEn ? "Admin Unlimited Plan" : "অ্যাডমিন সীমাহীন প্ল্যান") : `${currentPlan} Plan`;
 
         const expiryEl = document.getElementById("currentPlanExpiry");
         if (expiryEl) {
-          if (currentPlan === "Free" || isExpired || !expiryStr) {
+          if (isAdmin) {
+            expiryEl.textContent = isEn ? "Validity: Lifetime Admin Access" : "মেয়াদ: আজীবন অ্যাডমিন অ্যাক্সেস";
+          } else if (currentPlan === "Free" || isExpired || !expiryStr) {
             expiryEl.textContent = isEn ? "Validity: Lifetime / No Expiry" : "মেয়াদ: আজীবন / মেয়াদহীন";
           } else {
             const expDate = new Date(expiryStr);
@@ -1458,13 +1488,11 @@
         if (countValEl) countValEl.textContent = formatDigits(used);
 
         const remValEl = document.getElementById("usageRemainingVal");
-        if (remValEl) remValEl.textContent = formatDigits(remaining);
-
-        // Progress bar & countdown meter
         const fillEl = document.getElementById("accountQuotaFill");
-        const remDigitsEl = document.getElementById("quotaRemainingDigits");
-        const totDigitsEl = document.getElementById("quotaTotalDigits");
         const timerEl = document.getElementById("quotaLiveCountdown");
+        const quotaCountDisplayEl = document.getElementById("quotaCountDisplay");
+        const usageResetEl = document.getElementById("usageResetVal");
+        const quotaWindowSubtextEl = document.getElementById("quotaWindowSubtext");
 
         const windowMs = hours * 60 * 60 * 1000;
         let msRemaining = 0;
@@ -1496,20 +1524,49 @@
         }
 
         if (isAdmin) {
-          if (remDigitsEl) remDigitsEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
-          if (totDigitsEl) totDigitsEl.textContent = "∞";
-          if (fillEl) fillEl.style.width = "100%";
+          if (quotaCountDisplayEl) {
+            quotaCountDisplayEl.innerHTML = isEn 
+              ? "<strong id=\"quotaRemainingDigits\" style=\"color:var(--accent-blue);\">Unlimited</strong> (No Limit)" 
+              : "<strong id=\"quotaRemainingDigits\" style=\"color:var(--accent-blue);\">সীমাহীন</strong> (কোনো সীমা নেই)";
+          }
+          if (remValEl) remValEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
+          if (usageResetEl) usageResetEl.textContent = isEn ? "Unlimited" : "সীমাহীন";
+          if (fillEl) {
+            fillEl.style.width = "100%";
+            fillEl.className = "account-quota-fill";
+          }
           if (timerEl) timerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
+          if (quotaWindowSubtextEl) {
+            quotaWindowSubtextEl.textContent = isEn
+              ? "Admin account has unlimited access to all AI models and messages without rate limits."
+              : "অ্যাডমিন অ্যাকাউন্টে সমস্ত এআই মডেল এবং বার্তায় কোনো সীমা ছাড়াই পূর্ণ এক্সেস রয়েছে।";
+          }
         } else {
+          if (quotaCountDisplayEl) {
+            quotaCountDisplayEl.innerHTML = isEn
+              ? `<strong id="quotaRemainingDigits">${remaining}</strong> / <span id="quotaTotalDigits">${limit}</span> left`
+              : `<strong id="quotaRemainingDigits">${formatDigits(remaining)}</strong> / <span id="quotaTotalDigits">${formatDigits(limit)}</span> বাকি`;
+          }
+          if (remValEl) remValEl.textContent = formatDigits(remaining);
+          if (usageResetEl) usageResetEl.textContent = isEn ? `${hours}h` : `${formatDigits(hours)} ঘণ্টা`;
           const pct = limit > 0 ? Math.max(0, Math.min(100, Math.round((remaining / limit) * 100))) : 0;
-          if (fillEl) fillEl.style.width = `${pct}%`;
-          if (remDigitsEl) remDigitsEl.textContent = formatDigits(remaining);
-          if (totDigitsEl) totDigitsEl.textContent = formatDigits(limit);
+          if (fillEl) {
+            fillEl.style.width = `${pct}%`;
+            if (remaining <= 0 || pct <= 15) {
+              fillEl.className = "account-quota-fill danger";
+            } else if (pct <= 35) {
+              fillEl.className = "account-quota-fill warning";
+            } else {
+              fillEl.className = "account-quota-fill";
+            }
+          }
           if (timerEl) timerEl.textContent = timeLeftStr;
+          if (quotaWindowSubtextEl) {
+            quotaWindowSubtextEl.textContent = isEn
+              ? `Fair usage quota automatically refreshes ${limit} messages every ${hours} hour${hours > 1 ? "s" : ""}.`
+              : `ফেয়ার ইউসেজ কোটা প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা স্বয়ংক্রিয়ভাবে নবায়ন হয়।`;
+          }
         }
-
-        const usageResetEl = document.getElementById("usageResetVal");
-        if (usageResetEl) usageResetEl.textContent = isAdmin ? (isEn ? "Unlimited" : "সীমাহীন") : `${hours}h`;
 
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
         let sessionCount = 1;

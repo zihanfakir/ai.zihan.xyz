@@ -6121,14 +6121,28 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const expiryEl = document.getElementById("accountPlanExpiryDisplay");
       const warningEl = document.getElementById("accountPlanWarning");
 
+      let isAdmin = false;
+      try {
+        const u = getTrustedUser();
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+          isAdmin = true;
+        }
+      } catch {}
+
       if (valueEl) {
-        const planDisplayNames = isEn ? { Free: "Free", Pro: "Pro", Max: "Max" } : { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
-        valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
-        valueEl.className = "account-plan-badge plan-" + currentPlan;
+        if (isAdmin) {
+          valueEl.textContent = isEn ? "Admin (Unlimited)" : "Admin (আনলিমিটেড)";
+          valueEl.className = "account-plan-badge plan-Max";
+        } else {
+          const planDisplayNames = isEn ? { Free: "Free", Pro: "Pro", Max: "Max" } : { Free: "Free (ফ্রি)", Pro: "Pro (প্রো)", Max: "Max (ম্যাক্স)" };
+          valueEl.textContent = planDisplayNames[currentPlan] || currentPlan;
+          valueEl.className = "account-plan-badge plan-" + currentPlan;
+        }
       }
       const setMenuPlanName = document.getElementById("setMenuPlanName");
       if (setMenuPlanName) {
-        setMenuPlanName.textContent = currentPlan;
+        setMenuPlanName.textContent = isAdmin ? "Admin" : currentPlan;
       }
 
       const limitBadgeEl = document.getElementById("accountPlanLimitText");
@@ -6165,14 +6179,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const imgUsed = imgUsage.count || 0;
       const imgRemaining = Math.max(0, imgLimit - imgUsed);
 
-      let isAdmin = false;
-      try {
-        const u = getTrustedUser();
-        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
-        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
-          isAdmin = true;
-        }
-      } catch {}
+
 
       // Message timing
       const windowMs = hours * 60 * 60 * 1000;
@@ -6359,9 +6366,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }
       }
 
-      if (limitMsgEl) limitMsgEl.textContent = planInfo.messages;
-      if (limitModEl) limitModEl.textContent = planInfo.models;
-      if (limitSpdEl) limitSpdEl.textContent = planInfo.speed;
+      if (isAdmin) {
+        if (limitMsgEl) limitMsgEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
+        if (limitModEl) limitModEl.textContent = isEn ? "All Models + Web" : "সবগুলো মডেল ও ওয়েব সার্চ";
+        if (limitSpdEl) limitSpdEl.textContent = isEn ? "Maximum Priority" : "সর্বোচ্চ প্রায়োরিটি";
+      } else {
+        if (limitMsgEl) limitMsgEl.textContent = planInfo.messages;
+        if (limitModEl) limitModEl.textContent = planInfo.models;
+        if (limitSpdEl) limitSpdEl.textContent = planInfo.speed;
+      }
 
       const compareGrid = document.getElementById("accountAllPlansGrid");
       if (compareGrid) {
@@ -6406,7 +6419,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
 
       if (expiryEl) {
-        if (currentPlan === "Free") {
+        if (isAdmin) {
+          expiryEl.textContent = isEn ? "Validity: Lifetime Admin Access" : "মেয়াদ: আজীবন অ্যাডমিন অ্যাক্সেস";
+          expiryEl.className = "account-plan-expiry-text";
+        } else if (currentPlan === "Free") {
           expiryEl.textContent = isEn ? "Validity: Lifetime / Unlimited" : "মেয়াদ: আজীবন / মেয়াদহীন";
           expiryEl.className = "account-plan-expiry-text";
         } else {
