@@ -11,23 +11,23 @@
   
   <style>
     :root {
-      --bg-base: #0a0d14;
-      --bg-surface: rgba(18, 24, 38, 0.85);
-      --bg-surface-hover: rgba(26, 35, 54, 0.95);
+      --bg-base: #000000;
+      --bg-surface: #18181b;
+      --bg-surface-hover: #27272a;
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.5);
-      --accent-primary: #6366f1;
-      --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --text-muted: #64748b;
+      --border-focus: rgba(255, 255, 255, 0.35);
+      --accent-primary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
+      --text-main: #f4f4f5;
+      --text-sub: #a1a1aa;
+      --text-muted: #71717a;
       --danger: #ef4444;
       --success: #10b981;
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
       --radius-xl: 24px;
-      --font-main: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, 'Hind Siliguri', sans-serif;
     }
 
     [data-theme="oled"] {
@@ -118,7 +118,7 @@
 
     body {
       font-family: var(--font-main);
-      background-color: var(--bg-base);
+      background-color: #000000;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -130,22 +130,11 @@
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
       box-sizing: border-box;
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+      background-image: none !important;
     }
 
     .ambient-glow {
-      position: absolute;
-      top: -140px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 750px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
-      pointer-events: none;
-      filter: blur(50px);
-      z-index: 0;
+      display: none !important;
     }
 
     /* Top Bar */
@@ -153,13 +142,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px;
-      position: relative;
-      z-index: 10;
-      max-width: 1200px;
+      padding: max(12px, calc(env(safe-area-inset-top, 0px) + 8px)) 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
       width: 100%;
       margin: 0 auto;
-      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .top-bar-center {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-align: center;
+      flex: 1;
     }
 
     .brand-link {
@@ -189,34 +189,23 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 16px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #18181b;
       border: 1px solid var(--border-subtle);
       color: var(--text-main);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 500;
       transition: all 0.2s;
     }
 
     .back-btn:hover {
-      background: var(--bg-surface-hover);
-      transform: translateX(-2px);
+      background: #27272a;
     }
 
     .theme-toggle-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
+      display: none;
     }
 
     .lang-toggle-btn {
@@ -663,21 +652,18 @@
   <div id="toastEl" class="toast"></div>
 
   <header class="top-bar">
-    <a href="index.html" class="brand-link">
-      <img src="app_logo.png" alt="Alokpoth Logo" class="brand-logo">
-      <span>Alokpoth AI</span>
+    <a href="index.html" class="back-btn" id="backToChatBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      <span id="backToChatText">Alo AI</span>
     </a>
+    <div class="top-bar-center" id="plansPageTitle">Plans &amp; Pricing</div>
     <div class="top-actions">
       <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
         <span id="langBtnText">EN</span>
       </button>
-      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-      </button>
-      <a href="index.html" class="back-btn">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        <span id="backToChatText">চ্যাটে ফিরে যান</span>
-      </a>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" style="display:none;" title="থিম পরিবর্তন"></button>
     </div>
   </header>
 
@@ -837,8 +823,8 @@
     // i18n Dictionary
     const I18N_PLANS = {
       bn: {
-        pageTitle: "প্ল্যান ও মূল্য তালিকা — Alokpoth AI",
-        backToChat: "চ্যাটে ফিরে যান",
+        pageTitle: "প্ল্যান ও মূল্য — Alo AI",
+        backToChat: "Alo AI",
         themeToggle: "থিম পরিবর্তন",
         heroTitle: "আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন",
         heroSubtitle: "দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা",
@@ -891,8 +877,8 @@
         serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
       },
       en: {
-        pageTitle: "Plans & Pricing — Alokpoth AI",
-        backToChat: "Back to Chat",
+        pageTitle: "Plans & Pricing — Alo AI",
+        backToChat: "Alo AI",
         themeToggle: "Change Theme",
         heroTitle: "Choose the Perfect Plan for Your Needs",
         heroSubtitle: "Fastest AI for everyday questions, deep coding, and extensive research",
@@ -967,6 +953,9 @@
 
       const backToChatText = document.getElementById("backToChatText");
       if (backToChatText) backToChatText.textContent = d.backToChat;
+
+      const pageTitleEl = document.getElementById("plansPageTitle");
+      if (pageTitleEl) pageTitleEl.textContent = isEn ? "Plans & Pricing" : "প্ল্যান ও মূল্য";
 
       const heroTitle = document.getElementById("heroTitle");
       if (heroTitle) heroTitle.textContent = d.heroTitle;

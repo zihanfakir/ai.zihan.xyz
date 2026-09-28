@@ -1618,6 +1618,9 @@
     .mic-rec-text {
       display: none !important;
     }
+    #accountModalOverlay, #chatHistoryModalOverlay {
+      display: none !important;
+    }
 
     .native-tool-btn {
       width: 36px;
@@ -8112,33 +8115,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function openAccountModal(targetTab = "") {
       if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
       if (typeof closeBrandMenu === "function") closeBrandMenu();
-      if (accountModalOverlay) {
-        if (targetTab === "limits" || targetTab === "settingsLimitsView" || targetTab === "tabPlan") {
-          showSettingsView("settingsLimitsView");
-        } else if (targetTab === "account" || targetTab === "settingsAccountView") {
-          showSettingsView("settingsAccountView");
-        } else if (targetTab === "redeem" || targetTab === "settingsRedeemView") {
-          showSettingsView("settingsRedeemView");
-        } else if (targetTab === "language" || targetTab === "settingsLanguageView") {
-          showSettingsView("settingsLanguageView");
-        } else if (targetTab === "theme" || targetTab === "settingsThemeView") {
-          showSettingsView("settingsThemeView");
-        } else {
-          showSettingsView("settingsMainView");
-        }
-        accountModalOverlay.classList.add("open");
-        pushPageState("account");
-        syncUserProfileFromServer();
-        syncPlanLimitsFromServer();
-        renderCreditBalance();
-        startQuotaCountdownTimer();
-        refreshLanguageSubpageUI();
-        refreshThemeSubpageUI();
-        applyI18n();
-      } else {
-        const url = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
-        window.location.href = url;
-      }
+      const url = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
+      window.location.href = url;
     }
     window.openAccountModal = openAccountModal;
 

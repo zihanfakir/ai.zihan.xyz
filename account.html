@@ -1534,6 +1534,25 @@
       renderUserData();
     }, 1000);
 
+    // Auto-open requested modal from URL parameter
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get("tab");
+      if (tab) {
+        if (tab === "tabPlan" || tab === "subscription" || tab === "settingsPlanView") {
+          openModal("modalSubscription");
+        } else if (tab === "limits" || tab === "settingsLimitsView" || tab === "usage") {
+          openModal("modalUsage");
+        } else if (tab === "redeem" || tab === "settingsRedeemView") {
+          openModal("modalRedeem");
+        } else if (tab === "account" || tab === "settingsAccountView") {
+          openModal("modalAccount");
+        } else if (tab === "help") {
+          openModal("modalHelp");
+        }
+      }
+    } catch (e) {}
+
     // Logout Action
     document.getElementById("logoutBtn")?.addEventListener("click", () => {
       const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
