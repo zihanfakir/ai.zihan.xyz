@@ -791,6 +791,22 @@
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
+
+      <div class="row-divider"></div>
+
+      <!-- Download App Row -->
+      <div class="settings-row" id="rowDownloadApp" role="button" tabindex="0">
+        <div class="row-lead">
+          <span class="row-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </span>
+          <span class="row-title" id="downloadAppRowLabel">Download App</span>
+        </div>
+        <div class="row-tail">
+          <span class="row-tail-text" style="color: var(--accent-primary); font-weight: 600;">APK</span>
+          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
     </div>
 
     <!-- CARD 6: Log out Card -->
@@ -1053,7 +1069,8 @@
         passMismatch: "নতুন পাসওয়ার্ড দুটি মিলছে না",
         passShort: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
         codeEmpty: "অনুগ্রহ করে রিডিম কোডটি লিখুন",
-        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি"
+        serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি",
+        downloadAppLabel: "অ্যাপ ডাউনলোড"
       },
       en: {
         pageTitle: "Settings — Alo AI",
@@ -1108,7 +1125,8 @@
         passMismatch: "New passwords do not match",
         passShort: "New password must be at least 6 characters",
         codeEmpty: "Please enter a redeem code",
-        serverErr: "Could not connect to server"
+        serverErr: "Could not connect to server",
+        downloadAppLabel: "Download App"
       }
     };
 
@@ -1166,6 +1184,9 @@
 
       const redeemRowLabel = document.getElementById("redeemRowLabel");
       if (redeemRowLabel) redeemRowLabel.textContent = d.redeemLabel;
+
+      const downloadAppRowLabel = document.getElementById("downloadAppRowLabel");
+      if (downloadAppRowLabel) downloadAppRowLabel.textContent = d.downloadAppLabel;
 
       const logoutBtnText = document.getElementById("logoutBtnText");
       if (logoutBtnText) logoutBtnText.textContent = d.logout;
@@ -1260,6 +1281,12 @@
     document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization.html"; });
     document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help.html"; });
     document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem.html"; });
+    document.getElementById("rowDownloadApp")?.addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = "AloAI.apk";
+      a.download = "AloAI.apk";
+      a.click();
+    });
 
     // Language Toggle
     const toggleLanguage = () => {
