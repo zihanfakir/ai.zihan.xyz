@@ -588,6 +588,85 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
 
 
 
+// Helper for executing image generation via configured provider/model
+async function executeImageGeneration(prompt, forcedSettings = null) {
+  const { getSystemSettings, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+  const settings = forcedSettings || await getSystemSettings();
+  const cleanPrompt = String(prompt || '').trim().slice(0, 1000);
+  if (!cleanPrompt) throw new Error('অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।');
+
+  const imageModel = String(settings.image_model || 'flux-1-schnell').trim();
+  const targetUrl = String(settings.image_api_url || 'https://vyceai.com/v1/images/generations').trim();
+  const imageSize = String(settings.image_size || '1024x1024').trim();
+
+  // Pollinations Free Generator
+  if (imageModel.toLowerCase() === 'pollinations' || targetUrl.toLowerCase().includes('pollinations')) {
+    const encoded = encodeURIComponent(cleanPrompt);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
+    return { url: pollinationsUrl, model: 'pollinations', provider: 'pollinations' };
+  }
+
+  let targetKey = String(settings.image_api_key || process.env.IMAGE_API_KEY || process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY || '').trim();
+  if (!targetKey) {
+    targetKey = (await getApiKeyFromSupabase('__image_key__')) || (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6')) || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
+  }
+  if (!targetKey) {
+    throw new Error('ছবি তৈরির সার্ভিস এই মুহূর্তে কনফিগার করা হয়নি। অ্যাডমিন প্যানেল থেকে Image API Key সেট করুন।');
+  }
+
+  const reqPayload = {
+    prompt: cleanPrompt,
+    n: 1,
+    size: imageSize
+  };
+  if (imageModel && imageModel !== 'default' && imageModel !== 'vyceai-default') {
+    reqPayload.model = imageModel;
+  }
+
+  const imgAbortController = new AbortController();
+  const imgTimeout = setTimeout(() => imgAbortController.abort(), 35000);
+
+  let response;
+  try {
+    response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${targetKey}`
+      },
+      body: JSON.stringify(reqPayload),
+      signal: imgAbortController.signal
+    });
+  } catch (fetchErr) {
+    clearTimeout(imgTimeout);
+    if (fetchErr.name === 'AbortError') {
+      throw new Error('ছবি তৈরিতে অতিরিক্ত সময় লেগেছে, অনুগ্রহ করে আবার চেষ্টা করুন।');
+    }
+    throw fetchErr;
+  }
+  clearTimeout(imgTimeout);
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    console.error('[Image Gen Upstream Error]:', response.status, errText.slice(0, 250));
+    throw new Error(`ছবি তৈরি করতে সমস্যা হয়েছে (HTTP ${response.status})`);
+  }
+
+  const data = await response.json().catch(() => null);
+  const item = data?.data?.[0];
+  if (item?.url) {
+    return { url: item.url, model: imageModel };
+  } else if (item?.b64_json) {
+    return { url: `data:image/png;base64,${item.b64_json}`, model: imageModel };
+  } else if (data?.url) {
+    return { url: data.url, model: imageModel };
+  } else if (Array.isArray(data?.images) && data.images[0]) {
+    return { url: data.images[0], model: imageModel };
+  }
+
+  throw new Error('রেসপন্সে কোনো ছবি পাওয়া যায়নি।');
+}
+
 const generateImage = async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -595,87 +674,41 @@ const generateImage = async (req, res) => {
       return res.status(400).json({ success: false, error: 'অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।' });
     }
 
-    const cleanPrompt = prompt.trim().slice(0, 1000);
-    let targetKey = process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY;
-    if (!targetKey) {
-      targetKey = (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6')) || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
-    }
-    if (!targetKey) {
-      return res.status(503).json({ success: false, error: 'ছবি তৈরির সার্ভিস এই মুহূর্তে কনফিগার করা হয়নি।' });
-    }
+    const imgResult = await executeImageGeneration(prompt);
 
-    const targetUrl = 'https://vyceai.com/v1/images/generations';
-
-    const imgAbortController = new AbortController();
-    const imgTimeout = setTimeout(() => imgAbortController.abort(), 35000);
-
-    let response;
-    try {
-      response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${targetKey}`
-        },
-        body: JSON.stringify({ prompt: cleanPrompt, n: 1, size: '1024x1024' }),
-        signal: imgAbortController.signal
-      });
-    } catch (fetchErr) {
-      clearTimeout(imgTimeout);
-      if (fetchErr.name === 'AbortError') {
-        return res.status(504).json({ success: false, error: 'ছবি তৈরিতে অতিরিক্ত সময় লেগেছে, অনুগ্রহ করে আবার চেষ্টা করুন।' });
-      }
-      throw fetchErr;
-    }
-    clearTimeout(imgTimeout);
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.error('[Image Gen Upstream Error]:', response.status, errText.slice(0, 200));
-      return res.status(response.status).json({ success: false, error: 'ছবি তৈরি করতে সমস্যা হয়েছে, অনুগ্রহ করে আবার চেষ্টা করুন।' });
-    }
-
-    const data = await response.json().catch(() => null);
-    const item = data?.data?.[0];
-    if (item?.url || item?.b64_json) {
-      // Record usage log for image generation
-      const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
-      if (userId) {
-        if (getIsMongoConnected()) {
-          UsageLog.create({
-            user_id: userId,
-            model_id: 'image-generation',
-            timestamp: new Date()
-          }).catch(() => {});
-        } else {
-          memoryStore.usageLogs.push({
-            _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-            user_id: userId,
-            model_id: 'image-generation',
-            timestamp: new Date()
-          });
-          if (memoryStore.usageLogs.length > 5000) {
-            memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
-          }
-          debouncedSave();
-        }
-        const { incrementUserImageUsage } = require('../../utils/getModelConfig');
-        incrementUserImageUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
-      }
-
-      if (item?.url) {
-        return res.json({ success: true, url: item.url });
+    // Record usage log for image generation
+    const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
+    if (userId) {
+      if (getIsMongoConnected()) {
+        UsageLog.create({
+          user_id: userId,
+          model_id: 'image-generation',
+          timestamp: new Date()
+        }).catch(() => {});
       } else {
-        return res.json({ success: true, url: `data:image/png;base64,${item.b64_json}` });
+        memoryStore.usageLogs.push({
+          _id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          user_id: userId,
+          model_id: 'image-generation',
+          timestamp: new Date()
+        });
+        if (memoryStore.usageLogs.length > 5000) {
+          memoryStore.usageLogs = memoryStore.usageLogs.slice(-5000);
+        }
+        debouncedSave();
       }
+      const { incrementUserImageUsage } = require('../../utils/getModelConfig');
+      incrementUserImageUsage(userId, req.currentPlan ? req.currentPlan.window_hours : 3).catch(() => {});
     }
-    return res.status(500).json({ success: false, error: 'রেসপন্সে কোনো ছবি পাওয়া যায়নি।' });
+
+    return res.json({ success: true, url: imgResult.url, model: imgResult.model });
   } catch (error) {
     console.error('[Image Gen Error]:', error.message);
-    return res.status(500).json({ success: false, error: 'সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।' });
+    const statusCode = error.message.includes('কনফিগার করা হয়নি') ? 503 : (error.message.includes('অতিরিক্ত সময়') ? 504 : 500);
+    return res.status(statusCode).json({ success: false, error: error.message || 'ছবি তৈরি করতে সমস্যা হয়েছে।' });
   }
 };
 
-module.exports = { streamChatCompletions, generateImage };
+module.exports = { streamChatCompletions, generateImage, executeImageGeneration };
 
 

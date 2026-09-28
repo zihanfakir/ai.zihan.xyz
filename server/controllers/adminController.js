@@ -1494,6 +1494,42 @@ const updateSettings = async (req, res) => {
   }
 };
 
+const testWebSearchSetting = async (req, res) => {
+  try {
+    const { query, provider, api_key, custom_url, max_results } = req.body || {};
+    const cleanQuery = String(query || 'AI news').trim();
+    const { executeSearch } = require('./searchController');
+    const forcedSettings = {
+      web_search_provider: provider,
+      web_search_api_key: api_key,
+      web_search_custom_url: custom_url,
+      web_search_max_results: max_results
+    };
+    const result = await executeSearch(cleanQuery, forcedSettings);
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const testImageGenSetting = async (req, res) => {
+  try {
+    const { prompt, model, api_url, api_key, size } = req.body || {};
+    const cleanPrompt = String(prompt || 'a cute glowing baby robot in cybernetic world, photorealistic, 8k').trim();
+    const { executeImageGeneration } = require('./chatController');
+    const forcedSettings = {
+      image_model: model,
+      image_api_url: api_url,
+      image_api_key: api_key,
+      image_size: size
+    };
+    const result = await executeImageGeneration(cleanPrompt, forcedSettings);
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = { 
   getModels, 
   updateModel, 
@@ -1512,6 +1548,8 @@ module.exports = {
   deleteRedeemCode,
   createCustomRedeemCode,
   getSettings,
-  updateSettings
+  updateSettings,
+  testWebSearchSetting,
+  testImageGenSetting
 };
 

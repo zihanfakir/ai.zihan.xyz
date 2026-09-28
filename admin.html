@@ -734,6 +734,7 @@
       <button type="button" class="tab-btn" data-target="secPlans">ডাইনামিক প্ল্যান সেটিংস</button>
       <button type="button" class="tab-btn" data-target="secRedeem">রিডিম কোড জেনারেটর</button>
       <button type="button" class="tab-btn" data-target="secModels">মডেল সেটিংস</button>
+      <button type="button" class="tab-btn" data-target="secSettings">ইমেজ ও সার্চ API</button>
     </div>
 
     <!-- Section 1: User Management -->
@@ -971,6 +972,153 @@
       </div>
     </div>
 
+    <!-- Section 5: System & API Settings (Image Model & Web Search API) -->
+    <div class="section" id="secSettings">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+        <h3 id="settingsSectionHeader">ইমেজ মডেল ও ওয়েব সার্চ API কনফিগারেশন</h3>
+      </div>
+
+      <!-- Card 1: Image Generation Model & API Settings -->
+      <form id="imageSettingsForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 20px; border-radius: 14px; display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+          <h4 style="color: #60a5fa; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <span>🎨</span> ছবি তৈরির মডেল ও API কনফিগারেশন (Image Generation)
+          </h4>
+          <span style="font-size: 0.8rem; color: var(--text-muted); background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); padding: 3px 10px; border-radius: 999px;">AI Image Engine</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1.2; min-width: 220px;">
+            <label>ইমেজ মডেল প্রিসেট (Model Preset)</label>
+            <select id="imageModelPreset" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.9rem;">
+              <option value="flux-1-schnell">Flux.1 Schnell (High Speed, Photorealistic - Recommended)</option>
+              <option value="flux-1-dev">Flux.1 Dev (Ultra High Quality & Nuance)</option>
+              <option value="dall-e-3">DALL-E 3 (OpenAI Standard)</option>
+              <option value="dall-e-2">DALL-E 2 (OpenAI Legacy)</option>
+              <option value="recraft-v3">Recraft V3 (Design & Vector Art)</option>
+              <option value="stability-ai/sdxl">Stable Diffusion XL (SDXL)</option>
+              <option value="pollinations">Pollinations.ai (Free Direct Fallback - No Key Needed)</option>
+              <option value="custom">কাস্টম মডেল আইডি (Custom Model ID)...</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 1; min-width: 200px;">
+            <label>সক্রিয় মডেল আইডি (Active Model ID) *</label>
+            <input type="text" id="settingImageModel" required placeholder="e.g. flux-1-schnell">
+          </div>
+
+          <div class="form-group" style="flex: 0.8; min-width: 160px;">
+            <label>ডিফল্ট ছবির মাপ (Default Size)</label>
+            <select id="settingImageSize" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.9rem;">
+              <option value="1024x1024">1024x1024 (বর্গাকার / Square)</option>
+              <option value="1024x1792">1024x1792 (লম্বা / Portrait 9:16)</option>
+              <option value="1792x1024">1792x1024 (ওয়াইড / Landscape 16:9)</option>
+              <option value="512x512">512x512 (দ্রুত / Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1.5; min-width: 260px;">
+            <label>ইমেজ API Base URL (OpenAI-compatible Endpoint)</label>
+            <input type="text" id="settingImageUrl" placeholder="https://vyceai.com/v1/images/generations">
+            <span style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">ডিফল্ট: VyceAI বা OpenAI-কম্প্যাটিবল ইমেজ এন্ডপয়েন্ট। Pollinations হলে ফাঁকা রাখতে পারেন।</span>
+          </div>
+
+          <div class="form-group" style="flex: 1.2; min-width: 220px;">
+            <label>ইমেজ API Key</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="settingImageKey" placeholder="sk-... বা vyce API key" style="width: 100%; padding-right: 40px;">
+              <button type="button" class="btn-icon" onclick="togglePasswordVisibility('settingImageKey')" style="position: absolute; right: 6px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;" title="পাসওয়ার্ড দেখান / লুকান">
+                👁
+              </button>
+            </div>
+            <span style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">সার্ভারে সুরক্ষিত এনক্রিপশনে সংরক্ষিত হয়।</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btnTestImageGen" class="btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; font-size: 0.85rem; padding: 8px 16px;">
+            🧪 টেস্ট ছবি তৈরি করুন
+          </button>
+          <button type="submit" id="btnSaveImageSettings" class="btn btn-primary" style="padding: 9px 24px;">
+            💾 ইমেজ সেটিংস সংরক্ষণ করুন
+          </button>
+        </div>
+
+        <!-- Live Image Test Preview Box -->
+        <div id="imageTestResultBox" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-top: 6px;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: #60a5fa; margin-bottom: 8px;">টেস্ট রেজাল্ট:</div>
+          <div id="imageTestOutput" style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;"></div>
+        </div>
+      </form>
+
+      <!-- Card 2: Web Search API Settings -->
+      <form id="webSearchSettingsForm" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 20px; border-radius: 14px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+          <h4 style="color: #34d399; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <span>🌐</span> ওয়েব সার্চ API কনফিগারেশন (Web Search Engine)
+          </h4>
+          <span style="font-size: 0.8rem; color: var(--text-muted); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); padding: 3px 10px; border-radius: 999px;">Live Browsing</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1.2; min-width: 220px;">
+            <label>ওয়েব সার্চ প্রোভাইডার (Search Engine Provider) *</label>
+            <select id="settingSearchProvider" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.9rem;">
+              <option value="tavily">Tavily Search API (AI Optimized & Clean Summaries - Recommended)</option>
+              <option value="serper">Serper.dev (Google Real-Time Search API)</option>
+              <option value="brave">Brave Search API (High Privacy Web Index)</option>
+              <option value="duckduckgo">DuckDuckGo HTML Scraper (Free - No API Key Needed)</option>
+              <option value="custom">Custom Web Search Proxy API...</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 1.3; min-width: 240px;">
+            <label>সার্চ API Key (Search API Key)</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="settingSearchKey" placeholder="tvly-... বা serper key" style="width: 100%; padding-right: 40px;">
+              <button type="button" class="btn-icon" onclick="togglePasswordVisibility('settingSearchKey')" style="position: absolute; right: 6px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;" title="পাসওয়ার্ড দেখান / লুকান">
+                👁
+              </button>
+            </div>
+            <span style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">DuckDuckGo সিলেক্ট থাকলে এটি ফাঁকা রাখতে পারেন।</span>
+          </div>
+
+          <div class="form-group" style="flex: 0.7; min-width: 140px;">
+            <label>সর্বোচ্চ ফলাফল (Max Results)</label>
+            <select id="settingSearchMaxResults" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.9rem;">
+              <option value="3">৩টি স্নিপেট</option>
+              <option value="4" selected>৪টি স্নিপেট (Recommended)</option>
+              <option value="5">৫টি স্নিপেট</option>
+              <option value="8">৮টি স্নিপেট</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" id="customSearchUrlRow" style="display: none;">
+          <div class="form-group" style="flex: 1;">
+            <label>কাস্টম সার্চ API এন্ডপয়েন্ট URL</label>
+            <input type="text" id="settingSearchCustomUrl" placeholder="https://your-search-proxy.com/api/search">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btnTestWebSearch" class="btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; font-size: 0.85rem; padding: 8px 16px;">
+            🧪 টেস্ট সার্চ করুন
+          </button>
+          <button type="submit" id="btnSaveSearchSettings" class="btn btn-primary" style="padding: 9px 24px;">
+            💾 ওয়েব সার্চ সেটিংস সংরক্ষণ করুন
+          </button>
+        </div>
+
+        <!-- Live Search Test Preview Box -->
+        <div id="searchTestResultBox" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-top: 6px;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 8px;">টেস্ট সার্চ রেজাল্ট:</div>
+          <pre id="searchTestOutput" style="font-size: 0.82rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin: 0; max-height: 220px; overflow-y: auto;"></pre>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
@@ -1162,12 +1310,12 @@
         tabPlans: "Plan Settings",
         tabRedeem: "Redeem Codes",
         tabModels: "AI Models",
-        tabSettings: "System Settings",
+        tabSettings: "Image & Search APIs",
         usersHeader: "User Directory & Account Controls",
         plansHeader: "Dynamic Plan Settings",
         redeemHeader: "Redeem Code Generator",
         modelsHeader: "AI Model Settings",
-        settingsHeader: "System Prompt & Global Configuration",
+        settingsHeader: "Image Model & Web Search API Configuration",
         searchUserPlaceholder: "Search users (name, email, or plan)...",
         thName: "Name",
         thEmail: "Email",
@@ -1190,12 +1338,12 @@
         tabPlans: "প্ল্যান সেটিংস",
         tabRedeem: "রিডিম কোড",
         tabModels: "AI মডেল",
-        tabSettings: "সিস্টেম সেটিংস",
+        tabSettings: "ইমেজ ও সার্চ API",
         usersHeader: "ইউজার তালিকা ও অ্যাকাউন্ট নিয়ন্ত্রণ",
         plansHeader: "ডাইনামিক প্ল্যান সেটিংস",
         redeemHeader: "রিডিম কোড জেনারেটর",
         modelsHeader: "AI মডেল সেটিংস",
-        settingsHeader: "সিস্টেম প্রম্পট ও গ্লোবাল কনফিগারেশন",
+        settingsHeader: "ইমেজ মডেল ও ওয়েব সার্চ API কনফিগারেশন",
         searchUserPlaceholder: "ইউজার খুঁজুন (নাম, ইমেইল বা প্ল্যান)...",
         thName: "নাম",
         thEmail: "ইমেইল",
@@ -1245,6 +1393,9 @@
         tabBtns[3].textContent = d.tabModels;
         tabBtns[4].textContent = d.tabSettings;
       }
+
+      const sHead = document.getElementById("settingsSectionHeader");
+      if (sHead) sHead.textContent = d.settingsHeader;
 
       const uSearch = document.getElementById("userSearchInput");
       if (uSearch) uSearch.placeholder = d.searchUserPlaceholder;
@@ -1338,6 +1489,7 @@
       loadPlans();
       loadRedeemCodes();
       loadModels();
+      loadSettings();
     }
 
     async function loadStats() {
@@ -2470,6 +2622,257 @@
       }
     }
 
+    /* ===================================================
+       System Settings (Image Model & Web Search API)
+       =================================================== */
+    let currentSystemSettings = {};
+
+    function togglePasswordVisibility(inputId) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      el.type = el.type === "password" ? "text" : "password";
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await authFetch(`${API_BASE}/admin/settings`);
+        const data = await res.json();
+        if (data.success && data.settings) {
+          currentSystemSettings = data.settings;
+          const s = data.settings;
+
+          // Image Model Fields
+          const imgModel = s.image_model || "flux-1-schnell";
+          const inputImgModel = document.getElementById("settingImageModel");
+          if (inputImgModel) inputImgModel.value = imgModel;
+
+          const presetEl = document.getElementById("imageModelPreset");
+          if (presetEl) {
+            const hasOption = Array.from(presetEl.options).some(o => o.value === imgModel);
+            presetEl.value = hasOption ? imgModel : "custom";
+          }
+
+          const inputImgUrl = document.getElementById("settingImageUrl");
+          if (inputImgUrl) inputImgUrl.value = s.image_api_url || "https://vyceai.com/v1/images/generations";
+
+          const inputImgKey = document.getElementById("settingImageKey");
+          if (inputImgKey) inputImgKey.value = s.image_api_key || "";
+
+          const inputImgSize = document.getElementById("settingImageSize");
+          if (inputImgSize) inputImgSize.value = s.image_size || "1024x1024";
+
+          // Web Search Fields
+          const searchProvider = s.web_search_provider || "duckduckgo";
+          const selectSearchProvider = document.getElementById("settingSearchProvider");
+          if (selectSearchProvider) selectSearchProvider.value = searchProvider;
+
+          const inputSearchKey = document.getElementById("settingSearchKey");
+          if (inputSearchKey) inputSearchKey.value = s.web_search_api_key || "";
+
+          const selectMaxResults = document.getElementById("settingSearchMaxResults");
+          if (selectMaxResults) selectMaxResults.value = String(s.web_search_max_results || "4");
+
+          const inputCustomUrl = document.getElementById("settingSearchCustomUrl");
+          if (inputCustomUrl) inputCustomUrl.value = s.web_search_custom_url || "";
+
+          const customRow = document.getElementById("customSearchUrlRow");
+          if (customRow) customRow.style.display = (searchProvider === "custom") ? "flex" : "none";
+        }
+      } catch (err) {
+        console.warn("Failed to load settings:", err);
+      }
+    }
+
+    // Image Model Preset change listener
+    const imgPresetSelect = document.getElementById("imageModelPreset");
+    if (imgPresetSelect) {
+      imgPresetSelect.addEventListener("change", () => {
+        const val = imgPresetSelect.value;
+        const inputImgModel = document.getElementById("settingImageModel");
+        const inputImgUrl = document.getElementById("settingImageUrl");
+        if (val !== "custom" && inputImgModel) {
+          inputImgModel.value = val;
+        }
+        if (val === "pollinations" && inputImgUrl) {
+          inputImgUrl.value = "https://image.pollinations.ai/prompt";
+        } else if ((val === "dall-e-3" || val === "dall-e-2") && inputImgUrl && inputImgUrl.value.includes("vyceai.com")) {
+          inputImgUrl.value = "https://api.openai.com/v1/images/generations";
+        }
+      });
+    }
+
+    // Web Search Provider change listener
+    const searchProviderSelect = document.getElementById("settingSearchProvider");
+    if (searchProviderSelect) {
+      searchProviderSelect.addEventListener("change", () => {
+        const val = searchProviderSelect.value;
+        const customRow = document.getElementById("customSearchUrlRow");
+        if (customRow) customRow.style.display = (val === "custom") ? "flex" : "none";
+      });
+    }
+
+    // Save Image Settings
+    const imageSettingsForm = document.getElementById("imageSettingsForm");
+    if (imageSettingsForm) {
+      imageSettingsForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnSaveImageSettings");
+        if (btn) btn.disabled = true;
+
+        const payload = {
+          image_model: (document.getElementById("settingImageModel")?.value || "").trim(),
+          image_api_url: (document.getElementById("settingImageUrl")?.value || "").trim(),
+          image_api_key: (document.getElementById("settingImageKey")?.value || "").trim(),
+          image_size: (document.getElementById("settingImageSize")?.value || "1024x1024").trim()
+        };
+
+        try {
+          const res = await authFetch(`${API_BASE}/admin/settings`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast("ইমেজ মডেল সেটিংস সফলভাবে সংরক্ষিত হয়েছে", "success");
+            loadSettings();
+          } else {
+            showToast(data.error || "সেভ করতে সমস্যা হয়েছে", "error");
+          }
+        } catch (err) {
+          showToast("সার্ভারে সমস্যা হয়েছে", "error");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    // Save Web Search Settings
+    const webSearchSettingsForm = document.getElementById("webSearchSettingsForm");
+    if (webSearchSettingsForm) {
+      webSearchSettingsForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnSaveSearchSettings");
+        if (btn) btn.disabled = true;
+
+        const payload = {
+          web_search_provider: (document.getElementById("settingSearchProvider")?.value || "duckduckgo").trim(),
+          web_search_api_key: (document.getElementById("settingSearchKey")?.value || "").trim(),
+          web_search_max_results: parseInt(document.getElementById("settingSearchMaxResults")?.value || "4", 10),
+          web_search_custom_url: (document.getElementById("settingSearchCustomUrl")?.value || "").trim()
+        };
+
+        try {
+          const res = await authFetch(`${API_BASE}/admin/settings`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast("ওয়েব সার্চ সেটিংস সফলভাবে সংরক্ষিত হয়েছে", "success");
+            loadSettings();
+          } else {
+            showToast(data.error || "সেভ করতে সমস্যা হয়েছে", "error");
+          }
+        } catch (err) {
+          showToast("সার্ভারে সমস্যা হয়েছে", "error");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    // Test Image Generation
+    const btnTestImageGen = document.getElementById("btnTestImageGen");
+    if (btnTestImageGen) {
+      btnTestImageGen.addEventListener("click", async () => {
+        btnTestImageGen.disabled = true;
+        btnTestImageGen.textContent = "ছবি তৈরি হচ্ছে...";
+        const box = document.getElementById("imageTestResultBox");
+        const out = document.getElementById("imageTestOutput");
+        if (box) box.style.display = "block";
+        if (out) out.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">ছবি জেনারেট হচ্ছে, অনুগ্রহ করে ১০-১৫ সেকেন্ড অপেক্ষা করুন...</span>';
+
+        const payload = {
+          prompt: "a majestic neon glowing cyber lion in futuristic digital city, photorealistic, 8k",
+          model: (document.getElementById("settingImageModel")?.value || "").trim(),
+          api_url: (document.getElementById("settingImageUrl")?.value || "").trim(),
+          api_key: (document.getElementById("settingImageKey")?.value || "").trim(),
+          size: (document.getElementById("settingImageSize")?.value || "1024x1024").trim()
+        };
+
+        try {
+          const res = await authFetch(`${API_BASE}/admin/settings/test-image`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success && data.url) {
+            showToast("টেস্ট ছবি সফলভাবে তৈরি হয়েছে!", "success");
+            if (out) {
+              out.innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <img src="${escapeHtml(data.url)}" alt="Test Image" style="max-width:240px;max-height:240px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 15px rgba(0,0,0,0.4);">
+                  <span style="font-size:0.75rem;color:#34d399;">✓ মডেল: ${escapeHtml(data.model || payload.model)}</span>
+                  <a href="${escapeHtml(data.url)}" target="_blank" style="font-size:0.78rem;color:#60a5fa;text-decoration:underline;">নতুন ট্যাবে বড় করে দেখুন</a>
+                </div>
+              `;
+            }
+          } else {
+            showToast(data.error || "টেস্ট ছবি তৈরিতে ত্রুটি", "error");
+            if (out) out.innerHTML = `<span style="color:#ef4444;font-size:0.85rem;">✕ ত্রুটি: ${escapeHtml(data.error || 'ছবি তৈরি ব্যর্থ হয়েছে')}</span>`;
+          }
+        } catch (err) {
+          showToast("সার্ভার ত্রুটি", "error");
+          if (out) out.innerHTML = `<span style="color:#ef4444;font-size:0.85rem;">✕ ত্রুটি: ${escapeHtml(err.message)}</span>`;
+        } finally {
+          btnTestImageGen.disabled = false;
+          btnTestImageGen.textContent = "🧪 টেস্ট ছবি তৈরি করুন";
+        }
+      });
+    }
+
+    // Test Web Search
+    const btnTestWebSearch = document.getElementById("btnTestWebSearch");
+    if (btnTestWebSearch) {
+      btnTestWebSearch.addEventListener("click", async () => {
+        btnTestWebSearch.disabled = true;
+        btnTestWebSearch.textContent = "সার্চ হচ্ছে...";
+        const box = document.getElementById("searchTestResultBox");
+        const out = document.getElementById("searchTestOutput");
+        if (box) box.style.display = "block";
+        if (out) out.textContent = "সার্চ অনুরোধ পাঠানো হয়েছে, ফলাফল আসছে...";
+
+        const payload = {
+          query: "latest breakthroughs in artificial intelligence",
+          provider: (document.getElementById("settingSearchProvider")?.value || "duckduckgo").trim(),
+          api_key: (document.getElementById("settingSearchKey")?.value || "").trim(),
+          max_results: parseInt(document.getElementById("settingSearchMaxResults")?.value || "4", 10),
+          custom_url: (document.getElementById("settingSearchCustomUrl")?.value || "").trim()
+        };
+
+        try {
+          const res = await authFetch(`${API_BASE}/admin/settings/test-search`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success && data.results) {
+            showToast(`সার্চ সফল! (প্রোভাইডার: ${data.provider || payload.provider})`, "success");
+            if (out) out.textContent = `[প্রোভাইডার: ${data.provider || payload.provider}]\n\n${data.results}`;
+          } else {
+            showToast(data.error || "সার্চ করতে ত্রুটি হয়েছে", "error");
+            if (out) out.textContent = `✕ ত্রুটি: ${data.error || "ফলাফল পাওয়া যায়নি"}`;
+          }
+        } catch (err) {
+          showToast("সার্ভার ত্রুটি", "error");
+          if (out) out.textContent = `✕ ত্রুটি: ${err.message}`;
+        } finally {
+          btnTestWebSearch.disabled = false;
+          btnTestWebSearch.textContent = "🧪 টেস্ট সার্চ করুন";
+        }
+      });
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         const activePromptCancel = document.querySelector("#promptModalOverlay.open #promptModalCancelBtn");
@@ -2483,7 +2886,6 @@
         document.querySelectorAll(".custom-modal-overlay.open").forEach(o => o.classList.remove("open"));
       }
     });
-
 
   </script>
 </body>

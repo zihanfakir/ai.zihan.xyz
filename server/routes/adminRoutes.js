@@ -18,7 +18,9 @@ const {
   deleteModel,
   reorderModels,
   getSettings,
-  updateSettings
+  updateSettings,
+  testWebSearchSetting,
+  testImageGenSetting
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { adminOnly } = require('../middleware/adminMiddleware');
@@ -30,6 +32,8 @@ router.use(adminOnly);
 router.get('/stats', getAdminStats);
 router.get('/settings', getSettings);
 router.put('/settings', updateSettings);
+router.post('/settings/test-search', testWebSearchSetting);
+router.post('/settings/test-image', testImageGenSetting);
 router.get('/users', getUsers);
 router.delete('/users/:userId', deleteUser);
 router.put('/users/:userId/plan', updateUserPlan);

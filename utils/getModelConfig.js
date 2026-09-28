@@ -722,7 +722,16 @@ async function getSystemSettings() {
     return settingsCache;
   }
 
-  const defaultSettings = {};
+  const defaultSettings = {
+    image_model: 'flux-1-schnell',
+    image_api_url: 'https://vyceai.com/v1/images/generations',
+    image_api_key: '',
+    image_size: '1024x1024',
+    web_search_provider: 'duckduckgo',
+    web_search_api_key: '',
+    web_search_custom_url: '',
+    web_search_max_results: 4
+  };
 
   if (supabase) {
     try {
