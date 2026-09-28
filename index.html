@@ -10654,6 +10654,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function detectImageGenRequest(text) {
       if (!text) return null;
       const patterns = [
+        /^\/(image|draw|img|pollinations)\b/i,
+        /^(pollinations|পোলিনেশন)\s*[:：\-]/i,
         /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন)/i,
         /(একটি|একটা|কিছু|আমাকে)?\s*(ছবি|ইমেজ|আর্ট|চিত্র|পেইন্টিং)\s*(এঁকে|বানিয়ে|তৈরি করে|জেনারেট করে)/i,
         /^\s*(draw|paint|sketch)\s+(a|an|the\s+)?([a-z0-9_\-\s]{2,})/i,
@@ -10875,6 +10877,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
           
           try {
             let imgPrompt = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
+            imgPrompt = imgPrompt.replace(/^\/(image|draw|img|pollinations)\s+/i, "").trim();
+            imgPrompt = imgPrompt.replace(/^(pollinations|পোলিনেশন)\s*[:：\-]\s*/i, "").trim();
             if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
             const imageUrl = await generateImageForVyceaiModel(imgPrompt);
             renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);

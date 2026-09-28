@@ -723,10 +723,11 @@ async function getSystemSettings() {
   }
 
   const defaultSettings = {
-    image_model: 'flux-1-schnell',
-    image_api_url: 'https://vyceai.com/v1/images/generations',
+    image_model: 'pollinations/flux',
+    image_api_url: 'https://image.pollinations.ai/prompt',
     image_api_key: '',
     image_size: '1024x1024',
+    image_enhance: true,
     web_search_provider: 'duckduckgo',
     web_search_api_key: '',
     web_search_custom_url: '',

@@ -991,14 +991,23 @@
           <div class="form-group" style="flex: 1.2; min-width: 220px;">
             <label>ইমেজ মডেল প্রিসেট (Model Preset)</label>
             <select id="imageModelPreset" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 0.9rem;">
-              <option value="flux-1-schnell">Flux.1 Schnell (High Speed, Photorealistic - Recommended)</option>
-              <option value="flux-1-dev">Flux.1 Dev (Ultra High Quality & Nuance)</option>
-              <option value="dall-e-3">DALL-E 3 (OpenAI Standard)</option>
-              <option value="dall-e-2">DALL-E 2 (OpenAI Legacy)</option>
-              <option value="recraft-v3">Recraft V3 (Design & Vector Art)</option>
-              <option value="stability-ai/sdxl">Stable Diffusion XL (SDXL)</option>
-              <option value="pollinations">Pollinations.ai (Free Direct Fallback - No Key Needed)</option>
-              <option value="custom">কাস্টম মডেল আইডি (Custom Model ID)...</option>
+              <optgroup label="🌸 Pollinations.ai (ফ্রি ও আনলিমিটেড - কোনো Key লাগবে না)">
+                <option value="pollinations/flux" selected>Pollinations: Flux.1 Schnell (ডিফল্ট - হাই কোয়ালিটি)</option>
+                <option value="pollinations/flux-realism">Pollinations: Flux Realism (বাস্তবানুগ ছবি)</option>
+                <option value="pollinations/flux-anime">Pollinations: Anime & Manga (অ্যানিমে আর্ট)</option>
+                <option value="pollinations/flux-3d">Pollinations: 3D Pixar Style (থ্রিডি আর্ট)</option>
+                <option value="pollinations/turbo">Pollinations: SDXL Turbo (অতি দ্রুত)</option>
+                <option value="pollinations/midjourney">Pollinations: Midjourney Style (আর্টিস্টিক)</option>
+              </optgroup>
+              <optgroup label="অন্যান্য প্রোভাইডার (API Key প্রয়োজন)">
+                <option value="flux-1-schnell">Flux.1 Schnell (VyceAI / Fal.ai)</option>
+                <option value="flux-1-dev">Flux.1 Dev (VyceAI / Fal.ai)</option>
+                <option value="dall-e-3">DALL-E 3 (OpenAI Standard)</option>
+                <option value="dall-e-2">DALL-E 2 (OpenAI Legacy)</option>
+                <option value="recraft-v3">Recraft V3 (Design & Vector Art)</option>
+                <option value="stability-ai/sdxl">Stable Diffusion XL (SDXL)</option>
+                <option value="custom">কাস্টম মডেল আইডি (Custom Model ID)...</option>
+              </optgroup>
             </select>
           </div>
 
@@ -1035,6 +1044,10 @@
             </div>
             <span style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">সার্ভারে সুরক্ষিত এনক্রিপশনে সংরক্ষিত হয়।</span>
           </div>
+        </div>
+
+        <div id="pollinationsInfoBadge" style="display: none; padding: 10px 14px; border-radius: 8px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; font-size: 0.82rem; margin-top: 6px;">
+          🌸 <strong>Pollinations.ai অ্যাক্টিভ:</strong> এটি ১০০% ফ্রি ও আনলিমিটেড ইমেজ জেনারেটর। কোনো API Key-র প্রয়োজন নেই। টেস্ট ছবি তৈরি করে প্রিভিউ দেখতে পারেন!
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 6px;">
@@ -2642,7 +2655,7 @@
           const s = data.settings;
 
           // Image Model Fields
-          const imgModel = s.image_model || "flux-1-schnell";
+          const imgModel = s.image_model || "pollinations/flux";
           const inputImgModel = document.getElementById("settingImageModel");
           if (inputImgModel) inputImgModel.value = imgModel;
 
@@ -2652,11 +2665,21 @@
             presetEl.value = hasOption ? imgModel : "custom";
           }
 
+          const polliBadge = document.getElementById("pollinationsInfoBadge");
+          if (polliBadge) {
+            polliBadge.style.display = (imgModel.includes("pollinations")) ? "block" : "none";
+          }
+
           const inputImgUrl = document.getElementById("settingImageUrl");
-          if (inputImgUrl) inputImgUrl.value = s.image_api_url || "https://vyceai.com/v1/images/generations";
+          if (inputImgUrl) inputImgUrl.value = s.image_api_url || (imgModel.includes("pollinations") ? "https://image.pollinations.ai/prompt" : "https://vyceai.com/v1/images/generations");
 
           const inputImgKey = document.getElementById("settingImageKey");
-          if (inputImgKey) inputImgKey.value = s.image_api_key || "";
+          if (inputImgKey) {
+            inputImgKey.value = s.image_api_key || "";
+            if (imgModel.includes("pollinations")) {
+              inputImgKey.placeholder = "API Key প্রয়োজন নেই (Pollinations সম্পূর্ণ ফ্রি)";
+            }
+          }
 
           const inputImgSize = document.getElementById("settingImageSize");
           if (inputImgSize) inputImgSize.value = s.image_size || "1024x1024";
@@ -2690,13 +2713,24 @@
         const val = imgPresetSelect.value;
         const inputImgModel = document.getElementById("settingImageModel");
         const inputImgUrl = document.getElementById("settingImageUrl");
+        const inputImgKey = document.getElementById("settingImageKey");
+        const polliBadge = document.getElementById("pollinationsInfoBadge");
+
         if (val !== "custom" && inputImgModel) {
           inputImgModel.value = val;
         }
-        if (val === "pollinations" && inputImgUrl) {
-          inputImgUrl.value = "https://image.pollinations.ai/prompt";
+
+        const isPolli = val.includes("pollinations");
+        if (polliBadge) polliBadge.style.display = isPolli ? "block" : "none";
+
+        if (isPolli) {
+          if (inputImgUrl) inputImgUrl.value = "https://image.pollinations.ai/prompt";
+          if (inputImgKey) inputImgKey.placeholder = "API Key প্রয়োজন নেই (Pollinations সম্পূর্ণ ফ্রি)";
         } else if ((val === "dall-e-3" || val === "dall-e-2") && inputImgUrl && inputImgUrl.value.includes("vyceai.com")) {
-          inputImgUrl.value = "https://api.openai.com/v1/images/generations";
+          if (inputImgUrl) inputImgUrl.value = "https://api.openai.com/v1/images/generations";
+          if (inputImgKey) inputImgKey.placeholder = "sk-...";
+        } else {
+          if (inputImgKey) inputImgKey.placeholder = "sk-... বা API key";
         }
       });
     }

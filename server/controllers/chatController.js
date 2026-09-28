@@ -588,6 +588,35 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
 
 
 
+// Helper for constructing Pollinations AI image URLs
+function buildPollinationsUrl(cleanPrompt, imageModel = 'flux', imageSize = '1024x1024', enhance = true) {
+  let width = 1024;
+  let height = 1024;
+  if (imageSize && imageSize.includes('x')) {
+    const parts = imageSize.split('x').map(p => parseInt(p, 10));
+    if (!isNaN(parts[0]) && parts[0] > 0) width = parts[0];
+    if (!isNaN(parts[1]) && parts[1] > 0) height = parts[1];
+  }
+
+  // Determine pollinations model name
+  let modelName = 'flux';
+  const cleanMod = String(imageModel || '').toLowerCase().trim();
+  if (cleanMod.startsWith('pollinations/')) {
+    modelName = cleanMod.replace('pollinations/', '').trim() || 'flux';
+  } else if (['flux', 'flux-realism', 'flux-anime', 'flux-3d', 'flux-cablyai', 'turbo', 'midjourney', 'sana'].includes(cleanMod)) {
+    modelName = cleanMod;
+  }
+
+  const encoded = encodeURIComponent(cleanPrompt);
+  const randomSeed = Math.floor(Math.random() * 1000000000);
+  const enhanceParam = enhance ? '&enhance=true' : '&enhance=false';
+  return {
+    url: `https://image.pollinations.ai/prompt/${encoded}?model=${modelName}&width=${width}&height=${height}&nologo=true&seed=${randomSeed}&noredirect=true${enhanceParam}`,
+    model: `pollinations/${modelName}`,
+    provider: 'pollinations.ai'
+  };
+}
+
 // Helper for executing image generation via configured provider/model
 async function executeImageGeneration(prompt, forcedSettings = null) {
   const { getSystemSettings, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
@@ -595,23 +624,32 @@ async function executeImageGeneration(prompt, forcedSettings = null) {
   const cleanPrompt = String(prompt || '').trim().slice(0, 1000);
   if (!cleanPrompt) throw new Error('অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।');
 
-  const imageModel = String(settings.image_model || 'flux-1-schnell').trim();
-  const targetUrl = String(settings.image_api_url || 'https://vyceai.com/v1/images/generations').trim();
+  const imageModel = String(settings.image_model || 'pollinations/flux').trim();
+  const targetUrl = String(settings.image_api_url || 'https://image.pollinations.ai/prompt').trim();
   const imageSize = String(settings.image_size || '1024x1024').trim();
 
-  // Pollinations Free Generator
-  if (imageModel.toLowerCase() === 'pollinations' || targetUrl.toLowerCase().includes('pollinations')) {
-    const encoded = encodeURIComponent(cleanPrompt);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
-    return { url: pollinationsUrl, model: 'pollinations', provider: 'pollinations' };
+  // Check if provider or model is Pollinations
+  const isPollinations = (
+    imageModel.toLowerCase().includes('pollinations') ||
+    targetUrl.toLowerCase().includes('pollinations') ||
+    ['flux', 'flux-realism', 'flux-anime', 'flux-3d', 'flux-cablyai', 'turbo', 'midjourney', 'sana'].includes(imageModel.toLowerCase())
+  );
+
+  // Pollinations Free Unlimited Generator
+  if (isPollinations) {
+    return buildPollinationsUrl(cleanPrompt, imageModel, imageSize, settings.image_enhance !== false);
   }
 
+  // Upstream Paid API Providers (OpenAI, VyceAI, Fal.ai, etc.)
   let targetKey = String(settings.image_api_key || process.env.IMAGE_API_KEY || process.env.VYCE_API_KEY || process.env.OPENROUTER_API_KEY || '').trim();
   if (!targetKey) {
     targetKey = (await getApiKeyFromSupabase('__image_key__')) || (await getApiKeyFromSupabase('__vyce_key__')) || (await getApiKeyFromSupabase('claude-sonnet-4-6')) || (await getApiKeyFromSupabase('__openrouter_key__')) || (await getApiKeyFromSupabase('openrouter/free'));
   }
+
+  // If no API key configured for upstream provider, gracefully fall back to Pollinations AI
   if (!targetKey) {
-    throw new Error('ছবি তৈরির সার্ভিস এই মুহূর্তে কনফিগার করা হয়নি। অ্যাডমিন প্যানেল থেকে Image API Key সেট করুন।');
+    console.log('[Image Gen] No API key configured for upstream provider, falling back to Pollinations AI...');
+    return buildPollinationsUrl(cleanPrompt, 'flux', imageSize, true);
   }
 
   const reqPayload = {
@@ -639,17 +677,16 @@ async function executeImageGeneration(prompt, forcedSettings = null) {
     });
   } catch (fetchErr) {
     clearTimeout(imgTimeout);
-    if (fetchErr.name === 'AbortError') {
-      throw new Error('ছবি তৈরিতে অতিরিক্ত সময় লেগেছে, অনুগ্রহ করে আবার চেষ্টা করুন।');
-    }
-    throw fetchErr;
+    console.warn('[Image Gen Upstream Fetch Error, falling back to Pollinations]:', fetchErr.message);
+    return buildPollinationsUrl(cleanPrompt, 'flux', imageSize, true);
   }
   clearTimeout(imgTimeout);
 
   if (!response.ok) {
     const errText = await response.text().catch(() => '');
     console.error('[Image Gen Upstream Error]:', response.status, errText.slice(0, 250));
-    throw new Error(`ছবি তৈরি করতে সমস্যা হয়েছে (HTTP ${response.status})`);
+    console.log('[Image Gen] Falling back to Pollinations AI...');
+    return buildPollinationsUrl(cleanPrompt, 'flux', imageSize, true);
   }
 
   const data = await response.json().catch(() => null);
@@ -664,7 +701,8 @@ async function executeImageGeneration(prompt, forcedSettings = null) {
     return { url: data.images[0], model: imageModel };
   }
 
-  throw new Error('রেসপন্সে কোনো ছবি পাওয়া যায়নি।');
+  // Fallback to Pollinations if upstream returns invalid structure
+  return buildPollinationsUrl(cleanPrompt, 'flux', imageSize, true);
 }
 
 const generateImage = async (req, res) => {
