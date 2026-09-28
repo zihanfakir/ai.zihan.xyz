@@ -1,0 +1,128 @@
+import os
+import subprocess
+import shutil
+
+p_blade = "M 50.0 50.0 L 45.3 24.3 C 45.3 19.5 42.5 14.5 39.0 13.8 C 48.0 11.5 62.0 11.8 71.5 14.8 C 77.5 17.0 81.0 22.0 81.0 28.5 C 81.0 38.0 72.0 46.5 61.0 49.5 C 56.0 51.0 52.0 50.5 50.0 50.0 Z"
+
+# 1. Dark App Icon SVG (512x512, obsidian dark background #07080a with subtle glow)
+dark_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <defs>
+    <linearGradient id="aloGradTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="40%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="aloGradRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="aloGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <filter id="aloBladeShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="-1" dy="1" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <radialGradient id="aloBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#07080a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Dark canvas -->
+  <rect width="100" height="100" fill="#07080a"/>
+  <!-- Ambient glow -->
+  <circle cx="50" cy="50" r="46" fill="url(#aloBgGlow)"/>
+  <!-- Swirl Blades -->
+  <g>
+    <path d="{p_blade}" fill="url(#aloGradTop)" filter="url(#aloBladeShadow)"/>
+    <path d="{p_blade}" fill="url(#aloGradRight)" transform="rotate(120 50 50)" filter="url(#aloBladeShadow)"/>
+    <path d="{p_blade}" fill="url(#aloGradLeft)" transform="rotate(240 50 50)" filter="url(#aloBladeShadow)"/>
+  </g>
+</svg>'''
+
+# 2. Transparent Logo SVG (for embedding in UI)
+transparent_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="aloGradTopT" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="40%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="aloGradRightT" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="aloGradLeftT" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <filter id="aloBladeShadowT" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="-1" dy="1" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g>
+    <path d="{p_blade}" fill="url(#aloGradTopT)" filter="url(#aloBladeShadowT)"/>
+    <path d="{p_blade}" fill="url(#aloGradRightT)" transform="rotate(120 50 50)" filter="url(#aloBladeShadowT)"/>
+    <path d="{p_blade}" fill="url(#aloGradLeftT)" transform="rotate(240 50 50)" filter="url(#aloBladeShadowT)"/>
+  </g>
+</svg>'''
+
+with open('app_logo.svg', 'w', encoding='utf-8') as f:
+    f.write(dark_svg)
+
+with open('app_logo_transparent.svg', 'w', encoding='utf-8') as f:
+    f.write(transparent_svg)
+
+# Render to PNG using Edge headless
+edge = r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+
+# Render dark app_logo.png
+temp_html_dark = os.path.abspath('temp_render_dark.html')
+out_dark_png = os.path.abspath('app_logo.png')
+
+with open(temp_html_dark, 'w', encoding='utf-8') as f:
+    f.write('<!DOCTYPE html><html><head><style>html,body{margin:0;padding:0;background:#07080a;overflow:hidden;}</style></head><body>' + dark_svg + '</body></html>')
+
+cmd_dark = [
+    edge,
+    '--headless=new',
+    '--disable-gpu',
+    f'--screenshot={out_dark_png}',
+    '--window-size=512,512',
+    f'file:///{temp_html_dark.replace(os.sep, "/")}'
+]
+subprocess.run(cmd_dark, capture_output=True)
+
+# Render transparent logo
+temp_html_trans = os.path.abspath('temp_render_trans.html')
+out_trans_png = os.path.abspath('app_logo_transparent.png')
+
+with open(temp_html_trans, 'w', encoding='utf-8') as f:
+    f.write('<!DOCTYPE html><html><head><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden;}</style></head><body>' + transparent_svg + '</body></html>')
+
+cmd_trans = [
+    edge,
+    '--headless=new',
+    '--disable-gpu',
+    '--default-background-color=00000000',
+    f'--screenshot={out_trans_png}',
+    '--window-size=512,512',
+    f'file:///{temp_html_trans.replace(os.sep, "/")}'
+]
+subprocess.run(cmd_trans, capture_output=True)
+
+# Copy app_logo.png to all target destinations:
+# 1. "app logo.png" in root
+shutil.copy2('app_logo.png', 'app logo.png')
+
+# 2. android/app/src/main/res/drawable/app_logo.png
+android_dest = os.path.join('android', 'app', 'src', 'main', 'res', 'drawable', 'app_logo.png')
+if os.path.exists(os.path.dirname(android_dest)):
+    shutil.copy2('app_logo.png', android_dest)
+    print("Copied to", android_dest)
+
+print("Generated app_logo.png, app logo.png, app_logo_transparent.png, app_logo.svg, app_logo_transparent.svg!")
