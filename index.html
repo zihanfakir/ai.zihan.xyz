@@ -38,15 +38,15 @@
       --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.28);
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-      /* Premium Dark Theme (Default AMOLED / ChatGPT Style) */
+      /* Premium Modern Minimal Theme (Default Obsidian AMOLED / Linear Style) */
       --bg-main: #000000;
-      --bg-input: #1c1c1f;
+      --bg-input: #151518;
       --border-color: rgba(255, 255, 255, 0.08);
       --text-main: #ffffff;
       --text-sub: #9ca3af;
       --btn-send: #ffffff;
       --btn-send-disabled: #27272a;
-      --bubble-user-bg: #0f2b5c;
+      --bubble-user-bg: #141824;
       --accent-color: #3b82f6;
       --glass-bg: rgba(0, 0, 0, 0.95);
       --download-btn-bg: rgba(255, 255, 255, 0.08);
@@ -956,11 +956,11 @@
       margin: auto 0;
       width: 100%;
       color: var(--text-main);
-      font-size: 1.4rem;
-      font-weight: 700;
       text-align: center;
-      gap: 16px;
-      animation: fadeIn 0.5s ease-out;
+      gap: 12px;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 20px 12px;
+      box-sizing: border-box;
     }
 
     @keyframes fadeIn {
@@ -968,10 +968,110 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .empty-state span {
-      font-size: 0.95rem;
+    #heroGreetingText {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(180deg, #ffffff 40%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 2px 0 0;
+      line-height: 1.25;
+    }
+
+    .hero-subtitle {
+      font-size: 0.92rem;
       font-weight: 400;
-      color: var(--text-sub);
+      color: #71717a;
+      margin-bottom: 4px;
+    }
+
+    .quick-prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 14px;
+      box-sizing: border-box;
+    }
+
+    .quick-prompt-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .quick-prompt-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+    }
+
+    .quick-prompt-card:active {
+      transform: scale(0.97);
+    }
+
+    .quick-prompt-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      padding-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .quick-prompt-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .quick-prompt-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #f4f4f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quick-prompt-desc {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: #a1a1aa;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (max-width: 520px) {
+      .quick-prompts-grid {
+        grid-template-columns: 1fr;
+        max-width: 360px;
+        gap: 8px;
+      }
+      .quick-prompt-card {
+        padding: 10px 12px;
+      }
+      #heroGreetingText {
+        font-size: 1.35rem;
+      }
     }
 
     .quick-prompts-row {
@@ -1022,17 +1122,17 @@
     }
 
     .user-bubble {
-      background: var(--bubble-user-bg, #0f2b5c);
+      background: var(--bubble-user-bg, #141824);
       color: #ffffff;
       padding: 12px 18px;
-      border-radius: 18px 18px 4px 18px;
+      border-radius: 20px 20px 4px 20px;
       max-width: 85%;
       font-size: 0.98rem;
       line-height: 1.55;
       word-break: break-word;
       white-space: pre-wrap;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(59, 130, 246, 0.22);
       position: relative;
     }
 
@@ -1494,19 +1594,25 @@
     }
 
     .empty-state-logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      margin-bottom: 8px;
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      margin-bottom: 6px;
       object-fit: cover;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border-color);
-      animation: emptyStateLogoPulse 3.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.4));
+      animation: emptyStateLogoFloat 4s ease-in-out infinite;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes emptyStateLogoPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    @keyframes emptyStateLogoFloat {
+      0%, 100% {
+        transform: translateY(0px) scale(1);
+        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.35));
+      }
+      50% {
+        transform: translateY(-5px) scale(1.03);
+        filter: drop-shadow(0 0 32px rgba(139, 92, 246, 0.5));
+      }
     }
 
     .ai-bubble.streaming > *:last-child::after,
@@ -1576,18 +1682,20 @@
     .input-card {
       max-width: 800px;
       margin: 0 auto;
-      background-color: #1c1c1f;
+      background-color: #151518;
       border-radius: 28px; /* Clean rounded capsule */
       padding: 4px 6px 4px 10px;
       display: flex;
       align-items: center;
       gap: 8px;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .input-card:focus-within {
+      background-color: #18181c;
       border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
     }
 
     .native-mic-btn {
@@ -1602,11 +1710,14 @@
       color: #9ca3af;
       cursor: pointer;
       flex-shrink: 0;
-      transition: color 0.15s, background 0.15s;
+      transition: color 0.15s, background 0.15s, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .native-mic-btn:hover {
       background: rgba(255, 255, 255, 0.08);
       color: #ffffff;
+    }
+    .native-mic-btn:active {
+      transform: scale(0.92);
     }
     .native-mic-btn.recording {
       color: #ef4444 !important;
@@ -1634,11 +1745,14 @@
       color: #9ca3af;
       cursor: pointer;
       flex-shrink: 0;
-      transition: color 0.15s, background 0.15s;
+      transition: color 0.15s, background 0.15s, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .native-tool-btn:hover {
       background: rgba(255, 255, 255, 0.08);
       color: #ffffff;
+    }
+    .native-tool-btn:active {
+      transform: scale(0.92);
     }
 
     /* Generated Image Card with Overlays (Screenshot 5) */
@@ -2621,10 +2735,13 @@
       transform: scale(1.05);
       background: #f4f4f5;
     }
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.92);
+    }
     .action-btn:disabled {
       background: #27272a;
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.45;
       box-shadow: none;
       color: #71717a;
       transform: none;
@@ -4559,13 +4676,50 @@
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
         <svg class="empty-state-logo" viewBox="0 0 100 100" width="58" height="58" fill="none">
-          <g fill="#3b82f6">
+          <defs>
+            <linearGradient id="heroLogoGradStatic" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="50%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <g fill="url(#heroLogoGradStatic)">
             <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z"/>
             <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(120 50 50)"/>
             <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(240 50 50)"/>
           </g>
         </svg>
-        <div id="heroGreetingText" style="font-size: 1.35rem; font-weight: 600; color: #ffffff; letter-spacing: -0.01em; margin-top: 4px;">How can I help you?</div>
+        <div id="heroGreetingText">How can I help you?</div>
+        <div class="quick-prompts-grid">
+          <button type="button" class="quick-prompt-card" data-prompt="Explain quantum computing in simple terms with everyday analogies">
+            <div class="quick-prompt-icon">💡</div>
+            <div class="quick-prompt-text">
+              <span class="quick-prompt-title">Explain a concept</span>
+              <span class="quick-prompt-desc">Quantum computing in simple terms</span>
+            </div>
+          </button>
+          <button type="button" class="quick-prompt-card" data-prompt="Write a clean, production-ready async retry utility function in JavaScript with exponential backoff">
+            <div class="quick-prompt-icon">💻</div>
+            <div class="quick-prompt-text">
+              <span class="quick-prompt-title">Write or debug code</span>
+              <span class="quick-prompt-desc">Async retry function with backoff</span>
+            </div>
+          </button>
+          <button type="button" class="quick-prompt-card" data-prompt="Brainstorm 5 innovative micro-SaaS ideas utilizing generative AI for productivity">
+            <div class="quick-prompt-icon">✨</div>
+            <div class="quick-prompt-text">
+              <span class="quick-prompt-title">Brainstorm ideas</span>
+              <span class="quick-prompt-desc">5 innovative AI SaaS concepts</span>
+            </div>
+          </button>
+          <button type="button" class="quick-prompt-card" data-prompt="Draft a polite, professional follow-up email to a project manager after an interview">
+            <div class="quick-prompt-icon">✍️</div>
+            <div class="quick-prompt-text">
+              <span class="quick-prompt-title">Draft a message</span>
+              <span class="quick-prompt-desc">Polite follow-up after an interview</span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -5313,18 +5467,24 @@ Capabilities & Code Generation Instructions (CRITICAL):
       });
     }
 
+    window.populatePrompt = function(promptText) {
+      if (!userInput) return;
+      if (typeof requireAuth === "function" && !requireAuth()) return;
+      userInput.value = promptText;
+      userInput.style.height = "auto";
+      userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
+      userInput.focus();
+      try { userInput.setSelectionRange(promptText.length, promptText.length); } catch {}
+      if (typeof updateSendAvailability === "function") updateSendAvailability();
+    };
+
     document.addEventListener("click", (e) => {
-      const chip = e.target.closest(".quick-prompt-chip");
+      const chip = e.target.closest(".quick-prompt-chip, .quick-prompt-card");
       if (chip) {
         if (!requireAuth()) return;
         const promptText = chip.getAttribute("data-prompt");
         if (promptText) {
-          userInput.value = promptText;
-          userInput.style.height = "auto";
-          userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
-          userInput.focus();
-          try { userInput.setSelectionRange(promptText.length, promptText.length); } catch {}
-          updateSendAvailability();
+          window.populatePrompt(promptText);
         }
       }
     });
@@ -9522,7 +9682,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const isAndroid = (typeof isRunningInApp === "function" ? isRunningInApp() : (typeof window.isAndroidApp !== "undefined" && window.isAndroidApp));
       
       const bannerHtml = isAndroid ? '' : `
-        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 0;">
+        <div class="hero-app-banner sheen-surface" id="heroAppDownloadBanner" title="অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন" style="margin: 4px 0 0;">
           <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0;">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </span>
@@ -9530,10 +9690,51 @@ Capabilities & Code Generation Instructions (CRITICAL):
         </div>
       `;
 
+      const starters = isEn ? [
+        { icon: '💡', title: 'Explain a concept', desc: 'Quantum computing in everyday terms', prompt: 'Explain quantum computing in simple terms with everyday analogies' },
+        { icon: '💻', title: 'Write or debug code', desc: 'Async retry function with backoff', prompt: 'Write a clean, production-ready async retry utility function in JavaScript with exponential backoff' },
+        { icon: '✨', title: 'Brainstorm ideas', desc: '5 innovative micro-SaaS concepts', prompt: 'Brainstorm 5 innovative micro-SaaS ideas utilizing generative AI for productivity' },
+        { icon: '✍️', title: 'Draft a message', desc: 'Polite follow-up after an interview', prompt: 'Draft a polite, professional follow-up email to a project manager after an interview' }
+      ] : [
+        { icon: '💡', title: 'ধারণা সহজভাবে বুঝুন', desc: 'কোয়ান্টাম কম্পিউটিং সহজ ভাষায়', prompt: 'কোয়ান্টাম কম্পিউটিং কী? দৈনন্দিন উদাহরণের সাহায্যে সহজ ভাষায় ব্যাখ্যা করুন' },
+        { icon: '💻', title: 'কোড লিখুন বা ডিবাগ', desc: 'জাভাস্ক্রিপ্ট অ্যাসিনক্রোনাস ফাংশন', prompt: 'জাভাস্ক্রিপ্টে একটি ক্লিন এক্সপোনেনশিয়াল ব্যাকঅফ রিট্রাই ফাংশন লিখে দিন' },
+        { icon: '✨', title: 'নতুন আইডিয়া তৈরি', desc: '৫টি ইউনিক স্টার্টআপ আইডিয়া', prompt: 'উৎপাদনশীলতা বৃদ্ধির জন্য AI ভিত্তিক ৫টি উদ্ভাবনী স্টার্টআপ আইডিয়া দিন' },
+        { icon: '✍️', title: 'পেশাদার ড্রাফটিং', desc: 'প্রফেশনাল ফলো-আপ ইমেইল', prompt: 'একটি ইন্টারভিউ পরবর্তী পেশাদার ও আন্তরিক ফলো-আপ ইমেইলের খসড়া তৈরি করুন' }
+      ];
+
+      const startersHtml = `
+        <div class="quick-prompts-grid">
+          ${starters.map(s => `
+            <button type="button" class="quick-prompt-card" data-prompt="${s.prompt.replace(/"/g, '&quot;')}">
+              <div class="quick-prompt-icon">${s.icon}</div>
+              <div class="quick-prompt-text">
+                <span class="quick-prompt-title">${s.title}</span>
+                <span class="quick-prompt-desc">${s.desc}</span>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+      `;
+
       return `
         <div class="empty-state" id="emptyState">
-          <div id="heroGreetingText" style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em;">${greeting}</div>
+          <svg class="empty-state-logo" viewBox="0 0 100 100" width="58" height="58" fill="none">
+            <defs>
+              <linearGradient id="heroLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#60a5fa"/>
+                <stop offset="50%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+            <g fill="url(#heroLogoGrad)">
+              <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z"/>
+              <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(120 50 50)"/>
+              <path d="M38 18 H62 C70 18 76 24 76 32 C76 38 72 44 65 47 L58 50 C52 53 45 49 45 42 V25 C45 21 42 18 38 18 Z" transform="rotate(240 50 50)"/>
+            </g>
+          </svg>
+          <div id="heroGreetingText">${greeting}</div>
           ${bannerHtml}
+          ${startersHtml}
         </div>
       `;
     }
