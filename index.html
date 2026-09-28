@@ -8252,8 +8252,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function openAccountModal(targetTab = "") {
       if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
       if (typeof closeBrandMenu === "function") closeBrandMenu();
-      const url = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
-      window.location.href = url;
+      const directPages = {
+        "tabPlan": "subscription.html", "subscription": "subscription.html", "settingsPlanView": "subscription.html",
+        "limits": "usage.html", "settingsLimitsView": "usage.html", "usage": "usage.html",
+        "redeem": "redeem.html", "settingsRedeemView": "redeem.html",
+        "account": "security.html", "settingsAccountView": "security.html", "security": "security.html",
+        "help": "help.html", "profile": "profile.html", "theme": "theme.html",
+        "sound": "sound.html", "personalization": "personalization.html"
+      };
+      if (targetTab && directPages[targetTab]) {
+        window.location.href = directPages[targetTab];
+      } else {
+        window.location.href = targetTab ? `account.html?tab=${encodeURIComponent(targetTab)}` : "account.html";
+      }
     }
     window.openAccountModal = openAccountModal;
 

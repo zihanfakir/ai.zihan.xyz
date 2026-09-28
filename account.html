@@ -1291,16 +1291,7 @@
     }
     updateThemeDisplay(savedTheme);
 
-    document.getElementById("rowTheme")?.addEventListener("click", () => {
-      const themes = ["dark", "oled", "sapphire", "light"];
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("alokpoth_theme", next);
-      localStorage.setItem("alokpoth-theme", next);
-      updateThemeDisplay(next);
-      showToast(`${THEME_NAMES[next] || next} theme enabled`, "info");
-    });
+    // Theme display is shown on row but actual theme selection is in theme.html
 
     // Haptic Feedback Switch
     const hapticToggle = document.getElementById("hapticToggle");
@@ -1317,12 +1308,7 @@
     const soundValText = document.getElementById("soundValText");
     let soundEnabled = localStorage.getItem("alokpoth_sound") !== "false";
     if (soundValText) soundValText.textContent = soundEnabled ? "Default" : "Muted";
-    document.getElementById("rowSound")?.addEventListener("click", () => {
-      soundEnabled = !soundEnabled;
-      localStorage.setItem("alokpoth_sound", soundEnabled ? "true" : "false");
-      if (soundValText) soundValText.textContent = soundEnabled ? "Default" : "Muted";
-      showToast(soundEnabled ? "Sound enabled" : "Sound muted", "info");
-    });
+    // Sound settings are managed in sound.html
 
     // API & Auth Config
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
