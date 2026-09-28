@@ -1599,20 +1599,8 @@
       border-radius: 18px;
       margin-bottom: 6px;
       object-fit: cover;
-      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.4));
-      animation: emptyStateLogoFloat 4s ease-in-out infinite;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes emptyStateLogoFloat {
-      0%, 100% {
-        transform: translateY(0px) scale(1);
-        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.35));
-      }
-      50% {
-        transform: translateY(-5px) scale(1.03);
-        filter: drop-shadow(0 0 32px rgba(139, 92, 246, 0.5));
-      }
+      filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
+      animation: none;
     }
 
     .ai-bubble.streaming > *:last-child::after,
@@ -4710,36 +4698,6 @@
           </g>
         </svg>
         <div id="heroGreetingText">How can I help you?</div>
-        <div class="quick-prompts-grid">
-          <button type="button" class="quick-prompt-card" data-prompt="Explain quantum computing in simple terms with everyday analogies">
-            <div class="quick-prompt-icon">💡</div>
-            <div class="quick-prompt-text">
-              <span class="quick-prompt-title">Explain a concept</span>
-              <span class="quick-prompt-desc">Quantum computing in simple terms</span>
-            </div>
-          </button>
-          <button type="button" class="quick-prompt-card" data-prompt="Write a clean, production-ready async retry utility function in JavaScript with exponential backoff">
-            <div class="quick-prompt-icon">💻</div>
-            <div class="quick-prompt-text">
-              <span class="quick-prompt-title">Write or debug code</span>
-              <span class="quick-prompt-desc">Async retry function with backoff</span>
-            </div>
-          </button>
-          <button type="button" class="quick-prompt-card" data-prompt="Brainstorm 5 innovative micro-SaaS ideas utilizing generative AI for productivity">
-            <div class="quick-prompt-icon">✨</div>
-            <div class="quick-prompt-text">
-              <span class="quick-prompt-title">Brainstorm ideas</span>
-              <span class="quick-prompt-desc">5 innovative AI SaaS concepts</span>
-            </div>
-          </button>
-          <button type="button" class="quick-prompt-card" data-prompt="Draft a polite, professional follow-up email to a project manager after an interview">
-            <div class="quick-prompt-icon">✍️</div>
-            <div class="quick-prompt-text">
-              <span class="quick-prompt-title">Draft a message</span>
-              <span class="quick-prompt-desc">Polite follow-up after an interview</span>
-            </div>
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -9693,32 +9651,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
         </div>
       `;
 
-      const starters = isEn ? [
-        { icon: '💡', title: 'Explain a concept', desc: 'Quantum computing in everyday terms', prompt: 'Explain quantum computing in simple terms with everyday analogies' },
-        { icon: '💻', title: 'Write or debug code', desc: 'Async retry function with backoff', prompt: 'Write a clean, production-ready async retry utility function in JavaScript with exponential backoff' },
-        { icon: '✨', title: 'Brainstorm ideas', desc: '5 innovative micro-SaaS concepts', prompt: 'Brainstorm 5 innovative micro-SaaS ideas utilizing generative AI for productivity' },
-        { icon: '✍️', title: 'Draft a message', desc: 'Polite follow-up after an interview', prompt: 'Draft a polite, professional follow-up email to a project manager after an interview' }
-      ] : [
-        { icon: '💡', title: 'ধারণা সহজভাবে বুঝুন', desc: 'কোয়ান্টাম কম্পিউটিং সহজ ভাষায়', prompt: 'কোয়ান্টাম কম্পিউটিং কী? দৈনন্দিন উদাহরণের সাহায্যে সহজ ভাষায় ব্যাখ্যা করুন' },
-        { icon: '💻', title: 'কোড লিখুন বা ডিবাগ', desc: 'জাভাস্ক্রিপ্ট অ্যাসিনক্রোনাস ফাংশন', prompt: 'জাভাস্ক্রিপ্টে একটি ক্লিন এক্সপোনেনশিয়াল ব্যাকঅফ রিট্রাই ফাংশন লিখে দিন' },
-        { icon: '✨', title: 'নতুন আইডিয়া তৈরি', desc: '৫টি ইউনিক স্টার্টআপ আইডিয়া', prompt: 'উৎপাদনশীলতা বৃদ্ধির জন্য AI ভিত্তিক ৫টি উদ্ভাবনী স্টার্টআপ আইডিয়া দিন' },
-        { icon: '✍️', title: 'পেশাদার ড্রাফটিং', desc: 'প্রফেশনাল ফলো-আপ ইমেইল', prompt: 'একটি ইন্টারভিউ পরবর্তী পেশাদার ও আন্তরিক ফলো-আপ ইমেইলের খসড়া তৈরি করুন' }
-      ];
-
-      const startersHtml = `
-        <div class="quick-prompts-grid">
-          ${starters.map(s => `
-            <button type="button" class="quick-prompt-card" data-prompt="${s.prompt.replace(/"/g, '&quot;')}">
-              <div class="quick-prompt-icon">${s.icon}</div>
-              <div class="quick-prompt-text">
-                <span class="quick-prompt-title">${s.title}</span>
-                <span class="quick-prompt-desc">${s.desc}</span>
-              </div>
-            </button>
-          `).join('')}
-        </div>
-      `;
-
       return `
         <div class="empty-state" id="emptyState">
           <svg class="empty-state-logo" viewBox="0 0 100 100" width="64" height="64" fill="none">
@@ -9750,7 +9682,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
           </svg>
           <div id="heroGreetingText">${greeting}</div>
           ${bannerHtml}
-          ${startersHtml}
         </div>
       `;
     }
