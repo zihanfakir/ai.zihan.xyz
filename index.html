@@ -8250,6 +8250,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     window.refreshAccountSubpageUI = refreshAccountSubpageUI;
 
     function openAccountModal(targetTab = "") {
+      if (typeof targetTab !== "string") targetTab = "";
       if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
       if (typeof closeBrandMenu === "function") closeBrandMenu();
       const directPages = {

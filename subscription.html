@@ -420,7 +420,10 @@
 
   <script>
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (isLocal ? 'http://localhost:5000' : (window.location.origin.includes('vercel.app') ? window.location.origin : 'https://ai-zihan-xyz.vercel.app'));
+    const API_BASE = BACKEND_URL + "/api";
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
@@ -583,6 +586,39 @@
       }
     }
 
+    async function syncUserDataFromServer() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          localStorage.removeItem("alokpoth_token");
+          localStorage.removeItem("alokpoth_user");
+          window.location.href = "login.html";
+          return;
+        }
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          const freshUser = data.user;
+          localStorage.setItem("alokpoth_user", JSON.stringify(freshUser));
+          const pName = (freshUser.subscription && freshUser.subscription.plan_name) || freshUser.plan || "Free";
+          localStorage.setItem("alokpoth_current_plan", pName);
+          renderUserData();
+        }
+      } catch (e) {
+        console.warn("Could not sync user data from server:", e);
+      }
+    }
+
+    // Back button navigation
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
+
     // Toggle Language
     document.getElementById("langToggleBtn")?.addEventListener("click", () => {
       currentLanguage = (currentLanguage === "en" ? "bn" : "en");
@@ -593,6 +629,7 @@
 
     applyI18n();
     renderUserData();
+    syncUserDataFromServer();
   </script>
 </body>
 </html>

@@ -356,7 +356,10 @@
 
   <script>
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (isLocal ? 'http://localhost:5000' : (window.location.origin.includes('vercel.app') ? window.location.origin : 'https://ai-zihan-xyz.vercel.app'));
+    const API_BASE = BACKEND_URL + "/api";
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
@@ -421,7 +424,7 @@
       document.title = `${d.pageTitle} — Alo AI`;
     }
 
-    function renderUserData() {
+    function renderUserData(forceInputUpdate = false) {
       const userStr = localStorage.getItem("alokpoth_user");
       if (!userStr) return;
       const isEn = (currentLanguage === "en");
@@ -435,7 +438,7 @@
         document.getElementById("avatarLetter").textContent = (name || email || "U").charAt(0).toUpperCase();
 
         const editInput = document.getElementById("editNameInput");
-        if (editInput && !editInput.value) {
+        if (editInput && (!editInput.value || forceInputUpdate)) {
           editInput.value = user.name || "";
         }
 
@@ -450,6 +453,42 @@
         console.error(e);
       }
     }
+
+    async function syncUserDataFromServer() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          localStorage.removeItem("alokpoth_token");
+          localStorage.removeItem("alokpoth_user");
+          window.location.href = "login.html";
+          return;
+        }
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          const freshUser = data.user;
+          localStorage.setItem("alokpoth_user", JSON.stringify(freshUser));
+          if (freshUser.name) {
+            localStorage.setItem("alokpoth_account_name", freshUser.name);
+          }
+          const pName = (freshUser.subscription && freshUser.subscription.plan_name) || freshUser.plan || "Free";
+          localStorage.setItem("alokpoth_current_plan", pName);
+          renderUserData(false);
+        }
+      } catch (e) {
+        console.warn("Could not sync user data from server:", e);
+      }
+    }
+
+    // Back button smart navigation
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
 
     // Toggle Language
     document.getElementById("langToggleBtn")?.addEventListener("click", () => {
@@ -486,16 +525,18 @@
         const data = await res.json();
         if (res.ok && data.success) {
           const userStr = localStorage.getItem("alokpoth_user");
+          let u = {};
           if (userStr) {
-            try {
-              const u = JSON.parse(userStr);
-              u.name = newName;
-              localStorage.setItem("alokpoth_user", JSON.stringify(u));
-              localStorage.setItem("alokpoth_account_name", newName);
-            } catch {}
+            try { u = JSON.parse(userStr); } catch {}
           }
+          u.name = newName;
+          if (data.user) {
+            u = { ...u, ...data.user };
+          }
+          localStorage.setItem("alokpoth_user", JSON.stringify(u));
+          localStorage.setItem("alokpoth_account_name", newName);
           showToast(d.success, "success");
-          renderUserData();
+          renderUserData(true);
         } else {
           showToast(data.error || d.serverErr, "error");
         }
@@ -509,6 +550,7 @@
 
     applyI18n();
     renderUserData();
+    syncUserDataFromServer();
   </script>
 </body>
 </html>

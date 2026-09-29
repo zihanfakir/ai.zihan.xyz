@@ -4,5 +4,6 @@ const { claimRedeemCode } = require('../controllers/redeemController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.post('/claim', protect, claimRedeemCode);
+router.post('/', protect, claimRedeemCode);
 
 module.exports = router;

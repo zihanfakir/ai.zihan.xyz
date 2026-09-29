@@ -589,7 +589,7 @@
   <main class="settings-container">
     
     <!-- CARD 1: User Profile Card (Screenshot 4) -->
-    <div class="settings-group settings-profile-group" id="rowEditProfile" role="button" tabindex="0">
+    <a href="profile.html" class="settings-group settings-profile-group" id="rowEditProfile">
       <div class="profile-left-meta">
         <div class="profile-avatar-large" id="avatarLetter">Z</div>
         <div class="profile-name-text" id="profileNameDisplay">Zihan Fakir</div>
@@ -598,11 +598,11 @@
         <span class="row-tail-text" id="editProfileLabel">Edit profile</span>
         <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
-    </div>
+    </a>
 
     <!-- CARD 2: Account Card (Screenshot 4) -->
     <div class="settings-group">
-      <div class="settings-row" id="rowAccount" role="button" tabindex="0">
+      <a href="security.html" class="settings-row" id="rowAccount">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -613,13 +613,13 @@
           <span class="row-tail-text email-truncate" id="profileEmailDisplay">user@example.com</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- CARD 3: Subscription & Usage Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Subscription Row -->
-      <div class="settings-row" id="rowSubscription" role="button" tabindex="0">
+      <a href="subscription.html" class="settings-row" id="rowSubscription">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -630,12 +630,12 @@
           <span class="row-tail-text" id="currentPlanTitle">Free</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Usage Row -->
-      <div class="settings-row" id="rowUsage" role="button" tabindex="0">
+      <a href="usage.html" class="settings-row" id="rowUsage">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -645,12 +645,12 @@
         <div class="row-tail">
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Upgrade Row -->
-      <div class="settings-row" id="rowUpgrade" role="button" tabindex="0" onclick="window.location.href='plans.html'">
+      <a href="plans.html" class="settings-row" id="rowUpgrade">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -661,13 +661,13 @@
           <span class="row-tail-text text-blue" id="upgradeValText">Upgrade</span>
           <svg class="row-chevron chevron-blue" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- CARD 4: Preferences Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Color Theme Row -->
-      <div class="settings-row" id="rowTheme" role="button" tabindex="0">
+      <a href="theme.html" class="settings-row" id="rowTheme">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -678,7 +678,7 @@
           <span class="row-tail-text" id="themeValText">Dark</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
@@ -699,7 +699,7 @@
       <div class="row-divider"></div>
 
       <!-- Sound Row -->
-      <div class="settings-row" id="rowSound" role="button" tabindex="0">
+      <a href="sound.html" class="settings-row" id="rowSound">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -710,12 +710,12 @@
           <span class="row-tail-text" id="soundValText">Default</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Model Row -->
-      <div class="settings-row" id="rowModel" role="button" tabindex="0" onclick="window.location.href='index.html'">
+      <a href="index.html" class="settings-row" id="rowModel">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
@@ -726,12 +726,12 @@
           <span class="row-tail-text" id="modelValText">Alo AI</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Personalization Row -->
-      <div class="settings-row" id="rowPersonalization" role="button" tabindex="0">
+      <a href="personalization.html" class="settings-row" id="rowPersonalization">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -741,12 +741,12 @@
         <div class="row-tail">
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Haptic Feedback Row (Toggle) -->
-      <div class="settings-row" id="rowHaptic" style="cursor: default;">
+      <div class="settings-row" id="rowHaptic" style="cursor: pointer;">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
@@ -765,7 +765,7 @@
     <!-- CARD 5: Help Center & Redeem Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Help Center Row -->
-      <div class="settings-row" id="rowHelp" role="button" tabindex="0">
+      <a href="help.html" class="settings-row" id="rowHelp">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
@@ -775,12 +775,12 @@
         <div class="row-tail">
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Redeem Promo Code Row -->
-      <div class="settings-row" id="rowRedeem" role="button" tabindex="0">
+      <a href="redeem.html" class="settings-row" id="rowRedeem">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3h6a3 3 0 1 0-3-3"/></svg>
@@ -790,12 +790,12 @@
         <div class="row-tail">
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
 
       <div class="row-divider"></div>
 
       <!-- Download App Row -->
-      <div class="settings-row" id="rowDownloadApp" role="button" tabindex="0">
+      <a href="AloAI.apk" download="AloAI.apk" class="settings-row" id="rowDownloadApp">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -806,7 +806,7 @@
           <span class="row-tail-text" style="color: var(--accent-primary); font-weight: 600;">APK</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- CARD 6: Log out Card -->
@@ -1014,6 +1014,31 @@
   </div>
 
   <script>
+    // Handle URL tab redirects immediately (legacy support)
+    (function handleTabRedirect() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get("tab");
+        if (tab) {
+          const tabRedirects = {
+            "tabPlan": "subscription.html", "subscription": "subscription.html", "settingsPlanView": "subscription.html",
+            "limits": "usage.html", "settingsLimitsView": "usage.html", "usage": "usage.html",
+            "redeem": "redeem.html", "settingsRedeemView": "redeem.html",
+            "account": "security.html", "settingsAccountView": "security.html", "security": "security.html",
+            "help": "help.html",
+            "profile": "profile.html",
+            "theme": "theme.html",
+            "sound": "sound.html",
+            "personalization": "personalization.html"
+          };
+          if (tabRedirects[tab]) {
+            window.location.replace(tabRedirects[tab]);
+            return;
+          }
+        }
+      } catch (e) {}
+    })();
+
     // i18n Dictionary for Settings Page
     const I18N_ACCOUNT = {
       bn: {
@@ -1276,8 +1301,10 @@
     document.getElementById("rowAccount")?.addEventListener("click", () => { window.location.href = "security.html"; });
     document.getElementById("rowSubscription")?.addEventListener("click", () => { window.location.href = "subscription.html"; });
     document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage.html"; });
+    document.getElementById("rowUpgrade")?.addEventListener("click", () => { window.location.href = "plans.html"; });
     document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme.html"; });
     document.getElementById("rowSound")?.addEventListener("click", () => { window.location.href = "sound.html"; });
+    document.getElementById("rowModel")?.addEventListener("click", () => { window.location.href = "index.html"; });
     document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization.html"; });
     document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help.html"; });
     document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem.html"; });
@@ -1301,6 +1328,47 @@
     document.getElementById("langToggleBtn")?.addEventListener("click", toggleLanguage);
     document.getElementById("rowLanguage")?.addEventListener("click", toggleLanguage);
 
+    // Logout Action
+    const handleLogout = () => {
+      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
+      const keysToPurge = [
+        "alokpoth_token", "alokpoth_user", "alokpoth_account_name",
+        "alokpoth_chat_sessions", "alokpoth_current_session_id",
+        "alokpoth_message_count", "alokpoth_daily_usage",
+        "alokpoth_current_plan", "alokpoth_user_plan", "alokpoth_plan",
+        "alokpoth_plan_expiry", "alokpoth_plan_expires_at",
+        "alokpoth_window_usage", "alokpoth_image_window_usage", "alokpoth_usage_window"
+      ];
+      keysToPurge.forEach(k => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+      try {
+        localStorage.setItem("alokpoth_current_plan", "Free");
+        localStorage.setItem("alokpoth_plan", "Free");
+        localStorage.setItem("alokpoth_user_plan", "Free");
+      } catch {}
+      if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
+        try { window.AloAndroid.logout(); return; } catch (e) {}
+      }
+      if (window.AloAI && typeof window.AloAI.logout === "function") {
+        try { window.AloAI.logout(); return; } catch (e) {}
+      }
+      showToast(d.logoutSuccess, "success");
+      setTimeout(() => { window.location.href = "login.html"; }, 400);
+    };
+
+    document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
+
+    // Keyboard accessibility for rows with role="button"
+    document.querySelectorAll('.settings-row[role="button"], .settings-profile-group[role="button"]').forEach(el => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          el.click();
+        }
+      });
+    });
+
     // Theme Switch
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -1318,8 +1386,6 @@
     }
     updateThemeDisplay(savedTheme);
 
-    // Theme display is shown on row but actual theme selection is in theme.html
-
     // Haptic Feedback Switch
     const hapticToggle = document.getElementById("hapticToggle");
     const hapticEnabled = localStorage.getItem("alokpoth_haptic") !== "false";
@@ -1331,6 +1397,17 @@
       });
     }
 
+    const rowHaptic = document.getElementById("rowHaptic");
+    if (rowHaptic && hapticToggle) {
+      rowHaptic.style.cursor = "pointer";
+      rowHaptic.addEventListener("click", (e) => {
+        if (e.target !== hapticToggle && !e.target.closest(".toggle-switch")) {
+          hapticToggle.checked = !hapticToggle.checked;
+          hapticToggle.dispatchEvent(new Event("change"));
+        }
+      });
+    }
+
     // Sound Switch
     const soundValText = document.getElementById("soundValText");
     let soundEnabled = localStorage.getItem("alokpoth_sound") !== "false";
@@ -1339,7 +1416,10 @@
 
     // API & Auth Config
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (isLocal ? 'http://localhost:5000' : (window.location.origin.includes('vercel.app') ? window.location.origin : 'https://ai-zihan-xyz.vercel.app'));
+    const API_BASE = BACKEND_URL + "/api";
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
@@ -1605,47 +1685,6 @@
     accountLiveTimerInterval = setInterval(() => {
       renderUserData();
     }, 1000);
-
-    // Redirect URL tab parameters to dedicated standalone pages
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tab = urlParams.get("tab");
-      if (tab) {
-        const tabRedirects = {
-          "tabPlan": "subscription.html", "subscription": "subscription.html", "settingsPlanView": "subscription.html",
-          "limits": "usage.html", "settingsLimitsView": "usage.html", "usage": "usage.html",
-          "redeem": "redeem.html", "settingsRedeemView": "redeem.html",
-          "account": "security.html", "settingsAccountView": "security.html", "security": "security.html",
-          "help": "help.html",
-          "profile": "profile.html",
-          "theme": "theme.html",
-          "sound": "sound.html",
-          "personalization": "personalization.html"
-        };
-        if (tabRedirects[tab]) {
-          window.location.replace(tabRedirects[tab]);
-          return;
-        }
-      }
-    } catch (e) {}
-
-    // Logout Action
-    document.getElementById("logoutBtn")?.addEventListener("click", () => {
-      const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
-      const keysToPurge = [
-        "alokpoth_token", "alokpoth_user", "alokpoth_account_name",
-        "alokpoth_chat_sessions", "alokpoth_current_session_id",
-        "alokpoth_message_count", "alokpoth_daily_usage",
-        "alokpoth_current_plan", "alokpoth_user_plan", "alokpoth_plan",
-        "alokpoth_plan_expiry", "alokpoth_plan_expires_at",
-        "alokpoth_window_usage", "alokpoth_image_window_usage", "alokpoth_usage_window"
-      ];
-      keysToPurge.forEach(k => {
-        try { localStorage.removeItem(k); } catch {}
-      });
-      showToast(d.logoutSuccess, "success");
-      setTimeout(() => { window.location.href = "login.html"; }, 400);
-    });
 
     // Profile Name Save
     document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {

@@ -27,10 +27,20 @@
     }
 
     [data-theme="dark"] {
-      --bg-base: #000000;
+      --bg-base: #09090b;
       --bg-card: #18181b;
       --bg-card-hover: #222226;
       --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="oled"] {
+      --bg-base: #000000;
+      --bg-card: #111113;
+      --bg-card-hover: #1c1c1f;
+      --border-card: rgba(255, 255, 255, 0.12);
       --border-divider: rgba(255, 255, 255, 0.06);
       --text-main: #ffffff;
       --text-sub: #71717a;
@@ -44,6 +54,17 @@
       --border-divider: rgba(56, 189, 248, 0.08);
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
+    }
+
+    [data-theme="eyecare"] {
+      --bg-base: #f5eedc;
+      --bg-card: #eadeca;
+      --bg-card-hover: #dfcfb8;
+      --border-card: rgba(146, 64, 14, 0.15);
+      --border-divider: rgba(146, 64, 14, 0.08);
+      --text-main: #4a3b2c;
+      --text-sub: #7a6b5c;
+      --text-dim: #9e8e7e;
     }
 
     [data-theme="light"] {
@@ -213,7 +234,7 @@
     .stat-val-num {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
       line-height: 1.2;
     }
 
@@ -228,6 +249,14 @@
       color: var(--text-sub);
       line-height: 1.5;
       margin-top: 4px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin {
+      animation: spin 0.75s linear infinite;
     }
 
     /* Toast */
@@ -265,6 +294,9 @@
     </a>
     <div class="nav-title" id="pageTitle">Usage &amp; Quota</div>
     <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="refreshQuotaBtn" title="Refresh Quota" style="display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;">
+        <svg id="refreshIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+      </button>
       <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
         <span id="langBtnText">EN</span>
       </button>
@@ -284,7 +316,7 @@
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-sub);">
           <span id="quotaResetLabel">Reset in:</span>
-          <span id="quotaLiveCountdown" style="font-weight: 600; color: #fff;">Full quota available</span>
+          <span id="quotaLiveCountdown" style="font-weight: 600; color: var(--text-main);">Full quota available</span>
         </div>
       </div>
     </div>
@@ -311,7 +343,7 @@
 
     <!-- Fair Usage Policy Card -->
     <div class="settings-card">
-      <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 6px;" id="fairUsageTitle">
+      <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;" id="fairUsageTitle">
         Fair Usage Policy
       </div>
       <p class="quota-subtext" id="quotaWindowSubtext">
@@ -322,7 +354,10 @@
 
   <script>
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal ? 'http://localhost:3000/api' : 'https://alokpoth-ai-backend.vercel.app/api';
+    const BACKEND_URL = (isLocal && window.location.port === '5000') 
+      ? window.location.origin 
+      : (isLocal ? 'http://localhost:5000' : (window.location.origin.includes('vercel.app') ? window.location.origin : 'https://ai-zihan-xyz.vercel.app'));
+    const API_BASE = BACKEND_URL + "/api";
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
@@ -332,6 +367,38 @@
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
     document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const metaTag = document.querySelector('meta[name="theme-color"]');
+    const THEME_META_COLORS = {
+      dark: "#09090b",
+      oled: "#000000",
+      sapphire: "#070d19",
+      eyecare: "#f5eedc",
+      light: "#f4f4f5"
+    };
+    if (metaTag && THEME_META_COLORS[savedTheme]) {
+      metaTag.setAttribute("content", THEME_META_COLORS[savedTheme]);
+    }
+
+    let toastTimer = null;
+    function showToast(msg, type = "success") {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.display = "block";
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.style.display = "none"; }, 2500);
+    }
+
+    function decodeJWT(t) {
+      try {
+        const base64Url = t.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) { return null; }
+    }
 
     let dynamicPlanLimits = {
       Free: { limit: 10, hours: 3 },
@@ -353,7 +420,8 @@
         fullQuota: "কোটা সম্পূর্ণ পূর্ণ",
         adminUnlimitedNotice: "অ্যাডমিন অ্যাকাউন্টে সমস্ত এআই মডেল এবং বার্তায় কোনো সীমা ছাড়াই পূর্ণ এক্সেস রয়েছে।",
         adminUnlimitedBadge: "সীমাহীন (কোনো সীমা নেই)",
-        adminAccess: "সীমাহীন এক্সেস"
+        adminAccess: "সীমাহীন এক্সেস",
+        refreshed: "কোটা তথ্য সফলভাবে রিফ্রেশ হয়েছে"
       },
       en: {
         back: "Settings",
@@ -368,7 +436,8 @@
         fullQuota: "Full quota available",
         adminUnlimitedNotice: "Admin account has unlimited access to all AI models and messages without rate limits.",
         adminUnlimitedBadge: "Unlimited (No Limit)",
-        adminAccess: "Unlimited Access"
+        adminAccess: "Unlimited Access",
+        refreshed: "Quota successfully refreshed"
       }
     };
 
@@ -396,13 +465,33 @@
     }
 
     function renderUserData() {
-      const userStr = localStorage.getItem("alokpoth_user");
-      if (!userStr) return;
+      let user = null;
+      try {
+        const userStr = localStorage.getItem("alokpoth_user");
+        if (userStr) user = JSON.parse(userStr);
+      } catch {}
+
+      if (!user && token) {
+        const decoded = decodeJWT(token);
+        if (decoded) {
+          user = {
+            role: decoded.role || "user",
+            email: decoded.email || "",
+            plan: decoded.plan || "Free"
+          };
+        }
+      }
+      if (!user) {
+        user = {
+          role: "user",
+          plan: localStorage.getItem("alokpoth_current_plan") || "Free"
+        };
+      }
+
       const isEn = (currentLanguage === "en");
       const d = I18N[currentLanguage] || I18N.en;
 
       try {
-        const user = JSON.parse(userStr);
         const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
         const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));
 
@@ -416,8 +505,31 @@
         let usage = null;
         try {
           usage = JSON.parse(localStorage.getItem("alokpoth_window_usage") || localStorage.getItem("alokpoth_usage_window") || "null");
-          if (usage && usage.count) used = Number(usage.count) || 0;
+          if (usage && usage.count !== undefined) used = Number(usage.count) || 0;
         } catch {}
+
+        const windowMs = hours * 60 * 60 * 1000;
+        let msRemaining = 0;
+        if (usage && usage.resetAt) {
+          msRemaining = Math.max(0, new Date(usage.resetAt).getTime() - Date.now());
+        } else if (usage && usage.start) {
+          msRemaining = Math.max(0, (usage.start + windowMs) - Date.now());
+        }
+
+        if (msRemaining <= 0 && used > 0) {
+          used = 0;
+          msRemaining = 0;
+          try {
+            if (usage) {
+              usage.count = 0;
+              usage.start = Date.now();
+              usage.resetAt = null;
+              localStorage.setItem("alokpoth_window_usage", JSON.stringify(usage));
+              localStorage.setItem("alokpoth_usage_window", JSON.stringify(usage));
+            }
+          } catch {}
+          syncUserDataFromServer();
+        }
 
         const remaining = Math.max(0, limit - used);
 
@@ -431,19 +543,6 @@
         const usageResetEl = document.getElementById("usageResetVal");
         const quotaWindowSubtextEl = document.getElementById("quotaWindowSubtext");
 
-        const windowMs = hours * 60 * 60 * 1000;
-        let msRemaining = 0;
-        if (usage && usage.resetAt) {
-          msRemaining = Math.max(0, new Date(usage.resetAt).getTime() - Date.now());
-        } else if (usage && usage.start) {
-          msRemaining = Math.max(0, (usage.start + windowMs) - Date.now());
-        }
-
-        if (msRemaining <= 0 && used > 0) {
-          used = 0;
-          msRemaining = windowMs;
-        }
-
         const totalSec = Math.max(0, Math.floor(msRemaining / 1000));
         const hLeft = Math.floor(totalSec / 3600);
         const mLeft = Math.floor((totalSec % 3600) / 60);
@@ -453,7 +552,7 @@
         if (used === 0) {
           timeLeftStr = d.fullQuota;
         } else if (hLeft > 0) {
-          timeLeftStr = isEn ? `${hLeft}h ${mLeft}m ${sLeft}s` : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট`;
+          timeLeftStr = isEn ? `${hLeft}h ${mLeft}m ${sLeft}s` : `${formatDigits(hLeft)} ঘণ্টা ${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
         } else if (mLeft > 0) {
           timeLeftStr = isEn ? `${mLeft}m ${sLeft}s` : `${formatDigits(mLeft)} মিনিট ${formatDigits(sLeft)} সেকেন্ড`;
         } else {
@@ -502,9 +601,12 @@
         }
 
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
-        let sessionCount = 1;
+        let sessionCount = 0;
         if (allSessions) {
-          try { sessionCount = JSON.parse(allSessions).length || 1; } catch {}
+          try {
+            const parsed = JSON.parse(allSessions);
+            sessionCount = Array.isArray(parsed) ? parsed.length : 1;
+          } catch { sessionCount = 1; }
         }
         const totalMsgEl = document.getElementById("totalMessagesSent");
         if (totalMsgEl) totalMsgEl.textContent = formatDigits(sessionCount);
@@ -550,6 +652,27 @@
         }
       } catch (e) {}
     }
+
+    // Refresh Quota Button
+    document.getElementById("refreshQuotaBtn")?.addEventListener("click", async () => {
+      const icon = document.getElementById("refreshIcon");
+      if (icon) icon.classList.add("spin");
+      try {
+        await Promise.all([syncDynamicPlans(), syncUserDataFromServer()]);
+      } catch (err) {}
+      renderUserData();
+      if (icon) icon.classList.remove("spin");
+      const d = I18N[currentLanguage] || I18N.en;
+      showToast(d.refreshed);
+    });
+
+    // Back button
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
 
     // Toggle Language
     document.getElementById("langToggleBtn")?.addEventListener("click", () => {

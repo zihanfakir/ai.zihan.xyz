@@ -198,6 +198,10 @@
     .theme-item:hover, .theme-item:active {
       background: var(--bg-card-hover);
     }
+    .theme-item:focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: -2px;
+    }
 
     .theme-lead {
       display: flex;
@@ -460,6 +464,14 @@
         const d = I18N[currentLanguage] || I18N.en;
         showToast(d.applied);
       });
+    });
+
+    // Back button navigation
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
     });
 
     // Toggle Language

@@ -616,7 +616,9 @@ const updateProfile = async (req, res) => {
 
 const changePassword = async (req, res) => {
   try {
-    const { current_password, new_password, confirm_password } = req.body;
+    const current_password = req.body.current_password || req.body.currentPassword;
+    const new_password = req.body.new_password || req.body.newPassword;
+    const confirm_password = req.body.confirm_password || req.body.confirmPassword || new_password;
     if (!current_password || typeof current_password !== 'string') {
       return res.status(400).json({ success: false, error: 'বর্তমান পাসওয়ার্ড প্রদান করুন' });
     }

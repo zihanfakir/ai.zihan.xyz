@@ -481,6 +481,7 @@
 
     document.getElementById("soundToggle")?.addEventListener("change", (e) => {
       localStorage.setItem("alokpoth_sound_enabled", String(e.target.checked));
+      localStorage.setItem("alokpoth_sound", String(e.target.checked));
       showToast((I18N[currentLanguage] || I18N.en).saved);
     });
 
@@ -498,6 +499,14 @@
     document.getElementById("testSoundBtn")?.addEventListener("click", () => {
       const selected = document.getElementById("toneSelect")?.value || "subtle";
       playTone(selected);
+    });
+
+    // Back button navigation
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
     });
 
     // Toggle Language
