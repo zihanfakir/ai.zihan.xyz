@@ -480,8 +480,8 @@ async function getPersistedPlans() {
   }
 
   const defaultPlans = [
-    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, image_limit: 3, allowed_models: ['gemini-3.6-flash', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'openrouter/free', 'mimo-v2.5', 'hy3'], is_active: true },
-    { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, image_limit: 20, allowed_models: ['*'], is_active: true },
+    { name: 'Free', displayName: 'ফ্রি প্ল্যান', message_limit: 10, window_hours: 3, image_limit: 5, allowed_models: ['gemini-3.6-flash', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'openrouter/free', 'mimo-v2.5', 'hy3'], is_active: true },
+    { name: 'Pro', displayName: 'প্রো প্ল্যান', message_limit: 30, window_hours: 3, image_limit: 25, allowed_models: ['*'], is_active: true },
     { name: 'Max', displayName: 'ম্যাক্স প্ল্যান', message_limit: 50, window_hours: 1, image_limit: 100, allowed_models: ['*'], is_active: true }
   ];
 
@@ -498,8 +498,11 @@ async function getPersistedPlans() {
       const parsed = JSON.parse(data[0].api_key);
       if (Array.isArray(parsed) && parsed.length > 0) {
         parsed.forEach(p => {
-          if (p.image_limit === undefined) {
-            p.image_limit = p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100);
+          const fallback = p.name === 'Free' ? 5 : (p.name === 'Pro' ? 25 : 100);
+          if (p.image_limit === undefined || p.image_limit === null || isNaN(Number(p.image_limit)) || Number(p.image_limit) <= 0) {
+            p.image_limit = fallback;
+          } else {
+            p.image_limit = Math.max(Number(p.image_limit), fallback);
           }
         });
         plansCache = parsed;
@@ -514,8 +517,11 @@ async function getPersistedPlans() {
 
   const resPlans = memoryStore.plans && memoryStore.plans.length > 0 ? memoryStore.plans : defaultPlans;
   resPlans.forEach(p => {
-    if (p.image_limit === undefined) {
-      p.image_limit = p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100);
+    const fallback = p.name === 'Free' ? 5 : (p.name === 'Pro' ? 25 : 100);
+    if (p.image_limit === undefined || p.image_limit === null || isNaN(Number(p.image_limit)) || Number(p.image_limit) <= 0) {
+      p.image_limit = fallback;
+    } else {
+      p.image_limit = Math.max(Number(p.image_limit), fallback);
     }
   });
   return resPlans;

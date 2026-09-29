@@ -118,7 +118,8 @@ const checkRateLimit = async (req, res, next) => {
     }
     plan.message_limit = Number(plan.message_limit) || 10;
     plan.window_hours = Number(plan.window_hours) || 3;
-    plan.image_limit = plan.image_limit !== undefined && !isNaN(Number(plan.image_limit)) ? Number(plan.image_limit) : (plan.name === 'Free' ? 3 : (plan.name === 'Pro' ? 20 : 100));
+    const defaultImgLimit = (plan.name === 'Free' ? 5 : (plan.name === 'Pro' ? 25 : 100));
+    plan.image_limit = (plan.image_limit !== undefined && !isNaN(Number(plan.image_limit)) && Number(plan.image_limit) > 0) ? Math.max(Number(plan.image_limit), defaultImgLimit) : defaultImgLimit;
 
     const userId = String(user._id || user.id);
     const windowStart = new Date(Date.now() - plan.window_hours * 60 * 60 * 1000);

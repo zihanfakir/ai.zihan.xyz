@@ -5819,12 +5819,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function getImagePlanLimit() {
       const plan = currentPlan || "Free";
-      if (DYNAMIC_PLAN_LIMITS[plan] && DYNAMIC_PLAN_LIMITS[plan].image_limit !== undefined) {
-        return { limit: DYNAMIC_PLAN_LIMITS[plan].image_limit, hours: DYNAMIC_PLAN_LIMITS[plan].hours || 3 };
+      const fallbackImg = (plan === "Max" ? 100 : (plan === "Pro" ? 25 : 5));
+      const fallbackHours = (plan === "Max" ? 1 : 3);
+      if (DYNAMIC_PLAN_LIMITS[plan] && DYNAMIC_PLAN_LIMITS[plan].image_limit !== undefined && Number(DYNAMIC_PLAN_LIMITS[plan].image_limit) > 0) {
+        return { 
+          limit: Math.max(Number(DYNAMIC_PLAN_LIMITS[plan].image_limit), fallbackImg), 
+          hours: DYNAMIC_PLAN_LIMITS[plan].hours || fallbackHours 
+        };
       }
-      if (plan === "Max") return { limit: 100, hours: 1 };
-      if (plan === "Pro") return { limit: 20, hours: 3 };
-      return { limit: 3, hours: 3 };
+      return { limit: fallbackImg, hours: fallbackHours };
     }
 
     function getImageWindowUsage() {
@@ -5959,8 +5962,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
               ? Number(p.message_limit) : (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50));
             const hrs = (p.window_hours !== undefined && p.window_hours !== null && !isNaN(Number(p.window_hours)))
               ? Number(p.window_hours) : (p.name === 'Max' ? 1 : 3);
-            const imgLim = (p.image_limit !== undefined && p.image_limit !== null && !isNaN(Number(p.image_limit)))
-              ? Number(p.image_limit) : (p.name === 'Free' ? 3 : (p.name === 'Pro' ? 20 : 100));
+            const fallbackImg = (p.name === 'Free' ? 5 : (p.name === 'Pro' ? 25 : 100));
+            const imgLim = (p.image_limit !== undefined && p.image_limit !== null && !isNaN(Number(p.image_limit)) && Number(p.image_limit) > 0)
+              ? Math.max(Number(p.image_limit), fallbackImg) : fallbackImg;
             DYNAMIC_PLAN_LIMITS[p.name] = { limit: lim, hours: hrs, image_limit: imgLim };
 
             if (PLAN_LIMIT_DETAILS.bn[p.name]) {
@@ -10656,17 +10660,34 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function detectImageGenRequest(text) {
-      if (!text) return null;
-      const patterns = [
-        /^\/(image|draw|img|pollinations)\b/i,
-        /^(pollinations|পোলিনেশন)\s*[:：\-]/i,
-        /(ছবি|ইমেজ|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন)/i,
-        /(একটি|একটা|কিছু|আমাকে)?\s*(ছবি|ইমেজ|আর্ট|চিত্র|পেইন্টিং)\s*(এঁকে|বানিয়ে|তৈরি করে|জেনারেট করে)/i,
-        /^\s*(draw|paint|sketch)\s+(a|an|the\s+)?([a-z0-9_\-\s]{2,})/i,
-        /\b(draw|generate|create|paint|make)\b[\s\S]*?\b(image|picture|art|logo|wallpaper|photo|painting|drawing|illustration)\b/i,
-        /\bimage\s*of\b/i
+      if (!text || typeof text !== "string") return false;
+      const clean = text.trim();
+      if (!clean) return false;
+
+      // 1. Direct slash commands or pollinations prefix
+      if (/^\/(image|draw|img|photo|picture|pollinations)\b/i.test(clean)) return true;
+      if (/^(pollinations|পোলিনেশন)\s*[:：\-]/i.test(clean)) return true;
+
+      // 2. English image generation triggers (including modify, edit, variation)
+      const enPatterns = [
+        /\b(modify|edit|change|update|transform|redraw|regenerate|enhance|remix|generate|create|draw|paint|sketch|make|render|show|give|produce)\b[\s\S]*?\b(image|picture|photo|photograph|art|wallpaper|logo|illustration|drawing|painting|avatar|portrait|banner|thumbnail)\b/i,
+        /\b(image|picture|photo|art|wallpaper|logo|illustration|drawing)\s+of\b/i,
+        /^\s*(draw|paint|sketch|generate|create|render)\s+/i,
+        /^\s*(another|next|more)\s+(image|picture|photo|one)\b/i
       ];
-      return patterns.some((p) => p.test(text));
+      if (enPatterns.some((p) => p.test(clean))) return true;
+
+      // 3. Bengali image generation triggers (comprehensive)
+      const bnPatterns = [
+        /(ছবি|ইমেজ|ফটো|পিকচার|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং|অঙ্কন)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন|দাও|দেখাও|পাঠাও|এডিট|পরিবর্তন|বদল|আরেকটা|অন্য|নতুন)/i,
+        /(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|এডিট|পরিবর্তন)\s*(করে|করা)?\s*(দাও|দিন|করো)?\s*[\s\S]*?\b(ছবি|ইমেজ|ফটো|পিকচার|চিত্র|পেইন্টিং)/i,
+        /(একটি|একটা|কিছু|আমাকে|আমারে|আমার জন্য)?\s*(ছবি|ইমেজ|ফটো|পিকচার|চিত্র|পেইন্টিং)\s*(আঁকো|বানাও|দাও|দিন|দেখাও|পাঠাও|তৈরি)/i,
+        /^(আরেকটা|আরেকটি|অন্য একটা|নতুন একটা|পরেরটা|পরের ছবি|আরেকটা ছবি|আরেকটা ফটো)\s*(দাও|দিন|করো|দেখাও|বানাও)?$/i,
+        /(ছবি|ফটো|ইমেজ|পিকচার)\s*(আঁকো|বানাও|দাও|দেখাও|হবে|চাই)/i
+      ];
+      if (bnPatterns.some((p) => p.test(clean))) return true;
+
+      return false;
     }
 
     async function generateImageViaServer(prompt) {
@@ -10890,11 +10911,31 @@ Capabilities & Code Generation Instructions (CRITICAL):
           attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
           
           try {
-            let imgPrompt = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
-            imgPrompt = imgPrompt.replace(/^\/(image|draw|img|pollinations)\s+/i, "").trim();
+            let rawUserText = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
+            let imgPrompt = rawUserText;
+            imgPrompt = imgPrompt.replace(/^\/(image|draw|img|photo|picture|pollinations)\s+/i, "").trim();
             imgPrompt = imgPrompt.replace(/^(pollinations|পোলিনেশন)\s*[:：\-]\s*/i, "").trim();
             imgPrompt = imgPrompt.replace(/^(modify|edit|change|update|transform|redesign|redo)\s+(image|photo|picture|img)\s*[:：\-]?\s*/i, "").trim();
-            imgPrompt = imgPrompt.replace(/^(ছবি|ইমেজ|ফটো)\s*(পরিবর্তন|এডিট|পাল্টাও|বদলাও)\s*[:：\-]?\s*/i, "").trim();
+            imgPrompt = imgPrompt.replace(/^(ছবি|ইমেজ|ফটো|পিকচার)\s*(পরিবর্তন|এডিট|পাল্টাও|বদলাও|তৈরি করো|বানাও|আঁকো|দাও|দেখাও)\s*[:：\-]?\s*/i, "").trim();
+
+            // If prompt is just "another one" / "আরেকটা" / "পরেরটা", inherit from previous prompt
+            const isFollowUp = /^(আরেকটা|আরেকটি|অন্য একটা|পরেরটা|পরের ছবি|আরেকটা দাও|another one|another|more|next)\s*(দাও|দিন|করো|দেখাও|বানাও|please)?$/i.test(imgPrompt.trim());
+            if (isFollowUp) {
+              for (let i = messagesHistory.length - 2; i >= 0; i--) {
+                const prev = messagesHistory[i];
+                if (prev && prev.role === "user" && prev.content && detectImageGenRequest(prev.content)) {
+                  const cleanedPrev = prev.content.replace(/^\/(image|draw|img|photo|picture|pollinations)\s+/i, "")
+                    .replace(/^(modify|edit|change)\s+(image|photo)\s*[:：\-]?\s*/i, "")
+                    .replace(/(একটি|একটা)?\s*(ছবি|ফটো|ইমেজ)\s*(আঁকো|বানাও|দাও|তৈরি করো)?/i, "")
+                    .trim();
+                  if (cleanedPrev && cleanedPrev.length > 2) {
+                    imgPrompt = cleanedPrev;
+                    break;
+                  }
+                }
+              }
+            }
+
             if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
             const imageUrl = await generateImageForVyceaiModel(imgPrompt);
             renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);

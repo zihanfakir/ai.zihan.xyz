@@ -93,10 +93,10 @@ app.get('/api/plans', async (req, res) => {
     const normalizePlan = (p) => {
       const plain = (p && typeof p.toObject === 'function') ? p.toObject() : { ...p };
       plain.message_limit = Number(plain.message_limit) || 10;
-      plain.window_hours = Number(plain.window_hours) || 3;
-      plain.image_limit = (plain.image_limit !== undefined && plain.image_limit !== null && !isNaN(Number(plain.image_limit)))
-        ? Number(plain.image_limit)
-        : (plain.name === 'Free' ? 3 : (plain.name === 'Pro' ? 20 : 100));
+      const defaultImg = (plain.name === 'Free' ? 5 : (plain.name === 'Pro' ? 25 : 100));
+      plain.image_limit = (plain.image_limit !== undefined && plain.image_limit !== null && !isNaN(Number(plain.image_limit)) && Number(plain.image_limit) > 0)
+        ? Math.max(Number(plain.image_limit), defaultImg)
+        : defaultImg;
       return plain;
     };
 
