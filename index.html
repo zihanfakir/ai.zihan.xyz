@@ -9869,6 +9869,20 @@ Capabilities & Code Generation Instructions (CRITICAL):
           textDiv.classList.remove("streaming", "no-children");
           const rawText = typeof m.content === "string" ? m.content : "";
           
+          // Detect saved generated image markers and restore as image bubble
+          const imgMatch = rawText.match(/\[(?:ছবি তৈরি করা হয়েছে|Generated image|Image generated)\s*[:：]?\s*(https?:\/\/[^\]\s]+)\]/i);
+          if (imgMatch && imgMatch[1]) {
+            const savedImageUrl = imgMatch[1];
+            const savedPrompt = rawText.replace(/\[(?:ছবি তৈরি করা হয়েছে|Generated image|Image generated)\s*[:：]?\s*https?:\/\/[^\]\s]+\]/i, "").trim();
+            renderGeneratedImageBubble(textDiv, savedImageUrl, savedPrompt || "ছবি");
+            if (copyBtn) copyBtn.style.display = "none";
+            if (regenBtn) regenBtn.style.display = "inline-flex";
+            if (ttsBtn) ttsBtn.style.display = "none";
+            if (likeBtn) likeBtn.style.display = "inline-flex";
+            if (dislikeBtn) dislikeBtn.style.display = "inline-flex";
+            if (shareBtn) shareBtn.style.display = "inline-flex";
+            if (moreBtn) moreBtn.style.display = "inline-flex";
+          } else {
           let html = "";
           let finalReasoning = "";
           let finalContent = rawText;
@@ -9922,6 +9936,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (moreBtn) moreBtn.style.display = "inline-flex";
           if (regenBtn) regenBtn.style.display = "inline-flex";
         }
+          }
       });
       scrollToBottom();
       closeChatHistoryModal();
@@ -10696,6 +10711,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
       img.src = imageUrl;
       img.alt = prompt || "ছবি";
       img.className = "generated-image";
+      img.onerror = function() {
+        this.style.display = "none";
+        const errBox = document.createElement("div");
+        errBox.style.cssText = "padding:20px;text-align:center;color:var(--text-sub);font-size:0.9rem;border:1px dashed rgba(255,255,255,0.15);border-radius:12px;background:rgba(255,255,255,0.03);";
+        errBox.innerHTML = '<div style="font-size:1.5rem;margin-bottom:8px;">🖼️</div>' +
+          '<div>ছবি লোড করা যায়নি</div>' +
+          '<button type="button" onclick="this.parentElement.previousElementSibling.style.display=\'block\';this.parentElement.previousElementSibling.src=\'' + imageUrl + '&retry=' + Date.now() + '\';this.parentElement.remove();" ' +
+          'style="margin-top:10px;padding:6px 16px;background:var(--accent-primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;">আবার চেষ্টা করুন</button>';
+        wrap.appendChild(errBox);
+      };
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
@@ -10853,6 +10878,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
             let imgPrompt = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
             imgPrompt = imgPrompt.replace(/^\/(image|draw|img|pollinations)\s+/i, "").trim();
             imgPrompt = imgPrompt.replace(/^(pollinations|পোলিনেশন)\s*[:：\-]\s*/i, "").trim();
+            imgPrompt = imgPrompt.replace(/^(modify|edit|change|update|transform|redesign|redo)\s+(image|photo|picture|img)\s*[:：\-]?\s*/i, "").trim();
+            imgPrompt = imgPrompt.replace(/^(ছবি|ইমেজ|ফটো)\s*(পরিবর্তন|এডিট|পাল্টাও|বদলাও)\s*[:：\-]?\s*/i, "").trim();
             if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
             const imageUrl = await generateImageForVyceaiModel(imgPrompt);
             renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);
