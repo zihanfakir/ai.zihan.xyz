@@ -187,26 +187,60 @@
     .faq-item {
       padding: 14px 0;
       border-bottom: 1px solid var(--border-divider);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
     }
     .faq-item:last-child {
       border-bottom: none;
-      padding-bottom: 0;
+      padding-bottom: 4px;
     }
     .faq-item:first-child {
-      padding-top: 0;
+      padding-top: 2px;
     }
-
+    .faq-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
     .faq-q {
       font-size: 0.98rem;
       font-weight: 600;
       color: #ffffff;
-      margin-bottom: 6px;
+      transition: color 0.15s ease;
     }
-
+    .faq-item:hover .faq-q, .faq-item.open .faq-q {
+      color: var(--accent-blue);
+    }
+    .faq-chevron {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-sub);
+      fill: none;
+      stroke-width: 2.2;
+      flex-shrink: 0;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.15s;
+    }
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+      stroke: var(--accent-blue);
+    }
     .faq-a {
       font-size: 0.86rem;
       color: var(--text-sub);
       line-height: 1.6;
+      margin-top: 8px;
+      display: none;
+      padding-left: 2px;
+    }
+    .faq-item.open .faq-a {
+      display: block;
+      animation: faqFadeIn 0.2s ease;
+    }
+    @keyframes faqFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .contact-item {
@@ -261,23 +295,35 @@
         <span id="faqHeading">Frequently Asked Questions</span>
       </div>
 
-      <div class="faq-item">
-        <div class="faq-q" id="faqQ1">What is Alo AI?</div>
+      <div class="faq-item open" role="button" tabindex="0">
+        <div class="faq-header">
+          <div class="faq-q" id="faqQ1">What is Alo AI?</div>
+          <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
         <div class="faq-a" id="faqA1">Alo AI is a high-speed intelligence platform built for coding, academic research, generative image synthesis, and Bengali language conversational mastery.</div>
       </div>
 
-      <div class="faq-item">
-        <div class="faq-q" id="faqQ2">How does the fair usage quota work?</div>
+      <div class="faq-item" role="button" tabindex="0">
+        <div class="faq-header">
+          <div class="faq-q" id="faqQ2">How does the fair usage quota work?</div>
+          <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
         <div class="faq-a" id="faqA2">Each user plan includes a rolling window (e.g. Free: 10 messages / 3 hours, Pro: 30 / 3 hours, Max: 50 / 1 hour). When your limit is reached, your quota automatically resets as the window expires.</div>
       </div>
 
-      <div class="faq-item">
-        <div class="faq-q" id="faqQ3">How can I redeem a code?</div>
+      <div class="faq-item" role="button" tabindex="0">
+        <div class="faq-header">
+          <div class="faq-q" id="faqQ3">How can I redeem a code?</div>
+          <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
         <div class="faq-a" id="faqA3">Navigate to the Redeem Code page from Settings, enter your 12-character promo code, and your account will immediately upgrade to Pro or Max.</div>
       </div>
 
-      <div class="faq-item">
-        <div class="faq-q" id="faqQ4">Are Admin accounts rate-limited?</div>
+      <div class="faq-item" role="button" tabindex="0">
+        <div class="faq-header">
+          <div class="faq-q" id="faqQ4">Are Admin accounts rate-limited?</div>
+          <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
         <div class="faq-a" id="faqA4">No. Verified admin accounts enjoy unlimited messages, unrestricted image generation, and instant access to all AI models without queuing or rate limits.</div>
       </div>
     </div>
@@ -392,6 +438,19 @@
       currentLanguage = (currentLanguage === "en" ? "bn" : "en");
       try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
       applyI18n();
+    });
+
+    // FAQ Accordion Interaction
+    document.querySelectorAll(".faq-item").forEach(item => {
+      item.addEventListener("click", () => {
+        item.classList.toggle("open");
+      });
+      item.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          item.classList.toggle("open");
+        }
+      });
     });
 
     applyI18n();

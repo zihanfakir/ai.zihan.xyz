@@ -330,6 +330,47 @@
       border-color: var(--accent-blue);
     }
 
+    /* Suggestion Chips */
+    .suggestion-chips-wrap {
+      margin-top: 10px;
+    }
+    .chips-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+    .suggestion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sugg-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .sugg-chip:hover {
+      background: rgba(59, 130, 246, 0.14);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+    }
+    .sugg-chip:active {
+      transform: scale(0.96);
+    }
+
     /* iOS Style Toggle Switch */
     .toggle-row {
       display: flex;
@@ -559,6 +600,23 @@
       <div class="form-group">
         <label class="form-label" id="labelCustomInstructions">Custom Instructions</label>
         <textarea class="custom-textarea" id="customInstructions" placeholder="Tell Alo AI how you'd like it to respond (e.g., 'I am a software engineer, prefer JavaScript code snippets with concise explanations')."></textarea>
+        <div class="suggestion-chips-wrap">
+          <span class="chips-label" id="chipsLabel">Quick suggestions:</span>
+          <div class="suggestion-chips">
+            <button type="button" class="sugg-chip" data-text-en="Concise answers with clear bullet points" data-text-bn="অপ্রয়োজনীয় কথা ছাড়া সংক্ষিপ্ত ও বুলেট পয়েন্টে উত্তর দেবেন">
+              ⚡ <span class="chip-txt" id="chipTxt1">Concise bullets</span>
+            </button>
+            <button type="button" class="sugg-chip" data-text-en="Include clean, well-commented code snippets" data-text-bn="পরিষ্কার ও প্রয়োজনীয় কমেন্টসহ কোড স্নsnippet দেবেন">
+              💻 <span class="chip-txt" id="chipTxt2">Clean code snippets</span>
+            </button>
+            <button type="button" class="sugg-chip" data-text-en="Explain concepts simply with real-world examples" data-text-bn="বাস্তব উদাহরণ দিয়ে সহজ ভাষায় জটিল বিষয় ব্যাখ্যা করবেন">
+              💡 <span class="chip-txt" id="chipTxt3">Simple examples</span>
+            </button>
+            <button type="button" class="sugg-chip" data-text-en="Act as a Principal Software Engineer & Architect" data-text-bn="একজন দক্ষ সফটওয়্যার আর্কিটেক্ট হিসেবে পরামর্শ দেবেন">
+              👨‍💻 <span class="chip-txt" id="chipTxt4">Software architect</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Memory Context Toggle -->
@@ -645,9 +703,23 @@
       });
     });
 
-    // Initialize active card states
-    selectTone(currentTone);
-    selectLangPref(currentLangPref);
+    // Attach suggestion chips handlers
+    document.querySelectorAll(".sugg-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const text = currentLanguage === "bn" 
+          ? (chip.getAttribute("data-text-bn") || chip.getAttribute("data-text-en"))
+          : (chip.getAttribute("data-text-en") || chip.getAttribute("data-text-bn"));
+        if (!text || !customInstructions) return;
+        const cur = customInstructions.value.trim();
+        if (!cur) {
+          customInstructions.value = text;
+        } else if (!cur.includes(text)) {
+          customInstructions.value = cur + "\n" + text;
+        }
+        customInstructions.focus();
+        showToast(currentLanguage === "bn" ? "পরামর্শ যুক্ত করা হয়েছে" : "Suggestion added");
+      });
+    });
 
     const I18N = {
       bn: {
@@ -658,6 +730,11 @@
         labelResponseLang: "প্রধান ভাষা",
         labelCustomInstructions: "কাস্টম নির্দেশনা",
         placeholder: "Alo AI আপনাকে কীভাবে উত্তর দেবে তা লিখুন (যেমন: 'আমি একজন সফটওয়্যার ইঞ্জিনিয়ার, জাভাস্ক্রিপ্ট কোড উদাহরণের সাথে সংক্ষিপ্ত ব্যাখ্যা পছন্দ করি')",
+        chipsLabel: "দ্রুত পরামর্শসমূহ:",
+        chip1: "সংক্ষিপ্ত বুলেটস",
+        chip2: "পরিষ্কার কোড স্নsnippet",
+        chip3: "সহজ বাস্তব উদাহরণ",
+        chip4: "সফটওয়্যার আর্কিটেক্ট",
         labelMemory: "ক্রস-সেশন মেমোরি",
         descMemory: "চ্যাট সেশনগুলোর মাঝে আপনার পছন্দ ও প্রাসঙ্গিক তথ্য মনে রাখবে",
         btnSave: "সংরক্ষণ করুন",
@@ -687,6 +764,11 @@
         labelResponseLang: "Primary Language",
         labelCustomInstructions: "Custom Instructions",
         placeholder: "Tell Alo AI how you'd like it to respond (e.g., 'I am a software engineer, prefer JavaScript code snippets with concise explanations')",
+        chipsLabel: "Quick suggestions:",
+        chip1: "Concise bullets",
+        chip2: "Clean code snippets",
+        chip3: "Simple examples",
+        chip4: "Software architect",
         labelMemory: "Cross-Session Memory",
         descMemory: "Remember context and custom preferences across chat sessions",
         btnSave: "Save Preferences",
@@ -735,6 +817,13 @@
       document.getElementById("descMemory").textContent = d.descMemory;
       document.getElementById("btnSaveText").textContent = d.btnSave;
       document.title = `${d.pageTitle} — Alo AI`;
+
+      const cLabel = document.getElementById("chipsLabel");
+      if (cLabel && d.chipsLabel) cLabel.textContent = d.chipsLabel;
+      for (let i = 1; i <= 4; i++) {
+        const ct = document.getElementById(`chipTxt${i}`);
+        if (ct && d[`chip${i}`]) ct.textContent = d[`chip${i}`];
+      }
 
       // Translate Tone Cards
       const toneMap = {

@@ -9767,12 +9767,17 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         item.querySelector(".chat-history-delete-btn").addEventListener("click", (e) => {
           e.stopPropagation();
-          if (!confirm("আপনি কি নিশ্চিতভাবে এই চ্যাটটি মুছে ফেলতে চান?")) return;
-          const remaining = loadAllSessions().filter((s) => s.id !== session.id);
-          saveAllSessions(remaining);
-          if (currentSessionId === session.id) currentSessionId = null;
-          renderChatHistoryList();
-          showToast("চ্যাট সফলভাবে মুছে ফেলা হয়েছে", "info");
+          const confirmMsg = currentLanguage === "bn" 
+            ? "আপনি কি নিশ্চিতভাবে এই চ্যাটটি মুছে ফেলতে চান?" 
+            : "Are you sure you want to delete this chat session?";
+          showCustomUI("confirm", confirmMsg, null, (confirmed) => {
+            if (!confirmed) return;
+            const remaining = loadAllSessions().filter((s) => s.id !== session.id);
+            saveAllSessions(remaining);
+            if (currentSessionId === session.id) currentSessionId = null;
+            renderChatHistoryList();
+            showToast(currentLanguage === "bn" ? "চ্যাট সফলভাবে মুছে ফেলা হয়েছে" : "Chat deleted successfully", "info");
+          });
         });
 
         listEl.appendChild(item);

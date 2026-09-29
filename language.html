@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>App Language — Alo AI</title>
+  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+      --text-dim: #a1a1aa;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #09090b;
+      --bg-card: #18181b;
+      --bg-card-hover: #222226;
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="oled"] {
+      --bg-base: #000000;
+      --bg-card: #111113;
+      --bg-card-hover: #1c1c1f;
+      --border-card: rgba(255, 255, 255, 0.12);
+      --border-divider: rgba(255, 255, 255, 0.06);
+      --text-main: #ffffff;
+      --text-sub: #71717a;
+    }
+
+    [data-theme="sapphire"] {
+      --bg-base: #070d19;
+      --bg-card: #0f1c32;
+      --bg-card-hover: #152744;
+      --border-card: rgba(56, 189, 248, 0.15);
+      --border-divider: rgba(56, 189, 248, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    [data-theme="eyecare"] {
+      --bg-base: #f5eedc;
+      --bg-card: #eadeca;
+      --bg-card-hover: #dfcfb8;
+      --border-card: rgba(146, 64, 14, 0.15);
+      --border-divider: rgba(146, 64, 14, 0.08);
+      --text-main: #4a3b2c;
+      --text-sub: #7a6b5c;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --border-divider: rgba(0, 0, 0, 0.05);
+      --text-main: #09090b;
+      --text-sub: #71717a;
+      --text-dim: #52525b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: max(32px, env(safe-area-inset-bottom, 20px));
+      transition: background-color 0.2s ease;
+    }
+
+    /* Top Navigation Bar */
+    .settings-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .settings-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .settings-back-link:active {
+      opacity: 0.7;
+    }
+    .settings-back-link svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-pill-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-container {
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-blue);
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.45;
+      margin-bottom: 16px;
+    }
+
+    /* AMOLED Option Card Picker */
+    .option-card-group {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .option-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .option-card:last-child {
+      border-bottom: none;
+    }
+    .option-card:hover, .option-card:active {
+      background: var(--bg-card-hover);
+    }
+    .option-card.active {
+      background: rgba(59, 130, 246, 0.09);
+    }
+    .option-card:focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: -2px;
+    }
+    .option-lead {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .option-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .option-card.active .option-icon-badge {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+    .option-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .option-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .option-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      line-height: 1.35;
+    }
+    .option-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 10px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+    }
+    .option-check svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .option-card.active .option-check {
+      display: flex;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom, 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.success { border-color: #10b981; }
+  </style>
+</head>
+<body>
+  <div id="toastEl" class="toast"></div>
+
+  <!-- Top Navigation -->
+  <header class="settings-nav">
+    <a href="account.html" class="settings-back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="backText">Settings</span>
+    </a>
+    <div class="nav-title" id="pageTitle">App Language</div>
+    <div class="nav-actions">
+      <button type="button" class="lang-pill-btn" id="langToggleBtn" title="Language Switch">
+        <span id="langBtnText">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-container">
+    <div class="settings-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="sectionTitle">Interface Language</span>
+      </div>
+      <p class="card-desc" id="sectionDesc">
+        Choose your preferred language for menus, buttons, and app navigation. Changes will apply immediately.
+      </p>
+
+      <!-- Language Cards -->
+      <div class="option-card-group" id="languageGroup" role="radiogroup" aria-labelledby="sectionTitle">
+        <!-- Bengali -->
+        <div class="option-card" data-lang="bn" role="radio" tabindex="0" aria-checked="false">
+          <div class="option-lead">
+            <div class="option-icon-badge">🇧🇩</div>
+            <div class="option-info">
+              <span class="option-title" id="titleBn">বাংলা (Bengali)</span>
+              <span class="option-desc" id="descBn">খাঁটি, সাবলীল ও সমৃদ্ধ বাংলা ইউজার ইন্টারফেস</span>
+            </div>
+          </div>
+          <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <!-- English -->
+        <div class="option-card" data-lang="en" role="radio" tabindex="0" aria-checked="false">
+          <div class="option-lead">
+            <div class="option-icon-badge">🇬🇧</div>
+            <div class="option-info">
+              <span class="option-title" id="titleEn">English (US / UK)</span>
+              <span class="option-desc" id="descEn">Clean and standardized international interface</span>
+            </div>
+          </div>
+          <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const I18N = {
+      bn: {
+        back: "সেটিংস",
+        pageTitle: "অ্যাপের ভাষা",
+        sectionTitle: "ইন্টারফেস ভাষা",
+        sectionDesc: "মেনু, বাটন এবং সম্পূর্ণ অ্যাপের জন্য আপনার পছন্দের ভাষা নির্বাচন করুন। এটি তাৎক্ষণিকভাবে কার্যকর হবে।",
+        titleBn: "বাংলা (Bengali - ডিফল্ট)",
+        descBn: "খাঁটি, সাবলীল ও সমৃদ্ধ বাংলা ইউজার ইন্টারফেস",
+        titleEn: "English (US / UK)",
+        descEn: "আন্তর্জাতিক মানসম্পন্ন ইংরেজি ইউজার ইন্টারফেস",
+        saved: "ভাষা সফলভাবে পরিবর্তন করা হয়েছে!"
+      },
+      en: {
+        back: "Settings",
+        pageTitle: "App Language",
+        sectionTitle: "Interface Language",
+        sectionDesc: "Choose your preferred language for menus, buttons, and app navigation. Changes will apply immediately.",
+        titleBn: "বাংলা (Bengali)",
+        descBn: "Rich, native, and fluent Bengali user interface",
+        titleEn: "English (US / UK - Default)",
+        descEn: "Standard international English user interface",
+        saved: "Language changed successfully!"
+      }
+    };
+
+    function showToast(msg) {
+      const el = document.getElementById("toastEl");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = "toast success";
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 2000);
+    }
+
+    function applyI18n() {
+      const isEn = (currentLanguage === "en");
+      const d = I18N[currentLanguage] || I18N.en;
+
+      document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
+      document.getElementById("backText").textContent = d.back;
+      document.getElementById("pageTitle").textContent = d.pageTitle;
+      document.getElementById("sectionTitle").textContent = d.sectionTitle;
+      document.getElementById("sectionDesc").textContent = d.sectionDesc;
+      document.getElementById("titleBn").textContent = d.titleBn;
+      document.getElementById("descBn").textContent = d.descBn;
+      document.getElementById("titleEn").textContent = d.titleEn;
+      document.getElementById("descEn").textContent = d.descEn;
+      document.title = `${d.pageTitle} — Alo AI`;
+
+      // Update active cards
+      document.querySelectorAll("#languageGroup .option-card").forEach(card => {
+        const isActive = card.getAttribute("data-lang") === currentLanguage;
+        card.classList.toggle("active", isActive);
+        card.setAttribute("aria-checked", isActive ? "true" : "false");
+      });
+    }
+
+    function setLanguage(lang) {
+      if (currentLanguage === lang) return;
+      currentLanguage = lang;
+      try {
+        localStorage.setItem("alokpoth_lang", lang);
+      } catch (e) {}
+      applyI18n();
+      showToast((I18N[currentLanguage] || I18N.en).saved);
+    }
+
+    // Attach card click handlers
+    document.querySelectorAll("#languageGroup .option-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const lang = card.getAttribute("data-lang");
+        setLanguage(lang);
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setLanguage(card.getAttribute("data-lang"));
+        }
+      });
+    });
+
+    // Back button navigation
+    document.getElementById("backBtn")?.addEventListener("click", (e) => {
+      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
+
+    // Language Toggle pill button
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+      setLanguage(currentLanguage === "en" ? "bn" : "en");
+    });
+
+    applyI18n();
+  </script>
+</body>
+</html>
