@@ -278,6 +278,105 @@
       outline: none;
     }
 
+    /* AMOLED Option Card Picker */
+    .option-card-group {
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid var(--border-divider);
+      border-bottom: 1px solid var(--border-divider);
+      margin: 8px 0 16px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .option-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .option-card:last-child {
+      border-bottom: none;
+    }
+    .option-card:hover, .option-card:active {
+      background: var(--bg-card-hover);
+    }
+    .option-card.active {
+      background: rgba(59, 130, 246, 0.09);
+    }
+    .option-card:focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: -2px;
+    }
+    .option-lead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .option-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .option-card.active .option-icon-badge {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+    .option-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .option-title {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .option-desc {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+    .option-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 10px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+    }
+    .option-check svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .option-card.active .option-check {
+      display: flex;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -349,16 +448,48 @@
       <div class="row-divider"></div>
 
       <!-- Audio Tone Style -->
-      <div class="settings-row">
-        <div class="row-lead">
-          <span class="row-title" id="labelTone">Audio Tone</span>
-          <span class="row-desc" id="descTone">Select preferred tone character</span>
+      <div style="padding: 16px 16px 6px;">
+        <span class="row-title" id="labelTone">Audio Tone</span>
+        <span class="row-desc" id="descTone" style="margin-top: 3px; display: block;">Select preferred tone character</span>
+      </div>
+
+      <select class="tone-select" id="toneSelect" style="display:none;" aria-hidden="true">
+        <option value="subtle">Subtle Pop</option>
+        <option value="chime">Soft Chime</option>
+        <option value="cosmic">Cosmic Pulse</option>
+      </select>
+
+      <div class="option-card-group" id="soundToneGroup" role="radiogroup" aria-labelledby="labelTone">
+        <div class="option-card" data-tone-id="subtle" role="radio" tabindex="0" aria-checked="false">
+          <div class="option-lead">
+            <div class="option-icon-badge">💧</div>
+            <div class="option-info">
+              <span class="option-title" id="soundToneSubtleTitle">Subtle Pop</span>
+              <span class="option-desc" id="soundToneSubtleDesc">Gentle tactile click for discreet feedback</span>
+            </div>
+          </div>
+          <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
-        <select class="tone-select" id="toneSelect">
-          <option value="subtle">Subtle Pop</option>
-          <option value="chime">Soft Chime</option>
-          <option value="cosmic">Cosmic Pulse</option>
-        </select>
+        <div class="option-card" data-tone-id="chime" role="radio" tabindex="0" aria-checked="false">
+          <div class="option-lead">
+            <div class="option-icon-badge">🔔</div>
+            <div class="option-info">
+              <span class="option-title" id="soundToneChimeTitle">Soft Chime</span>
+              <span class="option-desc" id="soundToneChimeDesc">Pleasant harmonic chime notification</span>
+            </div>
+          </div>
+          <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="option-card" data-tone-id="cosmic" role="radio" tabindex="0" aria-checked="false">
+          <div class="option-lead">
+            <div class="option-icon-badge">🌌</div>
+            <div class="option-info">
+              <span class="option-title" id="soundToneCosmicTitle">Cosmic Pulse</span>
+              <span class="option-desc" id="soundToneCosmicDesc">High-tech sci-fi pulse sound effect</span>
+            </div>
+          </div>
+          <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
       </div>
 
       <!-- Test Sound Action -->
@@ -380,11 +511,43 @@
 
     const soundEnabled = localStorage.getItem("alokpoth_sound_enabled") !== "false";
     const chimeEnabled = localStorage.getItem("alokpoth_chime_enabled") !== "false";
-    const savedTone = localStorage.getItem("alokpoth_sound_tone") || "subtle";
+    let currentTone = localStorage.getItem("alokpoth_sound_tone") || "subtle";
 
     if (soundToggle) soundToggle.checked = soundEnabled;
     if (chimeToggle) chimeToggle.checked = chimeEnabled;
-    if (toneSelect) toneSelect.value = savedTone;
+    if (toneSelect) toneSelect.value = currentTone;
+
+    function selectSoundTone(toneId, preview = true) {
+      currentTone = toneId;
+      if (toneSelect) toneSelect.value = toneId;
+      document.querySelectorAll("#soundToneGroup .option-card").forEach(card => {
+        const isActive = card.getAttribute("data-tone-id") === toneId;
+        card.classList.toggle("active", isActive);
+        card.setAttribute("aria-checked", isActive ? "true" : "false");
+      });
+      localStorage.setItem("alokpoth_sound_tone", toneId);
+      if (preview) {
+        playTone(toneId);
+        showToast((I18N[currentLanguage] || I18N.en).saved);
+      }
+    }
+
+    // Attach card click & keyboard handlers
+    document.querySelectorAll("#soundToneGroup .option-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const tid = card.getAttribute("data-tone-id");
+        selectSoundTone(tid, true);
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectSoundTone(card.getAttribute("data-tone-id"), true);
+        }
+      });
+    });
+
+    // Initialize active sound card
+    selectSoundTone(currentTone, false);
 
     const I18N = {
       bn: {
@@ -397,7 +560,13 @@
         labelTone: "শব্দের টোন",
         descTone: "আপনার পছন্দের অডিও টোন বেছে নিন",
         btnTest: "শব্দ পরীক্ষা করুন",
-        saved: "সেটিংস সংরক্ষিত হয়েছে"
+        saved: "সেটিংস সংরক্ষিত হয়েছে",
+        tone_subtle_title: "মৃদু পপ",
+        tone_subtle_desc: "হালকা ও শান্ত স্পর্শধ্বনি",
+        tone_chime_title: "সফট চাইম",
+        tone_chime_desc: "মধুর সুরেলা ঘণ্টা সংকেত",
+        tone_cosmic_title: "কসমিক পালস",
+        tone_cosmic_desc: "উচ্চপ্রযুক্তির ফিউচারিস্টিক পালস"
       },
       en: {
         back: "Settings",
@@ -409,7 +578,13 @@
         labelTone: "Audio Tone",
         descTone: "Select preferred tone character",
         btnTest: "Test Audio Sound",
-        saved: "Settings updated successfully"
+        saved: "Settings updated successfully",
+        tone_subtle_title: "Subtle Pop",
+        tone_subtle_desc: "Gentle tactile click for discreet feedback",
+        tone_chime_title: "Soft Chime",
+        tone_chime_desc: "Pleasant harmonic chime notification",
+        tone_cosmic_title: "Cosmic Pulse",
+        tone_cosmic_desc: "High-tech sci-fi pulse sound effect"
       }
     };
 
@@ -437,6 +612,20 @@
       document.getElementById("descTone").textContent = d.descTone;
       document.getElementById("btnTestText").textContent = d.btnTest;
       document.title = `${d.pageTitle} — Alo AI`;
+
+      // Translate Sound Tone Cards
+      const toneMap = {
+        subtle: ["soundToneSubtleTitle", "soundToneSubtleDesc"],
+        chime: ["soundToneChimeTitle", "soundToneChimeDesc"],
+        cosmic: ["soundToneCosmicTitle", "soundToneCosmicDesc"]
+      };
+      Object.keys(toneMap).forEach(key => {
+        const [tId, dId] = toneMap[key];
+        const tEl = document.getElementById(tId);
+        const dEl = document.getElementById(dId);
+        if (tEl && d[`tone_${key}_title`]) tEl.textContent = d[`tone_${key}_title`];
+        if (dEl && d[`tone_${key}_desc`]) dEl.textContent = d[`tone_${key}_desc`];
+      });
     }
 
     function playTone(tone) {
@@ -490,14 +679,8 @@
       showToast((I18N[currentLanguage] || I18N.en).saved);
     });
 
-    document.getElementById("toneSelect")?.addEventListener("change", (e) => {
-      localStorage.setItem("alokpoth_sound_tone", e.target.value);
-      playTone(e.target.value);
-      showToast((I18N[currentLanguage] || I18N.en).saved);
-    });
-
     document.getElementById("testSoundBtn")?.addEventListener("click", () => {
-      const selected = document.getElementById("toneSelect")?.value || "subtle";
+      const selected = document.getElementById("toneSelect")?.value || currentTone || "subtle";
       playTone(selected);
     });
 

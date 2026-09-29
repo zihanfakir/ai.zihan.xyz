@@ -212,6 +212,106 @@
       border-color: var(--accent-blue);
     }
 
+    /* AMOLED Option Card Picker */
+    .option-card-group {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+    }
+    .option-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .option-card:last-child {
+      border-bottom: none;
+    }
+    .option-card:hover, .option-card:active {
+      background: var(--bg-card-hover);
+    }
+    .option-card.active {
+      background: rgba(59, 130, 246, 0.09);
+    }
+    .option-card:focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: -2px;
+    }
+    .option-lead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .option-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .option-card.active .option-icon-badge {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+    .option-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .option-title {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .option-desc {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+    .option-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 10px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+    }
+    .option-check svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .option-card.active .option-check {
+      display: flex;
+    }
+
     .custom-textarea {
       width: 100%;
       min-height: 120px;
@@ -352,23 +452,107 @@
       <!-- Tone selection -->
       <div class="form-group">
         <label class="form-label" id="labelTone">Response Tone</label>
-        <select class="custom-select" id="toneSelect">
+        <select class="custom-select" id="toneSelect" style="display:none;" aria-hidden="true">
           <option value="balanced">Balanced &amp; Natural (Default)</option>
           <option value="concise">Concise &amp; Direct</option>
           <option value="detailed">In-depth &amp; Comprehensive</option>
           <option value="academic">Academic &amp; Research-oriented</option>
           <option value="friendly">Warm &amp; Conversational</option>
         </select>
+        <div class="option-card-group" id="toneCardGroup" role="radiogroup" aria-labelledby="labelTone">
+          <div class="option-card" data-tone-id="balanced" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">⚖️</div>
+              <div class="option-info">
+                <span class="option-title" id="toneTitleBalanced">Balanced &amp; Natural (Default)</span>
+                <span class="option-desc" id="toneDescBalanced">Versatile tone with natural flow and clear depth</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-tone-id="concise" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">⚡</div>
+              <div class="option-info">
+                <span class="option-title" id="toneTitleConcise">Concise &amp; Direct</span>
+                <span class="option-desc" id="toneDescConcise">Short, bullet-pointed answers without fluff</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-tone-id="detailed" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">📚</div>
+              <div class="option-info">
+                <span class="option-title" id="toneTitleDetailed">In-depth &amp; Comprehensive</span>
+                <span class="option-desc" id="toneDescDetailed">Deep explanations, background context, and code</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-tone-id="academic" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">🔬</div>
+              <div class="option-info">
+                <span class="option-title" id="toneTitleAcademic">Academic &amp; Research</span>
+                <span class="option-desc" id="toneDescAcademic">Formal, analytical, and structured scientific prose</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-tone-id="friendly" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">💬</div>
+              <div class="option-info">
+                <span class="option-title" id="toneTitleFriendly">Warm &amp; Conversational</span>
+                <span class="option-desc" id="toneDescFriendly">Empathetic, approachable, and engaging friendly style</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+        </div>
       </div>
 
       <!-- Language preference -->
       <div class="form-group">
         <label class="form-label" id="labelResponseLang">Primary Language</label>
-        <select class="custom-select" id="langPrefSelect">
+        <select class="custom-select" id="langPrefSelect" style="display:none;" aria-hidden="true">
           <option value="auto">Auto-detect input language (Default)</option>
           <option value="bn">Always reply in Bengali (বাংলা)</option>
           <option value="en">Always reply in English</option>
         </select>
+        <div class="option-card-group" id="langPrefCardGroup" role="radiogroup" aria-labelledby="labelResponseLang">
+          <div class="option-card" data-lang-id="auto" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">🌐</div>
+              <div class="option-info">
+                <span class="option-title" id="langTitleAuto">Auto-detect (Default)</span>
+                <span class="option-desc" id="langDescAuto">Automatically replies in the language you ask</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-lang-id="bn" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">🇧🇩</div>
+              <div class="option-info">
+                <span class="option-title" id="langTitleBn">Always Bengali (বাংলা)</span>
+                <span class="option-desc" id="langDescBn">সবসময় খাঁটি, সাবলীল ও প্রাঞ্জল বাংলায় উত্তর প্রদান করবে</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="option-card" data-lang-id="en" role="radio" tabindex="0" aria-checked="false">
+            <div class="option-lead">
+              <div class="option-icon-badge">🇬🇧</div>
+              <div class="option-info">
+                <span class="option-title" id="langTitleEn">Always English</span>
+                <span class="option-desc" id="langDescEn">Always replies in fluent, natural English</span>
+              </div>
+            </div>
+            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+        </div>
       </div>
 
       <!-- Custom instructions -->
@@ -406,10 +590,64 @@
     const memoryToggle = document.getElementById("memoryToggle");
 
     // Load saved settings
-    if (toneSelect) toneSelect.value = localStorage.getItem("alokpoth_ai_tone") || "balanced";
-    if (langPrefSelect) langPrefSelect.value = localStorage.getItem("alokpoth_primary_lang") || "auto";
+    let currentTone = localStorage.getItem("alokpoth_ai_tone") || "balanced";
+    let currentLangPref = localStorage.getItem("alokpoth_primary_lang") || "auto";
+
+    if (toneSelect) toneSelect.value = currentTone;
+    if (langPrefSelect) langPrefSelect.value = currentLangPref;
     if (customInstructions) customInstructions.value = localStorage.getItem("alokpoth_custom_instructions") || "";
     if (memoryToggle) memoryToggle.checked = localStorage.getItem("alokpoth_memory_enabled") !== "false";
+
+    function selectTone(toneId) {
+      currentTone = toneId;
+      if (toneSelect) toneSelect.value = toneId;
+      document.querySelectorAll("#toneCardGroup .option-card").forEach(card => {
+        const isActive = card.getAttribute("data-tone-id") === toneId;
+        card.classList.toggle("active", isActive);
+        card.setAttribute("aria-checked", isActive ? "true" : "false");
+      });
+    }
+
+    function selectLangPref(langId) {
+      currentLangPref = langId;
+      if (langPrefSelect) langPrefSelect.value = langId;
+      document.querySelectorAll("#langPrefCardGroup .option-card").forEach(card => {
+        const isActive = card.getAttribute("data-lang-id") === langId;
+        card.classList.toggle("active", isActive);
+        card.setAttribute("aria-checked", isActive ? "true" : "false");
+      });
+    }
+
+    // Attach card click handlers
+    document.querySelectorAll("#toneCardGroup .option-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const tid = card.getAttribute("data-tone-id");
+        selectTone(tid);
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectTone(card.getAttribute("data-tone-id"));
+        }
+      });
+    });
+
+    document.querySelectorAll("#langPrefCardGroup .option-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const lid = card.getAttribute("data-lang-id");
+        selectLangPref(lid);
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectLangPref(card.getAttribute("data-lang-id"));
+        }
+      });
+    });
+
+    // Initialize active card states
+    selectTone(currentTone);
+    selectLangPref(currentLangPref);
 
     const I18N = {
       bn: {
@@ -423,7 +661,23 @@
         labelMemory: "ক্রস-সেশন মেমোরি",
         descMemory: "চ্যাট সেশনগুলোর মাঝে আপনার পছন্দ ও প্রাসঙ্গিক তথ্য মনে রাখবে",
         btnSave: "সংরক্ষণ করুন",
-        saved: "ব্যক্তিগতকরণ পছন্দ সংরক্ষিত হয়েছে!"
+        saved: "ব্যক্তিগতকরণ পছন্দ সংরক্ষিত হয়েছে!",
+        tone_balanced_title: "ভারসাম্যপূর্ণ ও স্বাভাবিক (ডিফল্ট)",
+        tone_balanced_desc: "স্বাভাবিক কথোপকথন ও পরিমিত তথ্যের সমন্বয়",
+        tone_concise_title: "সংক্ষিপ্ত ও সরাসরি",
+        tone_concise_desc: "অপ্রয়োজনীয় কথা বাদ দিয়ে বুলেট পয়েন্টে সরাসরি উত্তর",
+        tone_detailed_title: "বিস্তারিত ও গভীর",
+        tone_detailed_desc: "পুঙ্খানুপুঙ্খ ব্যাখ্যা, বিশদ বিবরণ ও কোড উদাহরণসহ",
+        tone_academic_title: "একাডেমিক ও গবেষণামূলক",
+        tone_academic_desc: "প্রাতিষ্ঠানিক মানসম্পন্ন ও যুক্তিভিত্তিক বিশ্লেষণ",
+        tone_friendly_title: "বন্ধুত্বপূর্ণ ও আন্তরিক",
+        tone_friendly_desc: "আন্তরিক, সহজবোধ্য ও অনুভূতিশীল ভঙ্গি",
+        lang_auto_title: "স্বয়ংক্রিয় শনাক্তকরণ (ডিফল্ট)",
+        lang_auto_desc: "আপনি যে ভাষায় প্রশ্ন করবেন সেই ভাষায় উত্তর দেবে",
+        lang_bn_title: "সর্বদা বাংলায় (বাংলা)",
+        lang_bn_desc: "সবসময় খাঁটি, সাবলীল ও প্রাঞ্জল বাংলায় উত্তর প্রদান করবে",
+        lang_en_title: "সর্বদা ইংরেজিতে (English)",
+        lang_en_desc: "সর্বদা শুদ্ধ ও সাবলীল ইংরেজিতে উত্তর প্রদান করবে"
       },
       en: {
         back: "Settings",
@@ -436,7 +690,23 @@
         labelMemory: "Cross-Session Memory",
         descMemory: "Remember context and custom preferences across chat sessions",
         btnSave: "Save Preferences",
-        saved: "Personalization preferences saved successfully!"
+        saved: "Personalization preferences saved successfully!",
+        tone_balanced_title: "Balanced & Natural (Default)",
+        tone_balanced_desc: "Versatile tone with natural flow and clear depth",
+        tone_concise_title: "Concise & Direct",
+        tone_concise_desc: "Short, bullet-pointed answers without fluff",
+        tone_detailed_title: "In-depth & Comprehensive",
+        tone_detailed_desc: "Deep explanations, background context, and code",
+        tone_academic_title: "Academic & Research",
+        tone_academic_desc: "Formal, analytical, and structured scientific prose",
+        tone_friendly_title: "Warm & Conversational",
+        tone_friendly_desc: "Empathetic, approachable, and engaging friendly style",
+        lang_auto_title: "Auto-detect (Default)",
+        lang_auto_desc: "Automatically replies in the language you ask",
+        lang_bn_title: "Always Bengali (বাংলা)",
+        lang_bn_desc: "Consistently replies in fluent, natural Bengali",
+        lang_en_title: "Always English",
+        lang_en_desc: "Always replies in fluent, natural English"
       }
     };
 
@@ -465,11 +735,41 @@
       document.getElementById("descMemory").textContent = d.descMemory;
       document.getElementById("btnSaveText").textContent = d.btnSave;
       document.title = `${d.pageTitle} — Alo AI`;
+
+      // Translate Tone Cards
+      const toneMap = {
+        balanced: ["toneTitleBalanced", "toneDescBalanced"],
+        concise: ["toneTitleConcise", "toneDescConcise"],
+        detailed: ["toneTitleDetailed", "toneDescDetailed"],
+        academic: ["toneTitleAcademic", "toneDescAcademic"],
+        friendly: ["toneTitleFriendly", "toneDescFriendly"]
+      };
+      Object.keys(toneMap).forEach(key => {
+        const [tId, dId] = toneMap[key];
+        const tEl = document.getElementById(tId);
+        const dEl = document.getElementById(dId);
+        if (tEl && d[`tone_${key}_title`]) tEl.textContent = d[`tone_${key}_title`];
+        if (dEl && d[`tone_${key}_desc`]) dEl.textContent = d[`tone_${key}_desc`];
+      });
+
+      // Translate Language Cards
+      const langMap = {
+        auto: ["langTitleAuto", "langDescAuto"],
+        bn: ["langTitleBn", "langDescBn"],
+        en: ["langTitleEn", "langDescEn"]
+      };
+      Object.keys(langMap).forEach(key => {
+        const [tId, dId] = langMap[key];
+        const tEl = document.getElementById(tId);
+        const dEl = document.getElementById(dId);
+        if (tEl && d[`lang_${key}_title`]) tEl.textContent = d[`lang_${key}_title`];
+        if (dEl && d[`lang_${key}_desc`]) dEl.textContent = d[`lang_${key}_desc`];
+      });
     }
 
     document.getElementById("savePersonalizationBtn")?.addEventListener("click", () => {
-      localStorage.setItem("alokpoth_ai_tone", toneSelect.value);
-      localStorage.setItem("alokpoth_primary_lang", langPrefSelect.value);
+      localStorage.setItem("alokpoth_ai_tone", toneSelect ? toneSelect.value : currentTone);
+      localStorage.setItem("alokpoth_primary_lang", langPrefSelect ? langPrefSelect.value : currentLangPref);
       localStorage.setItem("alokpoth_custom_instructions", customInstructions.value.trim());
       localStorage.setItem("alokpoth_memory_enabled", String(memoryToggle.checked));
       const d = I18N[currentLanguage] || I18N.en;
