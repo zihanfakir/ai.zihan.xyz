@@ -1,36 +1,99 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024">
   <defs>
-    <linearGradient id="aloGradTop" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60a5fa"/>
-      <stop offset="40%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#2563eb"/>
-    </linearGradient>
-    <linearGradient id="aloGradRight" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="50%" stop-color="#4f46e5"/>
-      <stop offset="100%" stop-color="#6366f1"/>
-    </linearGradient>
-    <linearGradient id="aloGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#818cf8"/>
-      <stop offset="50%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#c084fc"/>
-    </linearGradient>
-    <filter id="aloBladeShadow" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="-1" dy="1" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.35"/>
-    </filter>
-    <radialGradient id="aloBgGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#07080a" stop-opacity="0"/>
+    <radialGradient id="spaceAura" cx="50%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#2563EB" stop-opacity="0.32"/>
+      <stop offset="45%" stop-color="#7C3AED" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#050608" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="apexGlow" cx="50%" cy="18%" r="35%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.65"/>
+      <stop offset="60%" stop-color="#6366F1" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#050608" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="leftWingGrad" x1="50%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="12%" stop-color="#38BDF8"/>
+      <stop offset="45%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+
+    <linearGradient id="rightWingGrad" x1="50%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="15%" stop-color="#C084FC"/>
+      <stop offset="55%" stop-color="#9333EA"/>
+      <stop offset="100%" stop-color="#6B21A8"/>
+    </linearGradient>
+
+    <linearGradient id="bridgeGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="35%" stop-color="#3B82F6"/>
+      <stop offset="70%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#D946EF"/>
+    </linearGradient>
+
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="45%" stop-color="#F0F9FF"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+
+    <linearGradient id="leftEdgeLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#7DD3FC" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0284C7" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rightEdgeLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#E879F9" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#9333EA" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="shadow3D" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+    <filter id="bloomSpark" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- Dark canvas -->
-  <rect width="100" height="100" fill="#07080a"/>
-  <!-- Ambient glow -->
-  <circle cx="50" cy="50" r="46" fill="url(#aloBgGlow)"/>
-  <!-- Swirl Blades -->
-  <g>
-    <path d="M 50.0 50.0 L 45.3 24.3 C 45.3 19.5 42.5 14.5 39.0 13.8 C 48.0 11.5 62.0 11.8 71.5 14.8 C 77.5 17.0 81.0 22.0 81.0 28.5 C 81.0 38.0 72.0 46.5 61.0 49.5 C 56.0 51.0 52.0 50.5 50.0 50.0 Z" fill="url(#aloGradTop)" filter="url(#aloBladeShadow)"/>
-    <path d="M 50.0 50.0 L 45.3 24.3 C 45.3 19.5 42.5 14.5 39.0 13.8 C 48.0 11.5 62.0 11.8 71.5 14.8 C 77.5 17.0 81.0 22.0 81.0 28.5 C 81.0 38.0 72.0 46.5 61.0 49.5 C 56.0 51.0 52.0 50.5 50.0 50.0 Z" fill="url(#aloGradRight)" transform="rotate(120 50 50)" filter="url(#aloBladeShadow)"/>
-    <path d="M 50.0 50.0 L 45.3 24.3 C 45.3 19.5 42.5 14.5 39.0 13.8 C 48.0 11.5 62.0 11.8 71.5 14.8 C 77.5 17.0 81.0 22.0 81.0 28.5 C 81.0 38.0 72.0 46.5 61.0 49.5 C 56.0 51.0 52.0 50.5 50.0 50.0 Z" fill="url(#aloGradLeft)" transform="rotate(240 50 50)" filter="url(#aloBladeShadow)"/>
+
+  <rect width="512" height="512" fill="#060709"/>
+
+  <circle cx="256" cy="256" r="235" fill="url(#spaceAura)"/>
+  <circle cx="256" cy="160" r="160" fill="url(#apexGlow)"/>
+
+  <circle cx="256" cy="256" r="205" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" stroke-dasharray="4 8"/>
+  <polygon points="256,76 432,380 80,380" fill="none" stroke="rgba(56,189,248,0.06)" stroke-width="1"/>
+
+  <g filter="url(#shadow3D)">
+    <path d="M 162 292 L 350 292 C 358 292 364 298 360 306 L 348 332 C 344 340 336 346 328 346 L 184 346 C 176 346 168 340 164 332 L 152 306 C 148 298 154 292 162 292 Z"
+          fill="url(#bridgeGrad)"/>
+
+    <path d="M 256 78 C 264 78 270 84 266 92 L 244 146 L 156 364 C 150 378 136 388 120 388 L 96 388 C 86 388 80 376 86 367 L 230 88 C 237 79 246 78 256 78 Z"
+          fill="url(#leftWingGrad)"/>
+    <path d="M 256 78 L 86 367" fill="none" stroke="url(#leftEdgeLight)" stroke-width="3.5" stroke-linecap="round"/>
+
+    <path d="M 256 78 C 248 78 242 84 246 92 L 268 146 L 356 364 C 362 378 376 388 392 388 L 416 388 C 426 388 432 376 426 367 L 282 88 C 275 79 266 78 256 78 Z"
+          fill="url(#rightWingGrad)"/>
+    <path d="M 256 78 L 426 367" fill="none" stroke="url(#rightEdgeLight)" stroke-width="3.5" stroke-linecap="round"/>
+
+    <circle cx="256" cy="78" r="6" fill="#FFFFFF"/>
+    <circle cx="256" cy="78" r="3" fill="#E0F2FE"/>
   </g>
+
+  <g filter="url(#bloomSpark)">
+    <path d="M 256 168 Q 256 236 188 236 Q 256 236 256 304 Q 256 236 324 236 Q 256 236 256 168 Z"
+          fill="url(#sparkGrad)"/>
+    <circle cx="256" cy="236" r="15" fill="#FFFFFF"/>
+    <circle cx="256" cy="236" r="7.5" fill="#38BDF8"/>
+  </g>
+
+  <circle cx="120" cy="388" r="2.5" fill="#38BDF8"/>
+  <circle cx="392" cy="388" r="2.5" fill="#C084FC"/>
+  <circle cx="346" cy="314" r="2" fill="#E879F9"/>
+  <circle cx="166" cy="314" r="2" fill="#06B6D4"/>
 </svg>

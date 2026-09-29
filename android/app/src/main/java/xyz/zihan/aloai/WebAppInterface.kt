@@ -1,9 +1,14 @@
 package xyz.zihan.aloai
 
+import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import android.webkit.JavascriptInterface
 import android.widget.Toast
@@ -93,16 +98,55 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
     @JavascriptInterface
     fun vibrate(milliseconds: Long) {
         try {
-            val vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            val vibrator = getVibratorService()
             if (vibrator != null && vibrator.hasVibrator()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val effect = when {
+                        milliseconds <= 15 -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+                        milliseconds <= 40 -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                        else -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+                    }
+                    vibrator.vibrate(effect)
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
                     @Suppress("DEPRECATION")
                     vibrator.vibrate(milliseconds)
                 }
             }
-        } catch (_: Exception) {
+        } catch (_: Exception) {}
+    }
+
+    @JavascriptInterface
+    fun haptic(type: String?) {
+        try {
+            val vibrator = getVibratorService() ?: return
+            if (!vibrator.hasVibrator()) return
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val effect = when (type?.lowercase()) {
+                    "light", "tick" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+                    "heavy" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+                    else -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                }
+                vibrator.vibrate(effect)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val ms = if (type == "heavy") 50L else 20L
+                vibrator.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(25L)
+            }
+        } catch (_: Exception) {}
+    }
+
+    private fun getVibratorService(): Vibrator? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = activity.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            vibratorManager?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
         }
     }
 
@@ -111,6 +155,46 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
         if (!message.isNullOrBlank()) {
             activity.runOnUiThread {
                 Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @JavascriptInterface
+    fun shareText(text: String?) {
+        if (!text.isNullOrBlank()) {
+            activity.runOnUiThread {
+                try {
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, text)
+                        type = "text/plain"
+                    }
+                    val shareIntent = Intent.createChooser(sendIntent, "Alo AI - Share")
+                    activity.startActivity(shareIntent)
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    @JavascriptInterface
+    fun downloadImage(url: String?, filename: String?) {
+        if (url.isNullOrBlank()) return
+        activity.runOnUiThread {
+            try {
+                val dm = activity.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager ?: return@runOnUiThread
+                val uri = Uri.parse(url)
+                val targetName = filename ?: "AloAI_Image_${System.currentTimeMillis()}.png"
+                val request = DownloadManager.Request(uri)
+                    .setTitle(targetName)
+                    .setDescription("Alo AI Image Download")
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, targetName)
+                    .setAllowedOverMetered(true)
+                    .setAllowedOverRoaming(true)
+                dm.enqueue(request)
+                Toast.makeText(activity, "ছবি ডাউনলোড শুরু হয়েছে...", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(activity, "ডাউনলোড ব্যর্থ হয়েছে", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -144,5 +228,5 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
     fun isNativeApp(): Boolean = true
 
     @JavascriptInterface
-    fun getAppVersion(): String = "1.0.9"
+    fun getAppVersion(): String = "1.1.0"
 }

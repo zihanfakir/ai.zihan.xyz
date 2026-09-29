@@ -3883,10 +3883,14 @@
 // Hides all app-download UI instantly so it never flashes inside the native app
 (function(){
   var ua = (navigator.userAgent || '');
-  var isApp = (typeof window.AloAndroid !== 'undefined') || ua.indexOf('AloAI-Android') !== -1;
-  window.isAndroidApp = isApp;
+  var isApp = (typeof window.AloAndroid !== 'undefined') || (typeof window.AloIOS !== 'undefined') || (typeof window.AloAI !== 'undefined') || ua.indexOf('AloAI-Android') !== -1 || ua.indexOf('AloAI-iOS') !== -1 || window.isNativeApp === true;
+  window.isAndroidApp = (typeof window.AloAndroid !== 'undefined') || ua.indexOf('AloAI-Android') !== -1;
+  window.isIOSApp = (typeof window.AloIOS !== 'undefined') || ua.indexOf('AloAI-iOS') !== -1;
+  window.isNativeApp = isApp;
   if (!isApp) return;
-  if (document.documentElement) document.documentElement.classList.add('is-android-app');
+  if (document.documentElement) document.documentElement.classList.add('is-native-app');
+  if (window.isAndroidApp && document.documentElement) document.documentElement.classList.add('is-android-app');
+  if (window.isIOSApp && document.documentElement) document.documentElement.classList.add('is-ios-app');
   var style = document.createElement('style');
   style.textContent = '#heroAppDownloadBanner,#drawerDownloadAppWrap,#brandMenuDownloadAppBtn,#appDownloadModalOverlay,.hero-app-banner,#modelSearchInput,.model-search-wrap{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;}';
   document.head.appendChild(style);
@@ -4078,8 +4082,8 @@
       <div class="app-download-page-content">
         <div style="text-align: center; padding: 6px 4px 14px;">
           <img src="app_logo.png" alt="Alo AI App Logo" style="width: 68px; height: 68px; border-radius: 20px; margin: 0 auto 12px; display: block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);">
-          <div style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Alokpoth AI for Android</div>
-          <div style="font-size: 13px; color: var(--text-sub);">ভার্সন ১.০.৭ • সাইজ ~১৬ MB • পিওর নেটিভ ও দ্রুতগতির অভিজ্ঞতা</div>
+          <div style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Alo AI Mobile (Android &amp; iOS)</div>
+          <div style="font-size: 13px; color: var(--text-sub);">নতুন লোগো ও হাই-স্পিড নেটিভ ইঞ্জিন • আল্ট্রা অপটিমাইজড ও ল্যাগ-ফ্রি (v1.1.0)</div>
         </div>
 
         <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; font-size: 14px; line-height: 1.6;">
@@ -4100,7 +4104,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
           <a href="AloAI.apk" download="AloAI.apk" id="modalApkDownloadBtn" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 18px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>সরাসরি APK ডাউনলোড করুন (v1.0.9)</span>
+            <span>সরাসরি APK ডাউনলোড করুন (v1.1.0)</span>
           </a>
         </div>
       </div>
@@ -4403,7 +4407,7 @@
             </div>
           </div>
           <div class="settings-card">
-            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.0.9):</div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">নতুন কী এসেছে (v1.1.0):</div>
             <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.6;">
               <li>🔐 অ্যান্ড্রয়েড অ্যাপ লগইন ও ডাটা সিরিয়ালাইজেশন সম্পূর্ণ ফিক্স</li>
               <li>📦 সম্পূর্ণ APK সাইজ পুনরুদ্ধার (Full Engine & Material UI)</li>
@@ -4993,6 +4997,22 @@ Capabilities & Code Generation Instructions (CRITICAL):
     };
 
     function triggerHaptic(type = "light") {
+      // 1. Check iOS Native Bridge
+      if (window.AloIOS && typeof window.AloIOS.haptic === "function") {
+        try { window.AloIOS.haptic(type); return; } catch (e) {}
+      }
+      // 2. Check Android Native Bridge
+      if (window.AloAndroid && typeof window.AloAndroid.haptic === "function") {
+        try { window.AloAndroid.haptic(type); return; } catch (e) {}
+      }
+      if (window.AloAndroid && typeof window.AloAndroid.vibrate === "function") {
+        try {
+          const ms = (type === "light" ? 15 : (type === "medium" ? 30 : 60));
+          window.AloAndroid.vibrate(ms);
+          return;
+        } catch (e) {}
+      }
+      // 3. Web Navigator Vibrate Fallback
       if ("vibrate" in navigator) {
         try {
           if (type === "light") navigator.vibrate(10);
@@ -8917,9 +8937,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
        ======================================================== */
     function isRunningInApp() {
       const inApp = (typeof window.AloAndroid !== "undefined" && (window.AloAndroid.isNativeApp ? window.AloAndroid.isNativeApp() : true)) ||
-        (navigator.userAgent && navigator.userAgent.includes("AloAI-Android")) ||
-        (window.isAndroidApp === true);
-      window.isAndroidApp = inApp;
+        (typeof window.AloIOS !== "undefined") ||
+        (typeof window.AloAI !== "undefined" && (window.AloAI.isNativeApp ? window.AloAI.isNativeApp() : true)) ||
+        (navigator.userAgent && (navigator.userAgent.includes("AloAI-Android") || navigator.userAgent.includes("AloAI-iOS"))) ||
+        (window.isAndroidApp === true) || (window.isIOSApp === true) || (window.isNativeApp === true);
+      window.isNativeApp = inApp;
       return inApp;
     }
 

@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.view.WindowManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -104,6 +106,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        )
         enableHighRefreshRate()
         setContentView(R.layout.activity_main)
 
@@ -149,6 +155,8 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        webView.setBackgroundColor(Color.parseColor("#060709"))
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -162,10 +170,12 @@ class MainActivity : AppCompatActivity() {
             setSupportZoom(false)
             builtInZoomControls = false
             displayZoomControls = false
+            loadsImagesAutomatically = true
+            blockNetworkImage = false
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 offscreenPreRaster = true
             }
-            userAgentString = "$userAgentString AloAI-Android/1.0"
+            userAgentString = "$userAgentString AloAI-Android/1.1.0"
         }
 
         CookieManager.getInstance().apply {

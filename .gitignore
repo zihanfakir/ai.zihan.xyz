@@ -49,11 +49,13 @@ index_recovered.html
 *.jpeg
 account_limits_view_*.png
 
-# Whitelist App Logo & Android Res Icons
+# Whitelist App Logo, iOS & Android Res Icons
 !app logo.png
 !app_logo.png
+!app_logo_transparent.png
 !favicon.png
 !android/app/src/main/res/**/*.png
+!ios/**/*.png
 
 # Android build outputs & caches
 android/.gradle/
