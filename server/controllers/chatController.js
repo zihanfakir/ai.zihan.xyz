@@ -148,7 +148,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
     res.on('close', onClientClose);
 
     // Helper to attempt completion fetch with timeout (handles both OpenAI format & Google Gemini SSE format)
-    const tryFetchTarget = async (pType, url, key, modName, timeoutMs = 25000) => {
+    const tryFetchTarget = async (pType, url, key, modName, timeoutMs = 12000) => {
       const fetchController = new AbortController();
       const timeoutId = setTimeout(() => fetchController.abort(), timeoutMs);
 
@@ -196,7 +196,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
             ...(systemInstructionText ? { systemInstruction: { parts: [{ text: systemInstructionText }] } } : {}),
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 8192
+              maxOutputTokens: 4096
             }
           };
 
@@ -256,7 +256,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
     };
 
     // Primary model attempt
-    let response = await tryFetchTarget(providerType, targetUrl, targetKey, actualModel, 25000);
+    let response = await tryFetchTarget(providerType, targetUrl, targetKey, actualModel, 12000);
     let effectiveModel = cleanModel || 'gemini-3.6-flash';
     let isGeminiStream = (providerType === 'gemini');
 
@@ -300,7 +300,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
         console.warn(`[Chat Primary Failed] Model ${cleanModel} (status: ${response ? response.status : 'timeout'}), trying internal Fallback API 2 (${fb1Model || actualModel})...`);
         const fb1 = await resolveTierTarget(fb1Model, fb1Url, fb1Key);
         if (fb1) {
-          const fb1Resp = await tryFetchTarget(fb1.providerType, fb1.targetUrl, fb1.targetKey, fb1.actualModel, 25000);
+          const fb1Resp = await tryFetchTarget(fb1.providerType, fb1.targetUrl, fb1.targetKey, fb1.actualModel, 10000);
           if (fb1Resp && fb1Resp.ok) {
             console.log(`[Chat Internal API 2 Success] Model ${cleanModel} cleanly recovered using internal API 2 (${fb1.actualModel})`);
             response = fb1Resp;
@@ -321,7 +321,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
         console.warn(`[Chat Fallback 1 Failed] Model ${cleanModel}, trying internal Fallback API 3 (${fb2Model || actualModel})...`);
         const fb2 = await resolveTierTarget(fb2Model, fb2Url, fb2Key);
         if (fb2) {
-          const fb2Resp = await tryFetchTarget(fb2.providerType, fb2.targetUrl, fb2.targetKey, fb2.actualModel, 25000);
+          const fb2Resp = await tryFetchTarget(fb2.providerType, fb2.targetUrl, fb2.targetKey, fb2.actualModel, 10000);
           if (fb2Resp && fb2Resp.ok) {
             console.log(`[Chat Internal API 3 Success] Model ${cleanModel} cleanly recovered using internal API 3 (${fb2.actualModel})`);
             response = fb2Resp;
@@ -379,7 +379,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
 
       for (const fb of fallbacks) {
         if (res.writableEnded || res.destroyed) break;
-        const fbResp = await tryFetchTarget(fb.type, fb.url, fb.key, fb.model, 20000);
+        const fbResp = await tryFetchTarget(fb.type, fb.url, fb.key, fb.model, 8000);
         if (fbResp && fbResp.ok) {
           console.log(`[Chat Fallback Success] Switched cleanly to ${fb.id}`);
           response = fbResp;

@@ -1525,17 +1525,26 @@
     }
     .thought-block {
       display: block !important;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       width: 100%;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .thought-block:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
     }
     .thought-block summary {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 0;
-      font-size: 0.95rem;
+      gap: 8px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
       font-weight: 500;
-      color: #9ca3af;
+      color: #a1a1aa;
       cursor: pointer;
       user-select: none;
       background: transparent;
@@ -11020,7 +11029,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               try { currentAbortController.abort("timeout"); } catch {}
             }
           }
-        }, 65000);
+        }, 45000);
 
         const finishUp = () => {
           if (overallWatchdog) {
@@ -11093,16 +11102,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
           if (streamQueueContent.length > 0 || streamQueueReasoning.length > 0) {
             if (streamQueueReasoning.length > 0) {
-              let takeR = 3;
-              if (streamQueueReasoning.length > 20) takeR = 8;
-              if (streamQueueReasoning.length > 80) takeR = Math.ceil(streamQueueReasoning.length / 4);
+              let takeR = Math.max(12, Math.ceil(streamQueueReasoning.length / 2));
               renderedReasoning += streamQueueReasoning.substring(0, takeR);
               streamQueueReasoning = streamQueueReasoning.substring(takeR);
             }
             if (streamQueueContent.length > 0) {
-              let takeC = 3;
-              if (streamQueueContent.length > 20) takeC = 8;
-              if (streamQueueContent.length > 80) takeC = Math.ceil(streamQueueContent.length / 4);
+              let takeC = Math.max(12, Math.ceil(streamQueueContent.length / 2));
               renderedContent += streamQueueContent.substring(0, takeC);
               streamQueueContent = streamQueueContent.substring(takeC);
             }
