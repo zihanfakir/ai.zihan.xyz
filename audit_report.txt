@@ -1,0 +1,150 @@
+[CSS Performance] Line 891: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: padding: 10px 20px; border-radius: 999px; cursor: pointer; transition: all 0.2s;
+
+[CSS Performance] Line 2010: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: .attach-menu-item svg { width: 18px; height: 18px; fill: none; stroke: var(--text-sub); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; transition: stroke 0.15s ease; }
+
+[CSS Performance] Line 2034: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: font-size: 18px; line-height: 1; padding: 0 0 0 8px; flex-shrink: 0; transition: color 0.2s;
+
+[CSS Performance] Line 2393: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease, box-shadow 0.4s ease;
+
+[CSS Performance] Line 2479: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: transition: width 0.5s ease, background 0.3s ease;
+
+[CSS Performance] Line 2512: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: gap: 4px; padding: 4px 8px; border-radius: 6px; transition: background 0.2s;
+
+[CSS Performance] Line 2943: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: animation: toastIn 0.25s ease-out; max-width: 90%;
+
+[CSS Performance] Line 3998: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: <button type="button" id="drawerNewChatBtn" class="drawer-new-chat-btn" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 9999px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s;">
+
+[CSS Performance] Line 4185: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: <a href="AloAI.apk" download="AloAI.apk" id="modalApkDownloadBtn" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 18px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
+
+[CSS Performance] Line 4189: Animation/transition on layout-triggering property.
+Impact: Medium
+Fix: Use transform (scale, translate) instead of width/height/margin.
+Code: <a href="download.html" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 14px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.15s ease;">
+
+[DOM Performance] Line 4928: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const el = document.getElementById("modelModalOverlay");
+
+[DOM Performance] Line 5412: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const input = document.getElementById("userInput");
+
+[Render Performance] Line 6593: Scroll/Resize event listener added.
+Impact: High
+Fix: Debounce or throttle the event listener to avoid main thread blocking.
+Code: window.visualViewport.addEventListener("scroll", () => {
+
+[Memory Leaks] Line 6601: Timer created without storing its ID.
+Impact: Medium
+Fix: Store timer ID and call clearInterval/clearTimeout when appropriate.
+Code: setTimeout(setAppHeight, 150);
+
+[Render Performance] Line 6603: Scroll/Resize event listener added.
+Impact: High
+Fix: Debounce or throttle the event listener to avoid main thread blocking.
+Code: window.addEventListener("scroll", () => {
+
+[DOM Performance] Line 7432: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const modal = document.getElementById("accountModalOverlay");
+
+[DOM Performance] Line 7435: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const targetPanel = document.getElementById(targetTabId);
+
+[DOM Performance] Line 7435: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const targetPanel = document.getElementById(targetTabId);
+
+[Render Performance] Line 7448: Scroll/Resize event listener added.
+Impact: High
+Fix: Debounce or throttle the event listener to avoid main thread blocking.
+Code: container.addEventListener("scroll", () => {
+
+[DOM Performance] Line 7807: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const views = document.querySelectorAll("#accountModalOverlay .settings-subview");
+
+[DOM Performance] Line 7811: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const target = document.getElementById(viewId);
+
+[DOM Performance] Line 8174: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+
+[DOM Performance] Line 8180: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const uInput = document.getElementById("userInput");
+
+[DOM Performance] Line 8328: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const themeNameBadge = document.getElementById("setMenuThemeName");
+
+[DOM Performance] Line 8614: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const el = document.getElementById(id);
+
+[DOM Performance] Line 8711: DOM query inside a loop.
+Impact: High
+Fix: Cache the DOM query outside the loop.
+Code: const subName = document.getElementById("subAccountNameInput");
+
+[Render Performance] Line 10132: Scroll/Resize event listener added.
+Impact: High
+Fix: Debounce or throttle the event listener to avoid main thread blocking.
+Code: scrollContainer.addEventListener("scroll", () => {
+
+[Memory Leaks] Line 10160: Timer created without storing its ID.
+Impact: Medium
+Fix: Store timer ID and call clearInterval/clearTimeout when appropriate.
+Code: setTimeout(scrollToBottom, 100); setTimeout(scrollToBottom, 300);
+
+[Render Performance] Line 11429: innerHTML concatenation.
+Impact: High
+Fix: Use insertAdjacentHTML or appendChild for better performance and to avoid layout thrashing.
+Code: aiTextElement.innerHTML += `<div class="generation-stopped-note">${isEnNow ? "⏹ Generation stopped" : "⏹ উত্তর তৈরি থামানো হয়েছে"}</div>`;
+
+[Render Performance] Line 11477: innerHTML concatenation.
+Impact: High
+Fix: Use insertAdjacentHTML or appendChild for better performance and to avoid layout thrashing.
+Code: aiTextElement.innerHTML += `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${isEnNow ? "Temporary connection issue. Click button below to retry." : "সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।"}</div>`;
+
