@@ -11,6 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  animation: fadeInPage 0.25s ease forwards;
+}
+
     :root {
       --bg-base: #000000;
       --bg-card: #18181b;
@@ -135,7 +144,7 @@
     .settings-back-link svg {
       width: 20px;
       height: 20px;
-      stroke-width: 2.4;
+      stroke-width: 2;
       stroke: currentColor;
       fill: none;
       stroke-linecap: round;
@@ -1026,7 +1035,7 @@
             return;
           }
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     })();
 
     // i18n Dictionary for Settings Page
@@ -1299,7 +1308,7 @@
     // Language Toggle
     const toggleLanguage = () => {
       currentLanguage = (currentLanguage === "en" ? "bn" : "en");
-      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch {}
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch(e) { console.error('[Alo AI]', e); }
       applyAccountI18n();
       renderUserData();
       syncDynamicPlans();
@@ -1320,18 +1329,18 @@
         "alokpoth_window_usage", "alokpoth_image_window_usage", "alokpoth_usage_window"
       ];
       keysToPurge.forEach(k => {
-        try { localStorage.removeItem(k); } catch {}
+        try { localStorage.removeItem(k); } catch(e) { console.error('[Alo AI]', e); }
       });
       try {
         localStorage.setItem("alokpoth_current_plan", "Free");
         localStorage.setItem("alokpoth_plan", "Free");
         localStorage.setItem("alokpoth_user_plan", "Free");
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
-        try { window.AloAndroid.logout(); return; } catch (e) {}
+        try { window.AloAndroid.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
       }
       if (window.AloAI && typeof window.AloAI.logout === "function") {
-        try { window.AloAI.logout(); return; } catch (e) {}
+        try { window.AloAI.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
       }
       showToast(d.logoutSuccess, "success");
       setTimeout(() => { window.location.href = "login.html"; }, 400);
@@ -1421,7 +1430,7 @@
           });
           renderUserData();
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     // User Data Server Sync
@@ -1443,11 +1452,11 @@
             try {
               localStorage.setItem("alokpoth_window_usage", JSON.stringify(data.usage));
               localStorage.setItem("alokpoth_usage_window", JSON.stringify(data.usage));
-            } catch {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
           renderUserData();
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     // Render User Data in UI
@@ -1531,7 +1540,7 @@
         try {
           usage = JSON.parse(localStorage.getItem("alokpoth_window_usage") || localStorage.getItem("alokpoth_usage_window") || "null");
           if (usage && usage.count) used = Number(usage.count) || 0;
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
 
         const remaining = Math.max(0, limit - used);
 
@@ -1626,7 +1635,7 @@
         try {
           imgUsage = JSON.parse(localStorage.getItem("alokpoth_image_window_usage") || "null");
           if (imgUsage && imgUsage.count !== undefined) imgUsed = Number(imgUsage.count) || 0;
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
 
         let imgMsRemaining = 0;
         if (imgUsage && imgUsage.resetAt) {
@@ -1695,7 +1704,7 @@
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
         let sessionCount = 1;
         if (allSessions) {
-          try { sessionCount = JSON.parse(allSessions).length || 1; } catch {}
+          try { sessionCount = JSON.parse(allSessions).length || 1; } catch(e) { console.error('[Alo AI]', e); }
         }
         const totalMsgEl = document.getElementById("totalMessagesSent");
         if (totalMsgEl) totalMsgEl.textContent = formatDigits(sessionCount);
@@ -1806,7 +1815,7 @@
               u.subscription.expires_at = expiresAt;
               u.plan = newPlan;
               localStorage.setItem("alokpoth_user", JSON.stringify(u));
-            } catch {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
 
           codeInput.value = "";

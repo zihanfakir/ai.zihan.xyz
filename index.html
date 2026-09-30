@@ -1,6 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
@@ -20,11 +24,31 @@
         if (saved && saved !== "dark") {
           document.documentElement.setAttribute("data-theme", saved);
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     })();
   </script>
 
   <style>
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  animation: fadeInPage 0.25s ease forwards;
+}
+
+
+/* Focus styles for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-color, #6c63ff);
+  outline-offset: 2px;
+}
+
     :root {
       color-scheme: dark;
       /* Design Tokens */
@@ -219,7 +243,7 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", -system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", -system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
@@ -4084,7 +4108,7 @@
           <img src="app_logo.png" alt="Alo AI" style="width: 22px; height: 22px; border-radius: 6px; object-fit: cover;">
           <span>Alokpoth AI</span>
         </span>
-        <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close">
+        <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -4200,7 +4224,7 @@
     <div class="modal-sheet">
       <div class="modal-header">
         <span>মডেল বেছে নিন</span>
-        <button class="modal-close" id="modelModalClose" type="button" aria-label="Close">
+        <button class="modal-close" id="modelModalClose" type="button" aria-label="Close" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -4858,7 +4882,7 @@
 
       <!-- Right Action Tools: Voice, Send -->
       <div class="composer-tools composer-tools-right">
-        <button type="button" class="native-mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড বা কল" title="Voice Mode">
+        <button type="button" class="native-mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড বা কল" title="Voice Mode" aria-label="Voice input">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -4881,6 +4905,15 @@
       ? window.location.origin 
       : (window.location.origin.includes('vercel.app') ? window.location.origin : "https://ai-zihan-xyz.vercel.app");
     const API_BASE = BACKEND_URL + "/api";
+
+    // ── Utility: debounce ──────────────────────────────────────────────────────
+    function debounce(fn, delay) {
+      let timer;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
 
     // Global App Language (Initialized early)
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
@@ -5052,7 +5085,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             node.setAttribute("rel", "noopener noreferrer");
           }
         });
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     function safeMarkdown(md) {
@@ -5082,18 +5115,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function triggerHaptic(type = "light") {
       // 1. Check iOS Native Bridge
       if (window.AloIOS && typeof window.AloIOS.haptic === "function") {
-        try { window.AloIOS.haptic(type); return; } catch (e) {}
+        try { window.AloIOS.haptic(type); return; } catch(e) { console.error('[Alo AI]', e); }
       }
       // 2. Check Android Native Bridge
       if (window.AloAndroid && typeof window.AloAndroid.haptic === "function") {
-        try { window.AloAndroid.haptic(type); return; } catch (e) {}
+        try { window.AloAndroid.haptic(type); return; } catch(e) { console.error('[Alo AI]', e); }
       }
       if (window.AloAndroid && typeof window.AloAndroid.vibrate === "function") {
         try {
           const ms = (type === "light" ? 15 : (type === "medium" ? 30 : 60));
           window.AloAndroid.vibrate(ms);
           return;
-        } catch (e) {}
+        } catch(e) { console.error('[Alo AI]', e); }
       }
       // 3. Web Navigator Vibrate Fallback
       if ("vibrate" in navigator) {
@@ -5102,7 +5135,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           else if (type === "medium") navigator.vibrate(25);
           else if (type === "success") navigator.vibrate([15, 30, 20]);
           else if (type === "error") navigator.vibrate([40, 50, 30]);
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
       }
     }
 
@@ -5172,7 +5205,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function playAudioTts(text, lang = "bn") {
       if (currentTtsAudio) {
-        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch (e) {}
+        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch(e) { console.error('[Alo AI]', e); }
         currentTtsAudio = null;
       }
 
@@ -5217,20 +5250,20 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       // 0. Toggle stop if AloAndroid native TTS is currently speaking
       if (window.AloAndroid && typeof window.AloAndroid.isSpeaking === "function" && window.AloAndroid.isSpeaking()) {
-        try { window.AloAndroid.stopSpeech(); } catch (e) {}
+        try { window.AloAndroid.stopSpeech(); } catch(e) { console.error('[Alo AI]', e); }
         showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
         return;
       }
 
       // Toggle stop if already playing HTML5 Audio
       if (currentTtsAudio && !currentTtsAudio.paused) {
-        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch (e) {}
+        try { currentTtsAudio.pause(); currentTtsAudio.currentTime = 0; } catch(e) { console.error('[Alo AI]', e); }
         currentTtsAudio = null;
         showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
         return;
       }
       if ("speechSynthesis" in window && window.speechSynthesis && window.speechSynthesis.speaking) {
-        try { window.speechSynthesis.cancel(); } catch (e) {}
+        try { window.speechSynthesis.cancel(); } catch(e) { console.error('[Alo AI]', e); }
         showToast(isEn ? "Voice audio stopped." : "ভয়েস অডিও থামানো হয়েছে।", "info");
         return;
       }
@@ -5279,7 +5312,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           let didSpeak = false;
           const fallbackTimer = setTimeout(() => {
             if (!didSpeak) {
-              try { window.speechSynthesis.cancel(); } catch (e) {}
+              try { window.speechSynthesis.cancel(); } catch(e) { console.error('[Alo AI]', e); }
               playAudioTts(clean, langCode);
             }
           }, 1200);
@@ -5321,7 +5354,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       function resetMicBtn() {
         isSpeechRecording = false;
         if (speechRecognitionInstance) {
-          try { speechRecognitionInstance.abort(); } catch (e) {}
+          try { speechRecognitionInstance.abort(); } catch(e) { console.error('[Alo AI]', e); }
           speechRecognitionInstance = null;
         }
         micBtn.classList.remove("recording");
@@ -5356,7 +5389,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
         try {
           if (speechRecognitionInstance) {
-            try { speechRecognitionInstance.abort(); } catch (e) {}
+            try { speechRecognitionInstance.abort(); } catch(e) { console.error('[Alo AI]', e); }
           }
           speechRecognitionInstance = new SpeechRec();
         } catch (initErr) {
@@ -5473,7 +5506,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function stopGeneration() {
       if (currentAbortController) {
-        try { currentAbortController.abort(); } catch {}
+        try { currentAbortController.abort(); } catch(e) { console.error('[Alo AI]', e); }
         currentAbortController = null;
       }
       isGenerating = false;
@@ -5562,7 +5595,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       userInput.style.height = "auto";
       userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
       userInput.focus();
-      try { userInput.setSelectionRange(promptText.length, promptText.length); } catch {}
+      try { userInput.setSelectionRange(promptText.length, promptText.length); } catch(e) { console.error('[Alo AI]', e); }
       if (typeof updateSendAvailability === "function") updateSendAvailability();
     };
 
@@ -5708,7 +5741,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         try {
           localStorage.removeItem(PLAN_EXPIRY_KEY);
           localStorage.removeItem("alokpoth_plan_expiry");
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
         if (!silent && typeof showToast === "function") {
           showToast("আপনার প্ল্যানের মেয়াদ শেষ হয়ে গেছে! স্বয়ংক্রিয়ভাবে Free প্ল্যানে পরিবর্তন করা হয়েছে।", "warning");
         }
@@ -5758,7 +5791,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           return true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       return false;
     }
 
@@ -5783,7 +5816,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           }
           if (u.plan) return u.plan;
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       const exp = localStorage.getItem(PLAN_EXPIRY_KEY) || localStorage.getItem("alokpoth_plan_expiry");
       if (exp && new Date(exp).getTime() <= Date.now()) {
@@ -5818,7 +5851,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               u.plan = safeVal;
               localStorage.setItem("alokpoth_user", JSON.stringify(u));
             }
-          } catch {}
+          } catch(e) { console.error('[Alo AI]', e); }
         }
 
         if (oldPlan !== safeVal) {
@@ -5828,7 +5861,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (typeof ensureAccessibleModelSelected === "function") {
           ensureAccessibleModelSelected();
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     function showCustomConfirm(message, title = "নিশ্চিতকরণ") {
@@ -5907,14 +5940,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (stored && stored.start && (now - stored.start) < windowMs) {
           return stored;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       return { count: 0, start: now };
     }
 
     function recordWindowMessage() {
       const usage = getWindowUsage();
       usage.count = (usage.count || 0) + 1;
-      try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
+      try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch(e) { console.error('[Alo AI]', e); }
       renderCreditBalance();
     }
 
@@ -5940,7 +5973,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (stored && stored.start && (now - stored.start) < windowMs) {
           return stored;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       return { count: 0, start: now };
     }
 
@@ -5951,7 +5984,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           return true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       const { limit } = getImagePlanLimit();
       const usage = getImageWindowUsage();
       return (usage.count || 0) < limit;
@@ -5960,7 +5993,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function recordImageWindowUsage() {
       const usage = getImageWindowUsage();
       usage.count = (usage.count || 0) + 1;
-      try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
+      try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(usage)); } catch(e) { console.error('[Alo AI]', e); }
     }
 
 
@@ -5971,7 +6004,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           return true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       const { limit } = getPlanWindowLimit();
       const usage = getWindowUsage();
       return (usage.count || 0) < limit;
@@ -5990,7 +6023,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           renderCreditBalance();
           updateNavbarCreditBadge();
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     const PLAN_LIMIT_DETAILS = {
@@ -6083,7 +6116,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           });
           renderCreditBalance();
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     let quotaCountdownTimer = null;
@@ -6117,7 +6150,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           isAdmin = true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (isAdmin) {
@@ -6145,7 +6178,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         usage.count = 0;
         usage.start = Date.now();
         usage.resetAt = null;
-        try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
+        try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch(e) { console.error('[Alo AI]', e); }
         renderCreditBalance();
         syncUserProfileFromServer();
         return;
@@ -6192,7 +6225,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         imgUsage.count = 0;
         imgUsage.start = Date.now();
         imgUsage.resetAt = null;
-        try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(imgUsage)); } catch {}
+        try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(imgUsage)); } catch(e) { console.error('[Alo AI]', e); }
         renderCreditBalance();
         return;
       }
@@ -6242,7 +6275,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           isAdmin = true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       if (valueEl) {
         if (isAdmin) {
@@ -6308,7 +6341,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         usage.count = 0;
         usage.start = Date.now();
         usage.resetAt = null;
-        try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch {}
+        try { localStorage.setItem(USAGE_WINDOW_KEY, JSON.stringify(usage)); } catch(e) { console.error('[Alo AI]', e); }
         msRemainingInWindow = windowMs;
       }
 
@@ -6341,7 +6374,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         imgUsage.count = 0;
         imgUsage.start = Date.now();
         imgUsage.resetAt = null;
-        try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(imgUsage)); } catch {}
+        try { localStorage.setItem(IMAGE_WINDOW_KEY, JSON.stringify(imgUsage)); } catch(e) { console.error('[Alo AI]', e); }
         imgMsRemaining = imgWindowMs;
       }
 
@@ -6583,20 +6616,20 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
     setAppHeight();
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", () => {
+      window.visualViewport.addEventListener("resize", debounce(() => {
         setAppHeight();
         setTimeout(() => {
           window.scrollTo(0, 0);
           if (typeof scrollToBottom === "function") scrollToBottom(false);
         }, 60);
-      });
+      }, 150));
       window.visualViewport.addEventListener("scroll", () => {
         if (window.scrollY !== 0 || window.scrollX !== 0) {
           window.scrollTo(0, 0);
         }
       }, { passive: true });
     }
-    window.addEventListener("resize", setAppHeight);
+    window.addEventListener("resize", debounce(setAppHeight, 150));
     window.addEventListener("orientationchange", () => {
       setTimeout(setAppHeight, 150);
     });
@@ -6646,7 +6679,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const parsed = JSON.parse(cachedModelsStr);
         if (Array.isArray(parsed) && parsed.length > 0) MODELS = parsed;
       }
-    } catch (e) {}
+    } catch(e) { console.error('[Alo AI]', e); }
 
     function isModelAccessible(m, plan = null) {
       if (!m) return false;
@@ -6671,7 +6704,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     if (!initialTarget || !isModelAccessible(initialTarget)) {
       const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
       initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
-      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch (e) {}
+      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) { console.error('[Alo AI]', e); }
     }
     let selectedModelId = initialSavedModel;
 
@@ -6682,7 +6715,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
         if (fallback) {
           selectedModelId = fallback.id;
-          try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
+          try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch(e) { console.error('[Alo AI]', e); }
           if (modelTriggerLabel) modelTriggerLabel.textContent = fallback.name;
           if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
             if (typeof buildSystemPrompt === "function") {
@@ -6708,7 +6741,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.models) && data.models.length > 0) {
-          try { localStorage.setItem("alokpoth_cached_models", JSON.stringify(data.models)); } catch (e) {}
+          try { localStorage.setItem("alokpoth_cached_models", JSON.stringify(data.models)); } catch(e) { console.error('[Alo AI]', e); }
           const statusMap = new Map();
           MODELS.forEach(m => statusMap.set(m.id, { latency: m.latency, status: m.status }));
 
@@ -6749,7 +6782,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           } else {
             const firstAvailable = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
             selectedModelId = firstAvailable ? firstAvailable.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
-            try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch (e) {}
+            try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch(e) { console.error('[Alo AI]', e); }
           }
 
           const currentModelObj = MODELS.find(m => m.id === selectedModelId) || MODELS[0];
@@ -6801,7 +6834,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             };
           }
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
       return { latency: null, status: "offline" };
     }
 
@@ -6871,7 +6904,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           isUserAdmin = true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       MODELS.forEach((m) => {
         const card = document.createElement("button");
@@ -6951,7 +6984,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             showToast(`'${m.name}' মডেলটিতে সাময়িক সংযোগ সমস্যা হতে পারে।`, "warning");
           }
           selectedModelId = m.id;
-          try { localStorage.setItem("alokpoth_selected_model", m.id); } catch {}
+          try { localStorage.setItem("alokpoth_selected_model", m.id); } catch(e) { console.error('[Alo AI]', e); }
           modelTriggerLabel.textContent = m.name;
           if (messagesHistory[0] && messagesHistory[0].role === "system") {
             messagesHistory[0].content = buildSystemPrompt(m.name, true, true);
@@ -6973,7 +7006,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (!history.state || history.state.page !== name) {
           history.pushState({ page: name }, "");
         }
-      } catch(e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
     }
 
     window.addEventListener("popstate", () => {
@@ -7079,7 +7112,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function closeModal(isPopstate = false) {
       if (modelModalOverlay) modelModalOverlay.classList.remove("open");
       if (!isPopstate && history.state && history.state.page === "models") {
-        try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+        try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alo AI]', e); }
       }
     }
     window.openModelPicker = openModal;
@@ -7116,7 +7149,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (sidebarDrawer) sidebarDrawer.classList.remove("open");
       if (drawerBackdrop) drawerBackdrop.classList.remove("open");
       if (!isPopstate && history.state && history.state.page === "drawer") {
-        try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+        try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alo AI]', e); }
       }
     }
 
@@ -7243,7 +7276,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
           isAdmin = true;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       if (isAdmin) {
         if (countEl) countEl.textContent = isEn ? "Unlimited" : "আনলিমিটেড";
@@ -7445,14 +7478,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const container = document.getElementById("scrollContainer");
       if (!btn || !container) return;
 
-      container.addEventListener("scroll", () => {
+      container.addEventListener("scroll", debounce(() => {
         const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
         if (distFromBottom > 160) {
           btn.classList.add("visible");
         } else {
           btn.classList.remove("visible");
         }
-      }, { passive: true });
+      }, 150), { passive: true });
 
       btn.addEventListener("click", () => {
         scrollToBottom(true, "smooth");
@@ -7592,7 +7625,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     let messageCount = 0;
     try {
       messageCount = parseInt(localStorage.getItem("alokpoth_message_count") || "0", 10) || 0;
-    } catch {}
+    } catch(e) { console.error('[Alo AI]', e); }
 
     function getAccountName() {
       try {
@@ -7606,7 +7639,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (u.name && u.name.trim()) return u.name.trim();
           if (u.email && u.email.trim()) return u.email.split("@")[0].trim();
         }
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
       return "";
     }
 
@@ -7659,13 +7692,13 @@ Capabilities & Code Generation Instructions (CRITICAL):
         "alokpoth_current_plan", "alokpoth_user_plan", "alokpoth_plan",
         "alokpoth_usage_window"
       ];
-      keys.forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+      keys.forEach(k => { try { localStorage.removeItem(k); } catch(e) { console.error('[Alo AI]', e); } });
       currentPlan = "Free";
       try {
         localStorage.setItem("alokpoth_current_plan", "Free");
         localStorage.setItem("alokpoth_plan", "Free");
         localStorage.setItem("alokpoth_user_plan", "Free");
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
       messageCount = 0;
       currentSessionId = null;
       messagesHistory = [{ role: "system", content: typeof SYSTEM_PROMPT !== "undefined" ? SYSTEM_PROMPT : "" }];
@@ -7704,16 +7737,16 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (!localStorage.getItem("alokpoth_token")) return;
         if (res.ok && data.success && data.user) {
           if (data.token) {
-            try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+            try { localStorage.setItem("alokpoth_token", data.token); } catch(e) { console.error('[Alo AI]', e); }
           }
           const u = data.user;
-          try { localStorage.setItem("alokpoth_user", JSON.stringify(u)); } catch {}
+          try { localStorage.setItem("alokpoth_user", JSON.stringify(u)); } catch(e) { console.error('[Alo AI]', e); }
 
           const resolvedUserName = (u.name && u.name.trim()) || (u.email ? u.email.split('@')[0].trim() : "");
           if (resolvedUserName) {
             applyAccountName(resolvedUserName);
             if (accountNameInput) accountNameInput.value = resolvedUserName;
-            try { localStorage.setItem("alokpoth_account_name", resolvedUserName); } catch {}
+            try { localStorage.setItem("alokpoth_account_name", resolvedUserName); } catch(e) { console.error('[Alo AI]', e); }
           } else {
             applyAccountName(getAccountName());
           }
@@ -7726,7 +7759,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             try {
               localStorage.removeItem(PLAN_EXPIRY_KEY);
               localStorage.removeItem("alokpoth_plan_expiry");
-            } catch {}
+            } catch(e) { console.error('[Alo AI]', e); }
           } else if (u.subscription && u.subscription.plan_name) {
             // Check expiry
             if (u.subscription.expires_at) {
@@ -7737,14 +7770,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
                 try {
                   localStorage.removeItem(PLAN_EXPIRY_KEY);
                   localStorage.removeItem("alokpoth_plan_expiry");
-                } catch {}
+                } catch(e) { console.error('[Alo AI]', e); }
               } else {
                 currentPlan = u.subscription.plan_name;
                 saveCurrentPlan(currentPlan);
                 try {
                   localStorage.setItem(PLAN_EXPIRY_KEY, u.subscription.expires_at);
                   localStorage.setItem("alokpoth_plan_expiry", u.subscription.expires_at);
-                } catch {}
+                } catch(e) { console.error('[Alo AI]', e); }
               }
             } else {
               currentPlan = u.subscription.plan_name;
@@ -7752,7 +7785,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               try {
                 localStorage.removeItem(PLAN_EXPIRY_KEY);
                 localStorage.removeItem("alokpoth_plan_expiry");
-              } catch {}
+              } catch(e) { console.error('[Alo AI]', e); }
             }
           } else {
             currentPlan = "Free";
@@ -7778,7 +7811,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                 start: startTimestamp,
                 resetAt: lim.resetAt || (lim.resetInMinutes ? new Date(Date.now() + lim.resetInMinutes * 60 * 1000).toISOString() : null)
               }));
-            } catch {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
           renderCreditBalance();
           if (typeof updateAuthUIState === "function") updateAuthUIState();
@@ -7814,7 +7847,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (accountModalOverlay && accountModalOverlay.classList.contains("open") && !fromHistory) {
         if (viewId === "settingsMainView") {
           if (history.state && history.state.page && history.state.page.startsWith("account_sub_")) {
-            try { history.replaceState({ page: "account" }, ""); } catch(e) {}
+            try { history.replaceState({ page: "account" }, ""); } catch(e) { console.error('[Alo AI]', e); }
           }
         } else {
           pushPageState("account_sub_" + viewId);
@@ -8132,7 +8165,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function selectAppLanguage(lang) {
       currentLanguage = lang;
-      try { localStorage.setItem("alokpoth_lang", lang); } catch {}
+      try { localStorage.setItem("alokpoth_lang", lang); } catch(e) { console.error('[Alo AI]', e); }
       document.documentElement.setAttribute("lang", lang);
       applyI18n();
       refreshLanguageSubpageUI();
@@ -8346,7 +8379,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       let userObj = null;
       try {
         userObj = JSON.parse(localStorage.getItem("alokpoth_user") || "null");
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       const displayName = currentName || (userObj && userObj.name) || (token ? "ব্যবহারকারী" : (currentLanguage === 'en' ? "Guest" : "অতিথি"));
       const displayEmail = (userObj && userObj.email) || (token ? "লগইন করা আছে" : (currentLanguage === 'en' ? "Not logged in" : "লগইন করা নেই"));
@@ -8387,7 +8420,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (accountModalOverlay) accountModalOverlay.classList.remove("open");
       const isPop = isPopstate === true;
       if (!isPop && history.state && history.state.page && (history.state.page === "account" || history.state.page.startsWith("account_sub_"))) {
-        try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+        try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alo AI]', e); }
       }
       stopQuotaCountdownTimer();
       if (accountCountdownInterval) {
@@ -8470,10 +8503,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (res.ok && data.success) {
           const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
           const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
-          if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+          if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch(e) { console.error('[Alo AI]', e); }
           currentPlan = newPlan;
           saveCurrentPlan(newPlan);
-          if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
+          if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch(e) { console.error('[Alo AI]', e); }
           renderCreditBalance();
           if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
           if (typeof updateAuthUIState === "function") updateAuthUIState();
@@ -8513,8 +8546,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
             });
             const data = await res.json().catch(() => ({}));
             if (res.ok && data.success && data.user) {
-              try { localStorage.setItem("alokpoth_user", JSON.stringify(data.user)); } catch {}
-              try { localStorage.setItem("alokpoth_account_name", data.user.name || cleanName); } catch {}
+              try { localStorage.setItem("alokpoth_user", JSON.stringify(data.user)); } catch(e) { console.error('[Alo AI]', e); }
+              try { localStorage.setItem("alokpoth_account_name", data.user.name || cleanName); } catch(e) { console.error('[Alo AI]', e); }
               applyAccountName(data.user.name || cleanName);
               refreshAccountSubpageUI();
               showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
@@ -8527,7 +8560,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             subAccountSaveBtn.disabled = false;
           }
         } else {
-          try { localStorage.setItem("alokpoth_account_name", cleanName); } catch {}
+          try { localStorage.setItem("alokpoth_account_name", cleanName); } catch(e) { console.error('[Alo AI]', e); }
           applyAccountName(cleanName);
           refreshAccountSubpageUI();
           showToast(currentLanguage === 'en' ? "Name updated successfully!" : "নাম সফলভাবে সংরক্ষণ করা হয়েছে!", "success");
@@ -8653,10 +8686,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (res.ok && data.success) {
             const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
             const expiresAt = data.expires_at || (data.subscription && data.subscription.expires_at);
-            if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch {}
+            if (data.token) try { localStorage.setItem("alokpoth_token", data.token); } catch(e) { console.error('[Alo AI]', e); }
             currentPlan = newPlan;
             saveCurrentPlan(newPlan);
-            if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch {}
+            if (expiresAt) try { localStorage.setItem(PLAN_EXPIRY_KEY, expiresAt); } catch(e) { console.error('[Alo AI]', e); }
             renderCreditBalance();
             if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
             if (typeof updateAuthUIState === "function") updateAuthUIState();
@@ -8706,7 +8739,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function performAccountLogout(force = false) {
       const doLogout = () => {
         purgeLocalUserData();
-        try { sessionStorage.clear(); } catch (e) {}
+        try { sessionStorage.clear(); } catch(e) { console.error('[Alo AI]', e); }
 
         const subName = document.getElementById("subAccountNameInput");
         const subOldP = document.getElementById("subAccountOldPass");
@@ -8731,10 +8764,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
           showToast("সফলভাবে লগআউট হয়েছে!", "info");
         }
         if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
-          try { window.AloAndroid.logout(); return; } catch (e) {}
+          try { window.AloAndroid.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
         }
         if (window.AloAI && typeof window.AloAI.logout === "function") {
-          try { window.AloAI.logout(); return; } catch (e) {}
+          try { window.AloAI.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
         }
         setTimeout(() => {
           window.location.href = "login.html";
@@ -8819,7 +8852,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           localStorage.setItem("alokpoth_current_plan", "Free");
           localStorage.setItem("alokpoth_plan", "Free");
           localStorage.setItem("alokpoth_user_plan", "Free");
-        } catch (e) {}
+        } catch(e) { console.error('[Alo AI]', e); }
 
         if (currentAuthBtn) currentAuthBtn.style.display = "block";
         if (currentLogoutBtn) currentLogoutBtn.style.display = "none";
@@ -8969,7 +9002,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (data.user) {
             localStorage.setItem("alokpoth_user", JSON.stringify(data.user));
             const nameToSave = (data.user.name && data.user.name.trim()) || (data.user.email ? data.user.email.split('@')[0].trim() : "ব্যবহারকারী");
-            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch {}
+            try { localStorage.setItem("alokpoth_account_name", nameToSave); } catch(e) { console.error('[Alo AI]', e); }
             applyAccountName(nameToSave);
             if (accountNameInput) accountNameInput.value = nameToSave;
             if (data.user.subscription && data.user.subscription.plan_name) {
@@ -8985,12 +9018,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (window.AloAndroid && typeof window.AloAndroid.saveAuth === "function") {
             try {
               window.AloAndroid.saveAuth(data.token, data.user?.name || '', data.user?.email || '', currentPlan || 'Free');
-            } catch (e) {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
           if (window.AloAI && typeof window.AloAI.saveAuth === "function") {
             try {
               window.AloAI.saveAuth(data.token, data.user?.name || '', data.user?.email || '', currentPlan || 'Free');
-            } catch (e) {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
 
           updateAuthUIState();
@@ -9047,7 +9080,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (appDownloadModalOverlay) {
         appDownloadModalOverlay.classList.remove("open");
         if (!isPopstate && history.state && history.state.page === "download") {
-          try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+          try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alo AI]', e); }
         }
         setTimeout(() => {
           if (!appDownloadModalOverlay.classList.contains("open")) {
@@ -9130,7 +9163,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             localStorage.removeItem("alokpoth_chat_sessions");
             localStorage.removeItem("alokpoth_current_session_id");
             localStorage.removeItem("alokpoth_daily_usage");
-          } catch {}
+          } catch(e) { console.error('[Alo AI]', e); }
           
           renderUsage();
           messagesHistory = [{ role: "system", content: messagesHistory[0]?.content || SYSTEM_PROMPT }];
@@ -9204,7 +9237,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       try {
         localStorage.setItem("alokpoth_theme", theme);
         localStorage.setItem("alokpoth-theme", theme);
-      } catch (e) {}
+      } catch(e) { console.error('[Alo AI]', e); }
 
       updateThemeLabel(theme);
 
@@ -9309,7 +9342,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function loadDailyUsage() {
       let stored = null;
-      try { stored = JSON.parse(localStorage.getItem(DAILY_USAGE_KEY) || "null"); } catch {}
+      try { stored = JSON.parse(localStorage.getItem(DAILY_USAGE_KEY) || "null"); } catch(e) { console.error('[Alo AI]', e); }
       const key = todayKeyBD();
       if (!stored || stored.date !== key) {
         stored = { date: key, costUSD: 0, inputTokens: 0, outputTokens: 0, images: 0, codeGens: 0 };
@@ -9318,7 +9351,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function saveDailyUsage(daily) {
-      try { localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(daily)); } catch {}
+      try { localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(daily)); } catch(e) { console.error('[Alo AI]', e); }
     }
 
     let dailyUsage = loadDailyUsage();
@@ -9502,7 +9535,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           badge.textContent = "∞";
           return;
         }
-      } catch {}
+      } catch(e) { console.error('[Alo AI]', e); }
       const { limit } = getImagePlanLimit();
       const usage = getImageWindowUsage();
       const remaining = Math.max(0, limit - (usage.count || 0));
@@ -9619,7 +9652,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                           <button type="button" class="image-preview-remove">×</button>`;
         item.querySelector(".image-preview-remove").addEventListener("click", () => {
           if (img.previewUrl && img.previewUrl.startsWith("blob:")) {
-            try { URL.revokeObjectURL(img.previewUrl); } catch {}
+            try { URL.revokeObjectURL(img.previewUrl); } catch(e) { console.error('[Alo AI]', e); }
           }
           pendingImages.splice(idx, 1);
           renderImagePreviews();
@@ -9717,7 +9750,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             }
           });
           if (hasRepaired) {
-            try { localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(sessions)); } catch {}
+            try { localStorage.setItem(CHAT_SESSIONS_KEY, JSON.stringify(sessions)); } catch(e) { console.error('[Alo AI]', e); }
           }
         }
         return Array.isArray(sessions) ? sessions : [];
@@ -9796,7 +9829,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } else {
         currentSessionId = `chat_${now}_${Math.random().toString(36).slice(2, 8)}`;
         sessions.unshift({ id: currentSessionId, title, messagesHistory, updatedAt: now });
-        try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch {}
+        try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch(e) { console.error('[Alo AI]', e); }
       }
       saveAllSessions(sessions);
     }
@@ -9853,7 +9886,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function startNewChat() {
       currentSessionId = null;
-      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch {}
+      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch(e) { console.error('[Alo AI]', e); }
       const curMod = (typeof MODELS !== "undefined" && Array.isArray(MODELS)) ? MODELS.find(m => m.id === selectedModelId) : null;
       const modName = curMod ? curMod.name : "Alo AI";
       messagesHistory = [{ role: "system", content: buildSystemPrompt(modName, true, true) }];
@@ -9885,7 +9918,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             <div class="chat-history-item-title"></div>
             <div class="chat-history-item-meta">${dateStr}</div>
           </div>
-          <button type="button" class="chat-history-delete-btn" aria-label="মুছুন">
+          <button type="button" class="chat-history-delete-btn" aria-label="মুছুন" aria-label="Delete">
             <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
         `;
@@ -9999,7 +10032,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (!session) return;
 
       currentSessionId = session.id;
-      try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch {}
+      try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch(e) { console.error('[Alo AI]', e); }
       messagesHistory = session.messagesHistory;
 
       chatStream.innerHTML = "";
@@ -10102,7 +10135,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function closeChatHistoryModal(isPopstate = false) {
       if (chatHistoryModalOverlay) chatHistoryModalOverlay.classList.remove("open");
       if (!isPopstate && history.state && history.state.page === "history") {
-        try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+        try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alo AI]', e); }
       }
     }
 
@@ -10129,10 +10162,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", () => {
+      scrollContainer.addEventListener("scroll", debounce(() => {
         const distance = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
         userScrolledUp = distance > 100;
-      }, { passive: true });
+      }, 150), { passive: true });
     }
     
     userInput.addEventListener("input", () => {
@@ -10538,7 +10571,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         streamWatchdog = setTimeout(() => {
           isTimeoutAbort = true;
           if (currentAbortController) {
-            try { currentAbortController.abort("timeout"); } catch {}
+            try { currentAbortController.abort("timeout"); } catch(e) { console.error('[Alo AI]', e); }
           }
         }, timeoutMs);
       };
@@ -10578,7 +10611,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (errJson && errJson.error) {
             serverError = errJson.error;
           }
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
 
         if (response.status === 401 || response.status === 403) {
           if (serverError.includes("অকার্যকর") || serverError.includes("লগইন") || serverError.includes("অননুমোদিত") || serverError.includes("ব্লক")) {
@@ -10693,7 +10726,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                 fullReasoning += (deltaReasoning || "");
                 onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
               }
-            } catch (e) {}
+            } catch(e) { console.error('[Alo AI]', e); }
           }
           buffer = "";
         }
@@ -10930,7 +10963,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
             isUserAdmin = true;
           }
-        } catch {}
+        } catch(e) { console.error('[Alo AI]', e); }
 
         const isMaxOnlyModel = Boolean(currentModel && currentModel.efficient) || selectedModelId === 'gpt-5.6';
         const isProOnlyModel = Boolean(currentModel && currentModel.premium) && !isMaxOnlyModel;
@@ -11196,7 +11229,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (!apiFinished) {
             console.warn("[Client Watchdog]: Hard initial timeout (65s) reached.");
             if (currentAbortController) {
-              try { currentAbortController.abort("timeout"); } catch {}
+              try { currentAbortController.abort("timeout"); } catch(e) { console.error('[Alo AI]', e); }
             }
           }
         }, 45000);
@@ -11426,7 +11459,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             if (finalSavedContent) {
               try {
                 renderCurrentState();
-                aiTextElement.innerHTML += `<div class="generation-stopped-note">${isEnNow ? "⏹ Generation stopped" : "⏹ উত্তর তৈরি থামানো হয়েছে"}</div>`;
+                aiTextElement.insertAdjacentHTML('beforeend', `<div class="generation-stopped-note">${isEnNow ? "⏹ Generation stopped" : "⏹ উত্তর তৈরি থামানো হয়েছে"}</div>`);
                 enhanceCodeBlocks(aiTextElement);
               } catch {
                 aiTextElement.textContent = finalSavedContent + (isEnNow ? "\n\n(Generation stopped)" : "\n\n(উত্তর তৈরি থামানো হয়েছে)");
@@ -11474,7 +11507,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             if (fullResult && fullResult.trim().length > 0) {
               try {
                 renderCurrentState();
-                aiTextElement.innerHTML += `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${isEnNow ? "Temporary connection issue. Click button below to retry." : "সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।"}</div>`;
+                aiTextElement.insertAdjacentHTML('beforeend', `<div class="generation-error-note"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${isEnNow ? "Temporary connection issue. Click button below to retry." : "সংযোগে সাময়িক সমস্যা হয়েছে। পুনরায় চেষ্টা করতে নিচের বোতামে চাপুন।"}</div>`;
                 enhanceCodeBlocks(aiTextElement);
               } catch {
                 aiTextElement.textContent = fullResult;
@@ -11669,7 +11702,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       if (!isImgReq) {
         messageCount++;
-        try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch {}
+        try { localStorage.setItem("alokpoth_message_count", String(messageCount)); } catch(e) { console.error('[Alo AI]', e); }
         deductCredit(1);
         updateNavbarCreditBadge();
       }

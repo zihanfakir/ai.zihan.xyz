@@ -1,0 +1,80 @@
+﻿
+Filename          LineNumber Line                                                                                      
+--------          ---------- ----                                                                                      
+account.html            1410         const res = await fetch(`${API_BASE}/plans`, {                                    
+account.html            1431         const res = await fetch(`${API_BASE}/auth/me`, {                                  
+account.html            1704         console.error(e);                                                                 
+account.html            1732         const res = await fetch(`${API_BASE}/auth/profile`, {                             
+account.html            1778         const res = await fetch(`${API_BASE}/redeem/claim`, {                             
+account.html            1854         const res = await fetch(`${API_BASE}/auth/change-password`, {                     
+admin.html              1599           const res = await fetch(`${API_BASE}/admin/stats`, {                            
+admin.html              1761         const res = await fetch(`${API_BASE}/auth/login`, {                               
+admin.html              1808     async function authFetch(url, opts = {}) {                                            
+admin.html              1814       const res = await fetch(url, opts);                                                 
+admin.html              1834         const res = await authFetch(`${API_BASE}/admin/stats`);                           
+admin.html              1852         console.error("Stats load error:", err);                                          
+admin.html              2012         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(mode...
+admin.html              2123         const res = await authFetch(`${API_BASE}/admin/models?_t=${Date.now()}`);         
+admin.html              2130         console.error(err);                                                               
+admin.html              2201           const res = await authFetch(`${API_BASE}/auth/change-password`, {               
+admin.html              2255         const res = await authFetch(`${API_BASE}/admin/models/reorder`, {                 
+admin.html              2330         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(mode...
+admin.html              2369         const res = await authFetch(`${API_BASE}/admin/models/${encodeURIComponent(mode...
+admin.html              2430         const res = await authFetch(`${API_BASE}/admin/models`, {                         
+admin.html              2562         const res = await authFetch(`${API_BASE}/admin/users`);                           
+admin.html              2608       const res = await authFetch(`${API_BASE}/admin/users/${userId}/plan`, {             
+admin.html              2628         const res = await authFetch(`${API_BASE}/admin/users/${userId}/block`, {          
+admin.html              2654         const res = await authFetch(`${API_BASE}/admin/users/${encodeURIComponent(userI...
+admin.html              2677         const res = await authFetch(`${API_BASE}/admin/plans?_t=${Date.now()}`);          
+admin.html              2764         const res = await authFetch(`${API_BASE}/admin/plans/${planName}`, {              
+admin.html              2798         const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {                
+admin.html              2839         const res = await authFetch(`${API_BASE}/admin/redeem/custom`, {                  
+admin.html              2873         const res = await authFetch(`${API_BASE}/admin/redeem/list`);                     
+admin.html              2929         console.error(err);                                                               
+admin.html              2943         const res = await authFetch(`${API_BASE}/admin/redeem/${encodeURIComponent(code...
+admin.html              2975         const res = await authFetch(`${API_BASE}/admin/settings`);                        
+admin.html              3088           const res = await authFetch(`${API_BASE}/admin/settings`, {                     
+admin.html              3123           const res = await authFetch(`${API_BASE}/admin/settings`, {                     
+admin.html              3162           const res = await authFetch(`${API_BASE}/admin/settings/test-image`, {          
+admin.html              3212           const res = await authFetch(`${API_BASE}/admin/settings/test-search`, {         
+index.html              5206         currentTtsAudio.play().catch((err) => {                                           
+index.html              5363           console.error("SpeechRec instantiation failed:", initErr);                      
+index.html              6054         const res = await fetch(`${API_BASE}/plans?_t=${Date.now()}`, {                   
+index.html              6707         const res = await fetch(`${API_BASE}/chat/models?_t=${Date.now()}`, { cache: "n...
+index.html              6781       return fetch(url, { ...opts, signal: controller.signal }).finally(() => clearTime...
+index.html              7689         const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {                 
+index.html              8464         const res = await fetch(`${API_BASE}/redeem/claim`, {                             
+index.html              8506             const res = await fetch(`${API_BASE}/auth/me`, {                              
+index.html              8514             const data = await res.json().catch(() => ({}));                              
+index.html              8585           const res = await fetch(`${API_BASE}/auth/change-password`, {                   
+index.html              8590           const data = await res.json().catch(() => ({}));                                
+index.html              8647           const res = await fetch(`${API_BASE}/redeem/claim`, {                           
+index.html              8949           const res = await fetch(endpoint, {                                             
+index.html              9115         }).catch((err) => {                                                               
+index.html              9602             fetch(dataUrl)                                                                
+index.html              9605               .catch(() => resolve(file));                                                
+index.html              9760           console.error("Critical localStorage quota failure:", e2);                      
+index.html             10257           navigator.share({ title: "Alo AI", text: textToShare }).catch(() => {});        
+index.html             10551         response = await fetch(`${API_BASE}/chat/completions`, {                          
+index.html             10828       const data = await res.json().catch(() => ({}));                                    
+index.html             10847           const res = await fetch(imageUrl);                                              
+index.html             11693         console.error("[Chat Form generateAIReply Error]:", err);                         
+login.html               933               const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {           
+login.html              1040         const res = await fetch(endpoint, {                                               
+plans.html              1408         const res = await fetch(`${API_BASE}/redeem/claim`, {                             
+plans.html              1701         const res = await fetch(`${API_BASE}/plans?_t=${Date.now()}`, {                   
+plans.html              1733         const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {                 
+profile.html             474         console.error(e);                                                                 
+profile.html             481         const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {                 
+profile.html             538         const res = await fetch(`${API_BASE}/auth/profile`, {                             
+redeem.html              525         const res = await fetch(`${API_BASE}/redeem/claim`, {                             
+security.html            581         console.error(e);                                                                 
+security.html            588         const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {                 
+security.html            653         const res = await fetch(`${API_BASE}/auth/change-password`, {                     
+subscription.html        606         console.error(e);                                                                 
+subscription.html        613         const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {                 
+usage.html               724         console.error(e);                                                                 
+usage.html               730         const res = await fetch(`${API_BASE}/plans`, {                                    
+usage.html               750         const res = await fetch(`${API_BASE}/auth/me`, {                                  
+
+

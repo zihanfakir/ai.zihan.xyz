@@ -367,7 +367,15 @@
     }
     .toast.success { border-color: #10b981; }
     .toast.error { border-color: #ef4444; }
-  </style>
+  
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  animation: fadeInPage 0.25s ease forwards;
+}
+</style>
 </head>
 <body>
   <div id="toastEl" class="toast"></div>

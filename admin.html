@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alokpoth AI - অ্যাডমিন প্যানেল</title>
@@ -8,6 +12,26 @@
   <link rel="shortcut icon" type="image/png" href="app_logo.png">
   <link rel="apple-touch-icon" href="app_logo.png">
   <style>
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  animation: fadeInPage 0.25s ease forwards;
+}
+
+
+/* Focus styles for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-color, #6c63ff);
+  outline-offset: 2px;
+}
+
     :root {
       color-scheme: dark;
       --bg-main: #07080a;
@@ -51,7 +75,7 @@
       user-select: none !important;
       -webkit-touch-callout: none !important;
       -webkit-tap-highlight-color: transparent !important;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", -system-ui, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", -system-ui, "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
@@ -1742,7 +1766,7 @@
     if (adminLangBtn) {
       adminLangBtn.addEventListener("click", () => {
         currentAdminLang = (currentAdminLang === "en" ? "bn" : "en");
-        try { localStorage.setItem("alokpoth_lang", currentAdminLang); } catch {}
+        try { localStorage.setItem("alokpoth_lang", currentAdminLang); } catch(e) { console.error('[Alo AI]', e); }
         applyAdminI18n();
       });
     }
@@ -2726,7 +2750,7 @@
           `;
           container.appendChild(card);
         });
-      } catch (err) {}
+      } catch(err) { console.error('[Alo AI]', err); }
     }
 
     async function savePlanLimits(planName, btn) {

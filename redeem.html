@@ -330,7 +330,15 @@
     }
     .toast.success { border-color: #10b981; }
     .toast.error { border-color: #ef4444; }
-  </style>
+  
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  animation: fadeInPage 0.25s ease forwards;
+}
+</style>
 </head>
 <body>
   <canvas id="confettiCanvas"></canvas>
@@ -365,7 +373,8 @@
       <form id="redeemForm">
         <div class="form-group">
           <label class="form-label" id="labelCode" for="redeemCodeInput">Redeem Voucher Code</label>
-          <input type="text" class="code-input" id="redeemCodeInput" placeholder="e.g. ALOAI2026" maxlength="50" required autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+          <input type="text" class="code-input" id="redeemCodeInput" placeholder="e.g. ALOAI2026" maxlength="12" required autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+<span class="char-counter" id="redeemCounter">0/12</span>
         </div>
         <button type="submit" class="btn-claim" id="claimRedeemBtn">
           <span id="btnClaimText">Claim &amp; Upgrade</span>
@@ -591,5 +600,14 @@
 
     applyI18n();
   </script>
+
+<script>
+const ri = document.querySelector('input[maxlength="12"]');
+const rc = document.getElementById('redeemCounter');
+if (ri && rc) {
+    if (!ri.id) ri.id = 'redeemInput';
+    ri.addEventListener('input', () => rc.textContent = ri.value.length + '/12');
+}
+</script>
 </body>
 </html>
