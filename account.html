@@ -884,6 +884,22 @@
           <span id="quotaLiveCountdown" style="font-weight: 600; color: #fff;">3h 00m</span>
         </div>
       </div>
+      <div class="quota-meter-box" id="accountImageQuotaCard" style="margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <span style="font-weight: 600; display: flex; align-items: center; gap: 6px;" id="imageQuotaCardTitle">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ec4899;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="imageQuotaTitleText">Image Generation Quota</span>
+          </span>
+          <span id="imageQuotaCountDisplay"><strong id="imageQuotaRemainingDigits">5</strong> / <span id="imageQuotaTotalDigits">5</span> left</span>
+        </div>
+        <div class="account-quota-track" id="accountImageQuotaTrack">
+          <div class="account-quota-fill" id="accountImageQuotaFill" style="background: linear-gradient(90deg, #ec4899, #8b5cf6);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-sub);">
+          <span id="imageQuotaResetLabel">Reset in:</span>
+          <span id="imageQuotaLiveCountdown" style="font-weight: 600; color: #fff;">Full quota available</span>
+        </div>
+      </div>
       <div class="stats-2col">
         <div class="stat-pill">
           <div class="stat-val-num" id="usageCountVal">0</div>
@@ -1222,8 +1238,12 @@
       if (usageModalTitle) usageModalTitle.textContent = d.usageModalTitle || (isEn ? "Usage & Quota" : "ব্যবহার ও কোটা");
       const quotaCardTitle = document.getElementById("quotaCardTitle");
       if (quotaCardTitle) quotaCardTitle.textContent = d.quotaCardTitle;
+      const imageQuotaTitleText = document.getElementById("imageQuotaTitleText");
+      if (imageQuotaTitleText) imageQuotaTitleText.textContent = isEn ? "Image Generation Quota" : "ছবি তৈরির কোটা";
       const quotaResetLabel = document.getElementById("quotaResetLabel");
       if (quotaResetLabel) quotaResetLabel.textContent = d.quotaResetLabel;
+      const imageQuotaResetLabel = document.getElementById("imageQuotaResetLabel");
+      if (imageQuotaResetLabel) imageQuotaResetLabel.textContent = d.quotaResetLabel;
       const labelUsageSent = document.getElementById("labelUsageSent");
       if (labelUsageSent) labelUsageSent.textContent = d.labelUsageSent;
       const labelUsageRemaining = document.getElementById("labelUsageRemaining");
@@ -1359,9 +1379,9 @@
     }
 
     let dynamicPlanLimits = {
-      Free: { limit: 10, hours: 3 },
-      Pro: { limit: 30, hours: 3 },
-      Max: { limit: 50, hours: 1 }
+      Free: { limit: 10, image_limit: 5, hours: 3 },
+      Pro: { limit: 30, image_limit: 25, hours: 3 },
+      Max: { limit: 50, image_limit: 100, hours: 1 }
     };
 
     let accountLiveTimerInterval = null;
@@ -1392,6 +1412,7 @@
           data.plans.forEach(p => {
             dynamicPlanLimits[p.name] = {
               limit: Number(p.message_limit) || (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50)),
+              image_limit: Number(p.image_limit) || (p.name === 'Free' ? 5 : (p.name === 'Pro' ? 25 : 100)),
               hours: Number(p.window_hours) || (p.name === 'Max' ? 1 : 3)
             };
           });
@@ -1593,6 +1614,79 @@
               ? `Fair usage quota automatically refreshes ${limit} messages every ${hours} hour${hours > 1 ? "s" : ""}.`
               : `ফেয়ার ইউসেজ কোটা প্রতি ${formatDigits(hours)} ঘণ্টায় ${formatDigits(limit)}টি বার্তা স্বয়ংক্রিয়ভাবে নবায়ন হয়।`;
           }
+        }
+
+        // Image Generation Quota calculation
+        const imgLimit = (planConf && planConf.image_limit !== undefined) ? planConf.image_limit : (currentPlan === "Max" ? 100 : (currentPlan === "Pro" ? 25 : 5));
+        let imgUsed = 0;
+        let imgUsage = null;
+        try {
+          imgUsage = JSON.parse(localStorage.getItem("alokpoth_image_window_usage") || "null");
+          if (imgUsage && imgUsage.count !== undefined) imgUsed = Number(imgUsage.count) || 0;
+        } catch {}
+
+        let imgMsRemaining = 0;
+        if (imgUsage && imgUsage.resetAt) {
+          imgMsRemaining = Math.max(0, new Date(imgUsage.resetAt).getTime() - Date.now());
+        } else if (imgUsage && imgUsage.start) {
+          imgMsRemaining = Math.max(0, (imgUsage.start + windowMs) - Date.now());
+        }
+
+        if (imgMsRemaining <= 0 && imgUsed > 0) {
+          imgUsed = 0;
+          imgMsRemaining = windowMs;
+        }
+
+        const imgRemaining = Math.max(0, imgLimit - imgUsed);
+        const imgFillEl = document.getElementById("accountImageQuotaFill");
+        const imgTimerEl = document.getElementById("imageQuotaLiveCountdown");
+        const imgCountDisplayEl = document.getElementById("imageQuotaCountDisplay");
+
+        const imgTotalSec = Math.max(0, Math.floor(imgMsRemaining / 1000));
+        const imgHLeft = Math.floor(imgTotalSec / 3600);
+        const imgMLeft = Math.floor((imgTotalSec % 3600) / 60);
+        const imgSLeft = imgTotalSec % 60;
+
+        let imgTimeLeftStr = "";
+        if (imgUsed === 0) {
+          imgTimeLeftStr = isEn ? "Full quota available" : "কোটা সম্পূর্ণ পূর্ণ";
+        } else if (imgHLeft > 0) {
+          imgTimeLeftStr = isEn ? `${imgHLeft}h ${imgMLeft}m ${imgSLeft}s` : `${formatDigits(imgHLeft)} ঘণ্টা ${formatDigits(imgMLeft)} মিনিট`;
+        } else if (imgMLeft > 0) {
+          imgTimeLeftStr = isEn ? `${imgMLeft}m ${imgSLeft}s` : `${formatDigits(imgMLeft)} মিনিট ${formatDigits(imgSLeft)} সেকেন্ড`;
+        } else {
+          imgTimeLeftStr = isEn ? `${imgSLeft}s` : `${formatDigits(imgSLeft)} সেকেন্ড`;
+        }
+
+        if (isAdmin) {
+          if (imgCountDisplayEl) {
+            imgCountDisplayEl.innerHTML = isEn 
+              ? "<strong style=\"color:var(--accent-blue);\">Unlimited</strong> (No Limit)" 
+              : "<strong style=\"color:var(--accent-blue);\">সীমাহীন</strong> (কোনো সীমা নেই)";
+          }
+          if (imgFillEl) {
+            imgFillEl.style.width = "100%";
+            imgFillEl.className = "account-quota-fill";
+          }
+          if (imgTimerEl) imgTimerEl.textContent = isEn ? "Unlimited Access" : "সীমাহীন এক্সেস";
+        } else {
+          if (imgCountDisplayEl) {
+            imgCountDisplayEl.innerHTML = isEn
+              ? `<strong>${imgRemaining}</strong> / <span>${imgLimit}</span> left`
+              : `<strong>${formatDigits(imgRemaining)}</strong> / <span>${formatDigits(imgLimit)}</span> বাকি`;
+          }
+          const imgPct = imgLimit > 0 ? Math.max(0, Math.min(100, Math.round((imgRemaining / imgLimit) * 100))) : 0;
+          if (imgFillEl) {
+            imgFillEl.style.width = `${imgPct}%`;
+            if (imgRemaining <= 0 || imgPct <= 15) {
+              imgFillEl.className = "account-quota-fill danger";
+            } else if (imgPct <= 35) {
+              imgFillEl.className = "account-quota-fill warning";
+            } else {
+              imgFillEl.className = "account-quota-fill";
+            }
+          }
+          if (imgTimerEl) imgTimerEl.textContent = imgTimeLeftStr;
         }
 
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");

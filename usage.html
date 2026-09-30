@@ -308,7 +308,10 @@
     <div class="settings-card">
       <div class="quota-meter-box">
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
-          <span style="font-weight: 700;" id="quotaCardTitle">Message Quota</span>
+          <span style="font-weight: 700; display: flex; align-items: center; gap: 6px;" id="quotaCardTitle">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="quotaCardTitleText">Message Quota</span>
+          </span>
           <span id="quotaCountDisplay"><strong id="quotaRemainingDigits">10</strong> / <span id="quotaTotalDigits">10</span> left</span>
         </div>
         <div class="account-quota-track">
@@ -317,6 +320,26 @@
         <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-sub);">
           <span id="quotaResetLabel">Reset in:</span>
           <span id="quotaLiveCountdown" style="font-weight: 600; color: var(--text-main);">Full quota available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Generation Quota Card -->
+    <div class="settings-card" id="imageQuotaCard">
+      <div class="quota-meter-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
+          <span style="font-weight: 700; display: flex; align-items: center; gap: 6px;" id="imageQuotaCardTitle">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ec4899;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="imageQuotaTitleText">Image Generation Quota</span>
+          </span>
+          <span id="imageQuotaCountDisplay"><strong id="imageQuotaRemainingDigits">5</strong> / <span id="imageQuotaTotalDigits">5</span> left</span>
+        </div>
+        <div class="account-quota-track">
+          <div class="account-quota-fill" id="accountImageQuotaFill" style="background: linear-gradient(90deg, #ec4899, #8b5cf6);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-sub);">
+          <span id="imageQuotaResetLabel">Reset in:</span>
+          <span id="imageQuotaLiveCountdown" style="font-weight: 600; color: var(--text-main);">Full quota available</span>
         </div>
       </div>
     </div>
@@ -401,9 +424,9 @@
     }
 
     let dynamicPlanLimits = {
-      Free: { limit: 10, hours: 3 },
-      Pro: { limit: 30, hours: 3 },
-      Max: { limit: 50, hours: 1 }
+      Free: { limit: 10, image_limit: 5, hours: 3 },
+      Pro: { limit: 30, image_limit: 25, hours: 3 },
+      Max: { limit: 50, image_limit: 100, hours: 1 }
     };
 
     const I18N = {
@@ -411,7 +434,9 @@
         back: "সেটিংস",
         pageTitle: "ব্যবহার ও কোটা",
         quotaCardTitle: "বার্তা কোটা",
+        imageQuotaCardTitle: "ছবি তৈরির কোটা",
         quotaResetLabel: "রিসেট বাকি:",
+        imageQuotaResetLabel: "রিসেট বাকি:",
         labelUsageSent: "এই উইন্ডোতে পাঠানো",
         labelUsageRemaining: "অবশিষ্ট বার্তা সংখ্যা",
         labelUsageReset: "কোটা সাইকেল",
@@ -427,7 +452,9 @@
         back: "Settings",
         pageTitle: "Usage & Quota",
         quotaCardTitle: "Message Quota",
+        imageQuotaCardTitle: "Image Generation Quota",
         quotaResetLabel: "Reset in:",
+        imageQuotaResetLabel: "Reset in:",
         labelUsageSent: "Sent this window",
         labelUsageRemaining: "Messages left",
         labelUsageReset: "Refresh cycle",
@@ -454,8 +481,13 @@
       document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
       document.getElementById("backText").textContent = d.back;
       document.getElementById("pageTitle").textContent = d.pageTitle;
-      document.getElementById("quotaCardTitle").textContent = d.quotaCardTitle;
+      const quotaTitleEl = document.getElementById("quotaCardTitleText");
+      if (quotaTitleEl) quotaTitleEl.textContent = d.quotaCardTitle;
+      const imgQuotaTitleEl = document.getElementById("imageQuotaTitleText");
+      if (imgQuotaTitleEl) imgQuotaTitleEl.textContent = d.imageQuotaCardTitle;
       document.getElementById("quotaResetLabel").textContent = d.quotaResetLabel;
+      const imgResetLabelEl = document.getElementById("imageQuotaResetLabel");
+      if (imgResetLabelEl) imgResetLabelEl.textContent = d.imageQuotaResetLabel;
       document.getElementById("labelUsageSent").textContent = d.labelUsageSent;
       document.getElementById("labelUsageRemaining").textContent = d.labelUsageRemaining;
       document.getElementById("labelUsageReset").textContent = d.labelUsageReset;
@@ -600,6 +632,84 @@
           }
         }
 
+        // Image Generation Quota calculation
+        const imgLimit = (planConf && planConf.image_limit !== undefined) ? planConf.image_limit : (currentPlan === "Max" ? 100 : (currentPlan === "Pro" ? 25 : 5));
+        let imgUsed = 0;
+        let imgUsage = null;
+        try {
+          imgUsage = JSON.parse(localStorage.getItem("alokpoth_image_window_usage") || "null");
+          if (imgUsage && imgUsage.count !== undefined) imgUsed = Number(imgUsage.count) || 0;
+        } catch {}
+
+        let imgMsRemaining = 0;
+        if (imgUsage && imgUsage.resetAt) {
+          imgMsRemaining = Math.max(0, new Date(imgUsage.resetAt).getTime() - Date.now());
+        } else if (imgUsage && imgUsage.start) {
+          imgMsRemaining = Math.max(0, (imgUsage.start + windowMs) - Date.now());
+        }
+
+        if (imgMsRemaining <= 0 && imgUsed > 0) {
+          imgUsed = 0;
+          imgMsRemaining = 0;
+          try {
+            if (imgUsage) {
+              imgUsage.count = 0;
+              imgUsage.start = Date.now();
+              imgUsage.resetAt = null;
+              localStorage.setItem("alokpoth_image_window_usage", JSON.stringify(imgUsage));
+            }
+          } catch {}
+        }
+
+        const imgRemaining = Math.max(0, imgLimit - imgUsed);
+        const imgFillEl = document.getElementById("accountImageQuotaFill");
+        const imgTimerEl = document.getElementById("imageQuotaLiveCountdown");
+        const imgCountDisplayEl = document.getElementById("imageQuotaCountDisplay");
+
+        const imgTotalSec = Math.max(0, Math.floor(imgMsRemaining / 1000));
+        const imgHLeft = Math.floor(imgTotalSec / 3600);
+        const imgMLeft = Math.floor((imgTotalSec % 3600) / 60);
+        const imgSLeft = imgTotalSec % 60;
+
+        let imgTimeLeftStr = "";
+        if (imgUsed === 0) {
+          imgTimeLeftStr = d.fullQuota;
+        } else if (imgHLeft > 0) {
+          imgTimeLeftStr = isEn ? `${imgHLeft}h ${imgMLeft}m ${imgSLeft}s` : `${formatDigits(imgHLeft)} ঘণ্টা ${formatDigits(imgMLeft)} মিনিট ${formatDigits(imgSLeft)} সেকেন্ড`;
+        } else if (imgMLeft > 0) {
+          imgTimeLeftStr = isEn ? `${imgMLeft}m ${imgSLeft}s` : `${formatDigits(imgMLeft)} মিনিট ${formatDigits(imgSLeft)} সেকেন্ড`;
+        } else {
+          imgTimeLeftStr = isEn ? `${imgSLeft}s` : `${formatDigits(imgSLeft)} সেকেন্ড`;
+        }
+
+        if (isAdmin) {
+          if (imgCountDisplayEl) {
+            imgCountDisplayEl.innerHTML = `<strong style="color:var(--accent-blue);">${isEn ? "Unlimited" : "সীমাহীন"}</strong> (No Limit)`;
+          }
+          if (imgFillEl) {
+            imgFillEl.style.width = "100%";
+          }
+          if (imgTimerEl) imgTimerEl.textContent = d.adminAccess;
+        } else {
+          if (imgCountDisplayEl) {
+            imgCountDisplayEl.innerHTML = isEn
+              ? `<strong>${imgRemaining}</strong> / <span>${imgLimit}</span> left`
+              : `<strong>${formatDigits(imgRemaining)}</strong> / <span>${formatDigits(imgLimit)}</span> বাকি`;
+          }
+          const imgPct = imgLimit > 0 ? Math.max(0, Math.min(100, Math.round((imgRemaining / imgLimit) * 100))) : 0;
+          if (imgFillEl) {
+            imgFillEl.style.width = `${imgPct}%`;
+            if (imgRemaining <= 0 || imgPct <= 15) {
+              imgFillEl.style.background = "#ef4444";
+            } else if (imgPct <= 35) {
+              imgFillEl.style.background = "#f59e0b";
+            } else {
+              imgFillEl.style.background = "linear-gradient(90deg, #ec4899, #8b5cf6)";
+            }
+          }
+          if (imgTimerEl) imgTimerEl.textContent = imgTimeLeftStr;
+        }
+
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
         let sessionCount = 0;
         if (allSessions) {
@@ -625,6 +735,7 @@
           data.plans.forEach(p => {
             dynamicPlanLimits[p.name] = {
               limit: Number(p.message_limit) || (p.name === 'Free' ? 10 : (p.name === 'Pro' ? 30 : 50)),
+              image_limit: Number(p.image_limit) || (p.name === 'Free' ? 5 : (p.name === 'Pro' ? 25 : 100)),
               hours: Number(p.window_hours) || (p.name === 'Max' ? 1 : 3)
             };
           });

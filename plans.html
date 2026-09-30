@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>প্ল্যান ও মূল্য তালিকা — Alo AI</title>
   <link rel="icon" type="image/png" href="app_logo.png">
+  <script>
+    (function() {
+      var p = new URLSearchParams(window.location.search).get('theme');
+      var t = p || localStorage.getItem('alokpoth_theme') || localStorage.getItem('alokpoth-theme') || 'oled';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -450,22 +457,56 @@
 
     .plan-quota {
       display: flex;
-      align-items: baseline;
+      flex-direction: column;
       gap: 6px;
       margin-bottom: 24px;
       padding-bottom: 20px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
+    .quota-primary-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
     .quota-num {
       font-size: 2.4rem;
       font-weight: 800;
       color: var(--text-main);
+      line-height: 1.1;
     }
 
     .quota-unit {
       font-size: 0.95rem;
       color: var(--text-sub);
+    }
+
+    .quota-img-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(236, 72, 153, 0.12);
+      border: 1px solid rgba(236, 72, 153, 0.28);
+      color: #ec4899;
+      font-size: 0.82rem;
+      font-weight: 600;
+      width: fit-content;
+      margin-top: 4px;
+    }
+
+    [data-theme="light"] .quota-img-pill {
+      background: rgba(219, 39, 119, 0.1);
+      border-color: rgba(219, 39, 119, 0.25);
+      color: #db2777;
+    }
+
+    [data-theme="eyecare"] .quota-img-pill {
+      background: rgba(180, 83, 9, 0.12);
+      border-color: rgba(180, 83, 9, 0.25);
+      color: #92400e;
     }
 
     .features-list {
@@ -796,8 +837,14 @@
         <div class="plan-name" id="planNameFree">ফ্রি (Free)</div>
         <div class="plan-desc" id="planDescFree">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
-          <div class="quota-num" id="quotaNumFree">১০</div>
-          <div class="quota-unit" id="quotaUnitFree">বার্তা / ৩ ঘণ্টা</div>
+          <div class="quota-primary-row">
+            <div class="quota-num" id="quotaNumFree">১০</div>
+            <div class="quota-unit" id="quotaUnitFree">বার্তা / ৩ ঘণ্টা</div>
+          </div>
+          <div class="quota-img-pill" id="quotaImgBadgeFree">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="quotaImgPillTextFree">৫টি ছবি / ৩ ঘণ্টা</span>
+          </div>
         </div>
         <ul class="features-list">
           <li id="featFree1">
@@ -832,8 +879,14 @@
         <div class="plan-name" id="planNamePro">প্রো (Pro)</div>
         <div class="plan-desc" id="planDescPro">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
-          <div class="quota-num" id="quotaNumPro" style="color:#8b5cf6;">৩০</div>
-          <div class="quota-unit" id="quotaUnitPro">বার্তা / ৩ ঘণ্টা</div>
+          <div class="quota-primary-row">
+            <div class="quota-num" id="quotaNumPro" style="color:#8b5cf6;">৩০</div>
+            <div class="quota-unit" id="quotaUnitPro">বার্তা / ৩ ঘণ্টা</div>
+          </div>
+          <div class="quota-img-pill" id="quotaImgBadgePro" style="background: rgba(139, 92, 246, 0.12); border-color: rgba(139, 92, 246, 0.3); color: #8b5cf6;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="quotaImgPillTextPro">২৫টি ছবি / ৩ ঘণ্টা</span>
+          </div>
         </div>
         <ul class="features-list">
           <li id="featPro1">
@@ -866,8 +919,14 @@
         <div class="plan-name" id="planNameMax">ম্যাক্স (Max)</div>
         <div class="plan-desc" id="planDescMax">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
         <div class="plan-quota">
-          <div class="quota-num" id="quotaNumMax" style="color:#f59e0b;">৫০</div>
-          <div class="quota-unit" id="quotaUnitMax">বার্তা / ১ ঘণ্টা</div>
+          <div class="quota-primary-row">
+            <div class="quota-num" id="quotaNumMax" style="color:#f59e0b;">৫০</div>
+            <div class="quota-unit" id="quotaUnitMax">বার্তা / ১ ঘণ্টা</div>
+          </div>
+          <div class="quota-img-pill" id="quotaImgBadgeMax" style="background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="quotaImgPillTextMax">১০০টি ছবি / ১ ঘণ্টা</span>
+          </div>
         </div>
         <ul class="features-list">
           <li id="featMax1">
@@ -947,8 +1006,9 @@
         planDescFree: "দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।",
         quotaNumFree: "১০",
         quotaUnitFree: "বার্তা / ৩ ঘণ্টা",
+        quotaImgFree: "৫টি ছবি / ৩ ঘণ্টা",
         featFree1: "১০টি বার্তা প্রতি ৩ ঘণ্টায়",
-        featFreeImg: "৩টি ছবি প্রতি ৩ ঘণ্টায়",
+        featFreeImg: "৫টি ছবি প্রতি ৩ ঘণ্টায়",
         featFree2: "সাধারণ এআই মডেল অ্যাক্সেস",
         featFree3: "স্ট্যান্ডার্ড স্ট্রিমিং গতি",
         featFree4: "আজীবন মেয়াদহীন সুবিধা",
@@ -958,8 +1018,9 @@
         planDescPro: "পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।",
         quotaNumPro: "৩০",
         quotaUnitPro: "বার্তা / ৩ ঘণ্টা",
+        quotaImgPro: "২৫টি ছবি / ৩ ঘণ্টা",
         featPro1: "৩০টি বার্তা প্রতি ৩ ঘণ্টায়",
-        featProImg: "২০টি ছবি প্রতি ৩ ঘণ্টায়",
+        featProImg: "২৫টি ছবি প্রতি ৩ ঘণ্টায়",
         featPro2: "সবগুলো প্রিমিয়াম মডেল অ্যাক্সেস",
         featPro3: "আল্ট্রাফাস্ট স্ট্রিমিং ও রেসপন্স",
         featPro4: "কোড জেন ও লাইভ ওয়েব সার্চ",
@@ -968,6 +1029,7 @@
         planDescMax: "সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।",
         quotaNumMax: "৫০",
         quotaUnitMax: "বার্তা / ১ ঘণ্টা",
+        quotaImgMax: "১০০টি ছবি / ১ ঘণ্টা",
         featMax1: "৫০টি বার্তা প্রতি ১ ঘণ্টায়",
         featMaxImg: "১০০টি ছবি প্রতি ১ ঘণ্টায়",
         featMax2: "সর্বোচ্চ প্রায়োরিটি ব্যান্ডউইথ",
@@ -1001,8 +1063,9 @@
         planDescFree: "Perfect for everyday questions and quick research.",
         quotaNumFree: "10",
         quotaUnitFree: "msgs / 3 hrs",
+        quotaImgFree: "5 images / 3 hrs",
         featFree1: "10 messages per 3 hours",
-        featFreeImg: "3 images per 3 hours",
+        featFreeImg: "5 images per 3 hours",
         featFree2: "Access to standard AI models",
         featFree3: "Standard streaming speed",
         featFree4: "Lifetime free access",
@@ -1012,8 +1075,9 @@
         planDescPro: "Designed for developers, students, and regular creators.",
         quotaNumPro: "30",
         quotaUnitPro: "msgs / 3 hrs",
+        quotaImgPro: "25 images / 3 hrs",
         featPro1: "30 messages per 3 hours",
-        featProImg: "20 images per 3 hours",
+        featProImg: "25 images per 3 hours",
         featPro2: "Access to all premium models",
         featPro3: "Ultrafast streaming & low latency",
         featPro4: "Code generation & live web search",
@@ -1022,6 +1086,7 @@
         planDescMax: "Ultimate performance for heavy-duty coding and projects.",
         quotaNumMax: "50",
         quotaUnitMax: "msgs / 1 hr",
+        quotaImgMax: "100 images / 1 hr",
         featMax1: "50 messages per 1 hour",
         featMaxImg: "100 images per 1 hour",
         featMax2: "Highest priority bandwidth",
@@ -1087,6 +1152,8 @@
       if (quotaNumFree) quotaNumFree.textContent = d.quotaNumFree;
       const quotaUnitFree = document.getElementById("quotaUnitFree");
       if (quotaUnitFree) quotaUnitFree.textContent = d.quotaUnitFree;
+      const pillFree = document.getElementById("quotaImgPillTextFree");
+      if (pillFree) pillFree.textContent = d.quotaImgFree;
       const featFree1 = document.querySelector("#featFree1 span");
       if (featFree1) featFree1.textContent = d.featFree1;
       const featFreeImg = document.getElementById("featFreeImgText");
@@ -1111,6 +1178,8 @@
       if (quotaNumPro) quotaNumPro.textContent = d.quotaNumPro;
       const quotaUnitPro = document.getElementById("quotaUnitPro");
       if (quotaUnitPro) quotaUnitPro.textContent = d.quotaUnitPro;
+      const pillPro = document.getElementById("quotaImgPillTextPro");
+      if (pillPro) pillPro.textContent = d.quotaImgPro;
       const featPro1 = document.querySelector("#featPro1 span");
       if (featPro1) featPro1.textContent = d.featPro1;
       const featProImg = document.getElementById("featProImgText");
@@ -1133,6 +1202,8 @@
       if (quotaNumMax) quotaNumMax.textContent = d.quotaNumMax;
       const quotaUnitMax = document.getElementById("quotaUnitMax");
       if (quotaUnitMax) quotaUnitMax.textContent = d.quotaUnitMax;
+      const pillMax = document.getElementById("quotaImgPillTextMax");
+      if (pillMax) pillMax.textContent = d.quotaImgMax;
       const featMax1 = document.querySelector("#featMax1 span");
       if (featMax1) featMax1.textContent = d.featMax1;
       const featMaxImg = document.getElementById("featMaxImgText");
@@ -1505,6 +1576,15 @@
             featImg.textContent = isEn ? "Unlimited image generations" : "সীমাহীন ছবি তৈরির সুবিধা";
           } else {
             featImg.textContent = isEn ? `${imgLim} images per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(imgLim)}টি ছবি প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+          }
+        }
+
+        const imgPillText = document.getElementById(`quotaImgPillText${name}`);
+        if (imgPillText) {
+          if (name === "Max" && isUserAdmin) {
+            imgPillText.textContent = isEn ? "Unlimited images" : "সীমাহীন ছবি তৈরির সুবিধা";
+          } else {
+            imgPillText.textContent = isEn ? `${imgLim} images / ${hrs}h` : `${toBnNum(imgLim)}টি ছবি / ${toBnNum(hrs)} ঘণ্টা`;
           }
         }
       });
