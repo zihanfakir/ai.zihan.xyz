@@ -732,13 +732,26 @@
           </div>
           <div>
             <h2 class="card-title" id="iosCardTitle">Apple iOS (iPhone & iPad)</h2>
-            <p class="card-subtitle" id="iosCardSub">Progressive Web App (PWA) • Full Screen Native UI</p>
+            <p class="card-subtitle" id="iosCardSub">Native iOS IPA & PWA • 120Hz ProMotion</p>
           </div>
         </div>
-        <span class="badge-pill blue" id="badgeIos">Instant Setup</span>
+        <span class="badge-pill blue" id="badgeIos">IPA & PWA</span>
       </div>
 
-      <div class="steps-section" style="border-top: none; padding-top: 0;">
+      <!-- DOWNLOAD IPA BUTTON -->
+      <a href="Alokpoth.ipa" download="Alokpoth.ipa" class="download-action-btn" id="ipaDownloadBtn" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255, 255, 255, 0.15); margin-bottom: 20px;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span class="btn-text-wrap">
+          <span class="btn-main-text" id="btnIpaDownloadText">Download iOS App (.IPA)</span>
+          <span class="btn-sub-text" id="btnIpaSubText">Direct IPA Package • AltStore, Scarlet, Sideloadly • v1.1.0</span>
+        </span>
+      </a>
+
+      <div class="steps-section" style="border-top: 1px solid var(--border-divider); padding-top: 16px;">
         <div class="steps-heading" id="iosStepsHeading">
           <span>Add to iPhone Home Screen:</span>
         </div>
@@ -898,8 +911,10 @@
         step3: 'If asked by Android, allow <em>"Install unknown apps"</em> from your browser.',
         step4: 'Tap <strong>Install</strong> and enjoy lag-free Alokpoth!',
         iosCardTitle: "Apple iOS (iPhone & iPad)",
-        iosCardSub: "Progressive Web App (PWA) • Full Screen Native UI",
-        badgeIos: "Instant Setup",
+        iosCardSub: "Native iOS IPA & PWA • 120Hz ProMotion",
+        badgeIos: "IPA & PWA",
+        btnIpaDownload: "Download iOS App (.IPA)",
+        btnIpaSub: "Direct IPA Package • AltStore, Scarlet, Sideloadly • v1.1.0",
         iosStepsHeading: "Add to iPhone Home Screen:",
         iosStep1: "Open <strong>ai.zihan.xyz</strong> in Safari on your iPhone or iPad.",
         iosStep2: "Tap the <strong>Share</strong> button (box with upward arrow) at the bottom.",
@@ -914,9 +929,9 @@
         info2Desc: "Zero third-party trackers, no annoying ads, secure end-to-end HTTPS transmission with local encryption."
       },
       bn: {
-        pageTitle: "অ্যাপ ডাউনলোড — আলো এআই",
+        pageTitle: "অ্যাপ ডাউনলোড — আলোকপথ",
         navBack: "সেটিংস",
-        heroTitle: "অ্যান্ড্রয়েড ও আইওএসের জন্য আলো এআই",
+        heroTitle: "অ্যান্ড্রয়েড ও আইওএসের জন্য আলোকপথ",
         heroSubtitle: "আল্ট্রা-ফাস্ট রেসপন্স, ১২০Hz মসৃণ স্ক্রলিং, ভয়েস এআই এবং পিউর AMOLED ডার্ক মোডের সাথে নেটিভ অ্যাপ এক্সপেরিয়েন্স উপভোগ করুন।",
         androidCardTitle: "অ্যান্ড্রয়েড নেটিভ অ্যাপ (APK)",
         androidCardSub: "ইউনিভার্সাল ৬৪-বিট / ৩২-বিট • সরাসরি APK ডাউনলোড",
@@ -933,16 +948,18 @@
         step3: 'যদি অ্যান্ড্রয়েড পারমিশন চায়, তবে ব্রাউজার সেটিংসে গিয়ে <em>"Allow from this source"</em> অন করুন।',
         step4: '<strong>Install</strong>-এ ট্যাপ করে অ্যাপটি চালু করুন!',
         iosCardTitle: "অ্যাপল আইওএস (iPhone ও iPad)",
-        iosCardSub: "প্রগ্রেসিভ ওয়েব অ্যাপ (PWA) • ফুল-স্ক্রিন নেটিভ ইন্টারফেস",
-        badgeIos: "ইনস্ট্যান্ট সেটআপ",
+        iosCardSub: "নেটিভ iOS IPA ও PWA • ১২০Hz প্রোমোশন",
+        badgeIos: "IPA ও PWA",
+        btnIpaDownload: "iOS অ্যাপ ডাউনলোড করুন (.IPA)",
+        btnIpaSub: "সরাসরি IPA প্যাকেজ • AltStore, Scarlet, Sideloadly",
         iosStepsHeading: "আইফোনের হোম স্ক্রিনে যেভাবে যুক্ত করবেন:",
         iosStep1: "আপনার iPhone বা iPad-এর Safari ব্রাউজারে <strong>ai.zihan.xyz</strong> ওপেন করুন।",
         iosStep2: "নিচের <strong>Share</strong> বাটনে (তীরচিহ্ন সম্বলিত বক্স) ট্যাপ করুন।",
         iosStep3: "নিচে স্ক্রোল করে <strong>\"Add to Home Screen\"</strong> সিলেক্ট করুন।",
-        iosStep4: "এখন কোনো ব্রাউজার বার ছাড়া সরাসরি হোম স্ক্রিন থেকে আলো এআই ব্যবহার করুন!",
+        iosStep4: "এখন কোনো ব্রাউজার বার ছাড়া সরাসরি হোম স্ক্রিন থেকে আলোকপথ ব্যবহার করুন!",
         desktopCardTitle: "উইন্ডোজ ও ম্যাক (ডেস্কটপ অ্যাপ)",
         desktopCardSub: "Chrome, Edge ও Brave স্ট্যান্ডঅ্যালোন অ্যাপ",
-        desktopDesc: 'আপনি কম্পিউটার বা ল্যাপটপে আলো এআই একটি আলাদা অ্যাপ হিসেবে ইন্সটল করতে পারেন। ক্রোম বা এজ ব্রাউজারের অ্যাড্রেস বারের ডানপাশে থাকা <strong>Install</strong> আইকনে ক্লিক করুন অথবা মেনু থেকে <em>"Install Alokpoth"</em> সিলেক্ট করুন।',
+        desktopDesc: 'আপনি কম্পিউটার বা ল্যাপটপে আলোকপথ একটি আলাদা অ্যাপ হিসেবে ইন্সটল করতে পারেন। ক্রোম বা এজ ব্রাউজারের অ্যাড্রেস বারের ডানপাশে থাকা <strong>Install</strong> আইকনে ক্লিক করুন অথবা মেনু থেকে <em>"Install Alokpoth"</em> সিলেক্ট করুন।',
         qrTitle: "মোবাইলে স্ক্যান করে ডাউনলোড করুন",
         qrSub: "মোবাইলের ক্যামেরা দিয়ে এই কিউআর কোডটি স্ক্যান করে সরাসরি ডাউনলোড পেজে যেতে পারেন।",
         info1Desc: "জিপিইউ হার্ডওয়্যার অ্যাক্সিলারেশন সহ ৯০Hz, ১২০Hz ও ১৪৪Hz ডিসপ্লেতে ল্যাগ-মুক্ত সুপার স্মুথ স্ক্রলিং।",
@@ -985,6 +1002,12 @@
       document.getElementById("iosCardTitle").textContent = d.iosCardTitle;
       document.getElementById("iosCardSub").textContent = d.iosCardSub;
       document.getElementById("badgeIos").textContent = d.badgeIos;
+      if (document.getElementById("btnIpaDownloadText") && d.btnIpaDownload) {
+        document.getElementById("btnIpaDownloadText").textContent = d.btnIpaDownload;
+      }
+      if (document.getElementById("btnIpaSubText") && d.btnIpaSub) {
+        document.getElementById("btnIpaSubText").textContent = d.btnIpaSub;
+      }
       document.getElementById("iosStepsHeading").textContent = d.iosStepsHeading;
       document.getElementById("iosStep1").innerHTML = d.iosStep1;
       document.getElementById("iosStep2").innerHTML = d.iosStep2;
