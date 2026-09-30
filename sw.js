@@ -1,5 +1,5 @@
-/* Alokpoth AI - Progressive Web App Service Worker (v1.3.0) */
-const CACHE_NAME = 'alokpoth-ai-v1.3.0';
+/* Alokpoth AI - Progressive Web App Service Worker (v1.3.1) */
+const CACHE_NAME = 'alokpoth-ai-v1.3.1';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -17,7 +17,9 @@ const CORE_ASSETS = [
   '/redeem.html',
   '/manifest.json',
   '/favicon.png',
-  '/app_logo.png'
+  '/app_logo.png',
+  '/logo_icon_white.png',
+  '/logo_icon_black.png'
 ];
 
 self.addEventListener('install', (event) => {
