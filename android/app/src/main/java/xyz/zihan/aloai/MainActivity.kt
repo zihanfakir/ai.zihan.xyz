@@ -331,7 +331,7 @@ class MainActivity : AppCompatActivity() {
                 """.trimIndent()
                 view.evaluateJavascript(cleanupJs, null)
                 
-                // Inject Native Auth Token and User Info
+                // Inject Native Auth Token and User Info if available
                 val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
                 val token = prefs.getString("auth_token", null)
                 val userName = prefs.getString("user_name", null)
@@ -342,6 +342,7 @@ class MainActivity : AppCompatActivity() {
                     val safeEmail = (userEmail ?: "").replace("'", "\\'").replace("\"", "\\\"")
                     val userJson = "{\\\"name\\\":\\\"$safeName\\\",\\\"email\\\":\\\"$safeEmail\\\"}"
                     val js = StringBuilder()
+                    js.append("if (!localStorage.getItem('alokpoth_token')) {")
                     js.append("localStorage.setItem('alokpoth_token', '$token');")
                     js.append("localStorage.setItem('alokpoth_account_name', '$safeName');")
                     js.append("localStorage.setItem('alokpoth_name', '$safeName');")
@@ -354,10 +355,25 @@ class MainActivity : AppCompatActivity() {
                     }
                     js.append("if (typeof applyAccountName === 'function') applyAccountName('$safeName');")
                     js.append("if (typeof updateAuthUIState === 'function') updateAuthUIState();")
+                    js.append("}")
                     view.evaluateJavascript(js.toString(), null)
-                } else {
-                    view.evaluateJavascript("if (localStorage.getItem('alokpoth_token')) { localStorage.removeItem('alokpoth_token'); if (typeof updateAuthUIState === 'function') updateAuthUIState(); }", null)
                 }
+
+                // Sync web session back to native storage when user logs in via web
+                val syncBackJs = """
+                    (function(){
+                        try {
+                            var t = localStorage.getItem('alokpoth_token');
+                            var n = localStorage.getItem('alokpoth_account_name') || localStorage.getItem('alokpoth_name') || '';
+                            var e = localStorage.getItem('alokpoth_email') || '';
+                            var p = localStorage.getItem('alokpoth_current_plan') || localStorage.getItem('alokpoth_user_plan') || 'Free';
+                            if (t && window.AloAI && window.AloAI.saveAuth) {
+                                window.AloAI.saveAuth(t, n, e, p);
+                            }
+                        } catch(err){}
+                    })();
+                """.trimIndent()
+                view.evaluateJavascript(syncBackJs, null)
 
                 if (url != null && url != "about:blank" && !url.startsWith("data:")) {
                     hasLoadedPageSuccessfully = true
@@ -595,11 +611,9 @@ class MainActivity : AppCompatActivity() {
             CookieManager.getInstance().removeAllCookies(null)
             CookieManager.getInstance().flush()
 
-            val intent = Intent(this, xyz.zihan.aloai.auth.AuthActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            webView.post {
+                webView.loadUrl("https://ai.zihan.xyz/login.html")
             }
-            startActivity(intent)
-            finish()
         } catch (e: Exception) {
             Log.e(TAG, "Error logging out", e)
         }

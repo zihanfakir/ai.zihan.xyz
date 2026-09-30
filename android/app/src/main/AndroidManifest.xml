@@ -50,22 +50,16 @@
         android:largeHeap="true">
 
         <activity
-            android:name=".auth.AuthActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AloAI"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout|uiMode"
             android:windowSoftInputMode="adjustResize">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
             <!-- Support opening ai.zihan.xyz in app -->
             <intent-filter android:autoVerify="true">
@@ -77,6 +71,12 @@
                     android:host="ai.zihan.xyz" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".auth.AuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AloAI"
+            android:windowSoftInputMode="adjustResize" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
