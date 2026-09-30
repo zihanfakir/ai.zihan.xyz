@@ -802,6 +802,15 @@ body {
   animation: fadeInPage 0.25s ease forwards;
 }
 </style>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
   <div class="ambient-glow"></div>
@@ -809,7 +818,7 @@ body {
   <div id="toastEl" class="toast"></div>
 
   <header class="top-bar">
-    <a href="index.html" class="back-btn" id="backToChatBtn">
+    <a href="/" class="back-btn" id="backToChatBtn">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
@@ -878,7 +887,7 @@ body {
             <span>আজীবন মেয়াদহীন সুবিধা</span>
           </li>
         </ul>
-        <a href="index.html" class="btn-plan" id="btnFree">বর্তমান প্ল্যান ব্যবহার করুন</a>
+        <a href="/" class="btn-plan" id="btnFree">বর্তমান প্ল্যান ব্যবহার করুন</a>
       </div>
 
       <!-- Pro Plan -->
@@ -1396,7 +1405,7 @@ body {
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
         showToast(d.loginRequired, "error");
-        setTimeout(() => { window.location.href = "login.html"; }, 1000);
+        setTimeout(() => { window.location.href = "login"; }, 1000);
         return;
       }
 
@@ -1456,7 +1465,7 @@ body {
             ? (data.message || `Congratulations! Your '${newPlan}' plan is now active.`)
             : (data.message || `অভিনন্দন! আপনার '${newPlan}' প্ল্যান সক্রিয় হয়েছে।`);
           showToast(successMsg, "success");
-          setTimeout(() => { window.location.href = "subscription.html"; }, 1500);
+          setTimeout(() => { window.location.href = "subscription"; }, 1500);
         } else {
           showToast(data.error || (currentLanguage === "en" ? "Invalid or expired promo code!" : "অবৈধ বা মেয়াদোত্তীর্ণ রিডিম কোড!"), "error");
         }
@@ -1662,11 +1671,11 @@ body {
         if (userCurrentPlan === "Free" && !isUserAdmin) {
           btnFree.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
           btnFree.className = "btn-plan active-plan-btn";
-          btnFree.onclick = () => { window.location.href = "index.html"; };
+          btnFree.onclick = () => { window.location.href = "/"; };
         } else {
           btnFree.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
           btnFree.className = "btn-plan";
-          btnFree.onclick = () => { window.location.href = "index.html"; };
+          btnFree.onclick = () => { window.location.href = "/"; };
         }
       }
 
@@ -1675,7 +1684,7 @@ body {
         if (userCurrentPlan === "Pro" && !isUserAdmin) {
           btnPro.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
           btnPro.className = "btn-plan active-plan-btn";
-          btnPro.onclick = () => { window.location.href = "subscription.html"; };
+          btnPro.onclick = () => { window.location.href = "subscription"; };
         } else {
           btnPro.textContent = isEn ? "Unlock with Redeem Code" : "রিডিম কোড দিয়ে আনলক করুন";
           btnPro.className = "btn-plan primary";
@@ -1688,11 +1697,11 @@ body {
         if (isUserAdmin) {
           btnMax.textContent = isEn ? "👑 Admin Active (Unlimited)" : "👑 অ্যাডমিন সক্রিয় (আনলিমিটেড)";
           btnMax.className = "btn-plan active-admin-btn";
-          btnMax.onclick = () => { window.location.href = "subscription.html"; };
+          btnMax.onclick = () => { window.location.href = "subscription"; };
         } else if (userCurrentPlan === "Max") {
           btnMax.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
           btnMax.className = "btn-plan active-plan-btn";
-          btnMax.onclick = () => { window.location.href = "subscription.html"; };
+          btnMax.onclick = () => { window.location.href = "subscription"; };
         } else {
           btnMax.textContent = isEn ? "Claim Max with Code" : "ম্যাক্স কোড রিডিম করুন";
           btnMax.className = "btn-plan";

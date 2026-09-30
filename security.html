@@ -376,13 +376,22 @@ body {
   animation: fadeInPage 0.25s ease forwards;
 }
 </style>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
   <div id="toastEl" class="toast"></div>
 
   <!-- Top Navigation -->
   <header class="settings-nav">
-    <a href="account.html" class="settings-back-link" id="backBtn">
+    <a href="account" class="settings-back-link" id="backBtn">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       <span id="backText">Settings</span>
     </a>
@@ -476,7 +485,7 @@ body {
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
-      window.location.href = "login.html";
+      window.location.href = "login";
     }
 
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
@@ -599,7 +608,7 @@ body {
         if (res.status === 401) {
           localStorage.removeItem("alokpoth_token");
           localStorage.removeItem("alokpoth_user");
-          window.location.href = "login.html";
+          window.location.href = "login";
           return;
         }
         const data = await res.json();

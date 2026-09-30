@@ -806,6 +806,15 @@ textarea:focus-visible {
       .theme-wordmark { content: url('logo_wordmark_white.png'); }
     body.light-mode .theme-wordmark { content: url('logo_wordmark_black.png'); }
   </style>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -1005,11 +1014,11 @@ textarea:focus-visible {
 
   <div class="navbar">
     <div class="logo-area">
-      <a href="index.html" class="logo-brand-wrap" title="Back"><img src="logo_wordmark_white.png" class="theme-wordmark" alt="Alokpoth" style="height: 28px; width: auto; object-fit: contain;"></a>
+      <a href="/" class="logo-brand-wrap" title="Back"><img src="logo_wordmark_white.png" class="theme-wordmark" alt="Alokpoth" style="height: 28px; width: auto; object-fit: contain;"></a>
       <span class="admin-badge"><span class="live-dot"></span> Admin Dashboard</span>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <a href="index.html" class="btn btn-ghost" id="adminBackChatBtn" title="চ্যাটে ফিরে যান">
+      <a href="/" class="btn btn-ghost" id="adminBackChatBtn" title="চ্যাটে ফিরে যান">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         <span>চ্যাটে ফিরে যান</span>
       </a>

@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "functions": {
     "api/index.js": {
       "maxDuration": 60
@@ -12,6 +14,20 @@
     { "source": "/admin/(.*)", "destination": "/api/index.js" },
     { "source": "/search/(.*)", "destination": "/api/index.js" },
     { "source": "/download", "destination": "/download.html" },
-    { "source": "/app", "destination": "/download.html" }
+    { "source": "/app", "destination": "/download.html" },
+    { "source": "/account", "destination": "/account.html" },
+    { "source": "/plans", "destination": "/plans.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/security", "destination": "/security.html" },
+    { "source": "/usage", "destination": "/usage.html" },
+    { "source": "/theme", "destination": "/theme.html" },
+    { "source": "/sound", "destination": "/sound.html" },
+    { "source": "/language", "destination": "/language.html" },
+    { "source": "/personalization", "destination": "/personalization.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/help", "destination": "/help.html" },
+    { "source": "/subscription", "destination": "/subscription.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/redeem", "destination": "/redeem.html" }
   ]
 }

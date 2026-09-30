@@ -601,6 +601,15 @@ body {
       display: none !important;
     }
   </style>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
   <canvas id="confettiCanvas"></canvas>
@@ -608,7 +617,7 @@ body {
 
   <!-- Top Navigation Bar: < Settings (Screenshot 4) -->
   <header class="settings-nav">
-    <a href="index.html" class="settings-back-link" id="backToChatBtn" aria-label="Settings Back">
+    <a href="/" class="settings-back-link" id="backToChatBtn" aria-label="Settings Back">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       <span id="settingsPageTitle">Settings</span>
     </a>
@@ -622,7 +631,7 @@ body {
   <main class="settings-container">
     
     <!-- CARD 1: User Profile Card (Screenshot 4) -->
-    <a href="profile.html" class="settings-group settings-profile-group" id="rowEditProfile">
+    <a href="profile" class="settings-group settings-profile-group" id="rowEditProfile">
       <div class="profile-left-meta">
         <div class="profile-avatar-large" id="avatarLetter">Z</div>
         <div class="profile-name-text" id="profileNameDisplay">Zihan Fakir</div>
@@ -635,7 +644,7 @@ body {
 
     <!-- CARD 2: Account Card (Screenshot 4) -->
     <div class="settings-group">
-      <a href="security.html" class="settings-row" id="rowAccount">
+      <a href="security" class="settings-row" id="rowAccount">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -652,7 +661,7 @@ body {
     <!-- CARD 3: Subscription & Usage Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Subscription Row -->
-      <a href="subscription.html" class="settings-row" id="rowSubscription">
+      <a href="subscription" class="settings-row" id="rowSubscription">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -668,7 +677,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- Usage Row -->
-      <a href="usage.html" class="settings-row" id="rowUsage">
+      <a href="usage" class="settings-row" id="rowUsage">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -683,7 +692,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- Upgrade Row -->
-      <a href="plans.html" class="settings-row" id="rowUpgrade">
+      <a href="plans" class="settings-row" id="rowUpgrade">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -700,7 +709,7 @@ body {
     <!-- CARD 4: Preferences Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Color Theme Row -->
-      <a href="theme.html" class="settings-row" id="rowTheme">
+      <a href="theme" class="settings-row" id="rowTheme">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -716,7 +725,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- App Language Row -->
-      <a href="language.html" class="settings-row" id="rowLanguage">
+      <a href="language" class="settings-row" id="rowLanguage">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -732,7 +741,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- Personalization Row -->
-      <a href="personalization.html" class="settings-row" id="rowPersonalization">
+      <a href="personalization" class="settings-row" id="rowPersonalization">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -748,7 +757,7 @@ body {
     <!-- CARD 5: Help Center & Redeem Card (Screenshot 4) -->
     <div class="settings-group">
       <!-- Help Center Row -->
-      <a href="help.html" class="settings-row" id="rowHelp">
+      <a href="help" class="settings-row" id="rowHelp">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
@@ -763,7 +772,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- Redeem Promo Code Row -->
-      <a href="redeem.html" class="settings-row" id="rowRedeem">
+      <a href="redeem" class="settings-row" id="rowRedeem">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3h6a3 3 0 1 0-3-3"/></svg>
@@ -778,7 +787,7 @@ body {
       <div class="row-divider"></div>
 
       <!-- Download App Row -->
-      <a href="download.html" class="settings-row" id="rowDownloadApp">
+      <a href="download" class="settings-row" id="rowDownloadApp">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -869,7 +878,7 @@ body {
         <div style="font-size: 1.8rem; font-weight: 800; color: #fff; margin: 4px 0 2px;" id="currentPlanTitleModal">Free Plan</div>
         <div style="font-size: 0.88rem; color: var(--accent-blue);" id="currentPlanExpiry">Validity: Lifetime / No Expiry</div>
       </div>
-      <button type="button" class="btn-submit" onclick="window.location.href='plans.html'">
+      <button type="button" class="btn-submit" onclick="window.location.href="plans"">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         <span>View All Plans & Upgrade</span>
       </button>
@@ -1291,18 +1300,18 @@ body {
     });
 
     // Row Click Listeners - Navigate to dedicated standalone pages
-    document.getElementById("rowEditProfile")?.addEventListener("click", () => { window.location.href = "profile.html"; });
-    document.getElementById("rowAccount")?.addEventListener("click", () => { window.location.href = "security.html"; });
-    document.getElementById("rowSubscription")?.addEventListener("click", () => { window.location.href = "subscription.html"; });
-    document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage.html"; });
-    document.getElementById("rowUpgrade")?.addEventListener("click", () => { window.location.href = "plans.html"; });
-    document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme.html"; });
-    document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization.html"; });
-    document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help.html"; });
-    document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem.html"; });
+    document.getElementById("rowEditProfile")?.addEventListener("click", () => { window.location.href = "profile"; });
+    document.getElementById("rowAccount")?.addEventListener("click", () => { window.location.href = "security"; });
+    document.getElementById("rowSubscription")?.addEventListener("click", () => { window.location.href = "subscription"; });
+    document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage"; });
+    document.getElementById("rowUpgrade")?.addEventListener("click", () => { window.location.href = "plans"; });
+    document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme"; });
+    document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization"; });
+    document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help"; });
+    document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem"; });
     document.getElementById("rowDownloadApp")?.addEventListener("click", (e) => {
       e.preventDefault();
-      window.location.href = "download.html";
+      window.location.href = "download";
     });
 
     // Language Toggle
@@ -1343,7 +1352,7 @@ body {
         try { window.AloAI.logout(); return; } catch(e) { console.error('[Alokpoth]', e); }
       }
       showToast(d.logoutSuccess, "success");
-      setTimeout(() => { window.location.href = "login.html"; }, 400);
+      setTimeout(() => { window.location.href = "login"; }, 400);
     };
 
     document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
@@ -1387,7 +1396,7 @@ body {
 
     const token = localStorage.getItem("alokpoth_token");
     if (!token) {
-      window.location.href = "login.html";
+      window.location.href = "login";
     }
 
     let dynamicPlanLimits = {

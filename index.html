@@ -3994,6 +3994,15 @@ textarea:focus-visible {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
 <script>
@@ -4229,7 +4238,7 @@ textarea:focus-visible {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>সরাসরি APK ডাউনলোড করুন (v1.1.0)</span>
           </a>
-          <a href="download.html" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 14px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.15s ease;">
+          <a href="download" class="sheen-surface" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 14px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.15s ease;">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
             <span>অ্যাপ ডাউনলোড পেজ দেখুন (Android, iOS &amp; PC) &rarr;</span>
           </a>
@@ -4277,7 +4286,7 @@ textarea:focus-visible {
               </div>
               <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
             </button>
-            <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans.html'">
+            <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href="plans"">
               <div class="settings-row-left">
                 <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
@@ -4720,7 +4729,7 @@ textarea:focus-visible {
             </div>
           </div>
           
-          <button class="settings-btn-primary" type="button" onclick="window.location.href='plans.html'" style="margin-top: 16px;">
+          <button class="settings-btn-primary" type="button" onclick="window.location.href="plans"" style="margin-top: 16px;">
              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
              <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
           </button>
@@ -7191,7 +7200,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (typeof openAccountModal === "function") {
         openAccountModal("settingsMainView");
       } else {
-        window.location.href = "account.html";
+        window.location.href = "account";
       }
     }
     window.handleDrawerUserCardClick = handleDrawerUserCardClick;
@@ -8763,7 +8772,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           try { window.AloAI.logout(); return; } catch(e) { console.error('[Alokpoth]', e); }
         }
         setTimeout(() => {
-          window.location.href = "login.html";
+          window.location.href = "login";
         }, 350);
       };
 
@@ -10982,7 +10991,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                   ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
                 </button>
-                <a href="plans.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                <a href="plans" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   ${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}
                 </a>
@@ -11497,7 +11506,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                         ${isEnNow ? "Switch Model" : "মডেল পরিবর্তন করুন"}
                       </button>
-                      <a href="plans.html" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
+                      <a href="plans" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         ${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}
                       </a>

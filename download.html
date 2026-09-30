@@ -608,12 +608,21 @@
       text-decoration: none;
     }
   </style>
+<script>
+  (function() {
+    if (window.location.pathname.endsWith('.html')) {
+      var clean = window.location.pathname.replace(/\.html$/, '');
+      if (clean === '/index') clean = '/';
+      window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+    }
+  })();
+</script>
 </head>
 <body>
 
   <!-- Top Navigation -->
   <header class="nav-bar">
-    <a href="account.html" class="back-btn" id="navBackBtn">
+    <a href="account" class="back-btn" id="navBackBtn">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       <span id="navBackText">Settings</span>
     </a>
@@ -877,7 +886,7 @@
     <!-- FOOTER -->
     <footer class="footer">
       <span>Alokpoth v1.1.0 (Build 11) • Developed by Zihan Fakir</span>
-      <span><a href="index.html">Home</a> • <a href="account.html">Settings</a> • <a href="help.html">Help Center</a></span>
+      <span><a href="/">Home</a> • <a href="account">Settings</a> • <a href="help">Help Center</a></span>
     </footer>
 
   </main>
