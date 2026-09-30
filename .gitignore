@@ -64,8 +64,11 @@ account_limits_view_*.png
 # Whitelist App Logo, iOS & Android Res Icons
 !app logo.png
 !app_logo.png
-!app_logo_transparent.png
+!app_logo_*.png
+!logo_*.png
 !favicon.png
+!logo/
+!logo/**
 !android/app/src/main/res/**/*.png
 !ios/**/*.png
 

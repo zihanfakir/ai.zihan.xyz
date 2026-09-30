@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#09090b">
-  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="shortcut icon" type="image/png" href="app_logo.png">
   <link rel="apple-touch-icon" href="app_logo.png">
   <link rel="manifest" href="manifest.json">
@@ -1659,13 +1659,16 @@ textarea:focus-visible {
     }
 
     .empty-state-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
-      margin-bottom: 6px;
-      object-fit: cover;
-      filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 20px rgba(255, 255, 255, 0.15));
       animation: none;
+      display: block;
+    }
+    body.light-mode .empty-state-logo {
+      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.12));
     }
 
     .ai-bubble.streaming > *:last-child::after,
@@ -4019,7 +4022,7 @@ textarea:focus-visible {
   <aside class="sidebar-drawer" id="sidebarDrawer" aria-label="à¦ªà§à¦°à¦§à¦¾à¦¨ à¦®à§‡à¦¨à§" style="display: flex; flex-direction: column;">
     <div class="drawer-top-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px;">
       <div style="display: flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em;">
-        <img src="app_logo.png" alt="Alokpoth" style="width: 24px; height: 24px; border-radius: 7px; object-fit: cover;">
+        <img class="theme-icon" src="logo_icon_white.png" alt="Alokpoth" style="width: 24px; height: 24px; object-fit: contain;">
         <span>Alokpoth</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -4120,7 +4123,7 @@ textarea:focus-visible {
     <div class="modal-sheet brand-menu-sheet">
       <div class="modal-header">
         <span style="display: inline-flex; align-items: center; gap: 8px;">
-          <img src="app_logo.png" alt="Alokpoth" style="width: 22px; height: 22px; border-radius: 6px; object-fit: cover;">
+          <img class="theme-icon" src="logo_icon_white.png" alt="Alokpoth" style="width: 22px; height: 22px; object-fit: contain;">
           <span>Alokpoth</span>
         </span>
         <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close" aria-label="Close">
