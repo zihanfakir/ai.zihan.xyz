@@ -3098,8 +3098,7 @@ textarea:focus-visible {
         padding: 6px 6px;
       }
       .action-btn {
-        width: 38px;
-        height: 38px;
+        width: 44px; height: 44px;
       }
       .action-btn svg {
         width: 18px;
@@ -3240,6 +3239,7 @@ textarea:focus-visible {
       pointer-events: auto;
     }
     .sidebar-drawer {
+      will-change: transform, opacity;
       position: fixed;
       top: 0;
       bottom: 0;
@@ -4416,7 +4416,7 @@ textarea:focus-visible {
             <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);" data-i18n="redeemPromoTitle">à¦ªà§à¦°à§‹à¦®à§‹ à¦•à§‹à¦¡ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨</div>
             <div class="settings-field">
               <label class="settings-field-label">à¦­à¦¾à¦‰à¦šà¦¾à¦° à¦¬à¦¾ à¦°à¦¿à¦¡à¦¿à¦® à¦•à§‹à¦¡</label>
-              <input type="text" class="settings-field-input" id="subRedeemInput" placeholder="à¦¯à§‡à¦®à¦¨: ALO-PRO-XXXXXX à¦¬à¦¾ à¦•à§‹à¦¡" maxlength="50" style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;" autocomplete="off" spellcheck="false">
+              <input type="text" class="settings-field-input" id="subRedeemInput" placeholder="à¦¯à§‡à¦®à¦¨: alokpoth-pro-XXXXXX à¦¬à¦¾ à¦•à§‹à¦¡" maxlength="50" style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;" autocomplete="off" spellcheck="false">
             </div>
             <div id="subRedeemMsg" style="font-size: 0.85rem; min-height: 18px;"></div>
             <button type="button" class="settings-btn-primary" id="subRedeemSubmitBtn">
@@ -4979,7 +4979,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 - You ARE able to generate and create images when requested.`;
     }
 
-    const SYSTEM_PROMPT = buildSystemPrompt("Alo Go", true, true);
+    const SYSTEM_PROMPT = buildSystemPrompt("Alokpoth Go", true, true);
     let messagesHistory = [{ role: "system", content: SYSTEM_PROMPT }];
     const CHAT_SESSIONS_KEY = "alokpoth_chat_sessions";
     const CURRENT_SESSION_KEY = "alokpoth_current_session_id";
@@ -6644,8 +6644,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
     });
 
     let MODELS = [
-      { id: "hy3", name: "Alo HY3", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: false },
-      { id: "mimo-v2.5", name: "Alo Swift", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: true }
+      { id: "hy3", name: "Alokpoth HY3", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: false },
+      { id: "mimo-v2.5", name: "Alokpoth Swift", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: true }
     ];
     try {
       const cachedModelsStr = localStorage.getItem("alokpoth_cached_models");
@@ -6677,7 +6677,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const initialTarget = MODELS.find(m => m.id === initialSavedModel);
     if (!initialTarget || !isModelAccessible(initialTarget)) {
       const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
+      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "alokpoth-ai");
       try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) { console.error('[Alokpoth]', e); }
     }
     let selectedModelId = initialSavedModel;
@@ -6755,7 +6755,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             selectedModelId = savedModel;
           } else {
             const firstAvailable = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-            selectedModelId = firstAvailable ? firstAvailable.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
+            selectedModelId = firstAvailable ? firstAvailable.id : (MODELS[0] ? MODELS[0].id : "alokpoth-ai");
             try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch(e) { console.error('[Alokpoth]', e); }
           }
 
@@ -9287,7 +9287,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       "gemini-3.6-flash": { in: 0.075, out: 0.30 },
       "gemini-3.5-flash-lite": { in: 0.075, out: 0.30 },
       "llama-3.3-70b-versatile": { in: 0.59, out: 0.79 },
-      "alo-pro": { in: 0.59, out: 0.79 },
+      "alokpoth-pro": { in: 0.59, out: 0.79 },
       "qwen/qwen3.8-27b": { in: 0.20, out: 0.60 },
       "openrouter/free": { in: 0.05, out: 0.20 },
       "openai/gpt-oss-120b": { in: 0.15, out: 0.60 },
@@ -10557,7 +10557,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         try {
           const errJson = await response.json();
           if (errJson && errJson.error) {
-            serverError = errJson.error;
+            serverError = typeof errJson.error === "object" ? JSON.stringify(errJson.error) : String(errJson.error);
           }
         } catch(e) { console.error('[Alokpoth]', e); }
 
@@ -11271,7 +11271,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               scrollToBottom();
               lastRenderTime = now;
             }
-            queueRafId = requestAnimationFrame(processQueue);
+            if (queueRafId) cancelAnimationFrame(queueRafId); queueRafId = requestAnimationFrame(processQueue);
           } else {
             if (!apiFinished) {
               // Re-render to update the thinking timer!
@@ -11337,7 +11337,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (!isQueueActive) {
             isQueueActive = true;
             if (!queueRafId) {
-              queueRafId = requestAnimationFrame(processQueue);
+              if (queueRafId) cancelAnimationFrame(queueRafId); queueRafId = requestAnimationFrame(processQueue);
             }
           }
         };
@@ -11685,4 +11685,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
