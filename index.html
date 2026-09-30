@@ -3921,7 +3921,10 @@
     <!-- New Chat prominent pill button (Screenshot 3) -->
     <div style="padding: 0 16px 12px;">
       <button type="button" id="drawerNewChatBtn" class="drawer-new-chat-btn" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 9999px; background: #1c1c1f; border: 1px solid rgba(255, 255, 255, 0.08); color: #ffffff; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s;">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
         <span>New Chat</span>
       </button>
     </div>
@@ -3990,12 +3993,11 @@
       </button>
     </div>
     <div class="navbar-right">
-      <button class="icon-btn" id="navSoundToggleBtn" type="button" aria-label="অডিও টগল" title="ভয়েস আউটপুট নিঃশব্দ / চালু" style="background: transparent; border: none; color: var(--text-main); padding: 8px;">
-        <svg id="navSoundIconOff" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-        <svg id="navSoundIconOn" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-      </button>
-      <button class="icon-btn" id="quickNewChatNavBtn" type="button" aria-label="নতুন চ্যাট" title="নতুন চ্যাট শুরু করুন" style="background: transparent; border: none; color: var(--text-main); padding: 8px;">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+      <button class="icon-btn" id="quickNewChatNavBtn" type="button" aria-label="নতুন চ্যাট" title="নতুন চ্যাট শুরু করুন" style="background: transparent; border: none; color: var(--text-main); padding: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
       </button>
     </div>
   </nav>
@@ -4014,7 +4016,10 @@
       <div class="brand-menu-list">
         <button class="brand-menu-item sheen-surface" id="newChatBtn" type="button">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
             <span data-i18n="newChatAria">New Chat</span>
           </span>
         </button>
