@@ -35,6 +35,18 @@ tmp/
 temp/
 scratch/
 
+# Audit / analysis temp files
+analyze.js
+analyze.py
+analyze2.py
+genReport.js
+audit_report.md
+audit_report.txt
+findings.txt
+findings2.txt
+results.json
+storage_lines.txt
+
 # Server local data (contains user credentials)
 server/data/
 
