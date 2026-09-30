@@ -316,7 +316,11 @@
     .model-selector-btn .chevron {
       width: 16px;
       height: 16px;
-      fill: currentColor;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       opacity: 0.7;
       transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -423,7 +427,11 @@
     .brand-menu-item svg {
       width: 20px;
       height: 20px;
-      fill: currentColor;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* 4-State Theme Icons */
@@ -456,7 +464,11 @@
     .model-selector .chevron {
       width: 16px;
       height: 16px;
-      fill: var(--text-sub);
+      fill: none;
+      stroke: var(--text-sub);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* ===== Liquid Glass ব্লার ইফেক্ট ===== */
@@ -1204,9 +1216,13 @@
     }
 
     .edit-btn svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .ai-bubble-container {
@@ -1491,7 +1507,11 @@
     .status-indicator .status-icon svg {
       width: 100%;
       height: 100%;
-      fill: currentColor;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       animation: statusIconPulse 1.4s ease-in-out infinite;
     }
 
@@ -1524,7 +1544,6 @@
 
     .ai-error-box svg {
       flex-shrink: 0;
-      fill: currentColor;
     }
 
     .generation-error-note, .generation-stopped-note {
@@ -1576,8 +1595,11 @@
     .thought-chevron {
       width: 15px;
       height: 15px;
+      fill: none;
       stroke: currentColor;
       stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       opacity: 0.75;
       transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -1832,6 +1854,8 @@
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .composer-tools, .composer-tools-left, .composer-tools-right {
@@ -1983,8 +2007,8 @@
     }
 
     .attach-menu-item:hover { background-color: rgba(128, 128, 128, 0.08); }
-    .attach-menu-item svg { width: 20px; height: 20px; fill: var(--text-sub); flex-shrink: 0; }
-    
+    .attach-menu-item svg { width: 18px; height: 18px; fill: none; stroke: var(--text-sub); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; transition: stroke 0.15s ease; }
+    .attach-menu-item:hover svg { stroke: var(--text-main); }
     .attach-menu-item svg.stroke-svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .attach-menu-divider { height: 1px; background: var(--border-color); margin: 6px 12px; }
 
@@ -2003,7 +2027,7 @@
       max-width: 240px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .file-preview-chip svg { width: 18px; height: 18px; fill: var(--accent-color); flex-shrink: 0; }
+    .file-preview-chip svg { width: 18px; height: 18px; fill: none; stroke: var(--accent-color); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .file-preview-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-preview-remove {
       background: none; border: none; color: var(--text-sub); cursor: pointer;
@@ -2015,7 +2039,7 @@
       display: flex; align-items: center; gap: 8px; background-color: rgba(255, 255, 255, 0.1);
       border-radius: 999px; padding: 10px 16px; font-size: 0.85rem; max-width: 240px;
     }
-    .file-bubble-chip svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.8; }
+    .file-bubble-chip svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; opacity: 0.85; }
     .file-bubble-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bubble-file-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 8px; }
 
@@ -2077,6 +2101,8 @@
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       color: var(--text-main);
     }
     
@@ -2094,6 +2120,8 @@
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .settings-subtext {
@@ -2212,6 +2240,9 @@
       display: none;
       width: 20px;
       height: 20px;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     .settings-version-hero {
       text-align: center;
@@ -2474,7 +2505,7 @@
       display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;
       color: var(--text-main);
     }
-    .account-limits-title svg { color: var(--accent-color); flex-shrink: 0; }
+    .account-limits-title svg { color: var(--accent-color); flex-shrink: 0; stroke-linecap: round; stroke-linejoin: round; }
     .account-limits-toggle-btn {
       border: none; background: transparent; color: var(--accent-color); font-size: 0.78rem;
       font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center;
@@ -2597,7 +2628,7 @@
       padding: 8px; border-radius: 999px; flex-shrink: 0; display: flex;
     }
     .chat-history-delete-btn:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-    .chat-history-delete-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .chat-history-delete-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     /* AUTH MODAL STYLES */
     .auth-sheet {
@@ -3639,9 +3670,13 @@
       color: #ffffff;
     }
     .code-header-btn svg {
-      width: 13px;
-      height: 13px;
-      fill: currentColor;
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* ===== Voice Wave Animation ===== */
@@ -4029,7 +4064,7 @@
     <div class="nav-center">
       <button class="model-selector-btn" id="modelTrigger" type="button" aria-label="মডেল নির্বাচন করুন">
         <span id="modelTriggerLabel" class="trigger-label">Alo AI</span>
-        <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        <svg class="chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
     </div>
     <div class="navbar-right">
@@ -4065,34 +4100,34 @@
         </button>
         <button class="brand-menu-item sheen-surface" id="chatHistoryBtn" type="button">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7 6.9 6.9 0 0 1-4.9-2.03l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
             <span>Chat History</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="themeToggleBtn" type="button">
           <span class="brand-menu-item-left">
-            <svg class="icon-sun" viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l1.41 1.42a1 1 0 1 1-1.41 1.41L4.22 5.64a1 1 0 0 1 0-1.42zm12.73 12.73a1 1 0 0 1 1.41 0l1.42 1.41a1 1 0 1 1-1.42 1.42l-1.41-1.42a1 1 0 0 1 0-1.41zM1 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H2a1 1 0 0 1-1-1zm18 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1zM4.22 19.78a1 1 0 0 1 0-1.42l1.41-1.41a1 1 0 1 1 1.41 1.41l-1.41 1.42a1 1 0 0 1-1.41 0zM16.95 4.22a1 1 0 0 1 1.42 0l1.41 1.42a1 1 0 1 1-1.41 1.41l-1.42-1.41a1 1 0 0 1 0-1.42z"/></svg>
-            <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <svg class="icon-oled" viewBox="0 0 24 24"><path d="M16 4h-2V2h-4v2H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H8V6h8v14z"/><path d="M11 18h2v-4h3l-4-5v4H9z"/></svg>
-            <svg class="icon-eyecare" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <svg class="icon-oled" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"/></svg>
+            <svg class="icon-eyecare" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             <span class="theme-label-text">ডার্ক থিম</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="accountMenuBtn" type="button">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>একাউন্ট</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="brandMenuLimitsBtn" type="button">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             <span data-i18n="usageLimits">ব্যবহারের সীমা ও কোটা</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="brandMenuAuthBtn" type="button" style="color: var(--accent-color);">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24" style="fill: var(--accent-color);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             <span>লগইন / রেজিস্টার</span>
           </span>
         </button>
@@ -4105,7 +4140,7 @@
         </button>
         <button class="brand-menu-item sheen-surface" id="brandMenuLogoutBtn" type="button" style="color: #ef4444;">
           <span class="brand-menu-item-left">
-            <svg viewBox="0 0 24 24" style="fill: #ef4444;"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span>লগআউট</span>
           </span>
         </button>
@@ -4197,7 +4232,7 @@
                 <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span data-i18n="accountSettings">অ্যাকাউন্ট সেটিংস</span>
               </div>
-              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
             </button>
             <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans.html'">
               <div class="settings-row-left">
@@ -4206,25 +4241,25 @@
               </div>
               <div class="settings-row-right">
                 <span id="setMenuPlanName">Free</span>
-                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
               </div>
             </button>
             <button class="settings-row" type="button" id="setMenuLimits" onclick="showSettingsView('settingsLimitsView')">
               <div class="settings-row-left">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
                 <span data-i18n="usageLimits">ব্যবহারের সীমা</span>
               </div>
               <div class="settings-row-right">
                 <span id="setMenuLimitBadge" style="font-size: 0.75rem; color: var(--accent-color); font-weight: 600;"></span>
-                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
               </div>
             </button>
             <button class="settings-row" type="button" id="setMenuRedeem" onclick="showSettingsView('settingsRedeemView')">
               <div class="settings-row-left">
-                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
                 <span data-i18n="redeemCode">রিডিম কোড</span>
               </div>
-              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
             </button>
           </div>
 
@@ -4237,7 +4272,7 @@
               </div>
               <div class="settings-row-right">
                 <span id="setMenuLangName">বাংলা</span>
-                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
               </div>
             </button>
             <button class="settings-row" type="button" id="setMenuTheme" onclick="showSettingsView('settingsThemeView')">
@@ -4247,7 +4282,7 @@
               </div>
               <div class="settings-row-right">
                 <span id="setMenuThemeName">ডার্ক</span>
-                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
               </div>
             </button>
           </div>
@@ -4256,12 +4291,12 @@
           <div class="settings-group">
             <button class="settings-row" type="button" id="setMenuUpdates" onclick="showSettingsView('settingsUpdatesView')">
               <div class="settings-row-left">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
                 <span data-i18n="checkUpdates">আপডেটের জন্য চেক করুন</span>
               </div>
               <div class="settings-row-right">
                 <span>v1.0.9</span>
-                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
               </div>
             </button>
             <button class="settings-row" type="button" id="setMenuFeedback" onclick="showSettingsView('settingsFeedbackView')">
@@ -4269,7 +4304,7 @@
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <span data-i18n="helpFeedback">সাহায্য ও প্রতিক্রিয়া</span>
               </div>
-              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+              <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
             </button>
           </div>
 
@@ -4450,7 +4485,7 @@
             <div style="font-size: 0.9rem; color: var(--text-sub); margin-top: 4px;" data-i18n="versionStatus">আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন।</div>
             <div style="width: 100%; margin-top: 12px;">
               <a href="AloAI.apk" download="AloAI.apk" class="settings-btn-primary" style="text-decoration: none;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span data-i18n="downloadApk">নতুন APK ডাউনলোড করুন</span>
               </a>
             </div>
@@ -4520,7 +4555,7 @@
           <div class="account-quota-card">
             <div class="account-quota-header">
               <div class="account-quota-title-wrap">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <span data-i18n="quotaTitle">মেসেজ কোটা</span>
               </div>
               <div class="account-quota-count" id="quotaCountDisplay">
@@ -4532,7 +4567,7 @@
             </div>
             <div class="account-quota-footer">
               <div class="quota-timer-wrap">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span data-i18n="quotaReset">রিসেট:</span> <span class="quota-timer-value" id="quotaLiveCountdown">--:--:--</span>
               </div>
               <div class="quota-window-subtext" id="quotaWindowSubtext"></div>
@@ -4555,7 +4590,7 @@
             </div>
             <div class="account-quota-footer">
               <div class="quota-timer-wrap">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span data-i18n="quotaReset">রিসেট:</span> <span class="quota-timer-value" id="imageQuotaLiveCountdown">--:--:--</span>
               </div>
               <div class="quota-window-subtext" id="imageQuotaWindowSubtext"></div>
@@ -4565,7 +4600,7 @@
           <div class="account-limits-card" style="margin-top: 12px;">
             <div class="account-limits-top">
               <div class="account-limits-title">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
                 <span data-i18n="allPlansTitle">সব প্ল্যানের তুলনা</span>
               </div>
               <button class="account-limits-toggle-btn" id="accountLimitsToggleBtn" type="button" aria-expanded="false">
@@ -4717,14 +4752,14 @@
   </div>
 
   <div class="offline-banner" id="offlineBanner">
-    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
     <span data-i18n="offlineNotice">No internet connection — cannot send messages</span>
   </div>
 
   <div class="chat-container" id="scrollContainer">
     <div class="drag-drop-overlay" id="dropOverlay">
       <div class="drag-drop-icon">
-        <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.8;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><polyline points="12 11 12 16 12 11"/><polyline points="9 13 12 10 15 13"/></svg>
+        <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.8;" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><polyline points="12 11 12 16 12 11"/><polyline points="9 13 12 10 15 13"/></svg>
       </div>
       <div style="font-weight:600; font-size:1.1rem;" data-i18n="dropOverlayTitle">Drop files or images here</div>
       <div style="color:var(--text-sub); font-size:0.85rem;" data-i18n="dropOverlaySub">Images, PDFs, or text files will attach directly</div>
@@ -4780,15 +4815,15 @@
       <div class="composer-tools composer-tools-left">
         <div class="attach-menu-wrap" id="attachMenuWrap">
           <button type="button" class="native-tool-btn attach-btn" id="attachBtn" aria-label="যুক্ত করুন" title="ছবি বা ফাইল যুক্ত করুন">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
           <div class="attach-menu" id="attachMenu">
             <button type="button" class="attach-menu-item" id="attachImageOption">
-              <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
               <span data-i18n="attachImageText">Attach Image</span>
             </button>
             <button type="button" class="attach-menu-item" id="attachFileOption">
-              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
               <span data-i18n="attachFileText">Attach File (PDF/TXT/Code)</span>
             </button>
             
@@ -4796,13 +4831,13 @@
             
             <!-- Web Search inside Menu -->
             <button type="button" class="attach-menu-item" id="attachWebSearchOption">
-              <svg class="stroke-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               <span id="webSearchText" style="color: var(--text-sub);">Web Search: Off</span>
             </button>
 
             <!-- Image Generation inside Menu -->
             <button type="button" class="attach-menu-item" id="attachImageGenOption">
-              <svg class="stroke-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
               <span id="imageGenText" style="color: var(--text-sub);">Image Gen: Off</span>
               <span id="imageGenQuotaBadge" style="margin-left: auto; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px; background: rgba(236,72,153,0.12); color: #ec4899; font-weight: 600; border: 1px solid rgba(236,72,153,0.25);"></span>
             </button>
@@ -4810,7 +4845,7 @@
         </div>
 
         <button type="button" class="native-tool-btn" id="cameraBtn" aria-label="ছবি তুলুন বা নির্বাচন করুন" title="ক্যামেরা বা ছবি যোগ করুন">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
         </button>
       </div>
 
@@ -4821,20 +4856,18 @@
         rows="1"
       ></textarea>
 
-      <!-- Right Action Tools: Voice ((•)), Send (↑) -->
+      <!-- Right Action Tools: Voice, Send -->
       <div class="composer-tools composer-tools-right">
         <button type="button" class="native-mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড বা কল" title="Voice Mode">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
-            <path d="M16.24 7.76a6 6 0 0 1 0 8.49"/>
-            <path d="M7.76 16.24a6 6 0 0 1 0-8.49"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M4.93 19.07a10 10 0 0 1 0-14.14"/>
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" x2="12" y1="19" y2="22"/>
           </svg>
         </button>
 
         <button type="submit" class="action-btn" id="sendBtn" aria-label="Send" title="পাঠান">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
         </button>
       </div>
     </form>
@@ -4957,12 +4990,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       if (typeof isGenerating !== "undefined" && isGenerating) {
         sendBtn.disabled = false;
-        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #ef4444; width: 18px; height: 18px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`;
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="color: #ef4444;"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>`;
         sendBtn.setAttribute("aria-label", isEn ? "Stop" : "থামুন");
         sendBtn.setAttribute("title", isEn ? "Stop generating" : "উত্তর তৈরি থামান");
         return;
       } else {
-        sendBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>`;
+        sendBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`;
         sendBtn.setAttribute("aria-label", isEn ? "Send" : "পাঠান");
         sendBtn.setAttribute("title", isEn ? "Send" : "পাঠান");
       }
@@ -5297,11 +5330,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
         micBtn.setAttribute("aria-label", isCurrentEn ? "Voice Typing" : "ভয়েস রেকর্ড করুন");
         micBtn.innerHTML = `
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
-            <path d="M16.24 7.76a6 6 0 0 1 0 8.49"/>
-            <path d="M7.76 16.24a6 6 0 0 1 0-8.49"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M4.93 19.07a10 10 0 0 1 0-14.14"/>
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" x2="12" y1="19" y2="22"/>
           </svg>
         `;
         const userInputEl = document.getElementById("userInput");
@@ -6140,7 +6171,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (warningEl && remaining <= 0) {
         const warnPrefix = isEn ? "Your message limit has been reached! (Resets in: " : "আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ";
         const warnSuffix = isEn ? ")" : " পর)";
-        warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnPrefix}${timeLeftStr}${warnSuffix}`;
+        warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnPrefix}${timeLeftStr}${warnSuffix}`;
       }
 
       // 2. Image Quota Timer
@@ -6441,7 +6472,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             const warnText = isEn 
               ? `Your message limit has been reached! (Resets in: ${timeLeftStr})`
               : `আপনার বার্তা সীমা শেষ! (পুনরায় চালু হবে: ${timeLeftStr} পর)`;
-            warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnText}`;
+            warningEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;display:inline-block;vertical-align:-3px;margin-right:6px;" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${warnText}`;
             warningEl.classList.add("visible");
           } else {
             warningEl.classList.remove("visible");
@@ -6880,7 +6911,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         let lockHtml = "";
         if (isLocked) {
           lockHtml = `<span class="model-lock-badge" style="display:inline-flex; align-items:center; gap:3px; margin-left:6px; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25);">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             ${requiredPlan}
           </span>`;
         }
@@ -7332,10 +7363,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
             <div class="drawer-session-title" title="${escapeHtml(session.title || (isEn ? "Untitled Chat" : "নামহীন চ্যাট"))}">${escapeHtml(session.title || (isEn ? "Untitled Chat" : "নামহীন চ্যাট"))}</div>
             <div class="drawer-session-actions">
               <button type="button" class="drawer-session-action-btn edit-session-btn" title="${isEn ? "Rename" : "নাম পরিবর্তন করুন"}" aria-label="${isEn ? "Rename" : "নাম পরিবর্তন করুন"}">
-                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
               </button>
               <button type="button" class="drawer-session-action-btn del-session-btn" title="${isEn ? "Delete" : "মুছে ফেলুন"}" aria-label="${isEn ? "Delete" : "মুছে ফেলুন"}">
-                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
               </button>
             </div>
           `;
@@ -9123,10 +9154,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
       const icon = type === "success"
-        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`
         : (type === "info"
-          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`
-          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`);
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`);
       toast.innerHTML = `${icon}<span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
@@ -9395,7 +9426,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const chip = document.createElement("div");
         chip.className = "file-preview-chip";
         chip.innerHTML = `
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
           <span class="file-preview-chip-name">${escapeHtml(f.name)}${f.loading ? (isEn ? " (Reading...)" : " (পড়া হচ্ছে...)") : ""}</span>
           <button type="button" class="file-preview-remove" data-idx="${idx}">×</button>
         `;
@@ -9855,7 +9886,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             <div class="chat-history-item-meta">${dateStr}</div>
           </div>
           <button type="button" class="chat-history-delete-btn" aria-label="মুছুন">
-            <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
         `;
         item.querySelector(".chat-history-item-title").textContent = session.title;
@@ -10130,10 +10161,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
     });
 
     const STATUS_ICONS = {
-      thinking: `<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2zm-2 19h4v-1h-4v1z"/></svg>`,
-      working: `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A8 8 0 0 1 4.07 13H5a1 1 0 0 1 0-2h-.93A8 8 0 0 1 11 4.07V5a1 1 0 0 1 2 0v-.93A8 8 0 0 1 19.93 11H19a1 1 0 0 1 0 2h.93A8 8 0 0 1 13 16.93z"/></svg>`,
-      searching: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5L20.49 19l-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>`,
-      generating: `<svg viewBox="0 0 24 24"><path d="M12 2l1.6 5.1L19 9l-5.4 1.9L12 16l-1.6-5.1L5 9l5.4-1.9z"/></svg>`
+      thinking: `<svg viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
+      working: `<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>`,
+      searching: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+      generating: `<svg viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`
     };
 
     function createAIBubble() {
@@ -10163,7 +10194,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       copyBtn.className = "action-icon-btn";
       copyBtn.style.display = "none";
       copyBtn.title = isEn ? "Copy response" : "উত্তর কপি করুন";
-      const copyIconSvg = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      const copyIconSvg = `<svg viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
       const checkIconSvg = `<svg viewBox="0 0 24 24" style="color:#10b981;"><polyline points="20 6 9 17 4 12"/></svg>`;
       copyBtn.innerHTML = copyIconSvg;
       copyBtn.addEventListener("click", () => {
@@ -10193,7 +10224,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       likeBtn.className = "action-icon-btn";
       likeBtn.style.display = "none";
       likeBtn.title = isEn ? "Good response" : "ভালো উত্তর";
-      likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+      likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>`;
       likeBtn.addEventListener("click", () => {
         triggerHaptic("light");
         likeBtn.style.color = "#3b82f6";
@@ -10206,7 +10237,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       dislikeBtn.className = "action-icon-btn";
       dislikeBtn.style.display = "none";
       dislikeBtn.title = isEn ? "Bad response" : "খারাপ উত্তর";
-      dislikeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
+      dislikeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>`;
       dislikeBtn.addEventListener("click", () => {
         triggerHaptic("light");
         dislikeBtn.style.color = "#ef4444";
@@ -10219,7 +10250,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       shareBtn.className = "action-icon-btn";
       shareBtn.style.display = "none";
       shareBtn.title = isEn ? "Share response" : "উত্তর শেয়ার করুন";
-      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
+      shareBtn.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
       shareBtn.addEventListener("click", () => {
         const textToShare = copyBtn.dataset.text || textDiv.textContent || "";
         if (navigator.share) {
@@ -10234,7 +10265,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       moreBtn.className = "action-icon-btn";
       moreBtn.style.display = "none";
       moreBtn.title = isEn ? "More options" : "আরও অপশন";
-      moreBtn.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>`;
+      moreBtn.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/></svg>`;
       moreBtn.addEventListener("click", () => {
         triggerHaptic("light");
         showToast(isEn ? "Feedback noted" : "মতামত নথিভুক্ত করা হয়েছে", "info");
@@ -10245,7 +10276,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       regenBtn.className = "action-icon-btn btn-regen";
       regenBtn.style.display = "none";
       regenBtn.title = isEn ? "Regenerate response" : "পুনরায় লিখুন";
-      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`;
+      regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`;
       regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
       
       actionRow.appendChild(copyBtn);
@@ -10311,7 +10342,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.className = "code-header-btn";
-        copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>${isEnCode ? "Copy" : "কপি"}</span>`;
+        copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>${isEnCode ? "Copy" : "কপি"}</span>`;
         copyBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           copyTextToClipboard(currentCode).then((ok) => {
@@ -10327,7 +10358,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const dlBtn = document.createElement("button");
         dlBtn.type = "button";
         dlBtn.className = "code-header-btn";
-        dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>${isEnCode ? "Download" : "ডাউনলোড"}</span>`;
+        dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>${isEnCode ? "Download" : "ডাউনলোড"}</span>`;
         dlBtn.addEventListener("click", () => {
           const currentCode = (pre.querySelector("code") || pre).textContent;
           const blob = new Blob([currentCode], { type: "text/plain;charset=utf-8" });
@@ -10373,7 +10404,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         files.forEach((f) => {
           const chip = document.createElement("div");
           chip.className = "file-bubble-chip";
-          chip.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span class="file-bubble-chip-name">${f.name}</span>`;
+          chip.innerHTML = `<svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg><span class="file-bubble-chip-name">${f.name}</span>`;
           fileRow.appendChild(chip);
         });
         col.appendChild(fileRow);
@@ -10387,7 +10418,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       editBtn.type = "button";
       editBtn.className = "edit-btn";
       editBtn.setAttribute("aria-label", "এডিট করুন");
-      editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
       
       editBtn.addEventListener("click", () => {
         const isPlaceholder = text === "ছবি সংযুক্ত করা হয়েছে" || text === "ফাইল সংযুক্ত করা হয়েছে";
@@ -10938,7 +10969,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           aiTextElement.innerHTML = `
             <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
               <div style="display:flex; align-items:flex-start; gap:10px;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
                   <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
                   <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(detailMsg)}</span>
@@ -10985,7 +11016,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
             aiTextElement.classList.remove("streaming", "no-children");
             aiTextElement.innerHTML = `<div class="ai-error-box" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
-              <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span style="font-weight:600;font-size:0.92rem;color:var(--text-main);">${escapeHtml(limitMsg)}</span></div>
               <button type="button" class="btn btn-primary" onclick="openAccountModal()" style="align-self:flex-start;margin-top:4px;">${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}</button>
             </div>`;
@@ -11048,14 +11079,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
             aiTextElement.innerHTML = `
               <div class="ai-error-box" style="display:flex; flex-direction:column; gap:8px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
                 </div>
                 ${isLimit ? `<button type="button" class="btn btn-primary" onclick="openAccountModal('settingsLimitsView');" style="align-self:flex-start; margin-top:6px; padding:6px 14px; font-size:0.82rem; background:var(--accent-primary); color:#fff; border-radius:8px; border:none; cursor:pointer; touch-action:manipulation;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
               </div>
             `;
             if (!isLimit) {
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Retry" : "আবার চেষ্টা করুন"}</span>`;
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>${typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Retry" : "আবার চেষ্টা করুন"}</span>`;
               regenBtn.classList.add("regen-btn-highlight");
               regenBtn.style.display = "inline-flex";
             }
@@ -11293,7 +11324,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               if (shareBtn) shareBtn.style.display = "inline-flex";
               if (moreBtn) moreBtn.style.display = "inline-flex";
               regenBtn.classList.remove("regen-btn-highlight");
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`;
+              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`;
               regenBtn.style.display = "inline-flex";
               
               messagesHistory.push({ role: "assistant", content: finalSavedContent });
@@ -11342,7 +11373,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             aiTextElement.innerHTML = `
               <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
                 <div style="display:flex; align-items:flex-start; gap:10px;">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
                     <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${isEnNow ? `AI model '${escapeHtml(modelDisplayName)}' did not respond in time` : `AI মডেল '${escapeHtml(modelDisplayName)}' নির্দিষ্ট সময়ে সাড়া দেয়নি`}</span>
                     <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${isEnNow ? 'The model server may be slow or busy. You can retry or choose another model.' : 'মডেলের সার্ভার সাময়িকভাবে ধীর বা ডাউন থাকতে পারে। আপনি পুনরায় চেষ্টা করতে পারেন বা অন্য মডেল বেছে নিতে পারেন।'}</span>
@@ -11350,7 +11381,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                 </div>
                 <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
                   <button type="button" class="btn-retry-action" onclick="this.closest('.message-row.ai')?.querySelector('.action-icon-btn.regen-btn-highlight')?.click()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--accent-primary, #3b82f6); color:#fff; border:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
                     ${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}
                   </button>
                   <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
@@ -11360,7 +11391,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                 </div>
               </div>
             `;
-            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
             regenBtn.classList.add("regen-btn-highlight");
             regenBtn.style.display = "inline-flex";
             copyBtn.style.display = "none";
@@ -11452,7 +11483,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
               aiTextElement.innerHTML = `
                 <div class="ai-error-box" style="display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
                   <div style="display:flex; align-items:flex-start; gap:10px;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#ef4444" style="flex-shrink:0; margin-top:2px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                     <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
                       <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(userFriendlyMsg)}</span>
                       <span style="font-size:0.82rem; color:var(--text-sub); opacity:0.9;">${escapeHtml(errorDetail)}</span>
@@ -11472,7 +11503,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
                   ` : `
                     <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
                       <button type="button" class="btn-retry-action" onclick="this.closest('.message-row.ai')?.querySelector('.action-icon-btn.regen-btn-highlight')?.click()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--accent-primary, #3b82f6); color:#fff; border:none; font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
                         ${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}
                       </button>
                       <button type="button" onclick="openModelPicker()" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--surface-color, #1e293b); color:var(--text-main, #fff); border:1px solid var(--border-color, #334155); font-size:0.82rem; font-weight:600; cursor:pointer; touch-action:manipulation;">
@@ -11489,7 +11520,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (isPlanRestricted) {
             regenBtn.style.display = "none";
           } else {
-            regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L14 11h7V4l-3.35 2.35z"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
+            regenBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>${isEnNow ? "Try Again" : "আবার চেষ্টা করুন"}</span>`;
             regenBtn.classList.add("regen-btn-highlight");
             regenBtn.style.display = "inline-flex";
           }
