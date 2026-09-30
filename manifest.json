@@ -1,6 +1,6 @@
 {
-  "name": "Alokpoth AI",
-  "short_name": "Alo AI",
+  "name": "Alokpoth",
+  "short_name": "Alokpoth",
   "description": "বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন।",
   "start_url": "/index.html",
   "scope": "/",

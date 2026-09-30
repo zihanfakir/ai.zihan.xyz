@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <title>Settings — Alo AI</title>
+  <title>Settings — Alokpoth</title>
   <link rel="icon" type="image/png" href="app_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -962,7 +962,7 @@ body {
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.92rem; color: var(--text-dim); line-height: 1.6;">
         <div>
-          <strong style="color: #fff;">Alo AI Platform</strong><br>
+          <strong style="color: #fff;">Alokpoth Platform</strong><br>
           Native, intelligent AI assistant designed with privacy, multi-model failover, and high speed.
         </div>
         <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px;">
@@ -988,7 +988,7 @@ body {
         <button type="button" class="modal-close-btn" data-close="modalPersonalization">&times;</button>
       </div>
       <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.6;">
-        Alo AI remembers your preferred language (Bengali or English), model selection, sound effects, and haptic feedback across sessions.
+        Alokpoth remembers your preferred language (Bengali or English), model selection, sound effects, and haptic feedback across sessions.
       </p>
     </div>
   </div>
@@ -1035,13 +1035,13 @@ body {
             return;
           }
         }
-      } catch(e) { console.error('[Alo AI]', e); }
+      } catch(e) { console.error('[Alokpoth]', e); }
     })();
 
     // i18n Dictionary for Settings Page
     const I18N_ACCOUNT = {
       bn: {
-        pageTitle: "সেটিংস — Alo AI",
+        pageTitle: "সেটিংস — Alokpoth",
         settingsHeading: "সেটিংস",
         editProfile: "প্রোফাইল পরিবর্তন",
         accountLabel: "অ্যাকাউন্ট",
@@ -1097,7 +1097,7 @@ body {
         downloadAppLabel: "অ্যাপ ডাউনলোড"
       },
       en: {
-        pageTitle: "Settings — Alo AI",
+        pageTitle: "Settings — Alokpoth",
         settingsHeading: "Settings",
         editProfile: "Edit profile",
         accountLabel: "Account",
@@ -1308,7 +1308,7 @@ body {
     // Language Toggle
     const toggleLanguage = () => {
       currentLanguage = (currentLanguage === "en" ? "bn" : "en");
-      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch(e) { console.error('[Alo AI]', e); }
+      try { localStorage.setItem("alokpoth_lang", currentLanguage); } catch(e) { console.error('[Alokpoth]', e); }
       applyAccountI18n();
       renderUserData();
       syncDynamicPlans();
@@ -1329,18 +1329,18 @@ body {
         "alokpoth_window_usage", "alokpoth_image_window_usage", "alokpoth_usage_window"
       ];
       keysToPurge.forEach(k => {
-        try { localStorage.removeItem(k); } catch(e) { console.error('[Alo AI]', e); }
+        try { localStorage.removeItem(k); } catch(e) { console.error('[Alokpoth]', e); }
       });
       try {
         localStorage.setItem("alokpoth_current_plan", "Free");
         localStorage.setItem("alokpoth_plan", "Free");
         localStorage.setItem("alokpoth_user_plan", "Free");
-      } catch(e) { console.error('[Alo AI]', e); }
+      } catch(e) { console.error('[Alokpoth]', e); }
       if (window.AloAndroid && typeof window.AloAndroid.logout === "function") {
-        try { window.AloAndroid.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
+        try { window.AloAndroid.logout(); return; } catch(e) { console.error('[Alokpoth]', e); }
       }
       if (window.AloAI && typeof window.AloAI.logout === "function") {
-        try { window.AloAI.logout(); return; } catch(e) { console.error('[Alo AI]', e); }
+        try { window.AloAI.logout(); return; } catch(e) { console.error('[Alokpoth]', e); }
       }
       showToast(d.logoutSuccess, "success");
       setTimeout(() => { window.location.href = "login.html"; }, 400);
@@ -1430,7 +1430,7 @@ body {
           });
           renderUserData();
         }
-      } catch(e) { console.error('[Alo AI]', e); }
+      } catch(e) { console.error('[Alokpoth]', e); }
     }
 
     // User Data Server Sync
@@ -1452,11 +1452,11 @@ body {
             try {
               localStorage.setItem("alokpoth_window_usage", JSON.stringify(data.usage));
               localStorage.setItem("alokpoth_usage_window", JSON.stringify(data.usage));
-            } catch(e) { console.error('[Alo AI]', e); }
+            } catch(e) { console.error('[Alokpoth]', e); }
           }
           renderUserData();
         }
-      } catch(e) { console.error('[Alo AI]', e); }
+      } catch(e) { console.error('[Alokpoth]', e); }
     }
 
     // Render User Data in UI
@@ -1540,7 +1540,7 @@ body {
         try {
           usage = JSON.parse(localStorage.getItem("alokpoth_window_usage") || localStorage.getItem("alokpoth_usage_window") || "null");
           if (usage && usage.count) used = Number(usage.count) || 0;
-        } catch(e) { console.error('[Alo AI]', e); }
+        } catch(e) { console.error('[Alokpoth]', e); }
 
         const remaining = Math.max(0, limit - used);
 
@@ -1635,7 +1635,7 @@ body {
         try {
           imgUsage = JSON.parse(localStorage.getItem("alokpoth_image_window_usage") || "null");
           if (imgUsage && imgUsage.count !== undefined) imgUsed = Number(imgUsage.count) || 0;
-        } catch(e) { console.error('[Alo AI]', e); }
+        } catch(e) { console.error('[Alokpoth]', e); }
 
         let imgMsRemaining = 0;
         if (imgUsage && imgUsage.resetAt) {
@@ -1704,7 +1704,7 @@ body {
         const allSessions = localStorage.getItem("alokpoth_chat_sessions");
         let sessionCount = 1;
         if (allSessions) {
-          try { sessionCount = JSON.parse(allSessions).length || 1; } catch(e) { console.error('[Alo AI]', e); }
+          try { sessionCount = JSON.parse(allSessions).length || 1; } catch(e) { console.error('[Alokpoth]', e); }
         }
         const totalMsgEl = document.getElementById("totalMessagesSent");
         if (totalMsgEl) totalMsgEl.textContent = formatDigits(sessionCount);
@@ -1815,7 +1815,7 @@ body {
               u.subscription.expires_at = expiresAt;
               u.plan = newPlan;
               localStorage.setItem("alokpoth_user", JSON.stringify(u));
-            } catch(e) { console.error('[Alo AI]', e); }
+            } catch(e) { console.error('[Alokpoth]', e); }
           }
 
           codeInput.value = "";
