@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-theme="oled">
 <head>
   <meta charset="UTF-8">
@@ -93,6 +93,11 @@ body {
       padding: 0;
       -webkit-tap-highlight-color: transparent !important;
       -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      text-decoration: none !important;
+      color: inherit;
     }
 
     body {
@@ -199,17 +204,24 @@ body {
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
+      text-decoration: none !important;
+      color: inherit !important;
       transition: background 0.15s;
     }
     .settings-profile-group:hover,
     .settings-profile-group:active {
       background: var(--bg-card-hover);
+      text-decoration: none !important;
+    }
+    .settings-profile-group * {
+      text-decoration: none !important;
     }
 
     .profile-left-meta {
       display: flex;
       align-items: center;
       gap: 14px;
+      text-decoration: none !important;
     }
 
     .profile-avatar-large {
@@ -226,6 +238,7 @@ body {
       flex-shrink: 0;
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      text-decoration: none !important;
     }
 
     .profile-name-text {
@@ -233,6 +246,7 @@ body {
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.01em;
+      text-decoration: none !important;
     }
 
     /* Individual Item Rows */
@@ -242,7 +256,8 @@ body {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      text-decoration: none;
+      text-decoration: none !important;
+      color: inherit !important;
       cursor: pointer;
       user-select: none;
       transition: background 0.15s;
@@ -251,6 +266,11 @@ body {
     .settings-row:hover,
     .settings-row:active {
       background: var(--bg-card-hover);
+      text-decoration: none !important;
+    }
+
+    .settings-row * {
+      text-decoration: none !important;
     }
 
     .row-lead {
@@ -295,6 +315,7 @@ body {
       font-size: 0.9rem;
       color: var(--text-sub);
       font-weight: 400;
+      text-decoration: none !important;
     }
 
     .email-truncate {
