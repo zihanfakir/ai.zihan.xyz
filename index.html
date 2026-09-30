@@ -1805,7 +1805,7 @@ textarea:focus-visible {
     .mic-rec-text {
       display: none !important;
     }
-    #accountModalOverlay, #chatHistoryModalOverlay {
+    #accountModalOverlay:not(.open), #chatHistoryModalOverlay:not(.open), #libraryModalOverlay:not(.open) {
       display: none !important;
     }
 
@@ -1883,6 +1883,122 @@ textarea:focus-visible {
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    /* ===== My Library (আমার লাইব্রেরি) Styles ===== */
+    .modal-overlay.page-modal .library-container {
+      width: 100% !important;
+      max-width: 960px !important;
+      margin: 0 auto !important;
+      flex: 1 !important;
+      overflow-y: auto !important;
+      padding: 20px 20px 80px !important;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .library-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+    }
+
+    .library-card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card, rgba(255, 255, 255, 0.04));
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    .library-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      border-color: var(--accent-primary);
+    }
+    .library-card-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: rgba(128, 128, 128, 0.08);
+      overflow: hidden;
+    }
+    .library-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .library-card:hover .library-card-img {
+      transform: scale(1.05);
+    }
+    .library-card-overlay {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+    .library-card:hover .library-card-overlay,
+    .library-card:focus-within .library-card-overlay {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      .library-card-overlay {
+        opacity: 1;
+      }
+    }
+    .library-action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.68);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.15s, transform 0.15s;
+    }
+    .library-action-btn:hover {
+      background: var(--accent-primary);
+      transform: scale(1.1);
+    }
+    .library-card-info {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .library-card-prompt {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-main);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.35;
+    }
+    .library-card-date {
+      font-size: 0.72rem;
+      color: var(--text-sub);
     }
 
     .composer-tools, .composer-tools-left, .composer-tools-right {
@@ -4074,7 +4190,7 @@ textarea:focus-visible {
 
     <!-- Quick Navigation Links (Screenshot 3) -->
     <div style="padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 4px;">
-      <button type="button" class="drawer-session-item" id="drawerLibraryBtn" style="padding: 10px 12px; font-weight: 500; color: var(--text-main);" onclick="showToast('My Library', 'info')">
+      <button type="button" class="drawer-session-item" id="drawerLibraryBtn" style="padding: 10px 12px; font-weight: 500; color: var(--text-main);" onclick="openLibraryModal()">
         <div style="display: flex; align-items: center; gap: 10px;">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <span>My Library</span>
@@ -4163,6 +4279,12 @@ textarea:focus-visible {
           <span class="brand-menu-item-left">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
             <span>Chat History</span>
+          </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="brandMenuLibraryBtn" type="button" onclick="openLibraryModal()">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>My Library</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="themeToggleBtn" type="button">
@@ -4760,6 +4882,77 @@ textarea:focus-visible {
         <div class="page-header-spacer"></div>
       </div>
       <div class="chat-history-list" id="chatHistoryList"></div>
+    </div>
+  </div>
+
+  <!-- My Library (আমার লাইব্রেরি) Page Screen -->
+  <div class="modal-overlay page-modal" id="libraryModalOverlay">
+    <div class="modal-sheet">
+      <div class="page-header-bar">
+        <button class="page-back-btn" id="libraryModalClose" type="button" aria-label="ফিরে যান">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>ফিরে যান</span>
+        </button>
+        <div class="page-nav-title" style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>My Library</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="libraryImageCount" style="font-size: 0.8rem; font-weight: 600; color: var(--text-sub); background: var(--sheen-base-hover, rgba(128,128,128,0.12)); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border-color);">0 টি ছবি</span>
+        </div>
+      </div>
+      <div class="library-container" id="libraryContainer">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">AI জেনারেটেড ছবি</div>
+            <div style="font-size: 0.82rem; color: var(--text-sub); margin-top: 2px;">চ্যাটে তৈরি করা সকল ছবি এখানে সংরক্ষিত থাকে</div>
+          </div>
+          <div style="position: relative; max-width: 280px; width: 100%;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub); pointer-events: none;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="librarySearchInput" placeholder="ছবি বা প্রম্পট খুঁজুন..." style="width: 100%; padding: 8px 12px 8px 36px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-size: 0.85rem; outline: none; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div class="library-grid" id="libraryGrid"></div>
+
+        <div class="library-empty" id="libraryEmptyState" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--sheen-base-hover, rgba(128,128,128,0.1)); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; color: var(--accent-primary);">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">এখনও কোনো ছবি তৈরি করা হয়নি</div>
+          <div style="font-size: 0.88rem; color: var(--text-sub); max-width: 380px; line-height: 1.5; margin-bottom: 22px;">চ্যাটে AI-কে ছবি তৈরি করতে বলুন (যেমন: <i>একটি সুন্দর পাহাড়ি সূর্যাস্তের ছবি আঁকো</i>), আপনার তৈরি সব ছবি স্বয়ংক্রিয়ভাবে এখানে সংরক্ষিত থাকবে।</div>
+          <button type="button" class="btn btn-primary" id="libraryCreateImageBtn" style="padding: 10px 22px; border-radius: 12px; background: var(--accent-primary); color: #fff; border: none; font-size: 0.92rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>ছবি তৈরি করুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-Screen Lightbox Image Viewer Modal -->
+  <div class="modal-overlay" id="libraryViewerOverlay" style="z-index: 10050; display: none; background: rgba(0,0,0,0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="position: relative; max-width: 90vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;" onclick="event.stopPropagation()">
+      <button type="button" id="libraryViewerClose" aria-label="Close" style="position: absolute; top: -46px; right: 0; background: rgba(255,255,255,0.18); border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <img id="libraryViewerImg" src="" alt="Full preview" style="max-width: 88vw; max-height: 72vh; border-radius: 16px; object-fit: contain; box-shadow: 0 16px 48px rgba(0,0,0,0.7); display: block;">
+      <div style="margin-top: 16px; background: rgba(24,24,27,0.92); border: 1px solid rgba(255,255,255,0.14); border-radius: 16px; padding: 12px 18px; max-width: 620px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-sizing: border-box;">
+        <div style="flex: 1; overflow: hidden;">
+          <div id="libraryViewerPrompt" style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;"></div>
+          <div id="libraryViewerDate" style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 2px;"></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <button type="button" id="libraryViewerDownloadBtn" title="Download" style="background: var(--accent-primary); border: none; color: #fff; padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>ডাউনলোড</span>
+          </button>
+          <button type="button" id="libraryViewerChatBtn" title="Open Chat" style="background: rgba(255,255,255,0.14); border: none; color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>চ্যাট</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -7050,13 +7243,25 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (typeof closeChatHistoryModal === "function") closeChatHistoryModal(true);
         return;
       }
-      // 5. Sidebar Drawer
+      // 5. Library Image Viewer Lightbox
+      const libViewer = document.getElementById("libraryViewerOverlay");
+      if (libViewer && libViewer.style.display !== "none") {
+        if (typeof closeLibraryViewer === "function") closeLibraryViewer();
+        return;
+      }
+      // 6. My Library modal
+      const libModal = document.getElementById("libraryModalOverlay");
+      if (libModal && libModal.classList.contains("open")) {
+        if (typeof closeLibraryModal === "function") closeLibraryModal(true);
+        return;
+      }
+      // 7. Sidebar Drawer
       const drw = document.getElementById("sidebarDrawer");
       if (drw && drw.classList.contains("open")) {
         if (typeof closeSidebarDrawer === "function") closeSidebarDrawer(true);
         return;
       }
-      // 6. Brand Menu
+      // 8. Brand Menu
       const bm = document.getElementById("brandMenuOverlay");
       if (bm && bm.classList.contains("open")) {
         if (typeof closeBrandMenu === "function") closeBrandMenu();
@@ -7095,13 +7300,25 @@ Capabilities & Code Generation Instructions (CRITICAL):
           if (typeof closeChatHistoryModal === "function") closeChatHistoryModal();
           return;
         }
-        // 5. Sidebar Drawer
+        // 5. Library Image Viewer Lightbox
+        const libViewer = document.getElementById("libraryViewerOverlay");
+        if (libViewer && libViewer.style.display !== "none") {
+          if (typeof closeLibraryViewer === "function") closeLibraryViewer();
+          return;
+        }
+        // 6. My Library modal
+        const libModal = document.getElementById("libraryModalOverlay");
+        if (libModal && libModal.classList.contains("open")) {
+          if (typeof closeLibraryModal === "function") closeLibraryModal();
+          return;
+        }
+        // 7. Sidebar Drawer
         const drw = document.getElementById("sidebarDrawer");
         if (drw && drw.classList.contains("open")) {
           if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
           return;
         }
-        // 6. Brand Menu
+        // 8. Brand Menu
         const bMenu = document.getElementById("brandMenuOverlay");
         if (bMenu && bMenu.classList.contains("open")) {
           if (typeof closeBrandMenu === "function") closeBrandMenu();
@@ -10179,13 +10396,313 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (e.target === chatHistoryModalOverlay) closeChatHistoryModal();
     });
 
+    // ==========================================
+    // My Library (আমার লাইব্রেরি) - Generated Images Engine
+    // ==========================================
+    const LIBRARY_IMAGES_KEY = "alokpoth_library_images";
+    const libraryModalOverlay = document.getElementById("libraryModalOverlay");
+    const libraryModalClose = document.getElementById("libraryModalClose");
+    const libraryGrid = document.getElementById("libraryGrid");
+    const libraryEmptyState = document.getElementById("libraryEmptyState");
+    const librarySearchInput = document.getElementById("librarySearchInput");
+    const libraryImageCount = document.getElementById("libraryImageCount");
+    const libraryCreateImageBtn = document.getElementById("libraryCreateImageBtn");
+    const libraryViewerOverlay = document.getElementById("libraryViewerOverlay");
+    const libraryViewerImg = document.getElementById("libraryViewerImg");
+    const libraryViewerPrompt = document.getElementById("libraryViewerPrompt");
+    const libraryViewerDate = document.getElementById("libraryViewerDate");
+    const libraryViewerClose = document.getElementById("libraryViewerClose");
+    const libraryViewerDownloadBtn = document.getElementById("libraryViewerDownloadBtn");
+    const libraryViewerChatBtn = document.getElementById("libraryViewerChatBtn");
+
+    let currentViewerItem = null;
+
+    function loadLibraryImages() {
+      try {
+        const raw = localStorage.getItem(LIBRARY_IMAGES_KEY);
+        let items = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(items)) items = [];
+        return items;
+      } catch (e) {
+        console.error("[Alokpoth Library]", e);
+        return [];
+      }
+    }
+
+    function saveLibraryImages(items) {
+      try {
+        localStorage.setItem(LIBRARY_IMAGES_KEY, JSON.stringify(items));
+      } catch (e) {
+        console.error("[Alokpoth Library]", e);
+      }
+    }
+
+    function addImageToLibrary(imageUrl, prompt = "", sessionId = null) {
+      if (!imageUrl || typeof imageUrl !== "string") return;
+      try {
+        let items = loadLibraryImages();
+        const existingIdx = items.findIndex(item => item.url === imageUrl);
+        if (existingIdx !== -1) {
+          items[existingIdx].createdAt = items[existingIdx].createdAt || Date.now();
+          if (prompt && (!items[existingIdx].prompt || items[existingIdx].prompt === "ছবি")) {
+            items[existingIdx].prompt = prompt;
+          }
+          if (sessionId && !items[existingIdx].sessionId) {
+            items[existingIdx].sessionId = sessionId;
+          }
+        } else {
+          items.unshift({
+            id: "img_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+            url: imageUrl,
+            prompt: prompt || (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "AI Generated Image" : "AI জেনারেটেড ছবি"),
+            createdAt: Date.now(),
+            sessionId: sessionId || (typeof currentSessionId !== "undefined" ? currentSessionId : null)
+          });
+        }
+        if (items.length > 200) items = items.slice(0, 200);
+        saveLibraryImages(items);
+      } catch (e) {
+        console.error("[Alokpoth Library] addImageToLibrary error:", e);
+      }
+    }
+
+    function deleteLibraryImage(id, e) {
+      if (e) e.stopPropagation();
+      const isEn = typeof currentLanguage !== "undefined" && currentLanguage === "en";
+      const confirmMsg = isEn ? "Do you want to remove this image from your library?" : "আপনি কি এই ছবিটি লাইব্রেরি থেকে মুছে ফেলতে চান?";
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        let items = loadLibraryImages();
+        items = items.filter(item => item.id !== id && item.url !== id);
+        saveLibraryImages(items);
+        renderLibraryGrid(librarySearchInput ? librarySearchInput.value : "");
+        showToast(isEn ? "Image removed from library" : "ছবিটি লাইব্রেরি থেকে সরানো হয়েছে", "info");
+      } catch (err) {
+        console.error("[Alokpoth Library]", err);
+      }
+    }
+
+    function syncLibraryFromSessions() {
+      try {
+        const sessions = typeof loadAllSessions === "function" ? loadAllSessions() : [];
+        if (!sessions || !sessions.length) return;
+        let items = loadLibraryImages();
+        let changed = false;
+        const existingUrls = new Set(items.map(item => item.url));
+
+        sessions.forEach(s => {
+          const msgs = s.messagesHistory || [];
+          for (let i = 0; i < msgs.length; i++) {
+            const m = msgs[i];
+            if (m.role === "assistant" && typeof m.content === "string") {
+              const match = m.content.match(/\[(?:ছবি তৈরি করা হয়েছে|Generated image|Image generated)\s*[:：]?\s*(https?:\/\/[^\]\s]+)\]/i);
+              if (match && match[1]) {
+                const url = match[1];
+                if (!existingUrls.has(url)) {
+                  existingUrls.add(url);
+                  let prompt = m.content.replace(/\[(?:ছবি তৈরি করা হয়েছে|Generated image|Image generated)\s*[:：]?\s*https?:\/\/[^\]\s]+\]/i, "").trim();
+                  if (!prompt && i > 0 && msgs[i - 1].role === "user") {
+                    prompt = msgs[i - 1].content || "";
+                  }
+                  items.push({
+                    id: "img_" + (s.updatedAt || Date.now()) + "_" + Math.random().toString(36).substring(2, 6),
+                    url: url,
+                    prompt: prompt || (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "AI Generated Image" : "AI জেনারেটেড ছবি"),
+                    createdAt: s.updatedAt || Date.now(),
+                    sessionId: s.id || null
+                  });
+                  changed = true;
+                }
+              }
+            }
+          }
+        });
+
+        if (changed) {
+          items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          if (items.length > 200) items = items.slice(0, 200);
+          saveLibraryImages(items);
+        }
+      } catch (e) {
+        console.error("[Alokpoth Library] syncLibraryFromSessions error:", e);
+      }
+    }
+
+    function renderLibraryGrid(searchQuery = "") {
+      if (!libraryGrid) return;
+      const isEn = typeof currentLanguage !== "undefined" && currentLanguage === "en";
+      const items = loadLibraryImages();
+      const q = (searchQuery || "").trim().toLowerCase();
+
+      const filtered = q
+        ? items.filter(it => (it.prompt || "").toLowerCase().includes(q))
+        : items;
+
+      if (libraryImageCount) {
+        libraryImageCount.textContent = isEn ? `${filtered.length} Image${filtered.length === 1 ? '' : 's'}` : `${filtered.length} টি ছবি`;
+      }
+
+      if (!filtered.length) {
+        libraryGrid.innerHTML = "";
+        if (libraryEmptyState) {
+          libraryEmptyState.style.display = "flex";
+          const titleEl = libraryEmptyState.querySelector("div:nth-child(2)");
+          const subEl = libraryEmptyState.querySelector("div:nth-child(3)");
+          if (q) {
+            if (titleEl) titleEl.textContent = isEn ? "No matching images found" : "কোনো মিল থাকা ছবি পাওয়া যায়নি";
+            if (subEl) subEl.textContent = isEn ? "Try searching with a different prompt" : "অন্য কোনো প্রম্পট দিয়ে খুঁজে দেখুন";
+          } else {
+            if (titleEl) titleEl.textContent = isEn ? "No images generated yet" : "এখনও কোনো ছবি তৈরি করা হয়নি";
+            if (subEl) subEl.textContent = isEn
+              ? "Ask the AI in chat to create an image and all your generated images will appear here."
+              : "চ্যাটে AI-কে ছবি তৈরি করতে বলুন, আপনার তৈরি সব ছবি স্বয়ংক্রিয়ভাবে এখানে সংরক্ষিত থাকবে।";
+          }
+        }
+        return;
+      }
+
+      if (libraryEmptyState) libraryEmptyState.style.display = "none";
+
+      let html = "";
+      filtered.forEach(it => {
+        const dateStr = it.createdAt ? new Date(it.createdAt).toLocaleDateString(isEn ? 'en-US' : 'bn-BD', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "";
+        const safePrompt = escapeHtml(it.prompt || (isEn ? "AI Generated Image" : "AI জেনারেটেড ছবি"));
+        const safeUrl = escapeHtml(it.url);
+        const safeId = escapeHtml(it.id);
+
+        html += `
+          <div class="library-card" data-id="${safeId}">
+            <div class="library-card-img-wrap" onclick="openLibraryViewerById('${safeId}')">
+              <img class="library-card-img" src="${safeUrl}" alt="${safePrompt}" loading="lazy" onerror="this.src='app_logo.png'; this.style.opacity='0.6';">
+              <div class="library-card-overlay" onclick="event.stopPropagation()">
+                <button type="button" class="library-action-btn" title="${isEn ? 'Download' : 'ডাউনলোড'}" onclick="downloadGeneratedImage('${safeUrl}')" aria-label="Download">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <button type="button" class="library-action-btn" title="${isEn ? 'Delete' : 'মুছে ফেলুন'}" onclick="deleteLibraryImage('${safeId}', event)" aria-label="Delete">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="library-card-info" onclick="openLibraryViewerById('${safeId}')">
+              <div class="library-card-prompt" title="${safePrompt}">${safePrompt}</div>
+              ${dateStr ? `<div class="library-card-date">${dateStr}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      libraryGrid.innerHTML = html;
+    }
+
+    function openLibraryViewerById(id) {
+      const items = loadLibraryImages();
+      const item = items.find(it => it.id === id || it.url === id);
+      if (item) openLibraryViewer(item);
+    }
+
+    function openLibraryViewer(item) {
+      if (!item || !libraryViewerOverlay) return;
+      currentViewerItem = item;
+      const isEn = typeof currentLanguage !== "undefined" && currentLanguage === "en";
+
+      if (libraryViewerImg) {
+        libraryViewerImg.src = item.url;
+        libraryViewerImg.alt = item.prompt || "Generated Image";
+      }
+      if (libraryViewerPrompt) {
+        libraryViewerPrompt.textContent = item.prompt || (isEn ? "AI Generated Image" : "AI জেনারেটেড ছবি");
+        libraryViewerPrompt.title = item.prompt || "";
+      }
+      if (libraryViewerDate) {
+        libraryViewerDate.textContent = item.createdAt ? new Date(item.createdAt).toLocaleString(isEn ? 'en-US' : 'bn-BD') : "";
+      }
+      if (libraryViewerChatBtn) {
+        if (item.sessionId) {
+          libraryViewerChatBtn.style.display = "inline-flex";
+          libraryViewerChatBtn.onclick = () => {
+            closeLibraryViewer();
+            closeLibraryModal();
+            loadSession(item.sessionId);
+          };
+        } else {
+          libraryViewerChatBtn.style.display = "none";
+        }
+      }
+      if (libraryViewerDownloadBtn) {
+        libraryViewerDownloadBtn.onclick = () => {
+          downloadGeneratedImage(item.url);
+        };
+      }
+
+      libraryViewerOverlay.style.display = "flex";
+      libraryViewerOverlay.classList.add("open");
+    }
+
+    function closeLibraryViewer() {
+      if (libraryViewerOverlay) {
+        libraryViewerOverlay.style.display = "none";
+        libraryViewerOverlay.classList.remove("open");
+      }
+      currentViewerItem = null;
+    }
+
+    function openLibraryModal() {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
+      syncLibraryFromSessions();
+      if (librarySearchInput) librarySearchInput.value = "";
+      renderLibraryGrid();
+      if (libraryModalOverlay) {
+        libraryModalOverlay.classList.add("open");
+        pushPageState("library");
+      }
+    }
+
+    function closeLibraryModal(isPopstate = false) {
+      if (libraryModalOverlay) libraryModalOverlay.classList.remove("open");
+      closeLibraryViewer();
+      if (!isPopstate && history.state && history.state.page === "library") {
+        try { history.replaceState({ page: "home" }, ""); } catch(e) { console.error('[Alokpoth]', e); }
+      }
+    }
+
+    if (libraryModalClose) libraryModalClose.addEventListener("click", () => closeLibraryModal());
+    if (libraryModalOverlay) {
+      libraryModalOverlay.addEventListener("click", (e) => {
+        if (e.target === libraryModalOverlay) closeLibraryModal();
+      });
+    }
+    if (librarySearchInput) {
+      librarySearchInput.addEventListener("input", (e) => renderLibraryGrid(e.target.value));
+    }
+    if (libraryCreateImageBtn) {
+      libraryCreateImageBtn.addEventListener("click", () => {
+        closeLibraryModal();
+        startNewChat();
+        if (userInput) {
+          userInput.value = typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Generate an image of " : "একটি সুন্দর ছবি তৈরি করো: ";
+          userInput.focus();
+        }
+      });
+    }
+    if (libraryViewerClose) libraryViewerClose.addEventListener("click", closeLibraryViewer);
+    if (libraryViewerOverlay) {
+      libraryViewerOverlay.addEventListener("click", (e) => {
+        if (e.target === libraryViewerOverlay) closeLibraryViewer();
+      });
+    }
+
     window.addEventListener("beforeunload", () => {
       persistCurrentSession();
       try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch(e) {}
     });
     
-    // Check if a specific chat ID is explicitly requested via URL hash (#chat=...)
+    // Check if a specific chat ID or library is explicitly requested via URL hash (#chat=... or #library)
     try {
+      if (window.location.hash === "#library") {
+        openLibraryModal();
+      }
       const hashMatch = window.location.hash.match(/#chat=([a-zA-Z0-9_-]+)/);
       if (hashMatch && hashMatch[1]) {
         const reqId = hashMatch[1];
@@ -10195,7 +10712,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         } else {
           startNewChat();
         }
-      } else {
+      } else if (window.location.hash !== "#library") {
         // Normal page visit or refresh: start fresh clean New Chat
         startNewChat();
       }
@@ -10949,6 +11466,15 @@ Capabilities & Code Generation Instructions (CRITICAL):
       img.src = imageUrl;
       img.alt = prompt || "ছবি";
       img.className = "generated-image";
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", () => {
+        if (typeof openLibraryViewer === "function") {
+          openLibraryViewer({ url: imageUrl, prompt: prompt || "ছবি", createdAt: Date.now() });
+        }
+      });
+      if (typeof addImageToLibrary === "function") {
+        addImageToLibrary(imageUrl, prompt, typeof currentSessionId !== "undefined" ? currentSessionId : null);
+      }
       img.onerror = function() {
         this.style.display = "none";
         const errBox = document.createElement("div");
