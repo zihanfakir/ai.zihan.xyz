@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-theme="oled">
 <head>
   <meta charset="UTF-8">
@@ -427,6 +427,152 @@
       stroke-linejoin: round;
     }
 
+    /* Apple iOS Action Button */
+    .btn-download-ios {
+      width: 100%;
+      min-height: 54px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
+      color: #ffffff !important;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      cursor: pointer;
+      text-decoration: none !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+    .btn-download-ios:hover {
+      background: linear-gradient(135deg, #27272a 0%, #18181b 100%);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+    }
+    .btn-download-ios:active {
+      transform: scale(0.98);
+    }
+    .btn-download-ios svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .btn-text-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.25;
+      text-align: left;
+    }
+    .btn-main-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #ffffff !important;
+      letter-spacing: -0.01em;
+    }
+    .btn-sub-caption {
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: #a1a1aa !important;
+      margin-top: 1px;
+    }
+
+    /* Light & Eye Care Theme Overrides */
+    [data-theme="light"] .btn-download-ios,
+    [data-theme="eyecare"] .btn-download-ios {
+      background: #000000;
+      color: #ffffff !important;
+      border: 1px solid #000000;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    }
+    [data-theme="light"] .btn-download-ios:hover,
+    [data-theme="eyecare"] .btn-download-ios:hover {
+      background: #18181b;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+    }
+    [data-theme="light"] .btn-main-title,
+    [data-theme="eyecare"] .btn-main-title {
+      color: #ffffff !important;
+    }
+    [data-theme="light"] .btn-sub-caption,
+    [data-theme="eyecare"] .btn-sub-caption {
+      color: #d4d4d8 !important;
+    }
+    [data-theme="light"] .platform-icon.apple,
+    [data-theme="eyecare"] .platform-icon.apple {
+      background: rgba(0, 0, 0, 0.07);
+      color: #09090b;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    [data-theme="light"] .step-number,
+    [data-theme="eyecare"] .step-number {
+      background: rgba(0, 0, 0, 0.08);
+      color: #09090b;
+    }
+    [data-theme="light"] .meta-tag,
+    [data-theme="eyecare"] .meta-tag {
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #52525b;
+    }
+    [data-theme="light"] .meta-tag.highlight,
+    [data-theme="eyecare"] .meta-tag.highlight {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #2563eb;
+    }
+    [data-theme="light"] .hero-title,
+    [data-theme="eyecare"] .hero-title {
+      background: linear-gradient(135deg, #09090b 40%, #2563eb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    [data-theme="light"] .app-icon-wrap,
+    [data-theme="eyecare"] .app-icon-wrap {
+      background: #ffffff;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="light"] .lang-pill-btn,
+    [data-theme="eyecare"] .lang-pill-btn {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #09090b;
+    }
+    [data-theme="light"] .lang-pill-btn:hover,
+    [data-theme="eyecare"] .lang-pill-btn:hover {
+      background: rgba(0, 0, 0, 0.09);
+    }
+    [data-theme="light"] .back-btn:hover,
+    [data-theme="eyecare"] .back-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    [data-theme="light"] .platform-card,
+    [data-theme="eyecare"] .platform-card {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+    [data-theme="light"] .platform-card.featured,
+    [data-theme="eyecare"] .platform-card.featured {
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, #ffffff 40%);
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+    [data-theme="light"] .safe-badge,
+    [data-theme="eyecare"] .safe-badge {
+      color: #059669;
+    }
+    [data-theme="light"] .feature-item svg,
+    [data-theme="eyecare"] .feature-item svg {
+      stroke: #059669;
+    }
+
     .btn-secondary {
       width: 100%;
       height: 48px;
@@ -747,18 +893,42 @@
         <span class="badge-pill blue" id="badgeIos">IPA & PWA</span>
       </div>
 
-      <!-- DOWNLOAD IPA BUTTON -->
-      <a href="Alokpoth.ipa" download="Alokpoth.ipa" class="download-action-btn" id="ipaDownloadBtn" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255, 255, 255, 0.15); margin-bottom: 20px;">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <ul class="features-list">
+        <li class="feature-item">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="iosFeat1">120Hz ProMotion fluid animations & native touch response</span>
+        </li>
+        <li class="feature-item">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="iosFeat2">Dual Option: Direct Sideloadable .IPA & Instant Safari PWA</span>
+        </li>
+        <li class="feature-item">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="iosFeat3">True Fullscreen with Notch & Dynamic Island Safe-Area adaptation</span>
+        </li>
+        <li class="feature-item">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="iosFeat4">Zero lag, offline conversation storage & audio intelligence</span>
+        </li>
+      </ul>
+
+      <!-- Primary IPA Download CTA -->
+      <a href="Alokpoth.ipa" download="Alokpoth.ipa" class="btn-download-ios" id="btnDownloadIpa">
+        <svg viewBox="0 0 24 24">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        <span class="btn-text-wrap">
-          <span class="btn-main-text" id="btnIpaDownloadText">Download iOS App (.IPA)</span>
-          <span class="btn-sub-text" id="btnIpaSubText">Direct IPA Package • AltStore, Scarlet, Sideloadly • v1.1.0</span>
-        </span>
+        <div class="btn-text-col">
+          <span class="btn-main-title" id="btnIpaDownloadText">Download iOS App (.IPA)</span>
+          <span class="btn-sub-caption" id="btnIpaSubText">Direct IPA (80 KB) • AltStore, Scarlet, Sideloadly</span>
+        </div>
       </a>
+
+      <div class="safe-badge" style="margin-top: 12px; margin-bottom: 20px;">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span id="safeTextIos">Verified iOS Package • Clean Payload • No Jailbreak Required</span>
+      </div>
 
       <div class="steps-section" style="border-top: 1px solid var(--border-divider); padding-top: 16px;">
         <div class="steps-heading" id="iosStepsHeading">
@@ -922,8 +1092,13 @@
         iosCardTitle: "Apple iOS (iPhone & iPad)",
         iosCardSub: "Native iOS IPA & PWA • 120Hz ProMotion",
         badgeIos: "IPA & PWA",
+        iosFeat1: "120Hz ProMotion fluid animations & native touch response",
+        iosFeat2: "Dual Option: Direct Sideloadable .IPA & Instant Safari PWA",
+        iosFeat3: "True Fullscreen with Notch & Dynamic Island Safe-Area adaptation",
+        iosFeat4: "Zero lag, offline conversation storage & audio intelligence",
         btnIpaDownload: "Download iOS App (.IPA)",
-        btnIpaSub: "Direct IPA Package • AltStore, Scarlet, Sideloadly • v1.1.0",
+        btnIpaSub: "Direct IPA (80 KB) • AltStore, Scarlet, Sideloadly",
+        safeTextIos: "Verified iOS Package • Clean Payload • No Jailbreak Required",
         iosStepsHeading: "Add to iPhone Home Screen:",
         iosStep1: "Open <strong>ai.zihan.xyz</strong> in Safari on your iPhone or iPad.",
         iosStep2: "Tap the <strong>Share</strong> button (box with upward arrow) at the bottom.",
@@ -959,8 +1134,13 @@
         iosCardTitle: "অ্যাপল আইওএস (iPhone ও iPad)",
         iosCardSub: "নেটিভ iOS IPA ও PWA • ১২০Hz প্রোমোশন",
         badgeIos: "IPA ও PWA",
+        iosFeat1: "১২০Hz প্রোমোশন ফ্লুইড অ্যানিমেশন ও নেটিভ টাচ রেসপন্স",
+        iosFeat2: "দ্বৈত সুবিধা: সাইডলোডযোগ্য .IPA প্যাকেজ ও ইনস্ট্যান্ট Safari PWA",
+        iosFeat3: "নচ এবং ডায়নামিক আইল্যান্ড সেফ-এরিয়ার সাথে ফুলস্ক্রিন ভিউ",
+        iosFeat4: "সম্পূর্ণ ল্যাগ-মুক্ত, অফলাইন হিস্ট্রি স্টোরেজ ও ভয়েস এআই",
         btnIpaDownload: "iOS অ্যাপ ডাউনলোড করুন (.IPA)",
-        btnIpaSub: "সরাসরি IPA প্যাকেজ • AltStore, Scarlet, Sideloadly",
+        btnIpaSub: "সরাসরি IPA (৮০ KB) • AltStore, Scarlet, Sideloadly",
+        safeTextIos: "ভেরিফাইড iOS প্যাকেজ • জেলব্রেক ছাড়াই ইন্সটলযোগ্য",
         iosStepsHeading: "আইফোনের হোম স্ক্রিনে যেভাবে যুক্ত করবেন:",
         iosStep1: "আপনার iPhone বা iPad-এর Safari ব্রাউজারে <strong>ai.zihan.xyz</strong> ওপেন করুন।",
         iosStep2: "নিচের <strong>Share</strong> বাটনে (তীরচিহ্ন সম্বলিত বক্স) ট্যাপ করুন।",
@@ -1011,11 +1191,26 @@
       document.getElementById("iosCardTitle").textContent = d.iosCardTitle;
       document.getElementById("iosCardSub").textContent = d.iosCardSub;
       document.getElementById("badgeIos").textContent = d.badgeIos;
+      if (document.getElementById("iosFeat1") && d.iosFeat1) {
+        document.getElementById("iosFeat1").textContent = d.iosFeat1;
+      }
+      if (document.getElementById("iosFeat2") && d.iosFeat2) {
+        document.getElementById("iosFeat2").textContent = d.iosFeat2;
+      }
+      if (document.getElementById("iosFeat3") && d.iosFeat3) {
+        document.getElementById("iosFeat3").textContent = d.iosFeat3;
+      }
+      if (document.getElementById("iosFeat4") && d.iosFeat4) {
+        document.getElementById("iosFeat4").textContent = d.iosFeat4;
+      }
       if (document.getElementById("btnIpaDownloadText") && d.btnIpaDownload) {
         document.getElementById("btnIpaDownloadText").textContent = d.btnIpaDownload;
       }
       if (document.getElementById("btnIpaSubText") && d.btnIpaSub) {
         document.getElementById("btnIpaSubText").textContent = d.btnIpaSub;
+      }
+      if (document.getElementById("safeTextIos") && d.safeTextIos) {
+        document.getElementById("safeTextIos").textContent = d.safeTextIos;
       }
       document.getElementById("iosStepsHeading").textContent = d.iosStepsHeading;
       document.getElementById("iosStep1").innerHTML = d.iosStep1;
