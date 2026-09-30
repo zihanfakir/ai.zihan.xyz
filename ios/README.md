@@ -1,6 +1,6 @@
-# Alo AI (iOS Native Application)
+# Alokpoth (iOS Native Application)
 
-Ultra-optimized, 120Hz ProMotion Native iOS client for **Alo AI (আলো এআই)**.
+Ultra-optimized, 120Hz ProMotion Native iOS client for **Alokpoth (আলোকপথ)**.
 
 ## ✨ Features
 - **Pure Swift & SwiftUI Architecture**: Native performance, instant startup, zero lag.

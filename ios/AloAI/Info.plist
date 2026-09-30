@@ -5,11 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Alo AI</string>
+	<string>Alokpoth</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>xyz.zihan.aloai</string>
+	<string>xyz.zihan.alokpoth</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -23,11 +23,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Alo AI needs camera access to capture and analyze images in your conversations.</string>
+	<string>Alokpoth needs camera access to capture and analyze images in your conversations.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Alo AI needs microphone access for voice input and speech recognition.</string>
+	<string>Alokpoth needs microphone access for voice input and speech recognition.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Alo AI needs access to your photo library to attach photos in chat.</string>
+	<string>Alokpoth needs access to your photo library to attach photos in chat.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
