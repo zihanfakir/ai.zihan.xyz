@@ -9846,8 +9846,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function persistCurrentSession() {
-      const hasUserMsg = messagesHistory.some((m) => m.role === "user");
-      if (!hasUserMsg) return;
+      const hasUserMsg = messagesHistory && messagesHistory.some((m) => m.role === "user");
+      const hasAssistantMsg = messagesHistory && messagesHistory.some((m) => m.role === "assistant");
+      // Only persist if the conversation had at least one AI reply to avoid saving empty/aborted prompts
+      if (!hasUserMsg || !hasAssistantMsg) return;
 
       const sessions = loadAllSessions();
       const title = makeSessionTitle(messagesHistory);
@@ -9863,7 +9865,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } else {
         currentSessionId = `chat_${now}_${Math.random().toString(36).slice(2, 8)}`;
         sessions.unshift({ id: currentSessionId, title, messagesHistory, updatedAt: now });
-        try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch(e) { console.error('[Alokpoth]', e); }
       }
       saveAllSessions(sessions);
     }
@@ -9895,6 +9896,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
     function startNewChat() {
       currentSessionId = null;
       try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch(e) { console.error('[Alokpoth]', e); }
+      if (window.location.hash) {
+        try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) {}
+      }
       const curMod = (typeof MODELS !== "undefined" && Array.isArray(MODELS)) ? MODELS.find(m => m.id === selectedModelId) : null;
       const modName = curMod ? curMod.name : "Alokpoth";
       messagesHistory = [{ role: "system", content: buildSystemPrompt(modName, true, true) }];
@@ -9902,6 +9906,20 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (typeof updateSendAvailability === "function") updateSendAvailability();
       chatStream.innerHTML = getEmptyStateHtml();
       emptyState = document.getElementById("emptyState");
+
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+      if (typeof updateThemeLogos === "function") updateThemeLogos(currentTheme);
+
+      const heroBanner = document.getElementById("heroAppDownloadBanner");
+      if (heroBanner && typeof openAppDownloadModal === "function") {
+        heroBanner.addEventListener("click", (e) => {
+          e.preventDefault();
+          openAppDownloadModal();
+        });
+      }
+
+      const scrollContainer = document.getElementById("chatStreamContainer");
+      if (scrollContainer) scrollContainer.scrollTop = 0;
       closeBrandMenu();
     }
 
@@ -10041,6 +10059,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       currentSessionId = session.id;
       try { localStorage.setItem(CURRENT_SESSION_KEY, currentSessionId); } catch(e) { console.error('[Alokpoth]', e); }
+      try { history.replaceState(null, '', '#chat=' + encodeURIComponent(currentSessionId)); } catch(e) {}
       messagesHistory = session.messagesHistory;
 
       chatStream.innerHTML = "";
@@ -10154,18 +10173,28 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (e.target === chatHistoryModalOverlay) closeChatHistoryModal();
     });
 
-    window.addEventListener("beforeunload", persistCurrentSession);
+    window.addEventListener("beforeunload", () => {
+      persistCurrentSession();
+      try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch(e) {}
+    });
     
-    // Restore previous active session if available, otherwise start fresh
+    // Check if a specific chat ID is explicitly requested via URL hash (#chat=...)
     try {
-      const savedSessionId = localStorage.getItem(CURRENT_SESSION_KEY);
-      const allSessions = loadAllSessions();
-      if (savedSessionId && allSessions.some(s => s.id === savedSessionId && s.messagesHistory && s.messagesHistory.length > 1)) {
-        loadSession(savedSessionId);
+      const hashMatch = window.location.hash.match(/#chat=([a-zA-Z0-9_-]+)/);
+      if (hashMatch && hashMatch[1]) {
+        const reqId = hashMatch[1];
+        const allSessions = loadAllSessions();
+        if (allSessions.some(s => s.id === reqId)) {
+          loadSession(reqId);
+        } else {
+          startNewChat();
+        }
       } else {
+        // Normal page visit or refresh: start fresh clean New Chat
         startNewChat();
       }
-    } catch {
+    } catch(e) {
+      console.error('[Alokpoth]', e);
       startNewChat();
     }
 
