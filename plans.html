@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>প্ল্যান ও মূল্য তালিকা — Alokpoth AI</title>
+  <title>প্ল্যান ও মূল্য তালিকা — Alo AI</title>
   <link rel="icon" type="image/png" href="app_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,9 @@
   <style>
     :root {
       --bg-base: #000000;
-      --bg-surface: #18181b;
-      --bg-surface-hover: #27272a;
-      --border-subtle: rgba(255, 255, 255, 0.08);
+      --bg-surface: #121316;
+      --bg-surface-hover: #1a1b20;
+      --border-subtle: rgba(255, 255, 255, 0.1);
       --border-focus: rgba(255, 255, 255, 0.35);
       --accent-primary: #3b82f6;
       --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
@@ -27,47 +27,72 @@
       --radius-md: 14px;
       --radius-lg: 20px;
       --radius-xl: 24px;
-      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, 'Hind Siliguri', sans-serif;
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #09090b;
+      --bg-surface: #141417;
+      --bg-surface-hover: #1f1f24;
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --border-focus: rgba(255, 255, 255, 0.35);
+      --text-main: #f4f4f5;
+      --text-sub: #a1a1aa;
+      --text-muted: #71717a;
+      --accent-primary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
     }
 
     [data-theme="oled"] {
       --bg-base: #000000;
-      --bg-surface: rgba(12, 12, 12, 0.95);
+      --bg-surface: #0e0f12;
+      --bg-surface-hover: #18191d;
       --border-subtle: rgba(255, 255, 255, 0.12);
       --border-focus: rgba(255, 255, 255, 0.4);
+      --text-main: #ffffff;
+      --text-sub: #a1a1aa;
+      --text-muted: #71717a;
+      --accent-primary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
     }
 
     [data-theme="sapphire"] {
       --bg-base: #060913;
-      --bg-surface: rgba(11, 20, 38, 0.85);
-      --border-subtle: rgba(56, 189, 248, 0.12);
+      --bg-surface: #0f1c32;
+      --bg-surface-hover: #162846;
+      --border-subtle: rgba(56, 189, 248, 0.16);
       --border-focus: rgba(56, 189, 248, 0.5);
       --accent-primary: #38bdf8;
       --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
-    }
-
-    [data-theme="light"] {
-      --bg-base: #f8fafc;
-      --bg-surface: rgba(255, 255, 255, 0.95);
-      --bg-surface-hover: #f1f5f9;
-      --border-subtle: rgba(0, 0, 0, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.4);
-      --text-main: #0f172a;
-      --text-sub: #475569;
-      --text-muted: #94a3b8;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
     }
 
     [data-theme="eyecare"] {
       --bg-base: #f5eedc;
-      --bg-surface: rgba(251, 247, 239, 0.95);
+      --bg-surface: #fffdf7;
       --bg-surface-hover: #ede3ce;
-      --border-subtle: rgba(107, 78, 51, 0.15);
+      --border-subtle: rgba(146, 64, 14, 0.16);
       --border-focus: rgba(146, 64, 14, 0.4);
-      --text-main: #4a3b2c;
-      --text-sub: #7a6b5c;
-      --text-muted: #9e8e7e;
+      --text-main: #3d2f21;
+      --text-sub: #6e5e4e;
+      --text-muted: #8c7b6b;
       --accent-primary: #92400e;
       --accent-gradient: linear-gradient(135deg, #b45309, #92400e);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f4f4f6;
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #f8fafc;
+      --border-subtle: rgba(0, 0, 0, 0.09);
+      --border-focus: rgba(59, 130, 246, 0.4);
+      --text-main: #09090b;
+      --text-sub: #52525b;
+      --text-muted: #71717a;
+      --accent-primary: #2563eb;
+      --accent-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
     }
 
     *, *::before, *::after {
@@ -118,7 +143,7 @@
 
     body {
       font-family: var(--font-main);
-      background-color: #000000;
+      background-color: var(--bg-base) !important;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -131,6 +156,7 @@
       padding-right: env(safe-area-inset-right, 0px);
       box-sizing: border-box;
       background-image: none !important;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .ambient-glow {
@@ -146,18 +172,20 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(0, 0, 0, 0.88);
+      background: var(--bg-base);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
       width: 100%;
       margin: 0 auto;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
     }
 
     .top-bar-center {
       font-size: 1.05rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-main);
+    }
       text-align: center;
       flex: 1;
     }
@@ -191,7 +219,7 @@
       gap: 6px;
       padding: 6px 14px;
       border-radius: 999px;
-      background: #18181b;
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       color: var(--text-main);
       text-decoration: none;
@@ -201,15 +229,30 @@
     }
 
     .back-btn:hover {
-      background: #27272a;
+      background: var(--bg-surface-hover);
     }
 
     .theme-toggle-btn {
-      display: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--accent-primary);
     }
 
     .lang-toggle-btn {
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       color: var(--text-main);
       font-size: 0.8rem;
@@ -221,13 +264,10 @@
       align-items: center;
       transition: all 0.2s;
     }
+
     .lang-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--accent-primary);
-    }
-    
-    .theme-toggle-btn:hover {
       background: var(--bg-surface-hover);
+      border-color: var(--accent-primary);
     }
 
     @media (max-width: 640px) {
@@ -286,9 +326,9 @@
       gap: 6px;
       padding: 6px 14px;
       border-radius: 9999px;
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #a5b4fc;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--accent-primary);
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 16px;
@@ -299,9 +339,7 @@
       font-weight: 800;
       line-height: 1.25;
       margin-bottom: 12px;
-      background: linear-gradient(135deg, var(--text-main), var(--text-sub));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-main);
     }
 
     .hero-subtitle {
@@ -326,40 +364,60 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .plan-card:hover {
       transform: translateY(-6px);
-      border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-theme="light"] .plan-card:hover {
+      border-color: rgba(0, 0, 0, 0.2);
     }
 
     .plan-card.featured {
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 1px var(--accent-primary), 0 20px 48px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 0 1px var(--accent-primary), 0 20px 48px rgba(59, 130, 246, 0.18);
     }
 
     .plan-card.active-user-plan {
-      border-color: #10b981 !important;
+      border: 2px solid #10b981 !important;
       box-shadow: 0 0 0 1px #10b981, 0 16px 36px rgba(16, 185, 129, 0.22) !important;
     }
 
-    .active-plan-badge {
+    .plan-card.active-user-plan.admin-plan {
+      border: 2px solid #f59e0b !important;
+      box-shadow: 0 0 0 1px #f59e0b, 0 16px 36px rgba(245, 158, 11, 0.25) !important;
+    }
+
+    .plan-badge-slot {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .active-plan-badge-top {
+      padding: 4px 12px;
+      background: #10b981;
+      color: #ffffff;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 8px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #10b981;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      margin-left: 8px;
-      vertical-align: middle;
+    }
+
+    .active-plan-badge-top.admin {
+      background: linear-gradient(135deg, #ec4899, #f59e0b);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
     }
 
     .popular-tag {
@@ -372,13 +430,14 @@
       border-radius: 9999px;
       font-size: 0.78rem;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
     }
 
     .plan-name {
       font-size: 1.4rem;
       font-weight: 700;
       margin-bottom: 4px;
+      color: var(--text-main);
     }
 
     .plan-desc {
@@ -386,6 +445,7 @@
       color: var(--text-sub);
       margin-bottom: 20px;
       min-height: 42px;
+      line-height: 1.5;
     }
 
     .plan-quota {
@@ -434,7 +494,7 @@
       width: 100%;
       height: 48px;
       border-radius: var(--radius-md);
-      font-size: 1rem;
+      font-size: 0.96rem;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
@@ -442,17 +502,35 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       text-decoration: none;
       border: 1px solid var(--border-subtle);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--text-main);
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
+    [data-theme="light"] .btn-plan {
+      background: #f1f5f9;
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #09090b;
+    }
+    [data-theme="light"] .btn-plan:hover {
+      background: #e2e8f0;
+    }
+
+    [data-theme="eyecare"] .btn-plan {
+      background: #ede3ce;
+      border-color: rgba(146, 64, 14, 0.18);
+      color: #3d2f21;
+    }
+    [data-theme="eyecare"] .btn-plan:hover {
+      background: #dfcfb8;
+    }
+
     .btn-plan:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       transform: translateY(-2px);
     }
 
@@ -460,12 +538,28 @@
       background: var(--accent-gradient);
       color: #ffffff;
       border: none;
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
     }
 
     .btn-plan.primary:hover {
       opacity: 0.95;
-      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 30px rgba(59, 130, 246, 0.45);
+    }
+
+    .btn-plan.active-plan-btn {
+      background: #10b981 !important;
+      color: #ffffff !important;
+      border: none !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    .btn-plan.active-admin-btn {
+      background: linear-gradient(135deg, #ec4899, #f59e0b) !important;
+      color: #ffffff !important;
+      border: none !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4) !important;
     }
 
     /* Redeem Section */
@@ -541,6 +635,18 @@
     .redeem-input:focus {
       border-color: #a855f7;
       box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    }
+
+    [data-theme="light"] .redeem-input {
+      background: #f8fafc;
+      border-color: rgba(0, 0, 0, 0.15);
+      color: #09090b;
+    }
+
+    [data-theme="eyecare"] .redeem-input {
+      background: #ede3ce;
+      border-color: rgba(146, 64, 14, 0.25);
+      color: #3d2f21;
     }
 
     .btn-claim {
@@ -663,7 +769,12 @@
       <button type="button" class="lang-toggle-btn" id="langToggleBtn" title="ভাষা পরিবর্তন / Switch Language">
         <span id="langBtnText">EN</span>
       </button>
-      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" style="display:none;" title="থিম পরিবর্তন"></button>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="থিম পরিবর্তন / Switch Theme">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -671,7 +782,7 @@
     <div class="hero-section">
       <div class="hero-badge">
         <img src="app_logo.png" alt="Alo AI" style="width:16px;height:16px;border-radius:4px;vertical-align:-3px;margin-right:6px;display:inline-block;">
-        <span>Alokpoth AI Plans</span>
+        <span id="heroBadgeText">Alo AI Plans</span>
       </div>
       <h1 class="hero-title" id="heroTitle">আপনার প্রয়োজনীয় সেরা প্ল্যানটি বেছে নিন</h1>
       <p class="hero-subtitle" id="heroSubtitle">দৈনন্দিন সাধারণ প্রশ্ন থেকে শুরু করে জটিল কোডিং ও গবেষণার জন্য দ্রুততম এআই সুবিধা</p>
@@ -681,6 +792,7 @@
     <div class="plans-grid">
       <!-- Free Plan -->
       <div class="plan-card" id="planCardFree">
+        <div class="plan-badge-slot" id="badgeSlotFree"></div>
         <div class="plan-name" id="planNameFree">ফ্রি (Free)</div>
         <div class="plan-desc" id="planDescFree">দৈনন্দিন সাধারণ জ্ঞান ও তথ্য অনুসন্ধানের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
@@ -694,7 +806,7 @@
           </li>
           <li id="featFreeImg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span id="featFreeImgText">৩টি ছবি প্রতি ৩ ঘণ্টায়</span>
+            <span id="featFreeImgText">৫টি ছবি প্রতি ৩ ঘণ্টায়</span>
           </li>
           <li id="featFree2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -714,7 +826,9 @@
 
       <!-- Pro Plan -->
       <div class="plan-card featured" id="planCardPro">
-        <div class="popular-tag" id="popularTag">সর্বাধিক জনপ্রিয়</div>
+        <div class="plan-badge-slot" id="badgeSlotPro">
+          <div class="popular-tag" id="popularTag">সর্বাধিক জনপ্রিয়</div>
+        </div>
         <div class="plan-name" id="planNamePro">প্রো (Pro)</div>
         <div class="plan-desc" id="planDescPro">পেশাদার ডেভেলপার, শিক্ষার্থী ও নিয়মিত ক্রিয়েটরদের জন্য উপযুক্ত।</div>
         <div class="plan-quota">
@@ -728,7 +842,7 @@
           </li>
           <li id="featProImg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span id="featProImgText">২০টি ছবি প্রতি ৩ ঘণ্টায়</span>
+            <span id="featProImgText">২৫টি ছবি প্রতি ৩ ঘণ্টায়</span>
           </li>
           <li id="featPro2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -748,6 +862,7 @@
 
       <!-- Max Plan -->
       <div class="plan-card" id="planCardMax">
+        <div class="plan-badge-slot" id="badgeSlotMax"></div>
         <div class="plan-name" id="planNameMax">ম্যাক্স (Max)</div>
         <div class="plan-desc" id="planDescMax">সর্বোচ্চ পারফরম্যান্স ও হেভি ডিউটি প্রজেক্ট কাজের জন্য।</div>
         <div class="plan-quota">
@@ -1072,7 +1187,9 @@
     }
 
     // Theme sync
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeFromUrl = urlParams.get("theme");
+    const savedTheme = themeFromUrl || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const THEME_META_COLORS = {
@@ -1272,8 +1389,8 @@
 
     // Dynamic Plan Limits & User Sync
     const dynamicPlanData = {
-      Free: { message_limit: 10, window_hours: 3, image_limit: 3 },
-      Pro: { message_limit: 30, window_hours: 3, image_limit: 20 },
+      Free: { message_limit: 10, window_hours: 3, image_limit: 5 },
+      Pro: { message_limit: 30, window_hours: 3, image_limit: 25 },
       Max: { message_limit: 50, window_hours: 1, image_limit: 100 }
     };
 
@@ -1337,6 +1454,16 @@
     function updatePlanCardsUI() {
       const isEn = (currentLanguage === "en");
 
+      let isUserAdmin = false;
+      try {
+        const uStr = localStorage.getItem("alokpoth_user");
+        if (uStr) {
+          const userObj = JSON.parse(uStr);
+          const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+          isUserAdmin = userObj.role === "admin" || (userObj.email && adminEmails.includes(userObj.email.toLowerCase().trim()));
+        }
+      } catch {}
+
       ["Free", "Pro", "Max"].forEach(name => {
         const data = dynamicPlanData[name];
         if (!data) return;
@@ -1346,21 +1473,39 @@
         const imgLim = data.image_limit;
 
         const numEl = document.getElementById("quotaNum" + name);
-        if (numEl) numEl.textContent = isEn ? String(lim) : toBnNum(lim);
+        if (numEl) {
+          if (name === "Max" && isUserAdmin) {
+            numEl.textContent = "∞";
+          } else {
+            numEl.textContent = isEn ? String(lim) : toBnNum(lim);
+          }
+        }
 
         const unitEl = document.getElementById("quotaUnit" + name);
         if (unitEl) {
-          unitEl.textContent = isEn ? `msgs / ${hrs} hr${hrs > 1 ? 's' : ''}` : `বার্তা / ${toBnNum(hrs)} ঘণ্টা`;
+          if (name === "Max" && isUserAdmin) {
+            unitEl.textContent = isEn ? "Unlimited / No limit" : "সীমাহীন / কোনো কোটা নেই";
+          } else {
+            unitEl.textContent = isEn ? `msgs / ${hrs} hr${hrs > 1 ? 's' : ''}` : `বার্তা / ${toBnNum(hrs)} ঘণ্টা`;
+          }
         }
 
         const feat1 = document.querySelector(`#feat${name}1 span`);
         if (feat1) {
-          feat1.textContent = isEn ? `${lim} messages per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(lim)}টি বার্তা প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+          if (name === "Max" && isUserAdmin) {
+            feat1.textContent = isEn ? "Unlimited messages (Lifetime)" : "সীমাহীন বার্তা ব্যবহারের সুবিধা";
+          } else {
+            feat1.textContent = isEn ? `${lim} messages per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(lim)}টি বার্তা প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+          }
         }
 
         const featImg = document.getElementById(`feat${name}ImgText`);
         if (featImg) {
-          featImg.textContent = isEn ? `${imgLim} images per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(imgLim)}টি ছবি প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+          if (name === "Max" && isUserAdmin) {
+            featImg.textContent = isEn ? "Unlimited image generations" : "সীমাহীন ছবি তৈরির সুবিধা";
+          } else {
+            featImg.textContent = isEn ? `${imgLim} images per ${hrs} hour${hrs > 1 ? 's' : ''}` : `${toBnNum(imgLim)}টি ছবি প্রতি ${toBnNum(hrs)} ঘণ্টায়`;
+          }
         }
       });
 
@@ -1378,42 +1523,10 @@
       const cardPro = document.getElementById("planCardPro");
       const cardMax = document.getElementById("planCardMax");
 
-      if (cardFree) cardFree.classList.toggle("active-user-plan", userCurrentPlan === "Free");
-      if (cardPro) cardPro.classList.toggle("active-user-plan", userCurrentPlan === "Pro");
-      if (cardMax) cardMax.classList.toggle("active-user-plan", userCurrentPlan === "Max");
+      const badgeSlotFree = document.getElementById("badgeSlotFree");
+      const badgeSlotPro = document.getElementById("badgeSlotPro");
+      const badgeSlotMax = document.getElementById("badgeSlotMax");
 
-      // Free Button
-      if (btnFree) {
-        if (userCurrentPlan === "Free") {
-          btnFree.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
-          btnFree.style.borderColor = "var(--accent-primary)";
-          btnFree.style.background = "rgba(99, 102, 241, 0.15)";
-          btnFree.style.fontWeight = "700";
-          btnFree.onclick = () => { window.location.href = "index.html"; };
-        } else {
-          btnFree.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
-          btnFree.style.borderColor = "var(--border-subtle)";
-          btnFree.style.background = "rgba(255, 255, 255, 0.05)";
-          btnFree.style.fontWeight = "600";
-          btnFree.onclick = () => { window.location.href = "index.html"; };
-        }
-      }
-
-      // Pro Button
-      if (btnPro) {
-        if (userCurrentPlan === "Pro") {
-          btnPro.textContent = isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)";
-          btnPro.style.background = "rgba(99, 102, 241, 0.25)";
-          btnPro.style.boxShadow = "none";
-          btnPro.onclick = () => { window.location.href = "subscription.html"; };
-        } else {
-          btnPro.textContent = isEn ? "Unlock with Redeem Code" : "রিডিম কোড দিয়ে আনলক করুন";
-          btnPro.style.background = "var(--accent-gradient)";
-          btnPro.onclick = scrollToRedeem;
-        }
-      }
-
-      // Max Button
       let isUserAdmin = false;
       try {
         const uStr = localStorage.getItem("alokpoth_user");
@@ -1424,17 +1537,77 @@
         }
       } catch {}
 
+      if (badgeSlotFree) badgeSlotFree.innerHTML = "";
+      if (badgeSlotPro) badgeSlotPro.innerHTML = '<div class="popular-tag" id="popularTag">' + (isEn ? "Most Popular" : "সর্বাধিক জনপ্রিয়") + '</div>';
+      if (badgeSlotMax) badgeSlotMax.innerHTML = "";
+
+      if (cardFree) cardFree.classList.toggle("active-user-plan", userCurrentPlan === "Free" && !isUserAdmin);
+      if (cardPro) cardPro.classList.toggle("active-user-plan", userCurrentPlan === "Pro" && !isUserAdmin);
+      if (cardMax) {
+        cardMax.classList.toggle("active-user-plan", userCurrentPlan === "Max" || isUserAdmin);
+        cardMax.classList.toggle("admin-plan", isUserAdmin);
+      }
+
+      // Badges
+      if (isUserAdmin) {
+        if (badgeSlotMax) {
+          badgeSlotMax.innerHTML = '<div class="active-plan-badge-top admin">👑 ' + (isEn ? "Admin Unlimited" : "অ্যাডমিন (আনলিমিটেড)") + '</div>';
+        }
+      } else if (userCurrentPlan === "Max") {
+        if (badgeSlotMax) {
+          badgeSlotMax.innerHTML = '<div class="active-plan-badge-top">✓ ' + (isEn ? "Current Plan" : "সক্রিয় প্ল্যান") + '</div>';
+        }
+      } else if (userCurrentPlan === "Pro") {
+        if (badgeSlotPro) {
+          badgeSlotPro.innerHTML = '<div class="active-plan-badge-top">✓ ' + (isEn ? "Current Plan" : "সক্রিয় প্ল্যান") + '</div>';
+        }
+      } else if (userCurrentPlan === "Free") {
+        if (badgeSlotFree) {
+          badgeSlotFree.innerHTML = '<div class="active-plan-badge-top">✓ ' + (isEn ? "Current Plan" : "বর্তমান প্ল্যান") + '</div>';
+        }
+      }
+
+      // Free Button
+      if (btnFree) {
+        if (userCurrentPlan === "Free" && !isUserAdmin) {
+          btnFree.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
+          btnFree.className = "btn-plan active-plan-btn";
+          btnFree.onclick = () => { window.location.href = "index.html"; };
+        } else {
+          btnFree.textContent = isEn ? "Free Plan" : "ফ্রি প্ল্যান";
+          btnFree.className = "btn-plan";
+          btnFree.onclick = () => { window.location.href = "index.html"; };
+        }
+      }
+
+      // Pro Button
+      if (btnPro) {
+        if (userCurrentPlan === "Pro" && !isUserAdmin) {
+          btnPro.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
+          btnPro.className = "btn-plan active-plan-btn";
+          btnPro.onclick = () => { window.location.href = "subscription.html"; };
+        } else {
+          btnPro.textContent = isEn ? "Unlock with Redeem Code" : "রিডিম কোড দিয়ে আনলক করুন";
+          btnPro.className = "btn-plan primary";
+          btnPro.onclick = scrollToRedeem;
+        }
+      }
+
+      // Max Button
       if (btnMax) {
-        if (userCurrentPlan === "Max" || isUserAdmin) {
-          btnMax.textContent = isUserAdmin
-            ? (isEn ? "Admin Active (Unlimited)" : "অ্যাডমিন সক্রিয় (আনলিমিটেড)")
-            : (isEn ? "Current Plan (Active)" : "বর্তমান প্ল্যান (সক্রিয়)");
-          btnMax.style.background = "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(245,158,11,0.3))";
-          btnMax.style.border = "1px solid #f59e0b";
+        if (isUserAdmin) {
+          btnMax.textContent = isEn ? "👑 Admin Active (Unlimited)" : "👑 অ্যাডমিন সক্রিয় (আনলিমিটেড)";
+          btnMax.className = "btn-plan active-admin-btn";
+          btnMax.onclick = () => { window.location.href = "subscription.html"; };
+        } else if (userCurrentPlan === "Max") {
+          btnMax.textContent = isEn ? "✓ Current Plan (Active)" : "✓ বর্তমান প্ল্যান (সক্রিয়)";
+          btnMax.className = "btn-plan active-plan-btn";
           btnMax.onclick = () => { window.location.href = "subscription.html"; };
         } else {
           btnMax.textContent = isEn ? "Claim Max with Code" : "ম্যাক্স কোড রিডিম করুন";
+          btnMax.className = "btn-plan";
           btnMax.style.background = "linear-gradient(135deg, #ec4899, #f59e0b)";
+          btnMax.style.color = "#ffffff";
           btnMax.style.border = "none";
           btnMax.onclick = scrollToRedeem;
         }
