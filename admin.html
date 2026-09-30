@@ -8,7 +8,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alokpoth - অ্যাডমিন প্যানেল</title>
-  <link rel="icon" type="image/png" href="app_logo.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="shortcut icon" type="image/png" href="app_logo.png">
   <link rel="apple-touch-icon" href="app_logo.png">
   <style>
@@ -805,6 +805,12 @@ textarea:focus-visible {
     }
       .theme-wordmark { content: url('logo_wordmark_white.png'); }
     body.light-mode .theme-wordmark { content: url('logo_wordmark_black.png'); }
+  
+    :root[data-theme="light"] .theme-wordmark,
+    :root[data-theme="eyecare"] .theme-wordmark {
+      filter: brightness(0) !important;
+    }
+
   </style>
 <script>
   (function() {

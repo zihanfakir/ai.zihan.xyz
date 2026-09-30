@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2864,17 +2864,20 @@ textarea:focus-visible {
 
     
     /* Dynamic Theme Logos */
-    .theme-icon {
-      content: url('logo_icon_white.png');
+    .theme-icon, .empty-state-logo, .theme-wordmark {
+      transition: filter 0.2s ease, opacity 0.2s ease;
     }
-    body.light-mode .theme-icon {
-      content: url('logo_icon_black.png');
-    }
-    .theme-wordmark {
-      content: url('logo_wordmark_white.png');
-    }
+
+    :root[data-theme="light"] .theme-icon,
+    :root[data-theme="eyecare"] .theme-icon,
+    :root[data-theme="light"] .empty-state-logo,
+    :root[data-theme="eyecare"] .empty-state-logo,
+    :root[data-theme="light"] .theme-wordmark,
+    :root[data-theme="eyecare"] .theme-wordmark,
+    body.light-mode .theme-icon,
+    body.light-mode .empty-state-logo,
     body.light-mode .theme-wordmark {
-      content: url('logo_wordmark_black.png');
+      filter: brightness(0) !important;
     }
 
     /* ===== Custom UI Popup ===== */
@@ -9227,6 +9230,34 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
     }
 
+    
+    function updateThemeLogos(theme) {
+      const isLight = (theme === "light" || theme === "eyecare");
+      const iconSrc = isLight ? "logo_icon_black.png" : "logo_icon_white.png";
+      const wmSrc = isLight ? "logo_wordmark_black.png" : "logo_wordmark_white.png";
+      
+      document.querySelectorAll(".theme-icon, .empty-state-logo").forEach(img => {
+        if (img && img.tagName === "IMG") {
+          img.src = iconSrc;
+          if (isLight) {
+            img.style.filter = "brightness(0)";
+          } else {
+            img.style.filter = "";
+          }
+        }
+      });
+      document.querySelectorAll(".theme-wordmark").forEach(img => {
+        if (img && img.tagName === "IMG") {
+          img.src = wmSrc;
+          if (isLight) {
+            img.style.filter = "brightness(0)";
+          } else {
+            img.style.filter = "";
+          }
+        }
+      });
+    }
+
     function setTheme(theme, notify = false) {
       if (!AVAILABLE_THEMES.includes(theme)) theme = "dark";
       
@@ -9242,6 +9273,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } catch(e) { console.error('[Alokpoth]', e); }
 
       updateThemeLabel(theme);
+      updateThemeLogos(theme);
 
       let metaTag = document.querySelector('meta[name="theme-color"]');
       if (!metaTag) {
@@ -9853,7 +9885,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       return `
         <div class="empty-state" id="emptyState">
-          <img class="empty-state-logo theme-icon" src="logo_icon_white.png" alt="Alokpoth Logo">
+          <img class="empty-state-logo theme-icon" src="${(document.documentElement.getAttribute('data-theme') === 'light' || document.documentElement.getAttribute('data-theme') === 'eyecare') ? 'logo_icon_black.png' : 'logo_icon_white.png'}" alt="Alokpoth Logo">
           <div id="heroGreetingText">${greeting}</div>
           ${bannerHtml}
         </div>
