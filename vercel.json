@@ -10,6 +10,8 @@
     { "source": "/chat/(.*)", "destination": "/api/index.js" },
     { "source": "/redeem/(.*)", "destination": "/api/index.js" },
     { "source": "/admin/(.*)", "destination": "/api/index.js" },
-    { "source": "/search/(.*)", "destination": "/api/index.js" }
+    { "source": "/search/(.*)", "destination": "/api/index.js" },
+    { "source": "/download", "destination": "/download.html" },
+    { "source": "/app", "destination": "/download.html" }
   ]
 }

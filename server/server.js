@@ -150,6 +150,9 @@ app.get('/sound.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'sound.htm
 app.get('/personalization.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'personalization.html')));
 app.get('/help.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'help.html')));
 app.get('/redeem.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'redeem.html')));
+app.get('/download.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
+app.get('/download', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
+app.get('/app', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
 
 // 404 handler
 app.use((req, res) => {

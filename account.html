@@ -698,38 +698,6 @@
 
       <div class="row-divider"></div>
 
-      <!-- Sound Row -->
-      <a href="sound.html" class="settings-row" id="rowSound">
-        <div class="row-lead">
-          <span class="row-icon">
-            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          </span>
-          <span class="row-title" id="soundRowLabel">Sound</span>
-        </div>
-        <div class="row-tail">
-          <span class="row-tail-text" id="soundValText">Default</span>
-          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-
-      <div class="row-divider"></div>
-
-      <!-- Model Row -->
-      <a href="index.html" class="settings-row" id="rowModel">
-        <div class="row-lead">
-          <span class="row-icon">
-            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          </span>
-          <span class="row-title" id="modelRowLabel">Model</span>
-        </div>
-        <div class="row-tail">
-          <span class="row-tail-text" id="modelValText">Alo AI</span>
-          <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </a>
-
-      <div class="row-divider"></div>
-
       <!-- Personalization Row -->
       <a href="personalization.html" class="settings-row" id="rowPersonalization">
         <div class="row-lead">
@@ -742,24 +710,6 @@
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </a>
-
-      <div class="row-divider"></div>
-
-      <!-- Haptic Feedback Row (Toggle) -->
-      <div class="settings-row" id="rowHaptic" style="cursor: pointer;">
-        <div class="row-lead">
-          <span class="row-icon">
-            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          </span>
-          <span class="row-title" id="hapticRowLabel">Haptic feedback</span>
-        </div>
-        <div class="row-tail">
-          <label class="toggle-switch">
-            <input type="checkbox" id="hapticToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
     </div>
 
     <!-- CARD 5: Help Center & Redeem Card (Screenshot 4) -->
@@ -795,7 +745,7 @@
       <div class="row-divider"></div>
 
       <!-- Download App Row -->
-      <a href="AloAI.apk" download="AloAI.apk" class="settings-row" id="rowDownloadApp">
+      <a href="download.html" class="settings-row" id="rowDownloadApp">
         <div class="row-lead">
           <span class="row-icon">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -803,7 +753,7 @@
           <span class="row-title" id="downloadAppRowLabel">Download App</span>
         </div>
         <div class="row-tail">
-          <span class="row-tail-text" style="color: var(--accent-primary); font-weight: 600;">APK</span>
+          <span class="row-tail-text" style="color: var(--accent-blue); font-weight: 600;" id="downloadAppBadge">Android / iOS</span>
           <svg class="row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </a>
@@ -1192,17 +1142,8 @@
       const langRowLabel = document.getElementById("langRowLabel");
       if (langRowLabel) langRowLabel.textContent = d.langLabel;
 
-      const soundRowLabel = document.getElementById("soundRowLabel");
-      if (soundRowLabel) soundRowLabel.textContent = d.soundLabel;
-
-      const modelRowLabel = document.getElementById("modelRowLabel");
-      if (modelRowLabel) modelRowLabel.textContent = d.modelLabel;
-
       const personalizationRowLabel = document.getElementById("personalizationRowLabel");
       if (personalizationRowLabel) personalizationRowLabel.textContent = d.personalizationLabel;
-
-      const hapticRowLabel = document.getElementById("hapticRowLabel");
-      if (hapticRowLabel) hapticRowLabel.textContent = d.hapticLabel;
 
       const helpRowLabel = document.getElementById("helpRowLabel");
       if (helpRowLabel) helpRowLabel.textContent = d.helpLabel;
@@ -1303,16 +1244,12 @@
     document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage.html"; });
     document.getElementById("rowUpgrade")?.addEventListener("click", () => { window.location.href = "plans.html"; });
     document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme.html"; });
-    document.getElementById("rowSound")?.addEventListener("click", () => { window.location.href = "sound.html"; });
-    document.getElementById("rowModel")?.addEventListener("click", () => { window.location.href = "index.html"; });
     document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization.html"; });
     document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help.html"; });
     document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem.html"; });
-    document.getElementById("rowDownloadApp")?.addEventListener("click", () => {
-      const a = document.createElement("a");
-      a.href = "AloAI.apk";
-      a.download = "AloAI.apk";
-      a.click();
+    document.getElementById("rowDownloadApp")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "download.html";
     });
 
     // Language Toggle
@@ -1385,33 +1322,7 @@
     }
     updateThemeDisplay(savedTheme);
 
-    // Haptic Feedback Switch
-    const hapticToggle = document.getElementById("hapticToggle");
-    const hapticEnabled = localStorage.getItem("alokpoth_haptic") !== "false";
-    if (hapticToggle) {
-      hapticToggle.checked = hapticEnabled;
-      hapticToggle.addEventListener("change", () => {
-        localStorage.setItem("alokpoth_haptic", hapticToggle.checked ? "true" : "false");
-        showToast(hapticToggle.checked ? "Haptic feedback enabled" : "Haptic feedback disabled", "info");
-      });
-    }
 
-    const rowHaptic = document.getElementById("rowHaptic");
-    if (rowHaptic && hapticToggle) {
-      rowHaptic.style.cursor = "pointer";
-      rowHaptic.addEventListener("click", (e) => {
-        if (e.target !== hapticToggle && !e.target.closest(".toggle-switch")) {
-          hapticToggle.checked = !hapticToggle.checked;
-          hapticToggle.dispatchEvent(new Event("change"));
-        }
-      });
-    }
-
-    // Sound Switch
-    const soundValText = document.getElementById("soundValText");
-    let soundEnabled = localStorage.getItem("alokpoth_sound") !== "false";
-    if (soundValText) soundValText.textContent = soundEnabled ? "Default" : "Muted";
-    // Sound settings are managed in sound.html
 
     // API & Auth Config
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
