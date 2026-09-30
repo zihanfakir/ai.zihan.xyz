@@ -2859,6 +2859,21 @@ textarea:focus-visible {
     
     button, .brand-menu-item, .quick-prompt-chip, .icon-btn { -webkit-user-select: none; user-select: none; }
 
+        /* Dynamic Theme Logos */
+    .theme-icon {
+      content: url('logo_icon_white.png');
+    }
+    body.light-mode .theme-icon {
+      content: url('logo_icon_black.png');
+    }
+    
+    .theme-wordmark {
+      content: url('logo_wordmark_white.png');
+    }
+    body.light-mode .theme-wordmark {
+      content: url('logo_wordmark_black.png');
+    }
+
     /* ===== Custom UI Popup ===== */
     #customDialogOverlay {
       z-index: 10000 !important;
@@ -4791,7 +4806,7 @@ textarea:focus-visible {
     
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        <img class="empty-state-logo" src="app_logo.png" alt="Alokpoth Logo" width="64" height="64" style="border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);">
+        <img class="empty-state-logo theme-icon" src="logo_icon_white.png" alt="Alokpoth Logo" style="width: 72px; height: auto; margin-bottom: 12px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.15));">
         <div id="heroGreetingText">How can I help you?</div>
       </div>
     </div>
@@ -9825,7 +9840,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       return `
         <div class="empty-state" id="emptyState">
-          <img class="empty-state-logo" src="app_logo.png" alt="Alokpoth Logo" width="64" height="64" style="border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);">
+          <img class="empty-state-logo theme-icon" src="logo_icon_white.png" alt="Alokpoth Logo" style="width: 72px; height: auto; margin-bottom: 12px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.15));">
           <div id="heroGreetingText">${greeting}</div>
           ${bannerHtml}
         </div>
@@ -11685,6 +11700,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
   </script>
 </body>
 </html>
+
+
+
 
 
 
