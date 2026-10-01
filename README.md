@@ -1,6 +1,6 @@
 # Alokpoth AI — ai.zihan.xyz
 
-বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন। সকল API Key সার্ভার সাইডে সুরক্ষিত।
+বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন।
 
 ## 📱 Android App (অ্যান্ড্রয়েড অ্যাপ ডাউনলোড)
 
@@ -40,18 +40,6 @@ git clone https://github.com/ZihanFakir/ai.zihan.xyz.git
 cd ai.zihan.xyz/server
 npm install
 node server.js
-```
-
-## Environment Variables
-
-```env
-PORT=5000
-JWT_SECRET=your_super_secret_key
-MONGO_URI=mongodb+srv://...
-OPENROUTER_API_KEY=sk-or-v1-...
-GROQ_API_KEY=gsk_...
-VYCE_API_KEY=sk-...
-BAI_API_KEY=sk-...
 ```
 
 ## Live
