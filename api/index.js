@@ -52,17 +52,30 @@ app.use((req, res, next) => {
 
 // Normalize Vercel serverless URLs
 app.use((req, res, next) => {
-  if (req.url.startsWith('/api/[...all].js')) req.url = req.url.replace('/api/[...all].js', '') || '/';
-  else if (req.url.startsWith('/api/[...all]')) req.url = req.url.replace('/api/[...all]', '') || '/';
-  else if (req.url.startsWith('/api/index.js')) req.url = req.url.replace('/api/index.js', '') || '/';
-  else if (req.url.startsWith('/api/index')) req.url = req.url.replace('/api/index', '') || '/';
-
-  if ((req.url === '/' || req.url === '') && req.query && req.query.all) {
-    const subPath = Array.isArray(req.query.all) ? req.query.all.join('/') : req.query.all;
-    req.url = '/' + subPath;
+  if (req.url.startsWith('/api/index.js')) {
+    const rawUrl = req.headers['x-forwarded-uri'] || req.headers['x-matched-path'] || '';
+    if (rawUrl && rawUrl !== '/api/index.js') {
+      req.url = rawUrl;
+    } else {
+      req.url = req.url.replace('/api/index.js', '') || '/';
+    }
+  } else if (req.url.startsWith('/api/index')) {
+    req.url = req.url.replace('/api/index', '') || '/';
   }
   next();
 });
+
+// Diagnostic debug endpoint
+app.get(['/api/debug-route', '/debug-route'], (req, res) => {
+  res.json({
+    success: true,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    matchedPath: req.headers['x-matched-path'],
+    forwardedUri: req.headers['x-forwarded-uri']
+  });
+});
+
 
 
 // Health check
