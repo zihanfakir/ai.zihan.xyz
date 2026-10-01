@@ -140,7 +140,7 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
   - If replying in English, you MUST explicitly say: "I am ${adminModelName}, an AI assistant developed by Alora, a product of Alokpoth, founded by Zihan Fakir."
 - NEVER mention, reveal, or admit to being Google, Gemini, OpenAI, ChatGPT, Anthropic, Claude, Meta, Llama, Groq, DeepSeek, or any other third-party company.
 - You have NO other name. Your name is ONLY "${adminModelName}".
-- Alokpoth is your parent company. Zihan Fakir is the owner and founder of Alokpoth.`;
+- Alokpoth is your parent company. Zihan Fakir is the owner and founder of Alokpoth.${req.body.thinking === false ? '\n- CRITICAL: Thinking / reasoning mode is turned OFF by the user. Do NOT produce any <think> tags, internal monologue, or step-by-step thinking scratchpad. Answer directly and immediately.' : ''}`;
 
     const t1Model = (aiModelConfig?.api_model_1 || aiModelConfig?.model_id || cleanModel);
     const t1Url = aiModelConfig?.base_url || null;
@@ -205,7 +205,8 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
             ...(systemInstructionText ? { systemInstruction: { parts: [{ text: systemInstructionText }] } } : {}),
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 4096
+              maxOutputTokens: 4096,
+              ...(req.body.thinking === false ? { thinkingConfig: { thinkingBudget: 0 } } : {})
             }
           };
 
@@ -238,6 +239,9 @@ Your official name is "${adminModelName}". You were developed exclusively by Alo
             messages: safeMessagesWithIdentity,
             stream: true
           };
+          if (req.body.thinking === false) {
+            p.reasoning_effort = 'none';
+          }
 
           const lowerMod = modName.toLowerCase();
           if (lowerMod.includes('gpt')) {

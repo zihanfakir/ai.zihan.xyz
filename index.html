@@ -1603,9 +1603,30 @@
       display: none;
     }
     .thought-bulb-icon {
-      font-size: 1.05rem;
-      line-height: 1;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .thought-bulb-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: block;
+    }
+    @keyframes thoughtPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.92); }
+    }
+    .thought-bulb-icon.thinking-pulse svg {
+      animation: thoughtPulse 1.5s ease-in-out infinite;
     }
     .thought-chevron {
       width: 15px;
@@ -5082,6 +5103,12 @@
               <span id="imageGenText" style="color: var(--text-sub);">Image Gen: Off</span>
               <span id="imageGenQuotaBadge" style="margin-left: auto; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px; background: rgba(236,72,153,0.12); color: #ec4899; font-weight: 600; border: 1px solid rgba(236,72,153,0.25);"></span>
             </button>
+
+            <!-- Thinking Mode inside Menu -->
+            <button type="button" class="attach-menu-item" id="attachThinkingOption">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+              <span id="thinkingText" style="color: var(--text-sub);">Thinking: OFF</span>
+            </button>
           </div>
         </div>
 
@@ -5200,7 +5227,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 - You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
 - When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
 - Use proper code blocks (triple backticks with language specifier) to format code clearly.
-- You ARE able to generate and create images when requested.`;
+- You ARE able to generate and create images when requested.${(typeof isThinkingEnabled !== "undefined" && !isThinkingEnabled) ? '\n- CRITICAL: Thinking mode is turned OFF by the user. Do NOT include <think> tags, internal monologue, or step-by-step thinking scratchpads. Answer directly, concisely, and immediately.' : ''}`;
       }
       return `You are ${modelDisplayName}, an AI model built by Alora, a product of Alokpoth (আলোকপথ), founded by Zihan Fakir (জিহান ফকির).
 === LANGUAGE RULE (CRITICAL - highest priority, follow in every single reply) ===
@@ -5223,7 +5250,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 - You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
 - When the user asks for a website, full code, script, or program, you MUST write the **complete, full, production-ready code in full**. Do NOT truncate, do NOT use placeholders like '// rest of the code here' or '// ...', and do NOT cut off mid-code. Provide every single line required to make the code fully functional.
 - Use proper code blocks (triple backticks with language specifier) to format code clearly.
-- You ARE able to generate and create images when requested.`;
+- You ARE able to generate and create images when requested.${(typeof isThinkingEnabled !== "undefined" && !isThinkingEnabled) ? '\n- অত্যন্ত জরুরি (Thinking OFF): ব্যবহারকারী চিন্তাভাবনা মোড বন্ধ রেখেছেন। উত্তরের শুরুতে বা মাঝে কোনো <think> ট্যাগ বা ভেতরের ভাবনার খসড়া দেবেন না। সরাসরি এবং অবিলম্বে চূড়ান্ত উত্তর দিন।' : ''}`;
     }
 
     const SYSTEM_PROMPT = buildSystemPrompt("Alora Go", true, true);
@@ -5286,6 +5313,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     let isWebSearchEnabled = false;
     let isImageGenEnabled = false;
+    let isThinkingEnabled = localStorage.getItem("alokpoth_thinking_enabled") === "true";
     let currentAbortController = null;
 
     function escapeHtml(str) {
@@ -8252,6 +8280,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
         webSearchOff: "ওয়েব সার্চ: বন্ধ",
         imageGenOn: "ছবি তৈরি: চালু",
         imageGenOff: "ছবি তৈরি: বন্ধ",
+        thinkingOn: "চিন্তাভাবনা: চালু",
+        thinkingOff: "চিন্তাভাবনা: বন্ধ",
+        thinkingEnabledToast: "চিন্তাভাবনা মোড চালু হয়েছে",
+        thinkingDisabledToast: "চিন্তাভাবনা মোড বন্ধ করা হয়েছে",
         footerDisclaimer: "Alora AI ভুল করতে পারে। গুরুত্বপূর্ণ তথ্যাদি যাচাই করে নিন।",
         dropOverlayTitle: "ফাইল বা ছবি এখানে ড্রপ করুন",
         dropOverlaySub: "ছবি, পিডিএফ বা টেক্সট ফাইল সরাসরি যুক্ত হবে",
@@ -8399,6 +8431,10 @@ Capabilities & Code Generation Instructions (CRITICAL):
         webSearchOff: "Web Search: OFF",
         imageGenOn: "Image Generation: ON",
         imageGenOff: "Image Generation: OFF",
+        thinkingOn: "Thinking: ON",
+        thinkingOff: "Thinking: OFF",
+        thinkingEnabledToast: "Thinking mode enabled",
+        thinkingDisabledToast: "Thinking mode disabled",
         footerDisclaimer: "Alora can make mistakes. Please verify important info.",
         dropOverlayTitle: "Drop files or images here",
         dropOverlaySub: "Images, PDFs, and code files will be attached instantly",
@@ -8603,6 +8639,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
       const imgGenSpan = document.getElementById("imageGenText");
       if (imgGenSpan) imgGenSpan.textContent = isImageGenEnabled ? dict.imageGenOn : dict.imageGenOff;
+
+      const thinkingSpan = document.getElementById("thinkingText");
+      if (thinkingSpan) thinkingSpan.textContent = isThinkingEnabled ? dict.thinkingOn : dict.thinkingOff;
 
       const micBtnEl = document.getElementById("micBtn");
       if (micBtnEl && !isSpeechRecording) {
@@ -10013,6 +10052,39 @@ Capabilities & Code Generation Instructions (CRITICAL):
       updateAttachBtnActiveState(); closeAttachMenu();
     });
 
+    const attachThinkingOption = document.getElementById("attachThinkingOption");
+    const thinkingText = document.getElementById("thinkingText");
+
+    function updateThinkingUI() {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      if (thinkingText) {
+        thinkingText.textContent = isThinkingEnabled ? (isEn ? "Thinking: ON" : "চিন্তাভাবনা: চালু") : (isEn ? "Thinking: OFF" : "চিন্তাভাবনা: বন্ধ");
+        thinkingText.style.color = isThinkingEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      }
+      if (attachThinkingOption) {
+        attachThinkingOption.style.color = isThinkingEnabled ? "var(--accent-color)" : "var(--text-main)";
+        const svg = attachThinkingOption.querySelector('svg');
+        if (svg) svg.style.stroke = isThinkingEnabled ? "var(--accent-color)" : "var(--text-sub)";
+      }
+    }
+    updateThinkingUI();
+
+    if (attachThinkingOption) {
+      attachThinkingOption.addEventListener("click", () => {
+        isThinkingEnabled = !isThinkingEnabled;
+        try { localStorage.setItem("alokpoth_thinking_enabled", isThinkingEnabled ? "true" : "false"); } catch(e) {}
+        updateThinkingUI();
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        showToast(
+          isThinkingEnabled 
+            ? (isEn ? "Thinking mode enabled" : "চিন্তাভাবনা মোড চালু হয়েছে") 
+            : (isEn ? "Thinking mode disabled" : "চিন্তাভাবনা মোড বন্ধ করা হয়েছে"),
+          "success"
+        );
+        closeAttachMenu();
+      });
+    }
+
     document.addEventListener("click", (e) => { if (!attachMenuWrap.contains(e.target)) closeAttachMenu(); });
 
     function fileToBase64(file) {
@@ -10495,12 +10567,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
             finalContent = rawText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "");
           }
 
-          if (finalReasoning) {
+          if (isThinkingEnabled && finalReasoning) {
              const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
              const thinkTitle = isEn ? "Thinking completed" : "চিন্তাভাবনা সমাপ্ত";
              html += `<details class="thought-block">
                <summary>
-                 <span class="thought-bulb-icon">💡</span>
+                 <span class="thought-bulb-icon">
+                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                 </span>
                  <span>${thinkTitle}</span>
                  <svg class="thought-chevron" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
                </summary>
@@ -11327,7 +11401,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         response = await fetch(`${API_BASE}/chat/completions`, {
           method: "POST",
           headers,
-          body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true }),
+          body: JSON.stringify({ model: modelId, messages: formattedHistory, stream: true, thinking: isThinkingEnabled }),
           signal: currentAbortController.signal
         });
       } catch (fetchErr) {
@@ -12028,12 +12102,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
            const finalReasoning = renderedReasoning + (renderedReasoning && extracted.extractedReasoning ? "\n\n" : "") + extracted.extractedReasoning;
            const finalContent = extracted.cleanContent;
 
-           if (finalReasoning) {
+           if (isThinkingEnabled && finalReasoning) {
              const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
              const thinkTitle = !apiFinished && !finalContent ? (isEn ? "Thinking..." : "চিন্তা করা হচ্ছে...") : (isEn ? "Thinking completed" : "চিন্তাভাবনা সমাপ্ত");
              html += `<details class="thought-block" ${!apiFinished && !finalContent ? 'open' : ''}>
                <summary>
-                 <span class="thought-bulb-icon">💡</span>
+                 <span class="thought-bulb-icon ${(!apiFinished && !finalContent) ? 'thinking-pulse' : ''}">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                </span>
                  <span>${thinkTitle}</span>
                  <svg class="thought-chevron" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
                </summary>
@@ -12211,7 +12287,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             const extracted = extractThoughts(renderedContent || "");
             const combinedReasoning = (renderedReasoning || "") + ((renderedReasoning && extracted.extractedReasoning) ? "\n\n" : "") + (extracted.extractedReasoning || "");
             let finalSavedContent = extracted.cleanContent || "";
-            if (combinedReasoning) {
+            if (isThinkingEnabled && combinedReasoning) {
               finalSavedContent = `<think>\n${combinedReasoning}\n</think>\n\n` + finalSavedContent;
             }
             if (!finalSavedContent && combinedReasoning) finalSavedContent = `<think>\n${combinedReasoning}\n</think>`;
