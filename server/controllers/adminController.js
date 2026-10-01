@@ -1063,7 +1063,10 @@ const updateModel = async (req, res) => {
     }
 
     // 3. ALWAYS update Supabase __models_metadata__ and local memoryStore
-    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache, getApiKeyFromSupabase, removeDeletedModelId } = require('../../utils/getModelConfig');
+    if (typeof removeDeletedModelId === 'function') {
+      await removeDeletedModelId(modelId);
+    }
     let models = await getPersistedModels();
     models = [...models];
     let model = models.find(m => m.id === modelId || m.model_id === modelId || (m.id && decodeURIComponent(m.id) === modelId));
@@ -1173,7 +1176,10 @@ const addModel = async (req, res) => {
       await upsertApiKeyToSupabase(cleanModelId, api_key.trim());
     }
 
-    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache } = require('../../utils/getModelConfig');
+    const { getPersistedModels, savePersistedModels, invalidateModelsCache, invalidateModelKeyCache, removeDeletedModelId } = require('../../utils/getModelConfig');
+    if (typeof removeDeletedModelId === 'function') {
+      await removeDeletedModelId(cleanModelId);
+    }
     let models = await getPersistedModels();
     models = [...models];
 

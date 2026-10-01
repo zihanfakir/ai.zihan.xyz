@@ -189,6 +189,37 @@ async function addDeletedModelId(modelId) {
   invalidateModelsCache();
 }
 
+async function removeDeletedModelId(modelId) {
+  if (!modelId) return;
+  const cleanId = String(modelId).toLowerCase().trim();
+  const set = await getDeletedModelIds();
+  set.delete(cleanId);
+  try {
+    const decoded = decodeURIComponent(modelId).toLowerCase().trim();
+    if (decoded) set.delete(decoded);
+  } catch (e) {}
+
+  if (!Array.isArray(memoryStore.deletedModelIds)) {
+    memoryStore.deletedModelIds = [];
+  }
+  const list = Array.from(set);
+  memoryStore.deletedModelIds = list;
+  debouncedSave();
+
+  if (supabase) {
+    try {
+      await supabase
+        .from('api_keys')
+        .upsert(
+          { model_id: '__deleted_models__', api_key: JSON.stringify(list), updated_at: new Date().toISOString() },
+          { onConflict: 'model_id' }
+        );
+    } catch (e) {}
+  }
+  invalidateDeletedModelsCache();
+  invalidateModelsCache();
+}
+
 async function getPersistedModels() {
   const now = Date.now();
   if (modelsCache && (now - modelsCacheTs) < 10000) { // 10s cache
@@ -962,6 +993,7 @@ module.exports = {
   autoPurgeOrphanedDatabaseCaches,
   getDeletedModelIds,
   addDeletedModelId,
+  removeDeletedModelId,
   invalidateDeletedModelsCache
 };
 
