@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Alo AI</string>
+    <string name="app_name">Alora</string>
     <string name="error_offline_title">ইন্টারনেট সংযোগ নেই</string>
     <string name="error_offline_desc">অনুগ্রহ করে আপনার ইন্টারনেট বা Wi-Fi কানেকশন চেক করে আবার চেষ্টা করুন।</string>
     <string name="retry_button">আবার চেষ্টা করুন</string>

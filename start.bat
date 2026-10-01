@@ -1,6 +1,6 @@
 @echo off
-title Alokpoth AI Server
-echo Starting Alokpoth AI Server...
+title Alora AI Server
+echo Starting Alora AI Server...
 cd /d "%~dp0"
 cd server
 

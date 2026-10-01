@@ -36,7 +36,7 @@ router.get('/models', async (req, res) => {
       return {
         id: m.id || m.model_id,
         name: cleanName,
-        provider: "Alokpoth AI",
+        provider: "Alora",
         type: m.type,
         premium: !!m.premium,
         efficient: !!m.efficient,

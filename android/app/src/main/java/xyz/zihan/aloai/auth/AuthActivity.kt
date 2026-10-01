@@ -132,7 +132,7 @@ fun LoginScreen(onLoginSuccess: (AuthResponse) -> Unit, onNavigateToRegister: ()
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Alokpoth AI",
+            text = "Alora AI",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -249,7 +249,7 @@ fun RegisterScreen(onRegisterSuccess: (AuthResponse) -> Unit, onNavigateToLogin:
             color = Color.White
         )
         Text(
-            text = "Alokpoth AI-তে স্বাগতম",
+            text = "Alora AI-তে স্বাগতম",
             fontSize = 14.sp,
             color = Color(0xFF94A3B8),
             modifier = Modifier.padding(top = 4.dp, bottom = 28.dp)

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Alokpoth</string>
+	<string>Alora</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,11 +23,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Alokpoth needs camera access to capture and analyze images in your conversations.</string>
+	<string>Alora needs camera access to capture and analyze images in your conversations.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Alokpoth needs microphone access for voice input and speech recognition.</string>
+	<string>Alora needs microphone access for voice input and speech recognition.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Alokpoth needs access to your photo library to attach photos in chat.</string>
+	<string>Alora needs access to your photo library to attach photos in chat.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

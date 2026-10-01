@@ -1,7 +1,7 @@
 {
-  "name": "alokpoth-ai-server",
+  "name": "alora-ai-server",
   "version": "1.0.0",
-  "description": "Secure Backend and API Gateway for Alokpoth AI",
+  "description": "Secure Backend and API Gateway for Alora AI",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

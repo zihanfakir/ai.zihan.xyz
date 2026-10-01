@@ -1055,7 +1055,7 @@ const updateModel = async (req, res) => {
           api_model_3: cleanFbModel2 || '',
           premium: Boolean(premium),
           efficient: Boolean(efficient),
-          provider: 'Alokpoth',
+          provider: 'Alora',
           type: 'custom',
           order: 99
         }).catch(() => {});
@@ -1089,7 +1089,7 @@ const updateModel = async (req, res) => {
         api_model_3: cleanFbModel2 || '',
         premium: Boolean(premium),
         efficient: Boolean(efficient),
-        provider: 'Alokpoth',
+        provider: 'Alora',
         type: 'custom',
         order: models.length + 1
       };
@@ -1211,7 +1211,7 @@ const addModel = async (req, res) => {
           api_model_3: cleanFbModel2,
           premium: Boolean(premium),
           efficient: Boolean(efficient),
-          provider: provider || 'Alokpoth',
+          provider: provider || 'Alora',
           type: type || 'custom',
           order: newOrder
         });
@@ -1236,7 +1236,7 @@ const addModel = async (req, res) => {
       api_model_3: cleanFbModel2,
       premium: Boolean(premium),
       efficient: Boolean(efficient),
-      provider: provider || 'Alokpoth',
+      provider: provider || 'Alora',
       type: type || 'custom',
       order: newOrder
     };

@@ -93,7 +93,7 @@ struct AloWebView: UIViewRepresentable {
 
         // Custom iOS User Agent
         let defaultUA = webView.customUserAgent ?? ""
-        webView.customUserAgent = "\(defaultUA) Alokpoth-iOS/1.1.0 (Native iOS; ProMotion)"
+        webView.customUserAgent = "\(defaultUA) Alora-iOS/1.1.0 (Native iOS; ProMotion)"
 
         context.coordinator.webView = webView
 

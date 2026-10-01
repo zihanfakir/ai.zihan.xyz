@@ -80,7 +80,7 @@ app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', server: 'Alokpoth AI Backend Running', time: new Date() });
+  res.json({ status: 'ok', server: 'Alora AI Backend Running', time: new Date() });
 });
 
 // Public plans and limits info
@@ -177,7 +177,7 @@ process.on('uncaughtException', (err) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`[Alokpoth AI Server] Running on http://localhost:${PORT}`);
+  console.log(`[Alora AI Server] Running on http://localhost:${PORT}`);
   console.log(`[Admin Panel] Open http://localhost:${PORT}/admin.html`);
   console.log(`=================================================`);
 });
