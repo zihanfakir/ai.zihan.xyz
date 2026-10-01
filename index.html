@@ -4177,9 +4177,8 @@
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
   <aside class="sidebar-drawer" id="sidebarDrawer" aria-label="প্রধান মেনু" style="display: flex; flex-direction: column;">
     <div class="drawer-top-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px;">
-      <div style="display: flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em;">
-        <img class="theme-icon" src="logo_icon_white.png" alt="Alora" style="width: 24px; height: 24px; object-fit: contain;">
-        <span>Alora</span>
+      <div style="display: flex; align-items: center; height: 28px;">
+        <img class="theme-wordmark" src="logo_wordmark_white.png" alt="Alora" style="height: 26px; width: auto; object-fit: contain;" onerror="if(!this.src.includes('/logo/'))this.src='logo/logo_wordmark_white.png';">
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <button type="button" id="drawerSearchToggleBtn" aria-label="Search chats" style="background: transparent; border: none; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -4278,9 +4277,8 @@
   <div class="modal-overlay" id="brandMenuOverlay">
     <div class="modal-sheet brand-menu-sheet">
       <div class="modal-header">
-        <span style="display: inline-flex; align-items: center; gap: 8px;">
-          <img class="theme-icon" src="logo_icon_white.png" alt="Alora" style="width: 24px; height: 24px; object-fit: contain;">
-          <span>Alora</span>
+        <span style="display: inline-flex; align-items: center; height: 26px;">
+          <img class="theme-wordmark" src="logo_wordmark_white.png" alt="Alora" style="height: 24px; width: auto; object-fit: contain;" onerror="if(!this.src.includes('/logo/'))this.src='logo/logo_wordmark_white.png';">
         </span>
         <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -5047,7 +5045,7 @@
     
     <div class="chat-inner" id="chatStream">
       <div class="empty-state" id="emptyState">
-        <img class="empty-state-logo theme-icon" src="logo_icon_white.png" alt="Alora Logo">
+        <img class="empty-state-logo theme-icon" src="logo_icon_white.png" alt="Alora Logo" onerror="if(!this.src.includes('/logo/'))this.src='logo/logo_icon_white.png';">
         <div id="heroGreetingText">How can I help you?</div>
       </div>
     </div>
@@ -9579,6 +9577,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       document.querySelectorAll(".theme-icon, .empty-state-logo").forEach(img => {
         if (img && img.tagName === "IMG") {
           img.src = iconSrc;
+          img.onerror = function() {
+            if (!this.dataset.fallbackDone) {
+              this.dataset.fallbackDone = "1";
+              this.src = "logo/" + iconSrc;
+            }
+          };
           if (isLight) {
             img.style.filter = "brightness(0)";
           } else {
@@ -9589,6 +9593,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
       document.querySelectorAll(".theme-wordmark").forEach(img => {
         if (img && img.tagName === "IMG") {
           img.src = wmSrc;
+          img.onerror = function() {
+            if (!this.dataset.fallbackDone) {
+              this.dataset.fallbackDone = "1";
+              this.src = "logo/" + wmSrc;
+            }
+          };
           if (isLight) {
             img.style.filter = "brightness(0)";
           } else {

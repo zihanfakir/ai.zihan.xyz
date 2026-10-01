@@ -118,9 +118,33 @@ app.get('/api/plans', async (req, res) => {
   }
 });
 
-// Serve Frontend, Pages, PWA assets, and APK safely (never expose server directory)
 const ROOT_DIR = path.join(__dirname, '..');
 app.use('/avatars', express.static(path.join(ROOT_DIR, 'avatars')));
+app.use('/logo', express.static(path.join(ROOT_DIR, 'logo')));
+
+// Serve logo images, app icons, and mobile packages safely
+const STATIC_ASSETS = [
+  'logo_icon_white.png', 'logo_icon_black.png',
+  'logo_wordmark_white.png', 'logo_wordmark_black.png',
+  'app_logo.png', 'app_logo_transparent.png', 'app_logo_transparent_black.png',
+  'favicon.png', 'app_logo.svg', 'app_logo_transparent.svg',
+  'Alora.apk', 'Alora.ipa', 'AloAI.apk', 'Alokpoth.ipa'
+];
+
+STATIC_ASSETS.forEach(file => {
+  app.get('/' + file, (req, res) => {
+    const filePath = path.join(ROOT_DIR, file);
+    if (file.endsWith('.apk')) {
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
+    } else if (file.endsWith('.ipa')) {
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
+    }
+    res.sendFile(filePath);
+  });
+});
+
 app.get('/', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
 app.get('/admin.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'admin.html')));
@@ -133,13 +157,6 @@ app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
   res.sendFile(path.join(ROOT_DIR, 'sw.js'));
 });
-app.get('/AloAI.apk', (req, res) => {
-  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-  res.setHeader('Content-Disposition', 'attachment; filename="AloAI.apk"');
-  res.sendFile(path.join(ROOT_DIR, 'AloAI.apk'));
-});
-app.get('/favicon.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'favicon.png')));
-app.get('/app_logo.png', (req, res) => res.sendFile(path.join(ROOT_DIR, 'app_logo.png')));
 
 // Dedicated settings pages
 app.get('/profile.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'profile.html')));
