@@ -6882,15 +6882,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }
     });
 
-    let MODELS = [
-      { id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false, order: 1 },
-      { id: "openai/gpt-oss-120b", name: "Alo Fast", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false, order: 2 },
-      { id: "qwen/qwen3.8-27b", name: "Alo Qwen", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false, order: 3 },
-      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth AI", latency: null, status: "online", type: "vyce", premium: true, efficient: false, order: 4 },
-      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth AI", latency: null, status: "online", type: "vyce", premium: true, efficient: true, order: 5 },
-      { id: "ministral-8b-latest", name: "Alo mini 1", provider: "Alokpoth AI", latency: null, status: "online", type: "custom", premium: false, efficient: false, order: 6 },
-      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth AI", latency: null, status: "online", type: "openrouter", premium: false, efficient: false, order: 7 }
-    ];
+    let MODELS = [];
     try {
       const cachedModelsStr = localStorage.getItem("alokpoth_cached_models");
       if (cachedModelsStr) {
@@ -6898,7 +6890,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
         if (Array.isArray(parsed) && parsed.length > 0) {
           const deadIds = new Set(['hy3', 'mimo-v2.5', 'gemini-1.5-flash', 'llama-3.3-70b-versatile', 'deepseek-r1-distill-llama-70b']);
           const cleaned = parsed.filter(m => m && !deadIds.has(m.id || m.model_id));
-          if (cleaned.length > 0) MODELS = cleaned;
+          MODELS = cleaned;
         }
       }
     } catch(e) { console.error('[Alokpoth]', e); }
@@ -6922,17 +6914,19 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const modelList = document.getElementById("modelList");
 
     let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
-    if (initialSavedModel === 'hy3' || initialSavedModel === 'mimo-v2.5' || initialSavedModel === 'gemini-1.5-flash' || !initialSavedModel) {
-      initialSavedModel = 'gemini-3.6-flash';
-      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) {}
+    if (initialSavedModel === 'hy3' || initialSavedModel === 'mimo-v2.5' || initialSavedModel === 'gemini-1.5-flash') {
+      initialSavedModel = null;
+      try { localStorage.removeItem("alokpoth_selected_model"); } catch(e) {}
     }
     const initialTarget = MODELS.find(m => m.id === initialSavedModel);
     if (!initialTarget || !isModelAccessible(initialTarget)) {
       const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "gemini-3.6-flash");
-      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) { console.error('[Alokpoth]', e); }
+      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : null);
+      if (initialSavedModel) {
+        try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) { console.error('[Alokpoth]', e); }
+      }
     }
-    let selectedModelId = initialSavedModel;
+    let selectedModelId = initialSavedModel || null;
 
     function ensureAccessibleModelSelected() {
       if (typeof MODELS === "undefined" || !Array.isArray(MODELS) || MODELS.length === 0) return;
@@ -6955,9 +6949,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function updateSelectedModelUI() {
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       const current = MODELS.find(m => m.id === selectedModelId);
       if (current && modelTriggerLabel) {
         modelTriggerLabel.textContent = current.name;
+      } else if (modelTriggerLabel) {
+        modelTriggerLabel.textContent = isEn ? "No Model" : "কোনো মডেল নেই";
       }
     }
 
@@ -6966,8 +6963,23 @@ Capabilities & Code Generation Instructions (CRITICAL):
         const res = await fetch(`${API_BASE}/chat/models?_t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
-        if (data.success && Array.isArray(data.models) && data.models.length > 0) {
+        if (data.success && Array.isArray(data.models)) {
           try { localStorage.setItem("alokpoth_cached_models", JSON.stringify(data.models)); } catch(e) { console.error('[Alokpoth]', e); }
+
+          if (data.models.length === 0) {
+            MODELS = [];
+            selectedModelId = null;
+            try { localStorage.removeItem("alokpoth_selected_model"); } catch(e) {}
+            if (modelTriggerLabel) {
+              const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+              modelTriggerLabel.textContent = isEn ? "No Model" : "কোনো মডেল নেই";
+            }
+            renderModelList();
+            updateSelectedModelUI();
+            updateTriggerStatusDot();
+            return;
+          }
+
           const statusMap = new Map();
           MODELS.forEach(m => statusMap.set(m.id, { latency: m.latency, status: m.status }));
 
@@ -6977,7 +6989,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
             return {
               id: m.id,
               name: cleanName,
-              provider: "Alokpoth",
+              provider: m.provider || "Alokpoth",
               type: m.type || "openrouter",
               premium: Boolean(m.premium),
               efficient: Boolean(m.efficient),
@@ -7007,17 +7019,23 @@ Capabilities & Code Generation Instructions (CRITICAL):
             selectedModelId = savedModel;
           } else {
             const firstAvailable = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-            selectedModelId = firstAvailable ? firstAvailable.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
-            try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch(e) { console.error('[Alokpoth]', e); }
+            selectedModelId = firstAvailable ? firstAvailable.id : null;
+            if (selectedModelId) {
+              try { localStorage.setItem("alokpoth_selected_model", selectedModelId); } catch(e) { console.error('[Alokpoth]', e); }
+            }
           }
 
-          const currentModelObj = MODELS.find(m => m.id === selectedModelId) || MODELS[0];
-          if (currentModelObj) {
-            const curLabel = document.getElementById("modelTriggerLabel");
-            if (curLabel) curLabel.textContent = currentModelObj.name;
+          const currentModelObj = MODELS.find(m => m.id === selectedModelId);
+          if (currentModelObj && modelTriggerLabel) {
+            modelTriggerLabel.textContent = currentModelObj.name;
             if (typeof messagesHistory !== "undefined" && messagesHistory.length > 0 && messagesHistory[0].role === "system") {
-              messagesHistory[0].content = buildSystemPrompt(currentModelObj.name, true, true);
+              if (typeof buildSystemPrompt === "function") {
+                messagesHistory[0].content = buildSystemPrompt(currentModelObj.name, true, true);
+              }
             }
+          } else if (modelTriggerLabel) {
+            const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            modelTriggerLabel.textContent = isEn ? "No Model" : "কোনো মডেল নেই";
           }
 
           renderModelList();
@@ -7088,6 +7106,11 @@ Capabilities & Code Generation Instructions (CRITICAL):
       const current = MODELS.find((m) => m.id === selectedModelId);
       const dot = document.getElementById("triggerStatusDot");
       if (dot) {
+        if (!current) {
+          dot.className = "trigger-status-dot status-dot offline";
+          dot.title = (typeof currentLanguage !== "undefined" && currentLanguage === "en") ? "No active model" : "কোনো মডেল সক্রিয় নেই";
+          return;
+        }
         dot.className = `trigger-status-dot status-dot ${current ? current.status : "checking"}`;
         dot.title = current ? statusLabel(current.status) : "";
       }
@@ -7117,8 +7140,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
 
     function renderModelList() {
       modelList.innerHTML = "";
-      if (!MODELS.length) {
-        modelList.innerHTML = `<div style="text-align:center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;">কোনো মডেল পাওয়া যায়নি</div>`;
+      if (!MODELS || !MODELS.length) {
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        modelList.innerHTML = `
+          <div style="text-align: center; padding: 36px 16px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" fill="none" stroke-width="1.5" style="opacity: 0.45;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-top: 4px;">${isEn ? "No AI Models Configured" : "কোনো AI মডেল সক্রিয় নেই"}</div>
+            <div style="font-size: 12px; max-width: 250px; line-height: 1.4;">${isEn ? "No models were found in the Admin panel. Please add models from Admin to start chatting." : "অ্যাডমিন প্যানেলে কোনো মডেল যুক্ত করা হয়নি। চ্যাট শুরু করতে অ্যাডমিন প্যানেল থেকে মডেল যুক্ত করুন।"}</div>
+          </div>`;
         return;
       }
 
@@ -11582,6 +11611,12 @@ Capabilities & Code Generation Instructions (CRITICAL):
         }
         const { textDiv: aiTextElement, copyBtn, regenBtn, ttsBtn, shareBtn, likeBtn, dislikeBtn, moreBtn } = createAIBubble();
         const currentModel = MODELS.find((m) => m.id === selectedModelId);
+        if (!currentModel || !selectedModelId) {
+          const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+          aiTextElement.innerHTML = `<div class="generation-error-note">${isEnNow ? "No AI model is currently active. Please add and configure models from the Admin Panel." : "বর্তমানে কোনো AI মডেল সক্রিয় নেই। অনুগ্রহ করে অ্যাডমিন প্যানেল থেকে মডেল যুক্ত করুন।"}</div>`;
+          resolve();
+          return;
+        }
 
         const userPlan = (typeof getResolvedUserPlan === "function" ? getResolvedUserPlan() : (currentPlan || "Free"));
         let isUserAdmin = false;

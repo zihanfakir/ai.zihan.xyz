@@ -2072,8 +2072,12 @@
     function renderModelsTable(models) {
       const tbody = document.getElementById("modelTableBody");
       if (!tbody) return;
-      currentModelsList = models;
       tbody.innerHTML = "";
+      currentModelsList = models || [];
+      if (!models || models.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 0.88rem;">কোনো AI মডেল যোগ করা নেই। উপরের "+ নতুন AI মডেল যোগ করুন" ফর্ম ব্যবহার করে মডেল যুক্ত করুন।</td></tr>`;
+        return;
+      }
       models.forEach((m, idx) => {
         const mId = m.id || m.model_id;
         const isFirst = idx === 0;
