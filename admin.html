@@ -2634,17 +2634,22 @@
         }
       }
       
-      const res = await authFetch(`${API_BASE}/admin/users/${userId}/plan`, {
-        method: "PUT",
-        body: JSON.stringify({ plan_name, duration_days: duration })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast("ইউজারের প্ল্যান আপডেট হয়েছে!", "success");
-        loadUsers();
-        loadStats();
-      } else {
-        showToast(data.error || "প্ল্যান আপডেট ব্যর্থ হয়েছে", "error");
+      try {
+        const res = await authFetch(`${API_BASE}/admin/users/${userId}/plan`, {
+          method: "PUT",
+          body: JSON.stringify({ plan_name, duration_days: duration })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("ইউজারের প্ল্যান আপডেট হয়েছে!", "success");
+          loadUsers();
+          loadStats();
+        } else {
+          showToast(data.error || "প্ল্যান আপডেট ব্যর্থ হয়েছে", "error");
+          loadUsers();
+        }
+      } catch (err) {
+        showToast("সার্ভার ত্রুটি: প্ল্যান আপডেট করা যায়নি", "error");
         loadUsers();
       }
     }

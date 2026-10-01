@@ -618,8 +618,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       z-index: 9999;
     }
@@ -1765,18 +1765,21 @@
       renderUserData();
     }, 1000);
 
-    // Profile Name Save
+    // Profile Name Save (fallback)
     document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
-      const newName = document.getElementById("editNameInput").value.trim();
+      const editInp = document.getElementById("editNameInput");
+      const newName = editInp ? editInp.value.trim() : "";
       if (!newName) {
         showToast(d.nameEmpty, "error");
         return;
       }
       const saveBtn = document.getElementById("saveNameBtn");
-      saveBtn.disabled = true;
-      saveBtn.textContent = d.savingName;
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = d.savingName;
+      }
 
       try {
         const res = await fetch(`${API_BASE}/auth/profile`, {
@@ -1791,9 +1794,11 @@
         if (res.ok && data.success) {
           const userStr = localStorage.getItem("alokpoth_user");
           if (userStr) {
-            const user = JSON.parse(userStr);
-            user.name = newName;
-            localStorage.setItem("alokpoth_user", JSON.stringify(user));
+            try {
+              const user = JSON.parse(userStr);
+              user.name = newName;
+              localStorage.setItem("alokpoth_user", JSON.stringify(user));
+            } catch(e) { console.error('[Alokpoth]', e); }
           }
           renderUserData();
           closeModal("modalEditProfile");
@@ -1813,6 +1818,7 @@
     document.getElementById("claimRedeemBtn")?.addEventListener("click", async () => {
       const d = I18N_ACCOUNT[currentLanguage] || I18N_ACCOUNT.en;
       const codeInput = document.getElementById("redeemCodeInput");
+      if (!codeInput) return;
       const rawCode = codeInput.value.trim().toUpperCase();
       if (!rawCode) {
         showToast(d.codeEmpty, "error");
