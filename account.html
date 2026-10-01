@@ -239,6 +239,13 @@ body {
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       text-decoration: none !important;
+      overflow: hidden;
+    }
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .profile-name-text {
@@ -1512,7 +1519,17 @@ body {
         if (editNameInp && !editNameInp.value) editNameInp.value = user.name || "";
 
         const avatarEl = document.getElementById("avatarLetter");
-        if (avatarEl) avatarEl.textContent = (userName || userEmail || "U").charAt(0).toUpperCase();
+        if (avatarEl) {
+          const userAvatar = user.avatar || localStorage.getItem("alokpoth_user_avatar");
+          if (userAvatar && userAvatar !== "default") {
+            avatarEl.innerHTML = `<img src="${userAvatar}" alt="Avatar">`;
+            avatarEl.style.background = "none";
+          } else {
+            avatarEl.innerHTML = "";
+            avatarEl.textContent = (userName || userEmail || "U").charAt(0).toUpperCase();
+            avatarEl.style.background = "#27272a";
+          }
+        }
 
         const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
         const isAdmin = (user.role === "admin" || (user.email && adminEmails.includes(user.email.toLowerCase().trim())));

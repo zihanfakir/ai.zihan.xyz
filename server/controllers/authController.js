@@ -528,10 +528,11 @@ const updateProfile = async (req, res) => {
     if (name !== undefined && typeof name !== 'string') return res.status(400).json({ success: false, error: 'অবৈধ নাম' });
     if (avatar !== undefined && typeof avatar !== 'string') return res.status(400).json({ success: false, error: 'অবৈধ প্রোফাইল ছবি' });
     if (avatar && avatar.length > 50000) return res.status(400).json({ success: false, error: 'ছবির সাইজ অতিরিক্ত বড় (সর্বোচ্চ 50KB)' });
-    if (avatar && avatar !== 'default' && !avatar.startsWith('data:image/') && !avatar.startsWith('http://') && !avatar.startsWith('https://')) {
+    const isAvatarPreset = avatar && (avatar.startsWith('avatars/') || avatar.startsWith('/avatars/') || /^avatar_\d+\.svg$/.test(avatar));
+    if (avatar && avatar !== 'default' && !isAvatarPreset && !avatar.startsWith('data:image/') && !avatar.startsWith('http://') && !avatar.startsWith('https://')) {
       return res.status(400).json({ success: false, error: 'অকার্যকর ছবির ফরম্যাট' });
     }
-    if (avatar && avatar.startsWith('data:image/svg+xml')) {
+    if (avatar && !isAvatarPreset && avatar.startsWith('data:image/svg+xml')) {
       return res.status(400).json({ success: false, error: 'SVG ফরম্যাটের ছবি গ্রহণযোগ্য নয়।' });
     }
     const cleanName = name !== undefined ? name.trim().slice(0, 50) : undefined;

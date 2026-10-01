@@ -120,6 +120,7 @@ app.get('/api/plans', async (req, res) => {
 
 // Serve Frontend, Pages, PWA assets, and APK safely (never expose server directory)
 const ROOT_DIR = path.join(__dirname, '..');
+app.use('/avatars', express.static(path.join(ROOT_DIR, 'avatars')));
 app.get('/', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'index.html')));
 app.get('/admin.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'admin.html')));

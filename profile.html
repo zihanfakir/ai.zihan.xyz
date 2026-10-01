@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="bn" data-theme="oled">
+<!DOCTYPE html>
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -159,7 +159,7 @@
     }
 
     .lang-pill-btn {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--bg-card-hover, rgba(128, 128, 128, 0.08));
       border: 1px solid var(--border-card);
       color: var(--text-main);
       font-size: 0.8rem;
@@ -170,7 +170,7 @@
       transition: background 0.15s;
     }
     .lang-pill-btn:active {
-      background: rgba(255, 255, 255, 0.15);
+      opacity: 0.8;
     }
 
     /* Main Container */
@@ -202,8 +202,8 @@
     }
 
     .profile-avatar-giant {
-      width: 84px;
-      height: 84px;
+      width: 88px;
+      height: 88px;
       border-radius: 50%;
       background: linear-gradient(135deg, #2563eb, #38bdf8);
       color: #ffffff;
@@ -212,8 +212,24 @@
       justify-content: center;
       font-size: 2.2rem;
       font-weight: 800;
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+      border: 2px solid var(--border-card);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .profile-avatar-giant img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-name-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .user-email-text {
@@ -239,9 +255,96 @@
       border: 1px solid rgba(59, 130, 246, 0.3);
     }
     .badge-pill.plan {
-      background: rgba(255, 255, 255, 0.08);
-      color: #e4e4e7;
-      border-color: rgba(255, 255, 255, 0.15);
+      background: var(--bg-card-hover, rgba(128, 128, 128, 0.08));
+      color: var(--text-sub);
+      border: 1px solid var(--border-card);
+    }
+
+    /* Avatar Picker Card */
+    .avatar-picker-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .picker-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .picker-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .picker-sub {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 12px;
+      padding-top: 4px;
+    }
+    .avatar-option {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--border-card);
+      background: var(--bg-card-hover, rgba(128, 128, 128, 0.08));
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      overflow: visible;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      outline: none;
+    }
+    .avatar-option:hover {
+      transform: scale(1.08);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    .avatar-option.selected {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+      transform: scale(1.05);
+    }
+    .avatar-option img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .avatar-option.default-initial {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      border-color: transparent;
+    }
+    .avatar-option-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+    }
+    .avatar-option.selected .avatar-option-badge {
+      display: flex;
     }
 
     .form-group {
@@ -259,15 +362,18 @@
     .form-input {
       width: 100%;
       height: 48px;
-      padding: env(safe-area-inset-top, 0px) 16px 0 16px;
-      background: rgba(0, 0, 0, 0.35);
+      padding: 0 16px;
+      background: var(--bg-card-hover, rgba(128, 128, 128, 0.08));
       border: 1px solid var(--border-card);
       border-radius: 12px;
-      color: #ffffff;
+      color: var(--text-main);
       font-size: 0.98rem;
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input::placeholder {
+      color: var(--text-sub);
     }
     .form-input:focus {
       border-color: var(--accent-blue);
@@ -335,6 +441,10 @@
   </style>
 <script>
   (function() {
+    try {
+      var saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+      document.documentElement.setAttribute("data-theme", saved);
+    } catch(e) {}
     if (window.location.pathname.endsWith('.html')) {
       var clean = window.location.pathname.replace(/\.html$/, '');
       if (clean === '/index') clean = '/';
@@ -364,12 +474,21 @@
     <!-- Avatar & Overview Card -->
     <div class="settings-card avatar-section">
       <div class="profile-avatar-giant" id="avatarLetter">Z</div>
-      <div style="font-size: 1.25rem; font-weight: 700; color: #fff;" id="profileDisplayName">User</div>
+      <div class="profile-name-text" id="profileDisplayName">User</div>
       <div class="user-email-text" id="profileEmailDisplay">user@example.com</div>
       <div class="badges-row">
         <span class="badge-pill" id="profileRoleBadge">Member</span>
         <span class="badge-pill plan" id="profilePlanBadge">Free Plan</span>
       </div>
+    </div>
+
+    <!-- Avatar Selection Card -->
+    <div class="settings-card avatar-picker-card">
+      <div class="picker-header">
+        <div class="picker-title" id="avatarPickerTitle">Choose Avatar</div>
+        <div class="picker-sub" id="avatarPickerSub">Select a minimal avatar or use your name initial</div>
+      </div>
+      <div class="avatar-grid" id="avatarGrid"></div>
     </div>
 
     <!-- Edit Profile Form Card -->
@@ -405,16 +524,36 @@
     const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
+    const MINIMAL_AVATARS = [
+      { id: "default", path: "default", name: "Letter Initial", isInitial: true },
+      { id: "avatar_1.svg", path: "avatars/avatar_1.svg", name: "Cosmic Orb" },
+      { id: "avatar_2.svg", path: "avatars/avatar_2.svg", name: "Emerald Star" },
+      { id: "avatar_3.svg", path: "avatars/avatar_3.svg", name: "Geometric Fox" },
+      { id: "avatar_4.svg", path: "avatars/avatar_4.svg", name: "Amethyst Crystal" },
+      { id: "avatar_5.svg", path: "avatars/avatar_5.svg", name: "Ocean Wave" },
+      { id: "avatar_6.svg", path: "avatars/avatar_6.svg", name: "Cyber Astronaut" },
+      { id: "avatar_7.svg", path: "avatars/avatar_7.svg", name: "Minimal Cat" },
+      { id: "avatar_8.svg", path: "avatars/avatar_8.svg", name: "Cute Bot" },
+      { id: "avatar_9.svg", path: "avatars/avatar_9.svg", name: "Phoenix Flame" },
+      { id: "avatar_10.svg", path: "avatars/avatar_10.svg", name: "Zen Leaf" },
+      { id: "avatar_11.svg", path: "avatars/avatar_11.svg", name: "Neon Bolt" },
+      { id: "avatar_12.svg", path: "avatars/avatar_12.svg", name: "Night Moon" }
+    ];
+    let selectedAvatar = "default";
+
     const I18N = {
       bn: {
         back: "সেটিংস",
         pageTitle: "প্রোফাইল পরিবর্তন",
+        avatarTitle: "অবতার নির্বাচন করুন",
+        avatarSub: "একটি মিনিমাল অবতার বা নামের প্রথম অক্ষর বেছে নিন",
+        initialOption: "অক্ষর",
         editNameLabel: "পূর্ণ নাম",
         placeholder: "আপনার পূর্ণ নাম লিখুন",
         saveBtn: "সংরক্ষণ করুন",
         saving: "সংরক্ষণ হচ্ছে...",
         hint: "আপনার নামটি Alokpoth-এর চ্যাট, শেয়ার্ড সেশন ও অ্যাকাউন্টের তথ্যে প্রদর্শিত হবে।",
-        success: "আপনার নাম সফলভাবে আপডেট হয়েছে!",
+        success: "প্রোফাইল সফলভাবে আপডেট হয়েছে!",
         emptyErr: "নাম ফাঁকা রাখা যাবে না",
         serverErr: "সার্ভারের সাথে যোগাযোগ করা যায়নি",
         member: "সদস্য",
@@ -423,12 +562,15 @@
       en: {
         back: "Settings",
         pageTitle: "Edit Profile",
+        avatarTitle: "Choose Avatar",
+        avatarSub: "Select a minimal avatar or use your initial letter",
+        initialOption: "Initial",
         editNameLabel: "Full Name",
         placeholder: "Enter your full name",
         saveBtn: "Save Changes",
         saving: "Saving...",
         hint: "Your name will be visible across chats, shared sessions, and account summaries in Alokpoth.",
-        success: "Your name has been updated successfully!",
+        success: "Profile updated successfully!",
         emptyErr: "Name cannot be empty",
         serverErr: "Could not connect to server",
         member: "Member",
@@ -445,6 +587,56 @@
       setTimeout(() => { el.style.display = "none"; }, 3000);
     }
 
+    function updateAvatarDisplay(avatarPath, name) {
+      const avatarEl = document.getElementById("avatarLetter");
+      if (!avatarEl) return;
+      const initial = (name || "U").trim().charAt(0).toUpperCase() || "U";
+      if (avatarPath && avatarPath !== "default") {
+        avatarEl.innerHTML = `<img src="${avatarPath}" alt="Avatar">`;
+        avatarEl.style.background = "none";
+      } else {
+        avatarEl.innerHTML = '';
+        avatarEl.textContent = initial;
+        avatarEl.style.background = "linear-gradient(135deg, #2563eb, #38bdf8)";
+      }
+    }
+
+    function renderAvatarGrid(currentInitial = "U") {
+      const grid = document.getElementById("avatarGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      MINIMAL_AVATARS.forEach(item => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `avatar-option ${item.isInitial ? 'default-initial' : ''} ${selectedAvatar === item.path ? 'selected' : ''}`;
+        btn.dataset.avatar = item.path;
+        btn.title = item.name;
+
+        if (item.isInitial) {
+          btn.innerHTML = `<span class="initial-letter-text">${currentInitial}</span>
+            <span class="avatar-option-badge">
+              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>`;
+        } else {
+          btn.innerHTML = `<img src="${item.path}" alt="${item.name}" loading="lazy">
+            <span class="avatar-option-badge">
+              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>`;
+        }
+
+        btn.addEventListener("click", () => {
+          selectedAvatar = item.path;
+          document.querySelectorAll(".avatar-option").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          const nameInput = document.getElementById("editNameInput");
+          const curName = (nameInput && nameInput.value.trim()) || document.getElementById("profileDisplayName")?.textContent || "U";
+          updateAvatarDisplay(selectedAvatar, curName);
+        });
+
+        grid.appendChild(btn);
+      });
+    }
+
     function applyI18n() {
       const isEn = (currentLanguage === "en");
       const d = I18N[currentLanguage] || I18N.en;
@@ -452,6 +644,10 @@
       document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
       document.getElementById("backText").textContent = d.back;
       document.getElementById("pageTitle").textContent = d.pageTitle;
+      const avatarTitleEl = document.getElementById("avatarPickerTitle");
+      if (avatarTitleEl) avatarTitleEl.textContent = d.avatarTitle;
+      const avatarSubEl = document.getElementById("avatarPickerSub");
+      if (avatarSubEl) avatarSubEl.textContent = d.avatarSub;
       document.getElementById("editNameLabel").textContent = d.editNameLabel;
       document.getElementById("editNameInput").placeholder = d.placeholder;
       document.getElementById("saveBtnText").textContent = d.saveBtn;
@@ -467,10 +663,14 @@
         const user = JSON.parse(userStr);
         const name = user.name || (isEn ? "User" : "ব্যবহারকারী");
         const email = user.email || "";
+        const initial = (name || email || "U").trim().charAt(0).toUpperCase() || "U";
 
         document.getElementById("profileDisplayName").textContent = name;
         document.getElementById("profileEmailDisplay").textContent = email;
-        document.getElementById("avatarLetter").textContent = (name || email || "U").charAt(0).toUpperCase();
+
+        selectedAvatar = user.avatar || localStorage.getItem("alokpoth_user_avatar") || "default";
+        updateAvatarDisplay(selectedAvatar, name);
+        renderAvatarGrid(initial);
 
         const editInput = document.getElementById("editNameInput");
         if (editInput && (!editInput.value || forceInputUpdate)) {
@@ -508,6 +708,9 @@
           if (freshUser.name) {
             localStorage.setItem("alokpoth_account_name", freshUser.name);
           }
+          if (freshUser.avatar) {
+            localStorage.setItem("alokpoth_user_avatar", freshUser.avatar);
+          }
           const pName = (freshUser.subscription && freshUser.subscription.plan_name) || freshUser.plan || "Free";
           localStorage.setItem("alokpoth_current_plan", pName);
           renderUserData(false);
@@ -533,6 +736,17 @@
       renderUserData();
     });
 
+    // Live update initial on name input
+    document.getElementById("editNameInput")?.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      const initial = val ? val.charAt(0).toUpperCase() : "U";
+      const initialText = document.querySelector(".initial-letter-text");
+      if (initialText) initialText.textContent = initial;
+      if (selectedAvatar === "default") {
+        updateAvatarDisplay("default", val || "U");
+      }
+    });
+
     // Save profile form
     document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -555,7 +769,7 @@
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ name: newName })
+          body: JSON.stringify({ name: newName, avatar: selectedAvatar })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -565,11 +779,13 @@
             try { u = JSON.parse(userStr); } catch {}
           }
           u.name = newName;
+          u.avatar = selectedAvatar;
           if (data.user) {
             u = { ...u, ...data.user };
           }
           localStorage.setItem("alokpoth_user", JSON.stringify(u));
           localStorage.setItem("alokpoth_account_name", newName);
+          localStorage.setItem("alokpoth_user_avatar", selectedAvatar);
           showToast(d.success, "success");
           renderUserData(true);
         } else {
