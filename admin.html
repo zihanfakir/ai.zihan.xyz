@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,24 +13,13 @@
   <link rel="apple-touch-icon" href="app_logo.png">
   <style>
 
-@keyframes fadeInPage {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-body {
-  animation: fadeInPage 0.25s ease forwards;
-}
-
-
-/* Focus styles for keyboard navigation */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--accent-color, #6c63ff);
-  outline-offset: 2px;
-}
+    :focus {
+      outline: none;
+    }
+    button:focus-visible,
+    a:focus-visible {
+      outline: none;
+    }
 
     :root {
       color-scheme: dark;

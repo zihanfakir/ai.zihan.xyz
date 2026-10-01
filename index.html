@@ -30,24 +30,13 @@
 
   <style>
 
-@keyframes fadeInPage {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-body {
-  animation: fadeInPage 0.25s ease forwards;
-}
-
-
-/* Focus styles for keyboard navigation */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible:not(.chat-textarea) {
-  outline: 2px solid var(--accent-color, #6c63ff);
-  outline-offset: 2px;
-}
+    :focus {
+      outline: none;
+    }
+    button:focus-visible,
+    a:focus-visible {
+      outline: none;
+    }
 
     :root {
       color-scheme: dark;
@@ -2885,15 +2874,20 @@ textarea:focus-visible:not(.chat-textarea) {
     }
     .image-preview-remove:hover { background: #ef4444; }
 
+    #userInput,
+    #userInput:focus,
+    #userInput:focus-visible,
     .chat-textarea,
     .chat-textarea:focus,
     .chat-textarea:focus-visible {
       flex: 1; 
-      background: transparent; 
+      background: transparent !important; 
       border: none !important; 
       color: var(--text-main);
       font-size: 1rem; 
       outline: none !important; 
+      outline-width: 0 !important;
+      -webkit-appearance: none;
       box-shadow: none !important;
       resize: none; 
       max-height: 150px; 
@@ -2902,6 +2896,18 @@ textarea:focus-visible:not(.chat-textarea) {
       padding: 8px 8px;
       margin: 0;
       overflow-y: auto;
+    }
+
+    .input-card button:focus,
+    .input-card button:focus-visible,
+    .action-btn:focus,
+    .action-btn:focus-visible,
+    .native-mic-btn:focus,
+    .native-mic-btn:focus-visible,
+    .native-tool-btn:focus,
+    .native-tool-btn:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     .chat-textarea::-webkit-scrollbar {
@@ -4518,7 +4524,7 @@ textarea:focus-visible:not(.chat-textarea) {
         <div class="settings-subview-content">
           <div class="settings-card">
             <div style="display: flex; align-items: center; gap: 14px;">
-              <div id="subAccountAvatar" style="width: 52px; height: 52px; border-radius: 50%; background: var(--accent-color); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;">অ</div>
+              <div id="subAccountAvatar" style="width: 52px; height: 52px; border-radius: 50%; background: var(--accent-color); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; overflow: hidden; flex-shrink: 0;">অ</div>
               <div style="display: flex; flex-direction: column; gap: 4px;">
                 <span id="subAccountDisplayName" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">অতিথি</span>
                 <span id="subAccountEmailDisplay" style="font-size: 0.85rem; color: var(--text-sub);">লগইন করা নেই</span>
@@ -8656,7 +8662,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (nameInput) nameInput.value = currentName || (userObj && userObj.name) || "";
       if (nameDisplay) nameDisplay.textContent = displayName;
       if (emailDisplay) emailDisplay.textContent = displayEmail;
-      if (avatarEl) avatarEl.textContent = initial;
+      
+      const userAvatar = (userObj && userObj.avatar) || localStorage.getItem("alokpoth_user_avatar");
+      if (avatarEl) {
+        if (token && userAvatar && userAvatar !== "default") {
+          avatarEl.innerHTML = `<img src="${userAvatar}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">`;
+          avatarEl.style.background = "none";
+        } else {
+          avatarEl.innerHTML = "";
+          avatarEl.textContent = initial;
+          avatarEl.style.background = "var(--accent-color)";
+        }
+      }
 
       if (passCard) {
         passCard.style.display = token ? "flex" : "none";
