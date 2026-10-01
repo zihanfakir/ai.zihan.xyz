@@ -34,8 +34,14 @@ async function getApiKeyFromSupabase(modelId) {
 }
 
 const MODEL_ALIASES = {
-  'gemini-1.5-flash': 'gemini-3.5-flash-lite',
-  'alo-pro': 'llama-3.3-70b-versatile'
+  'gemini-1.5-flash': 'gemini-3.6-flash',
+  'gemini-2.5-flash': 'gemini-3.6-flash',
+  'gemini-flash': 'gemini-3.6-flash',
+  'alo-pro': 'openai/gpt-oss-120b',
+  'llama-3.3-70b-versatile': 'openai/gpt-oss-120b',
+  'deepseek-r1-distill-llama-70b': 'qwen/qwen3.8-27b',
+  'hy3': 'openai/gpt-oss-120b',
+  'mimo-v2.5': 'gemini-3.6-flash'
 };
 
 function resolveModelAlias(rawId) {

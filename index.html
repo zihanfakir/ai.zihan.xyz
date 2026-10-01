@@ -6877,14 +6877,23 @@ Capabilities & Code Generation Instructions (CRITICAL):
     });
 
     let MODELS = [
-      { id: "hy3", name: "Alokpoth HY3", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: false },
-      { id: "mimo-v2.5", name: "Alokpoth Swift", provider: "Alokpoth", latency: null, status: "online", type: "bai", premium: false, efficient: true }
+      { id: "gemini-3.6-flash", name: "Alo Flash", provider: "Alokpoth AI", latency: null, status: "online", type: "gemini", premium: false, efficient: false, order: 1 },
+      { id: "openai/gpt-oss-120b", name: "Alo Fast", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false, order: 2 },
+      { id: "qwen/qwen3.8-27b", name: "Alo Qwen", provider: "Alokpoth AI", latency: null, status: "online", type: "groq", premium: false, efficient: false, order: 3 },
+      { id: "claude-sonnet-4-6", name: "Alo Elite", provider: "Alokpoth AI", latency: null, status: "online", type: "vyce", premium: true, efficient: false, order: 4 },
+      { id: "gpt-5.6", name: "Alo Max", provider: "Alokpoth AI", latency: null, status: "online", type: "vyce", premium: true, efficient: true, order: 5 },
+      { id: "ministral-8b-latest", name: "Alo mini 1", provider: "Alokpoth AI", latency: null, status: "online", type: "custom", premium: false, efficient: false, order: 6 },
+      { id: "openrouter/free", name: "Alo Go", provider: "Alokpoth AI", latency: null, status: "online", type: "openrouter", premium: false, efficient: false, order: 7 }
     ];
     try {
       const cachedModelsStr = localStorage.getItem("alokpoth_cached_models");
       if (cachedModelsStr) {
         const parsed = JSON.parse(cachedModelsStr);
-        if (Array.isArray(parsed) && parsed.length > 0) MODELS = parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const deadIds = new Set(['hy3', 'mimo-v2.5', 'gemini-1.5-flash', 'llama-3.3-70b-versatile', 'deepseek-r1-distill-llama-70b']);
+          const cleaned = parsed.filter(m => m && !deadIds.has(m.id || m.model_id));
+          if (cleaned.length > 0) MODELS = cleaned;
+        }
       }
     } catch(e) { console.error('[Alokpoth]', e); }
 
@@ -6907,10 +6916,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
     const modelList = document.getElementById("modelList");
 
     let initialSavedModel = localStorage.getItem("alokpoth_selected_model");
+    if (initialSavedModel === 'hy3' || initialSavedModel === 'mimo-v2.5' || initialSavedModel === 'gemini-1.5-flash' || !initialSavedModel) {
+      initialSavedModel = 'gemini-3.6-flash';
+      try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) {}
+    }
     const initialTarget = MODELS.find(m => m.id === initialSavedModel);
     if (!initialTarget || !isModelAccessible(initialTarget)) {
       const fallback = MODELS.find(m => isModelAccessible(m)) || MODELS[0];
-      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "alo-ai");
+      initialSavedModel = fallback ? fallback.id : (MODELS[0] ? MODELS[0].id : "gemini-3.6-flash");
       try { localStorage.setItem("alokpoth_selected_model", initialSavedModel); } catch(e) { console.error('[Alokpoth]', e); }
     }
     let selectedModelId = initialSavedModel;

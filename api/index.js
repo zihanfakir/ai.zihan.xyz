@@ -50,6 +50,21 @@ app.use((req, res, next) => {
   next();
 });
 
+// Normalize Vercel serverless URLs
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api/[...all].js')) req.url = req.url.replace('/api/[...all].js', '') || '/';
+  else if (req.url.startsWith('/api/[...all]')) req.url = req.url.replace('/api/[...all]', '') || '/';
+  else if (req.url.startsWith('/api/index.js')) req.url = req.url.replace('/api/index.js', '') || '/';
+  else if (req.url.startsWith('/api/index')) req.url = req.url.replace('/api/index', '') || '/';
+
+  if ((req.url === '/' || req.url === '') && req.query && req.query.all) {
+    const subPath = Array.isArray(req.query.all) ? req.query.all.join('/') : req.query.all;
+    req.url = '/' + subPath;
+  }
+  next();
+});
+
+
 // Health check
 const healthHandler = (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
