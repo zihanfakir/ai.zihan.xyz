@@ -12,7 +12,6 @@ Alo AI এখন অ্যান্ড্রয়েডে সরাসরি �
 
 ## Features
 
-- 🤖 **১১টি AI মডেল** — Gemini, Groq, OpenRouter, VyceAI, B.AI সহ বিভিন্ন সেবা
 - 🔐 **সম্পূর্ণ সুরক্ষিত** — কোনো API Key ফ্রন্টএন্ডে নেই
 - 🌐 **Web Search** — লাইভ সার্চ সাপোর্ট
 - 🖼️ **Image Generation** — AI দিয়ে ছবি তৈরি
