@@ -8,7 +8,11 @@
   <script>
     (function() {
       var p = new URLSearchParams(window.location.search).get('theme');
-      var t = p || localStorage.getItem('alokpoth_theme') || localStorage.getItem('alokpoth-theme') || 'oled';
+      var t = p || localStorage.getItem('alokpoth_theme') || localStorage.getItem('alokpoth-theme') || 'system';
+      if (t === 'system') {
+        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        t = isDark ? 'dark' : 'light';
+      }
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
@@ -1273,8 +1277,17 @@
     // Theme sync
     const urlParams = new URLSearchParams(window.location.search);
     const themeFromUrl = urlParams.get("theme");
-    const savedTheme = themeFromUrl || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const savedTheme = themeFromUrl || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    
+    function applyEffectiveTheme(t) {
+      if (t === "system") {
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+      } else {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    }
+    applyEffectiveTheme(savedTheme);
 
     const THEME_META_COLORS = {
       dark: "#09090b",
@@ -1293,22 +1306,22 @@
       }
       meta.setAttribute('content', THEME_META_COLORS[t] || '#09090b');
     }
-    updateThemeMetaColor(savedTheme);
+    updateThemeMetaColor(savedTheme === "system" ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light") : savedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
     if (themeToggleBtn) {
-      const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
+      const themes = ["system", "dark", "light", "oled", "sapphire", "eyecare"];
       themeToggleBtn.addEventListener("click", () => {
-        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        const cur = localStorage.getItem("alokpoth_theme") || "system";
         const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-        document.documentElement.setAttribute("data-theme", next);
+        applyEffectiveTheme(next);
         localStorage.setItem("alokpoth_theme", next);
         localStorage.setItem("alokpoth-theme", next);
-        updateThemeMetaColor(next);
+        updateThemeMetaColor(next === "system" ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light") : next);
         const labels = currentLanguage === "en" ? {
-          dark: "Dark theme", sapphire: "Sapphire theme", oled: "OLED Black theme", eyecare: "Eye Care theme", light: "Light theme"
+          system: "System Default (Auto)", dark: "Dark theme", sapphire: "Sapphire theme", oled: "OLED Black theme", eyecare: "Eye Care theme", light: "Light theme"
         } : {
-          dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম"
+          system: "সিস্টেম থিম (অটো)", dark: "ডার্ক থিম", sapphire: "স্যাফায়ার থিম", oled: "OLED ব্ল্যাক থিম", eyecare: "আই কেয়ার থিম", light: "লাইট থিম"
         };
         showToast(currentLanguage === "en" ? `${labels[next] || next} activated` : `${labels[next] || next} সক্রিয় করা হয়েছে`);
       });

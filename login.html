@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -835,8 +835,16 @@
     }
 
     // Theme sync
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const rawSavedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    function applyEffectiveTheme(t) {
+      if (t === "system") {
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+      } else {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    }
+    applyEffectiveTheme(rawSavedTheme);
 
     const THEME_META_COLORS = {
       dark: "#09090b",
@@ -855,18 +863,20 @@
       }
       meta.setAttribute('content', THEME_META_COLORS[t] || '#09090b');
     }
-    updateThemeMetaColor(savedTheme);
+    updateThemeMetaColor(rawSavedTheme === "system" ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light") : rawSavedTheme);
 
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    const themes = ["dark", "sapphire", "oled", "eyecare", "light"];
-    themeToggleBtn.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("alokpoth_theme", next);
-      localStorage.setItem("alokpoth-theme", next);
-      updateThemeMetaColor(next);
-    });
+    const themes = ["system", "dark", "light", "oled", "sapphire", "eyecare"];
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener("click", () => {
+        const cur = localStorage.getItem("alokpoth_theme") || "system";
+        const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+        applyEffectiveTheme(next);
+        localStorage.setItem("alokpoth_theme", next);
+        localStorage.setItem("alokpoth-theme", next);
+        updateThemeMetaColor(next === "system" ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light") : next);
+      });
+    }
 
     // Smart API Base
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';

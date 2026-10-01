@@ -20,8 +20,18 @@
   <script>
     (function() {
       try {
-        const saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme");
-        if (saved && saved !== "dark") {
+        const saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute("data-theme-mode", saved);
+        if (saved === "system") {
+          if (!prefersDark) {
+            document.documentElement.setAttribute("data-theme", "light");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+        } else if (saved === "dark") {
+          document.documentElement.removeAttribute("data-theme");
+        } else {
           document.documentElement.setAttribute("data-theme", saved);
         }
       } catch(e) { console.error('[Alokpoth]', e); }
@@ -447,17 +457,19 @@
       stroke-linejoin: round;
     }
 
-    /* 4-State Theme Icons */
+    /* 5-State Theme Icons */
+    .brand-menu-item .icon-system,
     .brand-menu-item .icon-sun, 
     .brand-menu-item .icon-moon, 
     .brand-menu-item .icon-oled, 
     .brand-menu-item .icon-eyecare { display: none; }
     
-    :root:not([data-theme="light"]):not([data-theme="oled"]):not([data-theme="eyecare"]) .brand-menu-item .icon-moon,
-    :root[data-theme="sapphire"] .brand-menu-item .icon-moon { display: block; }
-    :root[data-theme="light"] .brand-menu-item .icon-sun { display: block; }
-    :root[data-theme="oled"] .brand-menu-item .icon-oled { display: block; }
-    :root[data-theme="eyecare"] .brand-menu-item .icon-eyecare { display: block; }
+    :root[data-theme-mode="system"] .brand-menu-item .icon-system { display: block !important; }
+    :root:not([data-theme-mode="system"]):not([data-theme="light"]):not([data-theme="oled"]):not([data-theme="eyecare"]) .brand-menu-item .icon-moon,
+    :root:not([data-theme-mode="system"])[data-theme="sapphire"] .brand-menu-item .icon-moon { display: block; }
+    :root:not([data-theme-mode="system"])[data-theme="light"] .brand-menu-item .icon-sun { display: block; }
+    :root:not([data-theme-mode="system"])[data-theme="oled"] .brand-menu-item .icon-oled { display: block; }
+    :root:not([data-theme-mode="system"])[data-theme="eyecare"] .brand-menu-item .icon-eyecare { display: block; }
 
     .model-selector {
       font-size: 0.95rem;
@@ -4298,11 +4310,12 @@
         </button>
         <button class="brand-menu-item sheen-surface" id="themeToggleBtn" type="button">
           <span class="brand-menu-item-left">
+            <svg class="icon-system" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
             <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
             <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
             <svg class="icon-oled" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"/></svg>
             <svg class="icon-eyecare" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span class="theme-label-text">ডার্ক থিম</span>
+            <span class="theme-label-text">সিস্টেম থিম</span>
           </span>
         </button>
         <button class="brand-menu-item sheen-surface" id="accountMenuBtn" type="button">
@@ -4633,24 +4646,28 @@
         </div>
         <div class="settings-subview-content">
           <div class="settings-group">
-            <button class="settings-select-item" id="themeOptDark" type="button" onclick="selectAppTheme('dark')">
-              <span data-i18n="themeDark">ডার্ক (Dark - ডিফল্ট)</span>
+            <button class="settings-select-item" id="themeOptSystem" type="button" onclick="selectAppTheme('system')">
+              <span data-i18n="themeSystem">সিস্টেম থিম (ডিভাইস অনুযায়ী)</span>
               <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            <button class="settings-select-item" id="themeOptSapphire" type="button" onclick="selectAppTheme('sapphire')">
-              <span data-i18n="themeSapphire">স্যাফায়ার (Sapphire - নেভি ব্লু)</span>
+            <button class="settings-select-item" id="themeOptDark" type="button" onclick="selectAppTheme('dark')">
+              <span data-i18n="themeDark">ডার্ক (Dark - স্ট্যান্ডার্ড)</span>
               <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
             <button class="settings-select-item" id="themeOptLight" type="button" onclick="selectAppTheme('light')">
               <span data-i18n="themeLight">লাইট (Light)</span>
               <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            <button class="settings-select-item" id="themeOptEyecare" type="button" onclick="selectAppTheme('eyecare')">
-              <span data-i18n="themeEyecare">আইকেয়ার (Eye Care - সেপিয়া)</span>
-              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
             <button class="settings-select-item" id="themeOptOled" type="button" onclick="selectAppTheme('oled')">
               <span data-i18n="themeOled">ওলেড (OLED - খাঁটি কালো)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptSapphire" type="button" onclick="selectAppTheme('sapphire')">
+              <span data-i18n="themeSapphire">স্যাফায়ার (Sapphire - নেভি ব্লু)</span>
+              <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="settings-select-item" id="themeOptEyecare" type="button" onclick="selectAppTheme('eyecare')">
+              <span data-i18n="themeEyecare">আইকেয়ার (Eye Care - সেপিয়া)</span>
               <svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
           </div>
@@ -8290,7 +8307,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         redeemBtn: "কোড রিডিম করুন",
         redeemPromoTitle: "প্রোমো কোড ব্যবহার করুন",
         redeemHint: "যেকোনো প্রোমো কোড বা ভাউচার কোড ব্যবহার করে আপনার একাউন্ট প্রো বা ম্যাক্স প্ল্যানে তাৎক্ষণিক আপগ্রেড করতে পারবেন।",
-        themeDark: "ডার্ক (Dark - ডিফল্ট)",
+        themeSystem: "সিস্টেম থিম (ডিভাইস অনুযায়ী)",
+        themeDark: "ডার্ক (Dark - স্ট্যান্ডার্ড)",
         themeSapphire: "স্যাফায়ার (Sapphire - নেভি ব্লু)",
         themeLight: "লাইট (Light)",
         themeEyecare: "আইকেয়ার (Eye Care - সেপিয়া)",
@@ -8436,7 +8454,8 @@ Capabilities & Code Generation Instructions (CRITICAL):
         redeemBtn: "Claim Code",
         redeemPromoTitle: "Use Promo Code",
         redeemHint: "Upgrade your account instantly with any voucher or promo code.",
-        themeDark: "Dark (Default)",
+        themeSystem: "System Default (Auto)",
+        themeDark: "Dark (Standard)",
         themeSapphire: "Sapphire (Deep Navy Blue)",
         themeLight: "Light",
         themeEyecare: "Eye Care (Sepia)",
@@ -8648,8 +8667,9 @@ Capabilities & Code Generation Instructions (CRITICAL):
     window.selectAppTheme = selectAppTheme;
 
     function refreshThemeSubpageUI() {
-      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const currentMode = localStorage.getItem("alokpoth_theme") || "system";
       const themeItems = {
+        system: document.getElementById("themeOptSystem"),
         dark: document.getElementById("themeOptDark"),
         sapphire: document.getElementById("themeOptSapphire"),
         light: document.getElementById("themeOptLight"),
@@ -8658,14 +8678,14 @@ Capabilities & Code Generation Instructions (CRITICAL):
       };
       Object.keys(themeItems).forEach(t => {
         if (themeItems[t]) {
-          themeItems[t].classList.toggle("selected", current === t);
+          themeItems[t].classList.toggle("selected", currentMode === t);
         }
       });
       const themeNameBadge = document.getElementById("setMenuThemeName");
       if (themeNameBadge) {
-        const namesBn = { dark: "ডার্ক", light: "লাইট", eyecare: "আইকেয়ার", oled: "ওলেড", sapphire: "স্যাফায়ার" };
-        const namesEn = { dark: "Dark", light: "Light", eyecare: "Eye Care", oled: "OLED", sapphire: "Sapphire" };
-        themeNameBadge.textContent = currentLanguage === 'en' ? (namesEn[current] || current) : (namesBn[current] || current);
+        const namesBn = { system: "সিস্টেম", dark: "ডার্ক", light: "লাইট", eyecare: "আইকেয়ার", oled: "ওলেড", sapphire: "স্যাফায়ার" };
+        const namesEn = { system: "System", dark: "Dark", light: "Light", eyecare: "Eye Care", oled: "OLED", sapphire: "Sapphire" };
+        themeNameBadge.textContent = currentLanguage === 'en' ? (namesEn[currentMode] || currentMode) : (namesBn[currentMode] || currentMode);
       }
     }
     window.refreshThemeSubpageUI = refreshThemeSubpageUI;
@@ -9513,29 +9533,40 @@ Capabilities & Code Generation Instructions (CRITICAL):
       }, 2200);
     }
 
-    const AVAILABLE_THEMES = ["dark", "sapphire", "oled", "eyecare", "light"];
+    const AVAILABLE_THEMES = ["system", "dark", "light", "oled", "sapphire", "eyecare"];
     const THEME_NAMES = {
-      dark: "ডার্ক থিম",
-      sapphire: "স্যাফায়ার থিম",
+      system: "সিস্টেম থিম (অটো)",
+      dark: "ডার্ক থিম (স্ট্যান্ডার্ড)",
+      light: "লাইট থিম",
       oled: "সেভিং / ওলেড থিম",
-      eyecare: "আই কেয়ার থিম",
-      light: "লাইট থিম"
+      sapphire: "স্যাফায়ার থিম",
+      eyecare: "আই কেয়ার থিম"
     };
     const THEME_META_COLORS = {
+      system: "#09090b",
       dark: "#09090b",
-      sapphire: "#070d19",
+      light: "#f9fafb",
       oled: "#000000",
-      eyecare: "#f5eedc",
-      light: "#f9fafb"
+      sapphire: "#070d19",
+      eyecare: "#f5eedc"
     };
 
-    function updateThemeLabel(theme) {
-      if (!theme) theme = document.documentElement.getAttribute("data-theme") || "dark";
+    function getDeviceColorScheme() {
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+
+    function updateThemeLabel(themeMode) {
+      if (!themeMode) themeMode = localStorage.getItem("alokpoth_theme") || "system";
       const btn = document.getElementById("themeToggleBtn");
       if (!btn) return;
       const label = btn.querySelector(".theme-label-text");
       if (label) {
-        label.textContent = THEME_NAMES[theme] || "ডার্ক থিম";
+        if (themeMode === 'system') {
+          const isDark = getDeviceColorScheme() === 'dark';
+          label.textContent = `সিস্টেম (${isDark ? 'ডার্ক' : 'লাইট'})`;
+        } else {
+          label.textContent = THEME_NAMES[themeMode] || "ডার্ক থিম";
+        }
       }
     }
 
@@ -9568,12 +9599,18 @@ Capabilities & Code Generation Instructions (CRITICAL):
     }
 
     function setTheme(theme, notify = false) {
-      if (!AVAILABLE_THEMES.includes(theme)) theme = "dark";
+      if (!AVAILABLE_THEMES.includes(theme)) theme = "system";
       
-      if (theme === "dark") {
+      let effectiveTheme = theme;
+      if (theme === "system") {
+        effectiveTheme = getDeviceColorScheme();
+      }
+
+      document.documentElement.setAttribute("data-theme-mode", theme);
+      if (effectiveTheme === "dark") {
         document.documentElement.removeAttribute("data-theme");
       } else {
-        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-theme", effectiveTheme);
       }
       
       try {
@@ -9582,7 +9619,7 @@ Capabilities & Code Generation Instructions (CRITICAL):
       } catch(e) { console.error('[Alokpoth]', e); }
 
       updateThemeLabel(theme);
-      updateThemeLogos(theme);
+      updateThemeLogos(effectiveTheme);
 
       let metaTag = document.querySelector('meta[name="theme-color"]');
       if (!metaTag) {
@@ -9590,17 +9627,26 @@ Capabilities & Code Generation Instructions (CRITICAL):
         metaTag.name = "theme-color";
         document.head.appendChild(metaTag);
       }
-      metaTag.setAttribute("content", THEME_META_COLORS[theme] || "#09090b");
+      const metaColor = (theme === "system")
+        ? (effectiveTheme === "dark" ? THEME_META_COLORS.dark : THEME_META_COLORS.light)
+        : (THEME_META_COLORS[theme] || "#09090b");
+      metaTag.setAttribute("content", metaColor);
 
       if (notify && typeof showToast === "function") {
-        showToast(`${THEME_NAMES[theme]} সক্রিয় করা হয়েছে`, "info");
+        const msg = (theme === "system")
+          ? (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "System theme enabled (auto)" : "সিস্টেম থিম সক্রিয় (ডিভাইস অনুযায়ী)")
+          : `${THEME_NAMES[theme]} সক্রিয় করা হয়েছে`;
+        showToast(msg, "info");
       }
 
+      if (typeof refreshThemeSubpageUI === "function") {
+        refreshThemeSubpageUI();
+      }
     }
 
     function cycleTheme(notify = true) {
-      const current = document.documentElement.getAttribute("data-theme") || "dark";
-      const currentIndex = AVAILABLE_THEMES.indexOf(current);
+      const currentMode = localStorage.getItem("alokpoth_theme") || "system";
+      const currentIndex = AVAILABLE_THEMES.indexOf(currentMode);
       const nextIndex = (currentIndex + 1) % AVAILABLE_THEMES.length;
       const nextTheme = AVAILABLE_THEMES[nextIndex];
       setTheme(nextTheme, notify);
@@ -9613,8 +9659,24 @@ Capabilities & Code Generation Instructions (CRITICAL):
       themeToggleBtn.addEventListener("click", () => cycleTheme(true));
     }
 
+    // Dynamic system preference change listener
+    if (window.matchMedia) {
+      const sysThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      const onSysThemeChange = () => {
+        const saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+        if (saved === "system") {
+          setTheme("system", false);
+        }
+      };
+      if (typeof sysThemeMedia.addEventListener === 'function') {
+        sysThemeMedia.addEventListener('change', onSysThemeChange);
+      } else if (typeof sysThemeMedia.addListener === 'function') {
+        sysThemeMedia.addListener(onSysThemeChange);
+      }
+    }
+
     // Initial theme & language sync
-    const initialTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
+    const initialTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
     setTheme(initialTheme, false);
     if (typeof applyI18n === "function") applyI18n();
     if (typeof refreshLanguageSubpageUI === "function") refreshLanguageSubpageUI();

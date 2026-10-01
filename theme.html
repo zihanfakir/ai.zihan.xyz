@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-theme="oled">
 <head>
   <meta charset="UTF-8">
@@ -222,6 +222,7 @@
       flex-shrink: 0;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
+    .theme-swatch.system { background: linear-gradient(135deg, #18181b 50%, #f4f4f5 50%); border-color: #3b82f6; }
     .theme-swatch.dark { background: #18181b; }
     .theme-swatch.oled { background: #000000; border-color: #3f3f46; }
     .theme-swatch.sapphire { background: #070d19; border-color: #38bdf8; }
@@ -322,6 +323,20 @@
 
   <main class="content-container">
     <div class="themes-group">
+      <!-- System Default -->
+      <div class="theme-item" data-theme-id="system">
+        <div class="theme-lead">
+          <div class="theme-swatch system"></div>
+          <div class="theme-info">
+            <span class="theme-name" id="nameSystem">সিস্টেম থিম (ডিভাইস অনুযায়ী)</span>
+            <span class="theme-desc" id="descSystem">মোবাইল বা ডিভাইসের সেটিংস অনুযায়ী স্বয়ংক্রিয়ভাবে পরিবর্তিত হবে</span>
+          </div>
+        </div>
+        <div class="theme-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="row-divider"></div>
+
       <!-- Dark -->
       <div class="theme-item" data-theme-id="dark">
         <div class="theme-lead">
@@ -394,13 +409,24 @@
 
   <script>
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
-    let activeTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
-    document.documentElement.setAttribute("data-theme", activeTheme);
+    let activeTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    
+    function applyEffectiveTheme(themeId) {
+      if (themeId === "system") {
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+      } else {
+        document.documentElement.setAttribute("data-theme", themeId);
+      }
+    }
+    applyEffectiveTheme(activeTheme);
 
     const I18N = {
       bn: {
         back: "সেটিংস",
         pageTitle: "কালার থিম",
+        nameSystem: "সিস্টেম থিম (ডিভাইস অনুযায়ী)",
+        descSystem: "মোবাইল বা ডিভাইসের সেটিংস অনুযায়ী স্বয়ংক্রিয়ভাবে পরিবর্তিত হবে",
         nameDark: "ডার্ক (স্ট্যান্ডার্ড)",
         descDark: "সুষম চারকোল ডার্ক মোড",
         nameOled: "OLED ব্ল্যাক",
@@ -416,6 +442,8 @@
       en: {
         back: "Settings",
         pageTitle: "Color Theme",
+        nameSystem: "System Default (Auto)",
+        descSystem: "Follows your phone or computer appearance automatically",
         nameDark: "Dark (Standard)",
         descDark: "Balanced charcoal night mode",
         nameOled: "OLED Black",
@@ -446,6 +474,8 @@
       document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
       document.getElementById("backText").textContent = d.back;
       document.getElementById("pageTitle").textContent = d.pageTitle;
+      if (document.getElementById("nameSystem")) document.getElementById("nameSystem").textContent = d.nameSystem;
+      if (document.getElementById("descSystem")) document.getElementById("descSystem").textContent = d.descSystem;
       document.getElementById("nameDark").textContent = d.nameDark;
       document.getElementById("descDark").textContent = d.descDark;
       document.getElementById("nameOled").textContent = d.nameOled;
@@ -471,7 +501,7 @@
         const themeId = item.getAttribute("data-theme-id");
         if (!themeId) return;
         activeTheme = themeId;
-        document.documentElement.setAttribute("data-theme", activeTheme);
+        applyEffectiveTheme(activeTheme);
         localStorage.setItem("alokpoth_theme", activeTheme);
         localStorage.setItem("alokpoth-theme", activeTheme);
         syncActiveThemeUI();
@@ -479,6 +509,14 @@
         showToast(d.applied);
       });
     });
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (activeTheme === "system") {
+          applyEffectiveTheme("system");
+        }
+      });
+    }
 
     // Back button navigation
     document.getElementById("backBtn")?.addEventListener("click", (e) => {

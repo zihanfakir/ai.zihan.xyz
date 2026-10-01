@@ -1381,10 +1381,19 @@
     });
 
     // Theme Switch
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    function applyEffectiveTheme(t) {
+      if (t === "system") {
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+      } else {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    }
+    applyEffectiveTheme(savedTheme);
 
     const THEME_NAMES = {
+      system: "System (Auto)",
       dark: "Dark",
       oled: "OLED Black",
       sapphire: "Sapphire",
@@ -1394,7 +1403,7 @@
 
     function updateThemeDisplay(t) {
       const themeValText = document.getElementById("themeValText");
-      if (themeValText) themeValText.textContent = THEME_NAMES[t] || "Dark";
+      if (themeValText) themeValText.textContent = THEME_NAMES[t] || "System (Auto)";
     }
     updateThemeDisplay(savedTheme);
 

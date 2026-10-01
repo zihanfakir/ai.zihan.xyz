@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-theme="oled">
 <head>
   <meta charset="UTF-8">
@@ -669,7 +669,9 @@
 
   <script>
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    const rawSavedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    const isDarkPers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = (rawSavedTheme === "system") ? (isDarkPers ? "dark" : "light") : rawSavedTheme;
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const toneSelect = document.getElementById("toneSelect");

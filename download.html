@@ -1063,7 +1063,9 @@
 
   <script>
     // Theme sync
-    const savedTheme = localStorage.getItem("alokpoth_theme") || "oled";
+    const rawSavedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    const isDarkDl = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = (rawSavedTheme === "system") ? (isDarkDl ? "dark" : "light") : rawSavedTheme;
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     // Language sync

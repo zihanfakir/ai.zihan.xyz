@@ -404,7 +404,9 @@
     }
 
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    const rawSavedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    const isDarkRedeem = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = (rawSavedTheme === "system") ? (isDarkRedeem ? "dark" : "light") : rawSavedTheme;
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const I18N = {

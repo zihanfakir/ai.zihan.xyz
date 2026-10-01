@@ -523,7 +523,11 @@
 <script>
   (function() {
     try {
-      var saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+      var saved = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+      if (saved === "system") {
+        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        saved = isDark ? "dark" : "light";
+      }
       document.documentElement.setAttribute("data-theme", saved);
     } catch(e) {}
     if (window.location.pathname.endsWith('.html')) {
@@ -602,7 +606,9 @@
     }
 
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "bn";
-    const savedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "oled";
+    const rawSavedTheme = localStorage.getItem("alokpoth_theme") || localStorage.getItem("alokpoth-theme") || "system";
+    const isDarkProfile = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = (rawSavedTheme === "system") ? (isDarkProfile ? "dark" : "light") : rawSavedTheme;
     document.documentElement.setAttribute("data-theme", savedTheme);
 
     const MINIMAL_AVATARS = [
