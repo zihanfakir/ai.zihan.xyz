@@ -122,12 +122,14 @@ const ROOT_DIR = path.join(__dirname, '..');
 app.use('/avatars', express.static(path.join(ROOT_DIR, 'avatars')));
 app.use('/logo', express.static(path.join(ROOT_DIR, 'logo')));
 
-// Serve logo images, app icons, and mobile packages safely
+// Serve logo images, app icons, favicons, and mobile packages safely
 const STATIC_ASSETS = [
+  'favicon.ico', 'favicon.svg', 'favicon.png', 'favicon-32x32.png', 'favicon-16x16.png',
+  'apple-touch-icon.png', 'app_logo.png', 'app logo.png',
   'logo_icon_white.png', 'logo_icon_black.png',
   'logo_wordmark_white.png', 'logo_wordmark_black.png',
-  'app_logo.png', 'app_logo_transparent.png', 'app_logo_transparent_black.png',
-  'favicon.png', 'app_logo.svg', 'app_logo_transparent.svg',
+  'app_logo_transparent.png', 'app_logo_transparent_black.png',
+  'app_logo.svg', 'app_logo_transparent.svg',
   'Alora.apk', 'Alora.ipa', 'AloAI.apk', 'Alokpoth.ipa'
 ];
 
@@ -140,6 +142,12 @@ STATIC_ASSETS.forEach(file => {
     } else if (file.endsWith('.ipa')) {
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
+    } else if (file.endsWith('.ico')) {
+      res.setHeader('Content-Type', 'image/x-icon');
+    } else if (file.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (file.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
     }
     res.sendFile(filePath);
   });

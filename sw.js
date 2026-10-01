@@ -1,5 +1,5 @@
-/* Alora AI - Progressive Web App Service Worker (v1.4.0) */
-const CACHE_NAME = 'alora-ai-v1.4.0';
+/* Alora AI - Progressive Web App Service Worker (v1.5.0) */
+const CACHE_NAME = 'alora-ai-v1.5.0';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -16,7 +16,12 @@ const CORE_ASSETS = [
   '/help.html',
   '/redeem.html',
   '/manifest.json',
+  '/favicon.ico',
+  '/favicon.svg',
   '/favicon.png',
+  '/favicon-32x32.png',
+  '/favicon-16x16.png',
+  '/apple-touch-icon.png',
   '/app_logo.png',
   '/logo_icon_white.png',
   '/logo_icon_black.png',

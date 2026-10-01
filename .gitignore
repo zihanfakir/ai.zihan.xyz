@@ -61,12 +61,14 @@ index_recovered.html
 *.jpeg
 account_limits_view_*.png
 
-# Whitelist App Logo, iOS & Android Res Icons
+# Whitelist App Logo, Favicons, iOS & Android Res Icons
 !app logo.png
 !app_logo.png
 !app_logo_*.png
 !logo_*.png
 !favicon.png
+!favicon-*.png
+!apple-touch-icon.png
 !logo/
 !logo/**
 !android/app/src/main/res/**/*.png
