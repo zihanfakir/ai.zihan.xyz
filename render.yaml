@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: alora-backend
+    runtime: node
+    plan: free                  # free / starter / standard — change when ready
+    region: singapore           # closest to Bangladesh
+    buildCommand: npm install
+    startCommand: node server/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"          # Render assigns PORT automatically, but set as fallback
+      - key: MONGODB_URI
+        sync: false             # set manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false             # set manually in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEYS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: VYCE_API_KEY
+        sync: false
+      - key: BAI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
