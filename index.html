@@ -2013,6 +2013,346 @@
       color: var(--text-sub);
     }
 
+    /* ===== Image Studio (ছবি তৈরি স্টুডিও) Styles ===== */
+    .modal-overlay.page-modal .studio-container {
+      width: 100% !important;
+      max-width: 1160px !important;
+      margin: 0 auto !important;
+      flex: 1 !important;
+      overflow-y: auto !important;
+      padding: 16px 20px 80px !important;
+      box-sizing: border-box;
+    }
+    .studio-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 460px) minmax(320px, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .studio-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+    .studio-panel {
+      background: var(--bg-card, rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .studio-section-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+    .studio-prompt-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .studio-textarea {
+      width: 100%;
+      min-height: 100px;
+      max-height: 220px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+    .studio-textarea:focus {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.18);
+    }
+    .studio-quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .studio-chip {
+      background: var(--sheen-base-hover, rgba(128, 128, 128, 0.1));
+      border: 1px solid var(--border-color);
+      border-radius: 9999px;
+      padding: 5px 12px;
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .studio-chip:hover {
+      background: rgba(236, 72, 153, 0.14);
+      border-color: rgba(236, 72, 153, 0.35);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+    .studio-style-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .studio-style-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .studio-style-card {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      color: var(--text-main);
+      user-select: none;
+    }
+    .studio-style-card:hover {
+      border-color: rgba(236, 72, 153, 0.45);
+      transform: translateY(-1px);
+    }
+    .studio-style-card.active {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.12);
+      box-shadow: 0 0 16px rgba(236, 72, 153, 0.22);
+    }
+    .studio-style-icon {
+      font-size: 1.35rem;
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+    .studio-style-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .studio-ratio-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .studio-ratio-btn {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      color: var(--text-main);
+      text-align: center;
+      user-select: none;
+    }
+    .studio-ratio-btn:hover {
+      border-color: rgba(236, 72, 153, 0.45);
+    }
+    .studio-ratio-btn.active {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.12);
+      box-shadow: 0 0 16px rgba(236, 72, 153, 0.22);
+    }
+    .studio-ratio-box {
+      border: 2px solid currentColor;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      opacity: 0.85;
+    }
+    .studio-ratio-box.r-1-1 { width: 18px; height: 18px; }
+    .studio-ratio-box.r-16-9 { width: 24px; height: 14px; }
+    .studio-ratio-box.r-9-16 { width: 14px; height: 24px; }
+    .studio-ratio-box.r-4-3 { width: 20px; height: 15px; }
+    .studio-ratio-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .studio-ratio-desc {
+      font-size: 0.66rem;
+      color: var(--text-sub);
+      margin-top: 3px;
+    }
+    .studio-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .studio-generate-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6);
+      background-size: 200% 200%;
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.35);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .studio-generate-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 26px rgba(236, 72, 153, 0.45);
+    }
+    .studio-generate-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .studio-canvas-panel {
+      position: sticky;
+      top: 16px;
+    }
+    .studio-canvas-card {
+      background: var(--bg-card, rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 380px;
+    }
+    .studio-canvas-preview-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 340px;
+      max-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(128,128,128,0.06) 0%, rgba(0,0,0,0.2) 100%);
+      overflow: hidden;
+    }
+    .studio-result-image {
+      max-width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      cursor: zoom-in;
+      transition: transform 0.25s ease;
+    }
+    .studio-result-image:hover {
+      transform: scale(1.015);
+    }
+    .studio-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-input);
+      flex-wrap: wrap;
+    }
+    .studio-action-button {
+      flex: 1;
+      min-width: 100px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card, rgba(255, 255, 255, 0.06));
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .studio-action-button:hover {
+      background: var(--sheen-base-hover, rgba(128, 128, 128, 0.18));
+      border-color: var(--accent-primary);
+    }
+    .studio-action-button.primary {
+      background: var(--accent-primary, #3b82f6);
+      color: #fff;
+      border-color: transparent;
+    }
+    .studio-action-button.primary:hover {
+      opacity: 0.92;
+    }
+    .studio-recent-strip {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+    .studio-recent-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 6px 2px 10px;
+      scrollbar-width: thin;
+    }
+    .studio-recent-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border-color);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s, border-color 0.15s;
+      background: rgba(128,128,128,0.1);
+    }
+    .studio-recent-thumb:hover {
+      transform: scale(1.06);
+      border-color: #ec4899;
+    }
+    .studio-recent-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .composer-tools, .composer-tools-left, .composer-tools-right {
       display: flex;
       align-items: center;
@@ -4220,6 +4560,13 @@
 
     <!-- Quick Navigation Links (Screenshot 3) -->
     <div style="padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 4px;">
+      <button type="button" class="drawer-session-item" id="drawerStudioBtn" style="padding: 10px 12px; font-weight: 500; color: var(--text-main);" onclick="if(typeof openImageStudioModal==='function')openImageStudioModal();">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          <span>Image Studio (ছবি তৈরি)</span>
+        </div>
+        <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px; background: rgba(236,72,153,0.12); color: #ec4899; font-weight: 600; border: 1px solid rgba(236,72,153,0.25);">NEW</span>
+      </button>
       <button type="button" class="drawer-session-item" id="drawerLibraryBtn" style="padding: 10px 12px; font-weight: 500; color: var(--text-main);" onclick="openLibraryModal()">
         <div style="display: flex; align-items: center; gap: 10px;">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -4309,6 +4656,13 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
             <span>Chat History</span>
           </span>
+        </button>
+        <button class="brand-menu-item sheen-surface" id="brandMenuStudioBtn" type="button" onclick="if(typeof openImageStudioModal==='function')openImageStudioModal();">
+          <span class="brand-menu-item-left">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            <span>Image Studio (ছবি তৈরি)</span>
+          </span>
+          <span style="font-size: 11px; padding: 2px 7px; border-radius: 6px; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; font-weight: 600;">AI</span>
         </button>
         <button class="brand-menu-item sheen-surface" id="brandMenuLibraryBtn" type="button" onclick="openLibraryModal()">
           <span class="brand-menu-item-left">
@@ -4990,6 +5344,217 @@
     </div>
   </div>
 
+  <!-- Image Studio (ছবি তৈরি স্টুডিও) Page Modal -->
+  <div class="modal-overlay page-modal" id="imageStudioModalOverlay">
+    <div class="modal-sheet">
+      <div class="page-header-bar">
+        <button class="page-back-btn" id="imageStudioModalClose" type="button" aria-label="ফিরে যান">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>ফিরে যান</span>
+        </button>
+        <div class="page-nav-title" style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          <span>Image Studio</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="studioQuotaBadge" style="font-size: 0.78rem; font-weight: 600; color: #ec4899; background: rgba(236,72,153,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(236,72,153,0.25);">বাকি কোটা</span>
+          <button type="button" id="studioOpenLibraryBtn" title="আমার লাইব্রেরি" style="background: var(--bg-card, rgba(255,255,255,0.06)); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>লাইব্রেরি</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="studio-container" id="studioContainer">
+        <div class="studio-grid">
+          <!-- Left Column: Controls & Configuration -->
+          <div class="studio-panel studio-controls">
+            <!-- Prompt Section -->
+            <div>
+              <div class="studio-section-label">
+                <span>📝 প্রম্পট লিখুন (Describe your image)</span>
+                <button type="button" class="btn-surprise-me" id="studioSurpriseBtn" style="background: none; border: none; color: #ec4899; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>🎲 আইডিয়া দিন</span>
+                </button>
+              </div>
+              <div class="studio-prompt-wrap">
+                <textarea id="studioPromptInput" class="studio-textarea" placeholder="যেমন: একটি সুন্দর পাহাড়ি নদীর উপরে মেঘের ভেলা ও সূর্যাস্তের সোনালী আলো, সিনেমাটিক 8K..." rows="3"></textarea>
+              </div>
+              <div class="studio-quick-chips" id="studioQuickChips">
+                <button type="button" class="studio-chip" data-prompt="একটি সুন্দর পাহাড়ি নদী ও সূর্যাস্তের সোনালী আলো, সিনেমাটিক দৃশ্য">🌅 সূর্যাস্তে পাহাড়ি নদী</button>
+                <button type="button" class="studio-chip" data-prompt="ভবিষ্যতমুখী সাইবারপাঙ্ক ঢাকা শহর, উড়ন্ত যানবাহন ও নিয়ন আলো">🏙️ সাইবারপাঙ্ক ঢাকা</button>
+                <button type="button" class="studio-chip" data-prompt="গভীর সুন্দরবনে রাজকীয় রয়েল বেঙ্গল টাইগার, হাইপার রিয়ালিস্টিক">🐅 রয়েল বেঙ্গল টাইগার</button>
+                <button type="button" class="studio-chip" data-prompt="হাতে আঁকা জলরঙে বৃষ্টিভেজা প্রাচীন শহরের পথ, রোমান্টিক সন্ধ্যা">🎨 জলরঙে বৃষ্টিভেজা শহর</button>
+                <button type="button" class="studio-chip" data-prompt="মহাকাশে ভাসমান সবুজ দ্বীপ, পাশে তারা ও গ্যালাক্সির মেলা">🌌 মহাকাশে দ্বীপ</button>
+              </div>
+            </div>
+
+            <!-- Style Picker Section -->
+            <div>
+              <div class="studio-section-label">
+                <span>🎨 আর্ট স্টাইল (Art Style)</span>
+                <span id="studioSelectedStyleLabel" style="font-size: 0.75rem; color: var(--text-sub); font-weight: normal;">স্বাভাবিক</span>
+              </div>
+              <div class="studio-style-grid" id="studioStyleGrid">
+                <button type="button" class="studio-style-card active" data-style="" data-name="স্বাভাবিক">
+                  <div class="studio-style-icon">✨</div>
+                  <div class="studio-style-name">স্বাভাবিক</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Photorealistic, 8k resolution, raw photo, realistic lighting, highly detailed" data-name="বাস্তবসম্মত">
+                  <div class="studio-style-icon">📷</div>
+                  <div class="studio-style-name">বাস্তবসম্মত</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Anime style, Makoto Shinkai aesthetic, vibrant colors, detailed anime background, cel shaded" data-name="অ্যানিমে">
+                  <div class="studio-style-icon">🎌</div>
+                  <div class="studio-style-name">অ্যানিমে</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Digital art, Artstation trending, fantasy illustration, sharp focus, masterwork" data-name="ডিজিটাল আর্ট">
+                  <div class="studio-style-icon">🖌️</div>
+                  <div class="studio-style-name">ডিজিটাল আর্ট</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="3D render, Unreal Engine 5, Octane render, smooth textures, ray tracing, subsurface scattering" data-name="৩ডি রেন্ডার">
+                  <div class="studio-style-icon">🧊</div>
+                  <div class="studio-style-name">৩ডি রেন্ডার</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Cyberpunk style, neon lights, futuristic, rainy dark streets, high tech aesthetic" data-name="সাইবারপাঙ্ক">
+                  <div class="studio-style-icon">⚡</div>
+                  <div class="studio-style-name">সাইবারপাঙ্ক</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Watercolor painting, soft color bleeding, textured paper, artistic brush strokes" data-name="জলরং">
+                  <div class="studio-style-icon">🎨</div>
+                  <div class="studio-style-name">জলরং</div>
+                </button>
+                <button type="button" class="studio-style-card" data-style="Cinematic film still, 35mm photograph, moody dramatic lighting, depth of field" data-name="সিনেমাটিক">
+                  <div class="studio-style-icon">🎬</div>
+                  <div class="studio-style-name">সিনেমাটিক</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Aspect Ratio Section -->
+            <div>
+              <div class="studio-section-label">
+                <span>📐 ছবির অনুপাত (Aspect Ratio)</span>
+                <span id="studioSelectedRatioLabel" style="font-size: 0.75rem; color: var(--text-sub); font-weight: normal;">1:1 (Square)</span>
+              </div>
+              <div class="studio-ratio-grid" id="studioRatioGrid">
+                <button type="button" class="studio-ratio-btn active" data-size="1024x1024" data-ratio="1:1" data-label="1:1 (Square)">
+                  <div class="studio-ratio-box r-1-1"></div>
+                  <div class="studio-ratio-title">1:1</div>
+                  <div class="studio-ratio-desc">Square</div>
+                </button>
+                <button type="button" class="studio-ratio-btn" data-size="1280x720" data-ratio="16:9" data-label="16:9 (Landscape)">
+                  <div class="studio-ratio-box r-16-9"></div>
+                  <div class="studio-ratio-title">16:9</div>
+                  <div class="studio-ratio-desc">Landscape</div>
+                </button>
+                <button type="button" class="studio-ratio-btn" data-size="720x1280" data-ratio="9:16" data-label="9:16 (Portrait)">
+                  <div class="studio-ratio-box r-9-16"></div>
+                  <div class="studio-ratio-title">9:16</div>
+                  <div class="studio-ratio-desc">Portrait</div>
+                </button>
+                <button type="button" class="studio-ratio-btn" data-size="1024x768" data-ratio="4:3" data-label="4:3 (Standard)">
+                  <div class="studio-ratio-box r-4-3"></div>
+                  <div class="studio-ratio-title">4:3</div>
+                  <div class="studio-ratio-desc">Standard</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Enhance Prompt Toggle -->
+            <label class="studio-toggle-row" for="studioEnhanceCheckbox">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/></svg>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">অটো-এনহ্যান্স (Auto-Enhance)</div>
+                  <div style="font-size: 0.72rem; color: var(--text-sub);">প্রম্পটে প্রফেশনাল আলো ও স্পষ্টতার বিবরণ যোগ করে</div>
+                </div>
+              </div>
+              <input type="checkbox" id="studioEnhanceCheckbox" checked style="accent-color: #ec4899; width: 18px; height: 18px; cursor: pointer;">
+            </label>
+
+            <!-- Error Banner -->
+            <div id="studioErrorBox" style="display: none; padding: 12px 14px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; font-size: 0.85rem;"></div>
+
+            <!-- Generate Button -->
+            <button type="button" class="studio-generate-btn" id="studioGenerateBtn">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+              <span id="studioGenerateBtnText">ছবি তৈরি করুন (Generate)</span>
+            </button>
+          </div>
+
+          <!-- Right Column: Canvas Preview & Quick Actions -->
+          <div class="studio-panel studio-canvas-panel">
+            <div class="studio-canvas-card">
+              <div class="studio-canvas-preview-wrap" id="studioCanvasWrap">
+                <!-- 1. Empty State Placeholder -->
+                <div id="studioEmptyState" style="text-align: center; padding: 40px 20px; color: var(--text-sub);">
+                  <div style="width: 76px; height: 76px; border-radius: 50%; background: rgba(236,72,153,0.1); color: #ec4899; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                    <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
+                  <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">আপনার কল্পনাকে ছবিতে রূপ দিন</div>
+                  <div style="font-size: 0.82rem; max-width: 320px; margin: 0 auto; line-height: 1.5;">বামপাশের বক্সে পছন্দের প্রম্পট লিখুন ও স্টাইল বেছে নিয়ে 'ছবি তৈরি করুন' বাটনে চাপুন।</div>
+                </div>
+
+                <!-- 2. Loading State Loader -->
+                <div id="studioLoadingState" style="display: none; text-align: center; padding: 50px 20px; width: 100%;">
+                  <div style="position: relative; width: 64px; height: 64px; margin: 0 auto 20px;">
+                    <div style="position: absolute; inset: 0; border: 3px solid rgba(236,72,153,0.2); border-top-color: #ec4899; border-radius: 50%; animation: spin 0.9s linear infinite;"></div>
+                    <div style="position: absolute; inset: 6px; border: 3px solid rgba(139,92,246,0.2); border-bottom-color: #8b5cf6; border-radius: 50%; animation: spin 1.4s linear infinite reverse;"></div>
+                    <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">✨</div>
+                  </div>
+                  <div id="studioLoadingStatus" style="font-size: 0.96rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">ছবি তৈরি হচ্ছে...</div>
+                  <div id="studioLoadingTip" style="font-size: 0.8rem; color: var(--text-sub); max-width: 340px; margin: 0 auto; line-height: 1.4;">উচ্চমানের ডিটেইল ও আলো রেন্ডার করা হচ্ছে, অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন...</div>
+                </div>
+
+                <!-- 3. Result State Image -->
+                <div id="studioResultState" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; position: relative;">
+                  <img id="studioResultImg" class="studio-result-image" src="" alt="Generated artwork">
+                  <div id="studioResultBadge" style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 8px; font-size: 0.72rem; color: #fff; border: 1px solid rgba(255,255,255,0.15);"></div>
+                </div>
+              </div>
+
+              <!-- Post-Generation Action Toolbar -->
+              <div class="studio-actions-bar" id="studioActionsBar" style="display: none;">
+                <button type="button" class="studio-action-button primary" id="studioDownloadBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>ডাউনলোড HD</span>
+                </button>
+                <button type="button" class="studio-action-button" id="studioChatBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>চ্যাটে পাঠান</span>
+                </button>
+                <button type="button" class="studio-action-button" id="studioRegenBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                  <span>পুনরায় তৈরি</span>
+                </button>
+                <button type="button" class="studio-action-button" id="studioCopyBtn" title="ইমেজ লিঙ্ক কপি">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <span>লিঙ্ক কপি</span>
+                </button>
+                <button type="button" class="studio-action-button" id="studioViewBtn" title="বড় করে দেখুন">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                  <span>ফুলস্ক্রিন</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Recent Creations Thumbnail Strip -->
+            <div class="studio-recent-strip" id="studioRecentWrap">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-main);">সাম্প্রতিক তৈরি ছবি</span>
+                <span id="studioRecentCount" style="font-size: 0.72rem; color: var(--text-sub);">0 টি</span>
+              </div>
+              <div class="studio-recent-scroll" id="studioRecentScroll">
+                <!-- Dynamically populated from library images -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- অথেন্টিকেশন (লগইন / রেজিস্টার) পেজ স্ক্রিন -->
   <div class="modal-overlay page-modal" id="authModalOverlay">
     <div class="modal-sheet auth-sheet">
@@ -5104,6 +5669,12 @@
               <span id="imageGenQuotaBadge" style="margin-left: auto; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px; background: rgba(236,72,153,0.12); color: #ec4899; font-weight: 600; border: 1px solid rgba(236,72,153,0.25);"></span>
             </button>
 
+            <!-- Image Studio option -->
+            <button type="button" class="attach-menu-item" id="attachOpenStudioOption" onclick="if(typeof openImageStudioModal==='function')openImageStudioModal(); if(typeof closeAttachMenu==='function')closeAttachMenu();">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+              <span>Image Studio (ছবি তৈরি)</span>
+            </button>
+
             <!-- Thinking Mode inside Menu -->
             <button type="button" class="attach-menu-item" id="attachThinkingOption">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
@@ -5114,6 +5685,10 @@
 
         <button type="button" class="native-tool-btn" id="cameraBtn" aria-label="ছবি তুলুন বা নির্বাচন করুন" title="ক্যামেরা বা ছবি যোগ করুন">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        </button>
+
+        <button type="button" class="native-tool-btn" id="composerStudioBtn" aria-label="ছবি তৈরির স্টুডিও" title="ছবি তৈরির স্টুডিও (Image Studio)" onclick="if(typeof openImageStudioModal==='function')openImageStudioModal();">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
         </button>
       </div>
 
@@ -7453,6 +8028,12 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       const libModal = document.getElementById("libraryModalOverlay");
       if (libModal && libModal.classList.contains("open")) {
         if (typeof closeLibraryModal === "function") closeLibraryModal(true);
+        return;
+      }
+      // 6.5. Image Studio modal
+      const studioModal = document.getElementById("imageStudioModalOverlay");
+      if (studioModal && studioModal.classList.contains("open")) {
+        if (typeof closeImageStudioModal === "function") closeImageStudioModal(true);
         return;
       }
       // 7. Sidebar Drawer
@@ -11027,11 +11608,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
     if (libraryCreateImageBtn) {
       libraryCreateImageBtn.addEventListener("click", () => {
         closeLibraryModal();
-        startNewChat();
-        if (userInput) {
-          userInput.value = typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Generate an image of " : "একটি সুন্দর ছবি তৈরি করো: ";
-          userInput.focus();
-        }
+        openImageStudioModal();
       });
     }
     if (libraryViewerClose) libraryViewerClose.addEventListener("click", closeLibraryViewer);
@@ -11041,15 +11618,433 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       });
     }
 
+    // =========================================================================
+    // IMAGE STUDIO (ছবি তৈরি স্টুডিও) CONTROLLER
+    // =========================================================================
+    let studioCurrentGeneratedImage = null;
+    let studioCurrentPrompt = "";
+    let studioCurrentStyle = "";
+    let studioCurrentSize = "1024x1024";
+    let studioCurrentRatio = "1:1";
+    let isStudioGenerating = false;
+
+    const studioRandomPrompts = [
+      "একটি সুন্দর পাহাড়ি নদী ও সূর্যাস্তের নরম সোনালী আলো, সিনেমাটিক ল্যান্ডস্কেপ, 8K",
+      "ভবিষ্যতমুখী সাইবারপাঙ্ক ঢাকা শহর, উড়ন্ত যান ও নিয়ন আলোর প্রতিফলন, রেইন এফেক্ট",
+      "গভীর সুন্দরবনে রাজকীয় রয়েল বেঙ্গল টাইগার, কুয়াশাচ্ছন্ন সকালের আলো, ন্যাশনাল জিওগ্রাফিক স্টাইল",
+      "হাতে আঁকা জলরঙে বৃষ্টিভেজা প্রাচীন শহরের সরু অলিগলি ও ল্যাম্পপোস্ট",
+      "মেঘের উপরে ভাসমান একটি প্রাচীন মায়াবী দুর্গ, চারপাশে রঙিন অরোরা আলো",
+      "জাপানি চেরি ব্লসম বাগানে শান্ত ঐতিহ্যবাহী কাঁচের তৈরি চা-ঘর, সূর্যাস্ত",
+      "মহাকাশে ভাসমান মহাজাগতিক স্পেস ক্যাট, তারার মেলা ও নেবুলার মাঝে",
+      "একটি প্রাচীন কাঠের লাইব্রেরির মধ্যে জ্বলন্ত মোমবাতি ও রহস্যময় খোলা বই",
+      "শান্ত নীল সমুদ্রের সৈকতে কাঁচের স্বচ্ছ মার্বেল ঘর, ক্রান্তীয় পাম গাছ",
+      "ভোরের শিশিরভেজা সবুজ বুনো ঘাসের মাঝে একটি ছোট্ট মিষ্টি খরগোশ"
+    ];
+
+    function updateStudioQuotaBadge() {
+      const badge = document.getElementById("studioQuotaBadge");
+      if (!badge) return;
+      try {
+        const u = getTrustedUser();
+        const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+        if (u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())))) {
+          badge.textContent = "আনলিমিটেড (∞)";
+          return;
+        }
+      } catch(e) {}
+      if (typeof getImagePlanLimit === "function" && typeof getImageWindowUsage === "function") {
+        const { limit } = getImagePlanLimit();
+        const usage = getImageWindowUsage();
+        const remaining = Math.max(0, limit - (usage.count || 0));
+        badge.textContent = `${remaining}/${limit} বাকি`;
+      }
+    }
+
+    function renderStudioRecentImages() {
+      const scrollEl = document.getElementById("studioRecentScroll");
+      const countEl = document.getElementById("studioRecentCount");
+      if (!scrollEl) return;
+      const items = typeof loadLibraryImages === "function" ? loadLibraryImages() : [];
+      if (countEl) countEl.textContent = `${items.length} টি`;
+      if (!items.length) {
+        scrollEl.innerHTML = '<div style="font-size: 0.78rem; color: var(--text-sub); padding: 8px;">এখনও কোনো ছবি তৈরি করা হয়নি</div>';
+        return;
+      }
+      scrollEl.innerHTML = items.slice(0, 15).map((item, idx) => `
+        <div class="studio-recent-thumb" title="${escapeHtml(item.prompt || 'ছবি')}" onclick="loadStudioRecentPreview(${idx})">
+          <img src="${escapeHtml(item.url)}" alt="Recent artwork" loading="lazy">
+        </div>
+      `).join("");
+    }
+
+    function loadStudioRecentPreview(index) {
+      const items = typeof loadLibraryImages === "function" ? loadLibraryImages() : [];
+      const item = items[index];
+      if (!item) return;
+      setStudioPreviewResult(item.url, item.prompt || "ছবি", "1:1");
+      const promptInput = document.getElementById("studioPromptInput");
+      if (promptInput && item.prompt) promptInput.value = item.prompt;
+    }
+
+    function openImageStudioModal(initialPrompt = "") {
+      if (typeof closeSidebarDrawer === "function") closeSidebarDrawer();
+      if (typeof closeBrandMenu === "function") closeBrandMenu();
+      if (typeof closeLibraryModal === "function") closeLibraryModal();
+
+      const modal = document.getElementById("imageStudioModalOverlay");
+      if (!modal) return;
+
+      const promptInput = document.getElementById("studioPromptInput");
+      if (promptInput && initialPrompt) {
+        promptInput.value = initialPrompt;
+      }
+
+      updateStudioQuotaBadge();
+      renderStudioRecentImages();
+
+      modal.classList.add("open");
+      if (typeof pushPageState === "function") pushPageState("studio");
+
+      if (promptInput && !initialPrompt) {
+        setTimeout(() => promptInput.focus(), 150);
+      }
+    }
+
+    function closeImageStudioModal(isPopstate = false) {
+      const modal = document.getElementById("imageStudioModalOverlay");
+      if (modal) modal.classList.remove("open");
+      if (!isPopstate && history.state && history.state.page === "studio") {
+        try { history.replaceState({ page: "home" }, ""); } catch(e) {}
+      }
+    }
+
+    function setStudioPreviewLoading(isLoading, customMessage = "") {
+      const emptyState = document.getElementById("studioEmptyState");
+      const loadingState = document.getElementById("studioLoadingState");
+      const resultState = document.getElementById("studioResultState");
+      const actionsBar = document.getElementById("studioActionsBar");
+      const generateBtn = document.getElementById("studioGenerateBtn");
+      const generateText = document.getElementById("studioGenerateBtnText");
+      const errorBox = document.getElementById("studioErrorBox");
+
+      isStudioGenerating = isLoading;
+      if (errorBox && isLoading) errorBox.style.display = "none";
+
+      if (isLoading) {
+        if (emptyState) emptyState.style.display = "none";
+        if (resultState) resultState.style.display = "none";
+        if (loadingState) loadingState.style.display = "block";
+        if (actionsBar) actionsBar.style.display = "none";
+        if (generateBtn) generateBtn.disabled = true;
+        if (generateText) generateText.textContent = customMessage || "ছবি তৈরি হচ্ছে...";
+      } else {
+        if (loadingState) loadingState.style.display = "none";
+        if (generateBtn) generateBtn.disabled = false;
+        if (generateText) generateText.textContent = "ছবি তৈরি করুন (Generate)";
+      }
+    }
+
+    function setStudioPreviewResult(url, prompt, ratioLabel = "1:1") {
+      const emptyState = document.getElementById("studioEmptyState");
+      const loadingState = document.getElementById("studioLoadingState");
+      const resultState = document.getElementById("studioResultState");
+      const actionsBar = document.getElementById("studioActionsBar");
+      const resultImg = document.getElementById("studioResultImg");
+      const resultBadge = document.getElementById("studioResultBadge");
+
+      studioCurrentGeneratedImage = url;
+      studioCurrentPrompt = prompt;
+
+      if (emptyState) emptyState.style.display = "none";
+      if (loadingState) loadingState.style.display = "none";
+      if (resultImg) {
+        resultImg.src = url;
+        resultImg.alt = prompt || "AI Artwork";
+      }
+      if (resultBadge) {
+        resultBadge.textContent = `${ratioLabel} • AI Generated`;
+      }
+      if (resultState) resultState.style.display = "flex";
+      if (actionsBar) actionsBar.style.display = "flex";
+    }
+
+    async function handleStudioGenerate() {
+      if (isStudioGenerating) return;
+
+      const promptInput = document.getElementById("studioPromptInput");
+      const prompt = promptInput ? promptInput.value.trim() : "";
+      const errorBox = document.getElementById("studioErrorBox");
+
+      if (!prompt) {
+        if (errorBox) {
+          errorBox.textContent = "অনুগ্রহ করে কেমন ছবি চান তার একটি বর্ণনা বা প্রম্পট লিখুন।";
+          errorBox.style.display = "block";
+        }
+        if (promptInput) promptInput.focus();
+        return;
+      }
+
+      // Check quota before request
+      if (typeof getImagePlanLimit === "function" && typeof getImageWindowUsage === "function") {
+        try {
+          const u = getTrustedUser();
+          const adminEmails = ["zihanfakir@gmail.com", "x@zihan.uk"];
+          const isAdmin = u && (u.role === "admin" || (u.email && adminEmails.includes(u.email.toLowerCase().trim())));
+          if (!isAdmin) {
+            const { limit } = getImagePlanLimit();
+            const usage = getImageWindowUsage();
+            if ((usage.count || 0) >= limit) {
+              if (errorBox) {
+                errorBox.innerHTML = `আপনার বর্তমান প্ল্যানে ছবি তৈরির সীমা (${limit}/${limit}) শেষ হয়ে গেছে। দয়া করে অপেক্ষা করুন অথবা <a href="plans" style="color:#ec4899;text-decoration:underline;">আপগ্রেড করুন</a>।`;
+                errorBox.style.display = "block";
+              }
+              return;
+            }
+          }
+        } catch(e) {}
+      }
+
+      const enhanceCheckbox = document.getElementById("studioEnhanceCheckbox");
+      const isEnhance = enhanceCheckbox ? enhanceCheckbox.checked : true;
+
+      setStudioPreviewLoading(true, "আইডিয়া প্রসেসিং হচ্ছে...");
+
+      // Dynamic progress status text
+      const statusEl = document.getElementById("studioLoadingStatus");
+      let statusStep = 0;
+      const statusTimer = setInterval(() => {
+        statusStep++;
+        if (statusStep === 1 && statusEl) statusEl.textContent = "আর্ট স্টাইল ও কম্পোজিশন সাজানো হচ্ছে...";
+        if (statusStep === 3 && statusEl) statusEl.textContent = "উচ্চমানের পিক্সেল রেন্ডার হচ্ছে...";
+        if (statusStep === 5 && statusEl) statusEl.textContent = "ফাইনাল ফিনিশিং ও লাইটিং ব্যালেন্স হচ্ছে...";
+      }, 2000);
+
+      try {
+        const imageUrl = await generateImageViaServer(prompt, {
+          size: studioCurrentSize,
+          style: studioCurrentStyle,
+          enhance: isEnhance
+        });
+
+        clearInterval(statusTimer);
+
+        // Record usage
+        if (typeof addImageUsage === "function") addImageUsage(selectedModelId || "alora");
+        if (typeof recordImageWindowUsage === "function") recordImageWindowUsage();
+        updateStudioQuotaBadge();
+        if (typeof updateAttachImageQuotaBadge === "function") updateAttachImageQuotaBadge();
+
+        // Add to client library
+        if (typeof addImageToLibrary === "function") {
+          addImageToLibrary(imageUrl, prompt, typeof currentSessionId !== "undefined" ? currentSessionId : null);
+        }
+
+        renderStudioRecentImages();
+        setStudioPreviewResult(imageUrl, prompt, studioCurrentRatio);
+        setStudioPreviewLoading(false);
+        showToast("ছবি সফলভাবে তৈরি হয়েছে!", "success");
+      } catch (err) {
+        clearInterval(statusTimer);
+        setStudioPreviewLoading(false);
+        if (errorBox) {
+          errorBox.textContent = err.message || "ছবি তৈরি ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।";
+          errorBox.style.display = "block";
+        }
+        showToast(err.message || "ছবি তৈরি ব্যর্থ হয়েছে", "error");
+      }
+    }
+
+    function insertStudioImageIntoChat() {
+      if (!studioCurrentGeneratedImage) {
+        showToast("কোনো ছবি পাওয়া যায়নি", "error");
+        return;
+      }
+      const imgUrl = studioCurrentGeneratedImage;
+      const prompt = studioCurrentPrompt || "AI Generated Image";
+
+      closeImageStudioModal();
+
+      // Ensure active chat session
+      if (!currentSessionId) {
+        startNewChat();
+      }
+
+      // Hide hero banner if on empty new chat
+      const hero = document.getElementById("heroState");
+      if (hero) hero.style.display = "none";
+      const list = document.getElementById("chatList");
+      if (list) list.style.display = "flex";
+
+      // Append user prompt message bubble
+      appendMessage("user", `🎨 [Image Studio]: ${prompt}`);
+      messagesHistory.push({ role: "user", content: `🎨 [Image Studio]: ${prompt}` });
+
+      // Create AI message container and render the image bubble inside it
+      const aiMsgEl = appendMessage("assistant", "");
+      const textDiv = aiMsgEl.querySelector(".chat-text") || aiMsgEl;
+      renderGeneratedImageBubble(textDiv, imgUrl, prompt);
+      messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imgUrl}]` });
+
+      persistCurrentSession();
+      scrollToBottom();
+      showToast("ছবি চ্যাটে পাঠানো হয়েছে!", "success");
+    }
+
+    function initImageStudioEvents() {
+      const modalClose = document.getElementById("imageStudioModalClose");
+      const modalOverlay = document.getElementById("imageStudioModalOverlay");
+      const surpriseBtn = document.getElementById("studioSurpriseBtn");
+      const generateBtn = document.getElementById("studioGenerateBtn");
+      const promptInput = document.getElementById("studioPromptInput");
+      const openLibBtn = document.getElementById("studioOpenLibraryBtn");
+      const downloadBtn = document.getElementById("studioDownloadBtn");
+      const chatBtn = document.getElementById("studioChatBtn");
+      const regenBtn = document.getElementById("studioRegenBtn");
+      const copyBtn = document.getElementById("studioCopyBtn");
+      const viewBtn = document.getElementById("studioViewBtn");
+      const resultImg = document.getElementById("studioResultImg");
+
+      if (modalClose) modalClose.addEventListener("click", () => closeImageStudioModal());
+      if (modalOverlay) {
+        modalOverlay.addEventListener("click", (e) => {
+          if (e.target === modalOverlay) closeImageStudioModal();
+        });
+      }
+
+      // Quick Chips click
+      document.querySelectorAll(".studio-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const p = chip.getAttribute("data-prompt");
+          if (promptInput && p) {
+            promptInput.value = p;
+            promptInput.focus();
+          }
+        });
+      });
+
+      // Surprise Me / Random Idea
+      if (surpriseBtn) {
+        surpriseBtn.addEventListener("click", () => {
+          const randomP = studioRandomPrompts[Math.floor(Math.random() * studioRandomPrompts.length)];
+          if (promptInput) {
+            promptInput.value = randomP;
+            promptInput.focus();
+          }
+        });
+      }
+
+      // Style Presets click
+      const styleCards = document.querySelectorAll(".studio-style-card");
+      const styleLabel = document.getElementById("studioSelectedStyleLabel");
+      styleCards.forEach(card => {
+        card.addEventListener("click", () => {
+          styleCards.forEach(c => c.classList.remove("active"));
+          card.classList.add("active");
+          studioCurrentStyle = card.getAttribute("data-style") || "";
+          if (styleLabel) styleLabel.textContent = card.getAttribute("data-name") || "স্বাভাবিক";
+        });
+      });
+
+      // Aspect Ratios click
+      const ratioBtns = document.querySelectorAll(".studio-ratio-btn");
+      const ratioLabel = document.getElementById("studioSelectedRatioLabel");
+      ratioBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          ratioBtns.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          studioCurrentSize = btn.getAttribute("data-size") || "1024x1024";
+          studioCurrentRatio = btn.getAttribute("data-ratio") || "1:1";
+          if (ratioLabel) ratioLabel.textContent = btn.getAttribute("data-label") || "1:1 (Square)";
+        });
+      });
+
+      // Generate button & Enter key (Ctrl/Cmd + Enter)
+      if (generateBtn) generateBtn.addEventListener("click", handleStudioGenerate);
+      if (promptInput) {
+        promptInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            handleStudioGenerate();
+          }
+        });
+      }
+
+      // Open library from studio
+      if (openLibBtn) {
+        openLibBtn.addEventListener("click", () => {
+          closeImageStudioModal();
+          if (typeof openLibraryModal === "function") openLibraryModal();
+        });
+      }
+
+      // Action toolbar handlers
+      if (downloadBtn) {
+        downloadBtn.addEventListener("click", () => {
+          if (studioCurrentGeneratedImage && typeof downloadGeneratedImage === "function") {
+            downloadGeneratedImage(studioCurrentGeneratedImage);
+          }
+        });
+      }
+
+      if (chatBtn) {
+        chatBtn.addEventListener("click", insertStudioImageIntoChat);
+      }
+
+      if (regenBtn) {
+        regenBtn.addEventListener("click", handleStudioGenerate);
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+          if (!studioCurrentGeneratedImage) return;
+          try {
+            await navigator.clipboard.writeText(studioCurrentGeneratedImage);
+            showToast("ছবির লিঙ্ক কপি হয়েছে!", "success");
+          } catch(e) {
+            showToast("লিঙ্ক কপি করা যায়নি", "error");
+          }
+        });
+      }
+
+      if (viewBtn) {
+        viewBtn.addEventListener("click", () => {
+          if (studioCurrentGeneratedImage && typeof openLibraryViewer === "function") {
+            openLibraryViewer({
+              url: studioCurrentGeneratedImage,
+              prompt: studioCurrentPrompt || "AI Image",
+              createdAt: Date.now()
+            });
+          }
+        });
+      }
+
+      if (resultImg) {
+        resultImg.addEventListener("click", () => {
+          if (studioCurrentGeneratedImage && typeof openLibraryViewer === "function") {
+            openLibraryViewer({
+              url: studioCurrentGeneratedImage,
+              prompt: studioCurrentPrompt || "AI Image",
+              createdAt: Date.now()
+            });
+          }
+        });
+      }
+    }
+
+    // Initialize Image Studio
+    initImageStudioEvents();
+
     window.addEventListener("beforeunload", () => {
       persistCurrentSession();
       try { localStorage.removeItem(CURRENT_SESSION_KEY); } catch(e) {}
     });
     
-    // Check if a specific chat ID or library is explicitly requested via URL hash (#chat=... or #library)
+    // Check if a specific chat ID, library, or studio is explicitly requested via URL hash (#chat=... or #library or #studio)
     try {
       if (window.location.hash === "#library") {
         openLibraryModal();
+      } else if (window.location.hash === "#studio" || window.location.hash === "#imagestudio") {
+        openImageStudioModal();
       }
       const hashMatch = window.location.hash.match(/#chat=([a-zA-Z0-9_-]+)/);
       if (hashMatch && hashMatch[1]) {
@@ -11060,7 +12055,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         } else {
           startNewChat();
         }
-      } else if (window.location.hash !== "#library") {
+      } else if (window.location.hash !== "#library" && window.location.hash !== "#studio" && window.location.hash !== "#imagestudio") {
         // Normal page visit or refresh: start fresh clean New Chat
         startNewChat();
       }
@@ -11776,16 +12771,22 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       return false;
     }
 
-    async function generateImageViaServer(prompt) {
+    async function generateImageViaServer(prompt, options = {}) {
       const token = localStorage.getItem("alokpoth_token");
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
+      const payload = { prompt };
+      if (options.size) payload.size = options.size;
+      if (options.style) payload.style = options.style;
+      if (options.model) payload.model = options.model;
+      if (options.enhance !== undefined) payload.enhance = options.enhance;
+
       const res = await fetchWithTimeout(`${API_BASE}/chat/image`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ prompt })
-      }, 45000);
+        body: JSON.stringify(payload)
+      }, 60000);
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {

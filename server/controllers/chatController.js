@@ -679,7 +679,8 @@ function buildPollinationsUrl(cleanPrompt, imageModel = 'flux', imageSize = '102
 // Helper for executing image generation via configured provider/model
 async function executeImageGeneration(prompt, forcedSettings = null) {
   const { getSystemSettings, getApiKeyFromSupabase } = require('../../utils/getModelConfig');
-  const settings = forcedSettings || await getSystemSettings();
+  const baseSettings = await getSystemSettings();
+  const settings = forcedSettings ? { ...baseSettings, ...forcedSettings } : baseSettings;
   const cleanPrompt = String(prompt || '').trim().slice(0, 1000);
   if (!cleanPrompt) throw new Error('অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।');
 
@@ -766,12 +767,22 @@ async function executeImageGeneration(prompt, forcedSettings = null) {
 
 const generateImage = async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, size, style, model, enhance } = req.body;
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
       return res.status(400).json({ success: false, error: 'অনুগ্রহ করে একটি সঠিক প্রম্পট প্রদান করুন।' });
     }
 
-    const imgResult = await executeImageGeneration(prompt);
+    let finalPrompt = prompt.trim();
+    if (style && typeof style === 'string' && style.trim()) {
+      finalPrompt = `${finalPrompt}, in ${style.trim()} style, highly detailed, beautiful lighting, cinematic composition`;
+    }
+
+    const forcedSettings = {};
+    if (size && typeof size === 'string') forcedSettings.image_size = size.trim();
+    if (model && typeof model === 'string') forcedSettings.image_model = model.trim();
+    if (enhance !== undefined) forcedSettings.image_enhance = !!enhance;
+
+    const imgResult = await executeImageGeneration(finalPrompt, Object.keys(forcedSettings).length ? forcedSettings : null);
 
     // Record usage log for image generation
     const userId = req.user ? String(req.user._id || req.user.id) : (req.guestId ? String(req.guestId) : null);
