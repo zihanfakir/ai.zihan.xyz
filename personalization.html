@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#000000">
-  <title>Personalization — Alora</title>
+  <title>Custom Prompt — Alora</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=3">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=3">
@@ -175,7 +175,7 @@
     /* Main Container */
     .content-container {
       width: 100%;
-      max-width: 580px;
+      max-width: 620px;
       margin: 0 auto;
       padding: 20px 16px 40px;
       display: flex;
@@ -187,184 +187,81 @@
       background: var(--bg-card);
       border: 1px solid var(--border-card);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      margin-bottom: 18px;
     }
 
     .card-title {
-      font-size: 1.05rem;
+      font-size: 1.12rem;
       font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 14px;
+      color: var(--text-main);
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
     .card-title svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       color: var(--accent-blue);
       stroke: currentColor;
       fill: none;
-      stroke-width: 2;
+      stroke-width: 2.2;
+    }
+
+    .card-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.5;
     }
 
     .form-group {
       margin-bottom: 16px;
     }
 
-    .form-label {
-      display: block;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-sub);
-      margin-bottom: 8px;
-    }
-
-    .custom-select {
-      width: 100%;
-      height: 46px;
-      padding: 0 14px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border-card);
-      border-radius: 12px;
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-family: inherit;
-      outline: none;
-    }
-    .custom-select:focus {
-      border-color: var(--accent-blue);
-    }
-
-    /* AMOLED Option Card Picker */
-    .option-card-group {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-card);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-    }
-    .option-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 14px;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      border-bottom: 1px solid var(--border-divider);
-    }
-    .option-card:last-child {
-      border-bottom: none;
-    }
-    .option-card:hover, .option-card:active {
-      background: var(--bg-card-hover);
-    }
-    .option-card.active {
-      background: rgba(59, 130, 246, 0.09);
-    }
-    .option-card:focus-visible {
-      outline: 2px solid var(--accent-blue);
-      outline-offset: -2px;
-    }
-    .option-lead {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-    .option-icon-badge {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-    .option-card.active .option-icon-badge {
-      background: rgba(59, 130, 246, 0.18);
-      border-color: rgba(59, 130, 246, 0.45);
-    }
-    .option-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
-    .option-title {
-      font-size: 0.94rem;
-      font-weight: 600;
-      color: var(--text-main);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .option-desc {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      line-height: 1.3;
-    }
-    .option-check {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      color: #ffffff;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-left: 10px;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
-    }
-    .option-check svg {
-      width: 13px;
-      height: 13px;
-      stroke: currentColor;
-      stroke-width: 2.5;
-      fill: none;
-    }
-    .option-card.active .option-check {
-      display: flex;
-    }
-
     .custom-textarea {
       width: 100%;
-      min-height: 120px;
-      padding: 14px;
+      min-height: 160px;
+      padding: 16px;
       background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border-card);
-      border-radius: 12px;
-      color: #ffffff;
+      border-radius: 14px;
+      color: var(--text-main);
       font-size: 0.95rem;
       font-family: inherit;
       outline: none;
       resize: vertical;
-      line-height: 1.5;
+      line-height: 1.6;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .custom-textarea:focus {
       border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
     }
 
     /* Suggestion Chips */
     .suggestion-chips-wrap {
-      margin-top: 10px;
+      margin-top: 14px;
     }
     .chips-label {
       display: block;
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--text-sub);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .suggestion-chips {
       display: flex;
@@ -375,10 +272,10 @@
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-card);
       color: var(--text-main);
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 500;
       font-family: inherit;
-      padding: 6px 12px;
+      padding: 7px 13px;
       border-radius: 9999px;
       cursor: pointer;
       display: inline-flex;
@@ -396,61 +293,21 @@
       transform: scale(0.96);
     }
 
-    /* iOS Style Toggle Switch */
-    .toggle-row {
+    /* Action buttons */
+    .btn-row {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 8px;
-    }
-
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 26px;
-      flex-shrink: 0;
-    }
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #3f3f46;
-      transition: background-color 0.25s;
-      border-radius: 9999px;
-    }
-    .toggle-slider::before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: #ffffff;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    .toggle-switch input:checked + .toggle-slider {
-      background-color: var(--accent-blue);
-    }
-    .toggle-switch input:checked + .toggle-slider::before {
-      transform: translateX(18px);
+      gap: 10px;
+      margin-top: 22px;
     }
 
     .btn-submit {
-      width: 100%;
+      flex: 1;
       height: 48px;
       border-radius: 12px;
       background: var(--accent-blue);
       color: #ffffff;
       border: none;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
@@ -458,13 +315,38 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background 0.15s;
-      margin-top: 10px;
+      transition: background 0.15s, transform 0.1s;
     }
     .btn-submit:hover {
       background: var(--accent-blue-hover);
     }
     .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .btn-clear {
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      color: var(--text-sub);
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-clear:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--accent-danger);
+    }
+    .btn-clear:active {
       transform: scale(0.98);
     }
 
@@ -519,155 +401,58 @@
 
   <main class="content-container">
     <div class="settings-card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-        <span id="assistantPrefTitle">Assistant Preferences</span>
-      </div>
-
-      <!-- Tone selection -->
-      <div class="form-group">
-        <label class="form-label" id="labelTone">Response Tone</label>
-        <select class="custom-select" id="toneSelect" style="display:none;" aria-hidden="true">
-          <option value="balanced">Balanced &amp; Natural (Default)</option>
-          <option value="concise">Concise &amp; Direct</option>
-          <option value="detailed">In-depth &amp; Comprehensive</option>
-          <option value="academic">Academic &amp; Research-oriented</option>
-          <option value="friendly">Warm &amp; Conversational</option>
-        </select>
-        <div class="option-card-group" id="toneCardGroup" role="radiogroup" aria-labelledby="labelTone">
-          <div class="option-card" data-tone-id="balanced" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">⚖️</div>
-              <div class="option-info">
-                <span class="option-title" id="toneTitleBalanced">Balanced &amp; Natural (Default)</span>
-                <span class="option-desc" id="toneDescBalanced">Versatile tone with natural flow and clear depth</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-tone-id="concise" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">⚡</div>
-              <div class="option-info">
-                <span class="option-title" id="toneTitleConcise">Concise &amp; Direct</span>
-                <span class="option-desc" id="toneDescConcise">Short, bullet-pointed answers without fluff</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-tone-id="detailed" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">📚</div>
-              <div class="option-info">
-                <span class="option-title" id="toneTitleDetailed">In-depth &amp; Comprehensive</span>
-                <span class="option-desc" id="toneDescDetailed">Deep explanations, background context, and code</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-tone-id="academic" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">🔬</div>
-              <div class="option-info">
-                <span class="option-title" id="toneTitleAcademic">Academic &amp; Research</span>
-                <span class="option-desc" id="toneDescAcademic">Formal, analytical, and structured scientific prose</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-tone-id="friendly" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">💬</div>
-              <div class="option-info">
-                <span class="option-title" id="toneTitleFriendly">Warm &amp; Conversational</span>
-                <span class="option-desc" id="toneDescFriendly">Empathetic, approachable, and engaging friendly style</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span id="customPromptTitle">কাস্টম প্রম্পট</span>
         </div>
+        <p class="card-subtitle" id="customPromptSubtitle">
+          Alora আপনার নির্দেশমতো ঠিক যেভাবে উত্তর দেবে ও আচরণ করবে, তা এখানে নিজের মতো করে লিখে দিন। Alora আপনার দেওয়া এই প্রম্পট সর্বোচ্চ অগ্রাধিকার দিয়ে অক্ষরে অক্ষরে পালন করবে।
+        </p>
       </div>
 
-      <!-- Language preference -->
       <div class="form-group">
-        <label class="form-label" id="labelResponseLang">Primary Language</label>
-        <select class="custom-select" id="langPrefSelect" style="display:none;" aria-hidden="true">
-          <option value="auto">Auto-detect input language (Default)</option>
-          <option value="bn">Always reply in Bengali (বাংলা)</option>
-          <option value="en">Always reply in English</option>
-        </select>
-        <div class="option-card-group" id="langPrefCardGroup" role="radiogroup" aria-labelledby="labelResponseLang">
-          <div class="option-card" data-lang-id="auto" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">🌐</div>
-              <div class="option-info">
-                <span class="option-title" id="langTitleAuto">Auto-detect (Default)</span>
-                <span class="option-desc" id="langDescAuto">Automatically replies in the language you ask</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-lang-id="bn" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">🇧🇩</div>
-              <div class="option-info">
-                <span class="option-title" id="langTitleBn">Always Bengali (বাংলা)</span>
-                <span class="option-desc" id="langDescBn">সবসময় খাঁটি, সাবলীল ও প্রাঞ্জল বাংলায় উত্তর প্রদান করবে</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-          <div class="option-card" data-lang-id="en" role="radio" tabindex="0" aria-checked="false">
-            <div class="option-lead">
-              <div class="option-icon-badge">🇬🇧</div>
-              <div class="option-info">
-                <span class="option-title" id="langTitleEn">Always English</span>
-                <span class="option-desc" id="langDescEn">Always replies in fluent, natural English</span>
-              </div>
-            </div>
-            <div class="option-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
+        <textarea class="custom-textarea" id="customInstructions" placeholder="যেমন: 'তুমি একজন অভিজ্ঞ ফুলস্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার। অপ্রয়োজনীয় কথা ছাড়া সবসময় সম্পূর্ণ কার্যকরী কোড দেবে। জটিল বিষয় বাস্তব উদাহরণ দিয়ে সহজ ভাষায় বুঝিয়ে বলবে।'"></textarea>
+        <div class="meta-row">
+          <span id="charCount">০ অক্ষর (০ শব্দ)</span>
+          <span id="priorityBadge" style="color: #60a5fa;">★ সর্বোচ্চ অগ্রাধিকার পাবে</span>
         </div>
-      </div>
 
-      <!-- Custom instructions -->
-      <div class="form-group">
-        <label class="form-label" id="labelCustomInstructions">Custom Instructions</label>
-        <textarea class="custom-textarea" id="customInstructions" placeholder="Tell Alora how you'd like it to respond (e.g., 'I am a software engineer, prefer JavaScript code snippets with concise explanations')."></textarea>
         <div class="suggestion-chips-wrap">
-          <span class="chips-label" id="chipsLabel">Quick suggestions:</span>
+          <span class="chips-label" id="chipsLabel">দ্রুত ব্যবহারের জন্য কিছু আইডিয়া:</span>
           <div class="suggestion-chips">
-            <button type="button" class="sugg-chip" data-text-en="Concise answers with clear bullet points" data-text-bn="অপ্রয়োজনীয় কথা ছাড়া সংক্ষিপ্ত ও বুলেট পয়েন্টে উত্তর দেবেন">
-              ⚡ <span class="chip-txt" id="chipTxt1">Concise bullets</span>
+            <button type="button" class="sugg-chip" data-text-en="Act as a Principal Software Engineer & Architect. Provide complete, production-ready, clean code with zero placeholders and explain trade-offs clearly." data-text-bn="একজন অভিজ্ঞ প্রিন্সিপাল সফটওয়্যার ইঞ্জিনিয়ার হিসেবে পরামর্শ দেবেন। কোডের ক্ষেত্রে কোনো প্লেসহোল্ডার ছাড়া সম্পূর্ণ প্রোডাকশন কোড দেবেন।">
+              👨‍💻 <span class="chip-txt" id="chipTxt1">সফটওয়্যার আর্কিটেক্ট</span>
             </button>
-            <button type="button" class="sugg-chip" data-text-en="Include clean, well-commented code snippets" data-text-bn="পরিষ্কার ও প্রয়োজনীয় কমেন্টসহ কোড স্নsnippet দেবেন">
-              💻 <span class="chip-txt" id="chipTxt2">Clean code snippets</span>
+            <button type="button" class="sugg-chip" data-text-en="Provide concise, to-the-point answers using clean bullet points without unnecessary conversational filler." data-text-bn="অপ্রয়োজনীয় কথা বা ভূমিকা ছাড়া সরাসরি টু-দ্য-পয়েন্টে এবং সংক্ষিপ্ত বুলেট আকারে উত্তর দেবেন।">
+              ⚡ <span class="chip-txt" id="chipTxt2">সংক্ষিপ্ত ও টু-দ্য-পয়েন্ট</span>
             </button>
-            <button type="button" class="sugg-chip" data-text-en="Explain concepts simply with real-world examples" data-text-bn="বাস্তব উদাহরণ দিয়ে সহজ ভাষায় জটিল বিষয় ব্যাখ্যা করবেন">
-              💡 <span class="chip-txt" id="chipTxt3">Simple examples</span>
+            <button type="button" class="sugg-chip" data-text-en="Explain complex concepts simply with intuitive real-world analogies and everyday examples." data-text-bn="জটিল বিষয়গুলোকে বাস্তব জীবনের সহজ ও সুন্দর উদাহরণ দিয়ে সহজভাবে ব্যাখ্যা করবেন।">
+              💡 <span class="chip-txt" id="chipTxt3">সহজ বাস্তব উদাহরণ</span>
             </button>
-            <button type="button" class="sugg-chip" data-text-en="Act as a Principal Software Engineer & Architect" data-text-bn="একজন দক্ষ সফটওয়্যার আর্কিটেক্ট হিসেবে পরামর্শ দেবেন">
-              👨‍💻 <span class="chip-txt" id="chipTxt4">Software architect</span>
+            <button type="button" class="sugg-chip" data-text-en="Act as an empathetic, warm, and thoughtful mentor who listens carefully and offers practical guidance." data-text-bn="একজন সহানুভূতিশীল, আন্তরিক ও অভিজ্ঞ মেন্টর হিসেবে বন্ধুভাবাপন্ন পরামর্শ দেবেন।">
+              🤝 <span class="chip-txt" id="chipTxt4">সহানুভূতিশীল মেন্টর</span>
+            </button>
+            <button type="button" class="sugg-chip" data-text-en="Think with master-level scientific rigor, deep analytical depth, and structured multi-angle insights." data-text-bn="গভীর বিশ্লেষণধর্মী দৃষ্টিভঙ্গি, যৌক্তিক কারণ এবং গবেষণামূলক গভীর অন্তর্দৃষ্টি সহ উত্তর দেবেন।">
+              🔬 <span class="chip-txt" id="chipTxt5">গভীর বিশ্লেষণ</span>
+            </button>
+            <button type="button" class="sugg-chip" data-text-en="Write with creative elegance, rich vocabulary, engaging rhythm, and captivating storytelling." data-text-bn="সমৃদ্ধ শব্দভাণ্ডার, চমৎকার সাহিত্যিক নান্দনিকতা ও আকর্ষণীয় ভঙ্গিতে ক্রিয়েটিভ লেখা তৈরি করবেন।">
+              ✍️ <span class="chip-txt" id="chipTxt6">ক্রিয়েটিভ রাইটিং</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Memory Context Toggle -->
-      <div class="toggle-row">
-        <div>
-          <div style="font-size: 0.95rem; font-weight: 600; color: #fff;" id="labelMemory">Cross-Session Memory</div>
-          <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 2px;" id="descMemory">Remember context and custom preferences across chat sessions</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="memoryToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="btn-row">
+        <button type="button" class="btn-submit" id="savePersonalizationBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="btnSaveText">প্রম্পট সংরক্ষণ করুন</span>
+        </button>
+        <button type="button" class="btn-clear" id="clearPromptBtn" title="মুছে ফেলুন">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span id="btnClearText">মুছে ফেলুন</span>
+        </button>
       </div>
-
-      <button type="button" class="btn-submit" id="savePersonalizationBtn">
-        <span id="btnSaveText">Save Preferences</span>
-      </button>
     </div>
   </main>
 
@@ -678,66 +463,32 @@
     const savedTheme = (rawSavedTheme === "system") ? (isDarkPers ? "dark" : "light") : rawSavedTheme;
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    const toneSelect = document.getElementById("toneSelect");
-    const langPrefSelect = document.getElementById("langPrefSelect");
     const customInstructions = document.getElementById("customInstructions");
-    const memoryToggle = document.getElementById("memoryToggle");
+    const charCountEl = document.getElementById("charCount");
 
-    // Load saved settings
-    let currentTone = localStorage.getItem("alokpoth_ai_tone") || "balanced";
-    let currentLangPref = localStorage.getItem("alokpoth_primary_lang") || "auto";
-
-    if (toneSelect) toneSelect.value = currentTone;
-    if (langPrefSelect) langPrefSelect.value = currentLangPref;
-    if (customInstructions) customInstructions.value = localStorage.getItem("alokpoth_custom_instructions") || "";
-    if (memoryToggle) memoryToggle.checked = localStorage.getItem("alokpoth_memory_enabled") !== "false";
-
-    function selectTone(toneId) {
-      currentTone = toneId;
-      if (toneSelect) toneSelect.value = toneId;
-      document.querySelectorAll("#toneCardGroup .option-card").forEach(card => {
-        const isActive = card.getAttribute("data-tone-id") === toneId;
-        card.classList.toggle("active", isActive);
-        card.setAttribute("aria-checked", isActive ? "true" : "false");
-      });
+    // Load saved prompt
+    if (customInstructions) {
+      customInstructions.value = localStorage.getItem("alokpoth_custom_instructions") || "";
+      updateCounter();
+      customInstructions.addEventListener("input", updateCounter);
     }
 
-    function selectLangPref(langId) {
-      currentLangPref = langId;
-      if (langPrefSelect) langPrefSelect.value = langId;
-      document.querySelectorAll("#langPrefCardGroup .option-card").forEach(card => {
-        const isActive = card.getAttribute("data-lang-id") === langId;
-        card.classList.toggle("active", isActive);
-        card.setAttribute("aria-checked", isActive ? "true" : "false");
-      });
+    function toBnNum(num) {
+      const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+      return String(num).replace(/[0-9]/g, (d) => bnDigits[d]);
     }
 
-    // Attach card click handlers
-    document.querySelectorAll("#toneCardGroup .option-card").forEach(card => {
-      card.addEventListener("click", () => {
-        const tid = card.getAttribute("data-tone-id");
-        selectTone(tid);
-      });
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          selectTone(card.getAttribute("data-tone-id"));
-        }
-      });
-    });
-
-    document.querySelectorAll("#langPrefCardGroup .option-card").forEach(card => {
-      card.addEventListener("click", () => {
-        const lid = card.getAttribute("data-lang-id");
-        selectLangPref(lid);
-      });
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          selectLangPref(card.getAttribute("data-lang-id"));
-        }
-      });
-    });
+    function updateCounter() {
+      if (!customInstructions || !charCountEl) return;
+      const text = customInstructions.value;
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      if (currentLanguage === "bn") {
+        charCountEl.textContent = `${toBnNum(chars)} অক্ষর (${toBnNum(words)} শব্দ)`;
+      } else {
+        charCountEl.textContent = `${chars} characters (${words} words)`;
+      }
+    }
 
     // Attach suggestion chips handlers
     document.querySelectorAll(".sugg-chip").forEach(chip => {
@@ -750,8 +501,9 @@
         if (!cur) {
           customInstructions.value = text;
         } else if (!cur.includes(text)) {
-          customInstructions.value = cur + "\n" + text;
+          customInstructions.value = cur + "\n\n" + text;
         }
+        updateCounter();
         customInstructions.focus();
         showToast(currentLanguage === "bn" ? "পরামর্শ যুক্ত করা হয়েছে" : "Suggestion added");
       });
@@ -761,70 +513,40 @@
       bn: {
         back: "সেটিংস",
         pageTitle: "ব্যক্তিগতকরণ",
-        assistantPrefTitle: "সহকারী পছন্দসমূহ",
-        labelTone: "উত্তরের ধরন",
-        labelResponseLang: "প্রধান ভাষা",
-        labelCustomInstructions: "কাস্টম নির্দেশনা",
-        placeholder: "Alora আপনাকে কীভাবে উত্তর দেবে তা লিখুন (যেমন: 'আমি একজন সফটওয়্যার ইঞ্জিনিয়ার, জাভাস্ক্রিপ্ট কোড উদাহরণের সাথে সংক্ষিপ্ত ব্যাখ্যা পছন্দ করি')",
-        chipsLabel: "দ্রুত পরামর্শসমূহ:",
-        chip1: "সংক্ষিপ্ত বুলেটস",
-        chip2: "পরিষ্কার কোড স্নsnippet",
+        customPromptTitle: "কাস্টম প্রম্পট",
+        customPromptSubtitle: "Alora আপনার নির্দেশমতো ঠিক যেভাবে উত্তর দেবে ও আচরণ করবে, তা এখানে নিজের মতো করে লিখে দিন। Alora আপনার দেওয়া এই প্রম্পট সর্বোচ্চ অগ্রাধিকার দিয়ে অক্ষরে অক্ষরে পালন করবে।",
+        placeholder: "যেমন: 'তুমি একজন অভিজ্ঞ ফুলস্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার। অপ্রয়োজনীয় কথা ছাড়া সবসময় সম্পূর্ণ কার্যকরী কোড দেবে। জটিল বিষয় বাস্তব উদাহরণ দিয়ে সহজ ভাষায় বুঝিয়ে বলবে।'\n\nআপনি যেভাবে চান Alora ঠিক সেভাবেই চলবে।",
+        priorityBadge: "★ সর্বোচ্চ অগ্রাধিকার পাবে",
+        chipsLabel: "দ্রুত ব্যবহারের জন্য কিছু আইডিয়া:",
+        chip1: "সফটওয়্যার আর্কিটেক্ট",
+        chip2: "সংক্ষিপ্ত ও টু-দ্য-পয়েন্ট",
         chip3: "সহজ বাস্তব উদাহরণ",
-        chip4: "সফটওয়্যার আর্কিটেক্ট",
-        labelMemory: "ক্রস-সেশন মেমোরি",
-        descMemory: "চ্যাট সেশনগুলোর মাঝে আপনার পছন্দ ও প্রাসঙ্গিক তথ্য মনে রাখবে",
-        btnSave: "সংরক্ষণ করুন",
-        saved: "ব্যক্তিগতকরণ পছন্দ সংরক্ষিত হয়েছে!",
-        tone_balanced_title: "ভারসাম্যপূর্ণ ও স্বাভাবিক (ডিফল্ট)",
-        tone_balanced_desc: "স্বাভাবিক কথোপকথন ও পরিমিত তথ্যের সমন্বয়",
-        tone_concise_title: "সংক্ষিপ্ত ও সরাসরি",
-        tone_concise_desc: "অপ্রয়োজনীয় কথা বাদ দিয়ে বুলেট পয়েন্টে সরাসরি উত্তর",
-        tone_detailed_title: "বিস্তারিত ও গভীর",
-        tone_detailed_desc: "পুঙ্খানুপুঙ্খ ব্যাখ্যা, বিশদ বিবরণ ও কোড উদাহরণসহ",
-        tone_academic_title: "একাডেমিক ও গবেষণামূলক",
-        tone_academic_desc: "প্রাতিষ্ঠানিক মানসম্পন্ন ও যুক্তিভিত্তিক বিশ্লেষণ",
-        tone_friendly_title: "বন্ধুত্বপূর্ণ ও আন্তরিক",
-        tone_friendly_desc: "আন্তরিক, সহজবোধ্য ও অনুভূতিশীল ভঙ্গি",
-        lang_auto_title: "স্বয়ংক্রিয় শনাক্তকরণ (ডিফল্ট)",
-        lang_auto_desc: "আপনি যে ভাষায় প্রশ্ন করবেন সেই ভাষায় উত্তর দেবে",
-        lang_bn_title: "সর্বদা বাংলায় (বাংলা)",
-        lang_bn_desc: "সবসময় খাঁটি, সাবলীল ও প্রাঞ্জল বাংলায় উত্তর প্রদান করবে",
-        lang_en_title: "সর্বদা ইংরেজিতে (English)",
-        lang_en_desc: "সর্বদা শুদ্ধ ও সাবলীল ইংরেজিতে উত্তর প্রদান করবে"
+        chip4: "সহানুভূতিশীল মেন্টর",
+        chip5: "গভীর বিশ্লেষণ",
+        chip6: "ক্রিয়েটিভ রাইটিং",
+        btnSave: "প্রম্পট সংরক্ষণ করুন",
+        btnClear: "মুছে ফেলুন",
+        saved: "কাস্টম প্রম্পট সফলভাবে সংরক্ষিত হয়েছে!",
+        cleared: "কাস্টম প্রম্পট মুছে ফেলা হয়েছে"
       },
       en: {
         back: "Settings",
         pageTitle: "Personalization",
-        assistantPrefTitle: "Assistant Preferences",
-        labelTone: "Response Tone",
-        labelResponseLang: "Primary Language",
-        labelCustomInstructions: "Custom Instructions",
-        placeholder: "Tell Alora how you'd like it to respond (e.g., 'I am a software engineer, prefer JavaScript code snippets with concise explanations')",
-        chipsLabel: "Quick suggestions:",
-        chip1: "Concise bullets",
-        chip2: "Clean code snippets",
-        chip3: "Simple examples",
-        chip4: "Software architect",
-        labelMemory: "Cross-Session Memory",
-        descMemory: "Remember context and custom preferences across chat sessions",
-        btnSave: "Save Preferences",
-        saved: "Personalization preferences saved successfully!",
-        tone_balanced_title: "Balanced & Natural (Default)",
-        tone_balanced_desc: "Versatile tone with natural flow and clear depth",
-        tone_concise_title: "Concise & Direct",
-        tone_concise_desc: "Short, bullet-pointed answers without fluff",
-        tone_detailed_title: "In-depth & Comprehensive",
-        tone_detailed_desc: "Deep explanations, background context, and code",
-        tone_academic_title: "Academic & Research",
-        tone_academic_desc: "Formal, analytical, and structured scientific prose",
-        tone_friendly_title: "Warm & Conversational",
-        tone_friendly_desc: "Empathetic, approachable, and engaging friendly style",
-        lang_auto_title: "Auto-detect (Default)",
-        lang_auto_desc: "Automatically replies in the language you ask",
-        lang_bn_title: "Always Bengali (বাংলা)",
-        lang_bn_desc: "Consistently replies in fluent, natural Bengali",
-        lang_en_title: "Always English",
-        lang_en_desc: "Always replies in fluent, natural English"
+        customPromptTitle: "Custom Prompt",
+        customPromptSubtitle: "Instruct Alora how to behave, talk, and assist you. Alora will strictly follow whatever instructions you provide here.",
+        placeholder: "e.g., 'You are a Senior Full-Stack Software Engineer. Always provide clean, production-ready code with concise explanations. Use simple real-world analogies.'\n\nAlora will adapt 100% to your needs.",
+        priorityBadge: "★ Highest Priority Applied",
+        chipsLabel: "Quick ideas to get started:",
+        chip1: "Software Architect",
+        chip2: "Concise & Direct",
+        chip3: "Simple Examples",
+        chip4: "Empathetic Mentor",
+        chip5: "Deep Analysis",
+        chip6: "Creative Writing",
+        btnSave: "Save Custom Prompt",
+        btnClear: "Clear",
+        saved: "Custom prompt saved successfully!",
+        cleared: "Custom prompt cleared"
       }
     };
 
@@ -844,61 +566,34 @@
       document.getElementById("langBtnText").textContent = isEn ? "বাং" : "EN";
       document.getElementById("backText").textContent = d.back;
       document.getElementById("pageTitle").textContent = d.pageTitle;
-      document.getElementById("assistantPrefTitle").textContent = d.assistantPrefTitle;
-      document.getElementById("labelTone").textContent = d.labelTone;
-      document.getElementById("labelResponseLang").textContent = d.labelResponseLang;
-      document.getElementById("labelCustomInstructions").textContent = d.labelCustomInstructions;
+      document.getElementById("customPromptTitle").textContent = d.customPromptTitle;
+      document.getElementById("customPromptSubtitle").textContent = d.customPromptSubtitle;
       document.getElementById("customInstructions").placeholder = d.placeholder;
-      document.getElementById("labelMemory").textContent = d.labelMemory;
-      document.getElementById("descMemory").textContent = d.descMemory;
-      document.getElementById("btnSaveText").textContent = d.btnSave;
-      document.title = `${d.pageTitle} — Alora`;
-
-      const cLabel = document.getElementById("chipsLabel");
-      if (cLabel && d.chipsLabel) cLabel.textContent = d.chipsLabel;
-      for (let i = 1; i <= 4; i++) {
+      document.getElementById("priorityBadge").textContent = d.priorityBadge;
+      document.getElementById("chipsLabel").textContent = d.chipsLabel;
+      for (let i = 1; i <= 6; i++) {
         const ct = document.getElementById(`chipTxt${i}`);
         if (ct && d[`chip${i}`]) ct.textContent = d[`chip${i}`];
       }
-
-      // Translate Tone Cards
-      const toneMap = {
-        balanced: ["toneTitleBalanced", "toneDescBalanced"],
-        concise: ["toneTitleConcise", "toneDescConcise"],
-        detailed: ["toneTitleDetailed", "toneDescDetailed"],
-        academic: ["toneTitleAcademic", "toneDescAcademic"],
-        friendly: ["toneTitleFriendly", "toneDescFriendly"]
-      };
-      Object.keys(toneMap).forEach(key => {
-        const [tId, dId] = toneMap[key];
-        const tEl = document.getElementById(tId);
-        const dEl = document.getElementById(dId);
-        if (tEl && d[`tone_${key}_title`]) tEl.textContent = d[`tone_${key}_title`];
-        if (dEl && d[`tone_${key}_desc`]) dEl.textContent = d[`tone_${key}_desc`];
-      });
-
-      // Translate Language Cards
-      const langMap = {
-        auto: ["langTitleAuto", "langDescAuto"],
-        bn: ["langTitleBn", "langDescBn"],
-        en: ["langTitleEn", "langDescEn"]
-      };
-      Object.keys(langMap).forEach(key => {
-        const [tId, dId] = langMap[key];
-        const tEl = document.getElementById(tId);
-        const dEl = document.getElementById(dId);
-        if (tEl && d[`lang_${key}_title`]) tEl.textContent = d[`lang_${key}_title`];
-        if (dEl && d[`lang_${key}_desc`]) dEl.textContent = d[`lang_${key}_desc`];
-      });
+      document.getElementById("btnSaveText").textContent = d.btnSave;
+      document.getElementById("btnClearText").textContent = d.btnClear;
+      document.title = `${d.pageTitle} — Alora`;
+      updateCounter();
     }
 
     document.getElementById("savePersonalizationBtn")?.addEventListener("click", () => {
-      localStorage.setItem("alokpoth_ai_tone", toneSelect ? toneSelect.value : currentTone);
-      localStorage.setItem("alokpoth_primary_lang", langPrefSelect ? langPrefSelect.value : currentLangPref);
-      localStorage.setItem("alokpoth_custom_instructions", customInstructions.value.trim());
-      localStorage.setItem("alokpoth_memory_enabled", String(memoryToggle.checked));
+      const val = customInstructions ? customInstructions.value.trim() : "";
+      localStorage.setItem("alokpoth_custom_instructions", val);
       const d = I18N[currentLanguage] || I18N.en;
       showToast(d.saved);
+    });
+
+    document.getElementById("clearPromptBtn")?.addEventListener("click", () => {
+      if (customInstructions) customInstructions.value = "";
+      localStorage.removeItem("alokpoth_custom_instructions");
+      updateCounter();
+      const d = I18N[currentLanguage] || I18N.en;
+      showToast(d.cleared);
     });
 
     // Back button navigation
@@ -920,4 +615,3 @@
   </script>
 </body>
 </html>
-
