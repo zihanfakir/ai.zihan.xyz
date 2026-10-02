@@ -5145,7 +5145,7 @@
   <script>
     // Smart API Base: local → localhost, Vercel preview → Vercel, everything else → Render backend
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const RENDER_BACKEND = "https://alora-backend.onrender.com";
+    const RENDER_BACKEND = "https://alora-backend-emw3.onrender.com";
     const BACKEND_URL = (isLocal && window.location.port === '5000')
       ? window.location.origin
       : (window.location.origin.includes('vercel.app') ? window.location.origin : RENDER_BACKEND);
