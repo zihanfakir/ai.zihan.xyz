@@ -16,14 +16,17 @@ const createRateLimiter = ({
   if (cleanup.unref) cleanup.unref();
 
   return (req, res, next) => {
-    const vercelIp = req.headers['x-real-ip'] || req.headers['x-vercel-forwarded-for'];
+    const cfIp = req.headers['cf-connecting-ip'];
+    const realIp = req.headers['x-real-ip'] || req.headers['x-vercel-forwarded-for'];
     const xff = req.headers['x-forwarded-for'];
-    // X-Forwarded-For can be spoofed. In Vercel/AWS, the true IP is often appended last, or better, use x-real-ip.
     let resolvedIp = req.socket?.remoteAddress || req.ip || '127.0.0.1';
-    if (vercelIp) resolvedIp = Array.isArray(vercelIp) ? vercelIp[0] : vercelIp.split(',')[0].trim();
-    else if (xff) {
-      const parts = Array.isArray(xff) ? xff[0].split(',') : xff.split(',');
-      resolvedIp = parts[parts.length - 1].trim(); // Get the last appended IP (the real one added by the trusted proxy)
+    if (cfIp) {
+      resolvedIp = Array.isArray(cfIp) ? cfIp[0].trim() : String(cfIp).split(',')[0].trim();
+    } else if (realIp) {
+      resolvedIp = Array.isArray(realIp) ? realIp[0].trim() : String(realIp).split(',')[0].trim();
+    } else if (xff) {
+      const parts = Array.isArray(xff) ? xff[0].split(',') : String(xff).split(',');
+      resolvedIp = parts[0].trim();
     }
     const rawIp = resolvedIp;
     const cleanIp = String(rawIp).replace(/^::ffff:/, '');
@@ -56,7 +59,7 @@ const createRateLimiter = ({
     if (record.count > max) {
       const retryAfterSec = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
       res.setHeader('Retry-After', retryAfterSec);
-      return res.status(429).json({ success: false, error: message });
+      return res.status(429).json({ success: false, error: message, retry_after: retryAfterSec });
     }
 
     next();

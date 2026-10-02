@@ -1500,25 +1500,6 @@
     const loginError = document.getElementById("loginError");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    /* Toast Notification */
-    function showToast(message, type = "success") {
-      const container = document.getElementById("toastContainer");
-      const toast = document.createElement("div");
-      toast.className = `toast toast-${type}`;
-      
-      const icon = type === "success" ? "✓" : (type === "error" ? "✕" : "ℹ");
-      toast.innerHTML = `
-        <div class="toast-icon">${icon}</div>
-        <div class="toast-msg">${message}</div>
-      `;
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.add("hide");
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
     /* HTML Escaping helper to prevent Stored XSS */
     function escapeHtml(str) {
       if (str === null || str === undefined) return "";
@@ -1530,6 +1511,26 @@
         .replace(/'/g, "&#039;");
     }
 
+    /* Toast Notification */
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      
+      const icon = type === "success" ? "✓" : (type === "error" ? "✕" : "ℹ");
+      toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-msg">${escapeHtml(message)}</div>
+      `;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add("hide");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
     /* Custom Confirm Modal */
     function customConfirm(message, title = "নিশ্চিতকরণ") {
       return new Promise((resolve) => {
@@ -1539,18 +1540,23 @@
         const okBtn = document.getElementById("confirmModalOkBtn");
         const cancelBtn = document.getElementById("confirmModalCancelBtn");
 
-        titleEl.textContent = title;
-        bodyEl.textContent = message;
+        if (!overlay || !okBtn || !cancelBtn) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (bodyEl) bodyEl.textContent = message;
         overlay.classList.add("open");
 
         function onBackdrop(e) { if (e.target === overlay) { cleanup(); resolve(false); } }
         function onKey(e) { if (e.key === "Escape") { cleanup(); resolve(false); } }
 
         function cleanup() {
-          overlay.classList.remove("open");
-          okBtn.removeEventListener("click", onOk);
-          cancelBtn.removeEventListener("click", onCancel);
-          overlay.removeEventListener("click", onBackdrop);
+          if (overlay) overlay.classList.remove("open");
+          if (okBtn) okBtn.removeEventListener("click", onOk);
+          if (cancelBtn) cancelBtn.removeEventListener("click", onCancel);
+          if (overlay) overlay.removeEventListener("click", onBackdrop);
           document.removeEventListener("keydown", onKey);
         }
 
@@ -1574,8 +1580,13 @@
         const okBtn = document.getElementById("promptModalOkBtn");
         const cancelBtn = document.getElementById("promptModalCancelBtn");
 
-        titleEl.textContent = title;
-        descEl.textContent = description;
+        if (!overlay || !okBtn || !cancelBtn || !inputEl) {
+          resolve(window.prompt(description || title, defaultValue));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (descEl) descEl.textContent = description;
         inputEl.value = defaultValue;
         overlay.classList.add("open");
         setTimeout(() => inputEl.focus(), 50);
@@ -1587,10 +1598,10 @@
         }
 
         function cleanup() {
-          overlay.classList.remove("open");
-          okBtn.removeEventListener("click", onOk);
-          cancelBtn.removeEventListener("click", onCancel);
-          overlay.removeEventListener("click", onBackdrop);
+          if (overlay) overlay.classList.remove("open");
+          if (okBtn) okBtn.removeEventListener("click", onOk);
+          if (cancelBtn) cancelBtn.removeEventListener("click", onCancel);
+          if (overlay) overlay.removeEventListener("click", onBackdrop);
           document.removeEventListener("keydown", onKey);
         }
 
@@ -2538,7 +2549,8 @@
         const uId = u._id || u.id;
         const plan = u.subscription?.plan_name || 'Free';
         const planBadge = plan === "Max" ? '<span class="tag tag-max">Max</span>' : (plan === "Pro" ? '<span class="tag tag-pro">Pro</span>' : '<span class="tag tag-free">Free</span>');
-        const exp = u.subscription?.expires_at ? new Date(u.subscription.expires_at).toLocaleDateString("bn-BD") : "সীমাহীন";
+        const expDate = u.subscription?.expires_at ? new Date(u.subscription.expires_at) : null;
+        const exp = (expDate && !isNaN(expDate.getTime())) ? expDate.toLocaleDateString("bn-BD") : "সীমাহীন";
         
         const tr = document.createElement("tr");
         tr.innerHTML = `

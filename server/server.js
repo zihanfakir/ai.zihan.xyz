@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const redeemRoutes = require('./routes/redeemRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 const app = express();
 
@@ -129,15 +130,48 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/redeem', redeemLimiter, redeemRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/search', searchRoutes);
 
 // Health check
 const serverHealthHandler = (req, res) => {
-  res.json({ success: true, status: 'ok', server: 'Alora AI Backend Running', time: new Date() });
+  res.json({
+    success: true,
+    status: 'ok',
+    server: 'Alora AI Backend Running',
+    mongo: getIsMongoConnected(),
+    timestamp: new Date().toISOString()
+  });
 };
 app.get('/api/health', serverHealthHandler);
 app.head('/api/health', (req, res) => res.status(200).end());
+app.get('/health', serverHealthHandler);
+app.head('/health', (req, res) => res.status(200).end());
 app.get('/', serverHealthHandler);
 app.head('/', (req, res) => res.status(200).end());
+
+// Diagnostic debug-models endpoint
+app.get('/api/debug-models', async (req, res) => {
+  try {
+    const { getPersistedModels, getDeletedModelIds } = require('../utils/getModelConfig');
+    const isMongo = getIsMongoConnected();
+    const deleted = Array.from(await getDeletedModelIds());
+    const persisted = await getPersistedModels();
+    let mongoList = [];
+    if (isMongo) {
+      mongoList = await AiModel.find().lean().catch(e => ({ error: e.message }));
+    }
+    res.json({
+      success: true,
+      isMongo,
+      deleted,
+      persistedCount: Array.isArray(persisted) ? persisted.length : 0,
+      mongoCount: Array.isArray(mongoList) ? mongoList.length : 0,
+      mongoList
+    });
+  } catch(e) {
+    res.status(500).json({ error: e.message, stack: e.stack });
+  }
+});
 
 // Public plans and limits info
 app.get('/api/plans', async (req, res) => {
@@ -222,7 +256,7 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'sw.js'));
 });
 
-// Dedicated settings pages
+// Dedicated settings and feature pages
 app.get('/profile.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'profile.html')));
 app.get('/security.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'security.html')));
 app.get('/subscription.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'subscription.html')));
@@ -230,11 +264,17 @@ app.get('/usage.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'usage.htm
 app.get('/theme.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'theme.html')));
 app.get('/sound.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'sound.html')));
 app.get('/personalization.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'personalization.html')));
+app.get('/language.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'language.html')));
 app.get('/help.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'help.html')));
 app.get('/redeem.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'redeem.html')));
 app.get('/download.html', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
 app.get('/download', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
 app.get('/app', (req, res) => res.sendFile(path.join(ROOT_DIR, 'download.html')));
+
+// Extensionless Clean Page Routes
+['plans', 'login', 'account', 'profile', 'security', 'subscription', 'usage', 'theme', 'sound', 'personalization', 'language', 'help', 'redeem', 'admin'].forEach(p => {
+  app.get(`/${p}`, (req, res) => res.sendFile(path.join(ROOT_DIR, `${p}.html`)));
+});
 
 // 404 handler
 app.use((req, res) => {

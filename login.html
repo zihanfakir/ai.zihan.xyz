@@ -1131,7 +1131,19 @@
           showAlert(currentMode === "login" ? d.loginSuccess : d.registerSuccess, "success");
 
           setTimeout(() => {
-            const redirect = urlParams.get("redirect") || "index.html";
+            let redirect = urlParams.get("redirect") || "index.html";
+            if (/^(?:[a-z]+:|\/\/)/i.test(redirect) || redirect.startsWith('\\')) {
+              try {
+                const parsed = new URL(redirect, window.location.origin);
+                if (parsed.origin !== window.location.origin) {
+                  redirect = "index.html";
+                } else {
+                  redirect = parsed.pathname + parsed.search + parsed.hash;
+                }
+              } catch {
+                redirect = "index.html";
+              }
+            }
             window.location.href = redirect;
           }, 800);
         } else {

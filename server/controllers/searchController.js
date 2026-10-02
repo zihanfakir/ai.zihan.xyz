@@ -181,7 +181,7 @@ async function executeSearch(query, forcedSettings = null) {
 
 const searchDuckDuckGo = async (req, res) => {
   try {
-    const query = req.query.q;
+    const query = req.query.q || req.query.query;
     if (!query || typeof query !== 'string' || !query.trim()) {
       return res.status(400).json({ success: false, error: 'Query is required' });
     }

@@ -4290,7 +4290,7 @@
         <span style="display: inline-flex; align-items: center; height: 26px;">
           <img class="theme-wordmark" src="logo_wordmark_white.png" alt="Alora" style="height: 24px; width: auto; object-fit: contain;" onerror="if(!this.src.includes('/logo/'))this.src='logo/logo_wordmark_white.png';">
         </span>
-        <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close" aria-label="Close">
+        <button class="modal-close" id="brandMenuClose" type="button" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -4413,7 +4413,7 @@
     <div class="modal-sheet">
       <div class="modal-header">
         <span>মডেল বেছে নিন</span>
-        <button class="modal-close" id="modelModalClose" type="button" aria-label="Close" aria-label="Close">
+        <button class="modal-close" id="modelModalClose" type="button" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -5126,7 +5126,7 @@
 
       <!-- Right Action Tools: Voice, Send -->
       <div class="composer-tools composer-tools-right">
-        <button type="button" class="native-mic-btn" id="micBtn" aria-label="ভয়েস রেকর্ড বা কল" title="Voice Mode" aria-label="Voice input">
+        <button type="button" class="native-mic-btn" id="micBtn" aria-label="Voice input" title="Voice Mode">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -10513,7 +10513,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
             <div class="chat-history-item-title"></div>
             <div class="chat-history-item-meta">${dateStr}</div>
           </div>
-          <button type="button" class="chat-history-delete-btn" aria-label="মুছুন" aria-label="Delete">
+          <button type="button" class="chat-history-delete-btn" aria-label="মুছুন">
             <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
         `;
@@ -11318,8 +11318,8 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
           const blob = new Blob([currentCode], { type: "text/plain;charset=utf-8" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
-          a.href = url; a.download = `code.${ext}`;
-          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
           showToast(isEnCode ? `code.${ext} downloaded successfully` : `code.${ext} ডাউনলোড হয়েছে`, "success");
         });
         
@@ -11814,7 +11814,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         a.href = blobUrl;
         a.download = `alora-ai-image-${Date.now()}.png`;
         document.body.appendChild(a); a.click(); a.remove();
-        if (blobUrl !== imageUrl) URL.revokeObjectURL(blobUrl);
+        if (blobUrl !== imageUrl) setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
         showToast("ছবি ডাউনলোড হয়েছে", "success");
       } catch (err) {
         window.open(imageUrl, "_blank");

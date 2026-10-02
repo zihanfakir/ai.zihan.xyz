@@ -203,7 +203,10 @@ function isDynamicOrApiRequest(url, req) {
       host.includes('anthropic.com') ||
       host.includes('openai.com') ||
       host.includes('huggingface.co') ||
-      host.includes('pollinations.ai')
+      host.includes('pollinations.ai') ||
+      host.includes('onrender.com') ||
+      host.includes('render.com') ||
+      host.includes('supabase.co')
     ) {
       return true;
     }

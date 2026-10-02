@@ -1443,6 +1443,12 @@
           },
           body: JSON.stringify({ code: rawCode })
         });
+        if (res.status === 401) {
+          localStorage.removeItem("alokpoth_token");
+          showToast(currentLanguage === "en" ? "Session expired. Please log in again." : "লগইন সেশন শেষ হয়ে গেছে। অনুগ্রহ করে আবার লগইন করুন।", "error");
+          setTimeout(() => { window.location.href = "login.html?redirect=plans.html"; }, 1500);
+          return;
+        }
         const data = await res.json();
         if (res.ok && data.success) {
           const newPlan = data.plan_name || (data.subscription && data.subscription.plan_name) || "Pro";
@@ -1801,6 +1807,10 @@
             } catch {}
             updateUserPlanButtons();
           }
+        } else if (res.status === 401) {
+          localStorage.removeItem("alokpoth_token");
+          userCurrentPlan = "Free";
+          updateUserPlanButtons();
         }
       } catch (e) {}
     }
