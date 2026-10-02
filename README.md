@@ -1,14 +1,14 @@
-# Alokpoth AI — ai.zihan.xyz
+# Alora AI — ai.zihan.xyz
 
 বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন।
 
 ## 📱 Android App (অ্যান্ড্রয়েড অ্যাপ ডাউনলোড)
 
-Alo AI এখন অ্যান্ড্রয়েডে সরাসরি নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
+Alora এখন অ্যান্ড্রয়েডে সরাসরি হাই-পারফরম্যান্স নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
 
-- 📥 **সরাসরি ডাউনলোড:** [**AloAI.apk (Direct Download v1.0.5)**](https://github.com/zihanfakir/ai.zihan.xyz/releases/download/v1.0.5/AloAI.apk)
-- 🏷️ **GitHub Releases:** [Latest Release v1.0.5](https://github.com/zihanfakir/ai.zihan.xyz/releases/latest)
-- ⚡ **ফিচারসমূহ:** মোবাইল কিবোর্ড স্ক্রোল ফিক্স (টাইপ বারের নিচে স্ক্রোল করলে পেজ সরে যাওয়ার সমস্যার সমাধান), ইন-অ্যাপ লোগো অপসারণ করে ক্লিন ইন্টারফেস, শুধুমাত্র মডেল চয়েস ডায়ালগে PRO/MAX ব্যাজ প্রদর্শন, নিরাপদ এরর হ্যান্ডলিং ও রিট্রাই সাপোর্ট।
+- 📥 **সরাসরি ডাউনলোড:** [**Alora.apk (Direct Download v1.2.0)**](https://ai.zihan.xyz/Alora.apk)
+- 🌐 **ডাউনলোড পেজ:** [**ai.zihan.xyz/download**](https://ai.zihan.xyz/download)
+- ⚡ **ফিচারসমূহ (v1.2.0):** ডিপ থিঙ্কিং অন/অফ টগল, সুপারফাস্ট 120Hz স্ক্রলিং ও টাচ রেসপন্স, পিউর AMOLED ডার্ক মোড, অফলাইন চ্যাট ক্যাশিং এবং আল্ট্রা-স্মুথ নেটিভ ইন্টারফেস।
 
 ## Features
 

@@ -1,8 +1,9 @@
-/* Alora AI - Progressive Web App Service Worker (v1.5.2) */
-const CACHE_NAME = 'alora-ai-v1.5.2';
+/* Alora AI - Progressive Web App Service Worker (v1.5.3) */
+const CACHE_NAME = 'alora-ai-v1.5.3';
 const CORE_ASSETS = [
   '/',
   '/index.html',
+  '/download.html',
   '/account.html',
   '/plans.html',
   '/login.html',
@@ -60,8 +61,8 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Skip non-GET-requests, API calls, and anti-cache timestamped requests
-  if (req.method !== 'GET' || url.pathname.includes('/api/') || url.searchParams.has('_t')) {
+  // Skip non-GET-requests, API calls, binary downloads, and anti-cache timestamped requests
+  if (req.method !== 'GET' || url.pathname.includes('/api/') || url.pathname.endsWith('.apk') || url.pathname.endsWith('.ipa') || url.searchParams.has('_t')) {
     return;
   }
 

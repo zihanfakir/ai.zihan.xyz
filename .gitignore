@@ -75,6 +75,8 @@ account_limits_view_*.png
 !ios/**/*.png
 !Alokpoth.ipa
 !AloAI.apk
+!Alora.apk
+!Alora.ipa
 
 # Android build outputs & caches
 android/.gradle/
