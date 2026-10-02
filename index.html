@@ -1897,6 +1897,274 @@
       stroke-linejoin: round;
     }
 
+    /* ===== Polished In-Chat Image Generating Card ===== */
+    .chat-image-generating-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card, rgba(255, 255, 255, 0.04));
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 6px 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+    }
+    .chat-image-generating-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 2.5px;
+      background: linear-gradient(90deg, transparent, #ec4899, #8b5cf6, #3b82f6, transparent);
+      animation: imageCardGlow 2s linear infinite;
+    }
+    @keyframes imageCardGlow {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(50%); }
+    }
+    .chat-image-generating-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .chat-image-generating-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chat-image-generating-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2.5px solid rgba(236, 72, 153, 0.2);
+      border-top-color: #ec4899;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .chat-image-generating-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+    .chat-image-generating-sub {
+      font-size: 0.74rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    .chat-image-switch-text-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-sub);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .chat-image-switch-text-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
+    .chat-image-prompt-quote {
+      font-size: 0.82rem;
+      color: var(--text-main);
+      background: var(--bg-input);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      font-style: italic;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .chat-image-skeleton-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: rgba(128, 128, 128, 0.08);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-image-skeleton-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      animation: shimmer 1.6s infinite;
+    }
+    .chat-image-skeleton-badge {
+      position: relative;
+      z-index: 2;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(6px);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* ===== Polished In-Chat Image Result Card ===== */
+    .chat-image-result-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card, rgba(255, 255, 255, 0.03));
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      overflow: hidden;
+      margin: 6px 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+    .chat-image-result-card:hover {
+      border-color: rgba(236, 72, 153, 0.4);
+    }
+    .chat-image-result-header {
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.76rem;
+      color: var(--text-sub);
+    }
+    .chat-image-prompt-tag {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .chat-image-result-img-wrap {
+      position: relative;
+      width: 100%;
+      background: rgba(0,0,0,0.2);
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+    .chat-image-result-img {
+      width: 100%;
+      height: auto;
+      max-height: 520px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+    .chat-image-result-img-wrap:hover .chat-image-result-img {
+      transform: scale(1.015);
+    }
+    .chat-image-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: var(--bg-input);
+      border-top: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+    .chat-image-tool-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .chat-image-tool-btn:hover {
+      background: var(--sheen-base-hover, rgba(128, 128, 128, 0.15));
+      border-color: var(--accent-primary);
+    }
+    .chat-image-tool-btn.primary {
+      background: var(--accent-primary, #3b82f6);
+      color: #fff;
+      border-color: transparent;
+    }
+    .chat-image-tool-btn.primary:hover {
+      opacity: 0.92;
+    }
+
+    /* ===== Composer Image Mode Active Indicator Bar ===== */
+    .image-mode-indicator-bar {
+      max-width: 800px;
+      margin: 0 auto 8px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(236, 72, 153, 0.12);
+      border: 1.5px solid rgba(236, 72, 153, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: fadeIn 0.2s ease;
+    }
+    .image-mode-indicator-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      font-size: 0.82rem;
+    }
+    .image-mode-indicator-text {
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .image-mode-indicator-text strong {
+      color: #ec4899;
+      margin-right: 4px;
+    }
+    .image-mode-cancel-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--text-main);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .image-mode-cancel-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+
     /* ===== My Library (আমার লাইব্রেরি) Styles ===== */
     .modal-overlay.page-modal .library-container {
       width: 100% !important;
@@ -5634,6 +5902,21 @@
     <div class="image-preview-row" id="imagePreviewRow"></div>
     <div class="file-preview-row" id="filePreviewRow"></div>
 
+    <!-- Active Image Mode Indicator Bar with Cancel Option -->
+    <div class="image-mode-indicator-bar" id="imageModeIndicatorBar" style="display:none;">
+      <div class="image-mode-indicator-content">
+        <span style="font-size: 1.05rem; line-height: 1;">🎨</span>
+        <div class="image-mode-indicator-text">
+          <strong>ছবি তৈরি মোড সক্রিয়:</strong>
+          <span id="imageModePromptPreview">AI ছবি তৈরি করা হবে</span>
+        </div>
+      </div>
+      <button type="button" class="image-mode-cancel-btn" id="imageModeCancelBtn" title="ছবি বাতিল করে সাধারণ টেক্সট হিসেবে পাঠান">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <span>সাধারণ টেক্সট পাঠান</span>
+      </button>
+    </div>
+
     <form class="input-card" id="chatForm">
       <input type="file" id="imageInput" accept="image/*" style="display:none" multiple>
       <input type="file" id="docInput" accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.css,.js,.jsx,.ts,.tsx" style="display:none" multiple>
@@ -7776,9 +8059,16 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
     const PING_TIMEOUT_MS = 8000;
     let pingInFlight = false;
 
-    function fetchWithTimeout(url, opts, timeoutMs) {
+    function fetchWithTimeout(url, opts = {}, timeoutMs = 60000) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeoutMs);
+      if (opts.signal) {
+        if (opts.signal.aborted) {
+          controller.abort(opts.signal.reason);
+        } else {
+          opts.signal.addEventListener("abort", () => controller.abort(opts.signal.reason), { once: true });
+        }
+      }
       return fetch(url, { ...opts, signal: controller.signal }).finally(() => clearTimeout(id));
     }
 
@@ -12074,7 +12364,13 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
     userInput.addEventListener("input", () => {
       userInput.style.height = "auto";
       userInput.style.height = `${Math.min(userInput.scrollHeight, 150)}px`;
+      if (!userInput.value.trim()) {
+        window._forceTextResponse = false;
+      }
       updateSendAvailability();
+      if (typeof updateImageModeIndicator === "function") {
+        updateImageModeIndicator();
+      }
     });
 
     userInput.addEventListener("keydown", (e) => {
@@ -12735,40 +13031,155 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       return intervalId;
     }
 
-    function setBubbleGeneratingImage(element) {
+    function setBubbleGeneratingImage(element, promptText, onSwitchToText) {
       const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      setBubbleStatus(element, "generating", isEn ? "Generating image..." : "ছবি তৈরি হচ্ছে...");
+      element.classList.add("streaming");
+
+      const cleanPrompt = (promptText || "")
+        .replace(/^\/(image|draw|img|photo|picture|pollinations)\s*/i, "")
+        .replace(/^(modify|edit|change)\s+(image|photo)\s*[:：\-]?\s*/i, "")
+        .replace(/(একটি|একটা)?\s*(ছবি|ইমেজ|ফটো)\s*(আঁকো|বানাও|দাও|তৈরি করো|এঁকে দাও)?/i, "")
+        .trim();
+
+      const displayPrompt = cleanPrompt ? `"${escapeHtml(cleanPrompt.slice(0, 80))}${cleanPrompt.length > 80 ? '...' : ''}"` : (isEn ? "Creative AI Image" : "সুন্দর চিত্রকর্ম");
+
+      element.innerHTML = `
+        <div class="chat-image-generating-card">
+          <div class="chat-image-generating-top">
+            <div class="chat-image-generating-title-wrap">
+              <div class="chat-image-generating-spinner"></div>
+              <div>
+                <div class="chat-image-generating-title">${isEn ? "Generating AI Image..." : "AI ছবি তৈরি হচ্ছে..."}</div>
+                <div class="chat-image-generating-sub" id="chatImageGenTimer">${isEn ? "Rendering high quality pixels..." : "পিক্সেল ও লাইটিং রেন্ডার হচ্ছে..."}</div>
+              </div>
+            </div>
+            <button type="button" class="chat-image-switch-text-btn" id="chatImageSwitchTextBtn" title="${isEn ? 'Cancel image and answer with text' : 'ছবি বাতিল করে টেক্সট উত্তর নিন'}">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>${isEn ? "Switch to Text" : "টেক্সট উত্তর নিন"}</span>
+            </button>
+          </div>
+          <div class="chat-image-prompt-quote">${displayPrompt}</div>
+          <div class="chat-image-skeleton-box">
+            <div class="chat-image-skeleton-shimmer"></div>
+            <div class="chat-image-skeleton-badge" id="chatImageSkeletonStatus">🎨 ${isEn ? "Painting details..." : "রং ও ডিটেইল সাজানো হচ্ছে..."}</div>
+          </div>
+        </div>
+      `;
+
+      // Cycle progress status hints smoothly
+      let genStep = 0;
+      const statusEl = element.querySelector("#chatImageSkeletonStatus");
+      const timerEl = element.querySelector("#chatImageGenTimer");
+      const intervalId = setInterval(() => {
+        if (!element.isConnected) {
+          clearInterval(intervalId);
+          return;
+        }
+        genStep++;
+        if (genStep === 2) {
+          if (statusEl) statusEl.textContent = isEn ? "✨ Balancing lighting & depth..." : "✨ আলো ও ডেপথ ব্যালেন্স করা হচ্ছে...";
+          if (timerEl) timerEl.textContent = isEn ? "Finishing touches..." : "ফাইনাল ফিনিশিং চলছে...";
+        } else if (genStep === 4) {
+          if (statusEl) statusEl.textContent = isEn ? "🖼️ Encoding full HD image..." : "🖼️ ফুল এইচডি ইমেজ এনকোড হচ্ছে...";
+        }
+      }, 2500);
+
+      const switchBtn = element.querySelector("#chatImageSwitchTextBtn");
+      if (switchBtn && typeof onSwitchToText === "function") {
+        switchBtn.addEventListener("click", () => {
+          clearInterval(intervalId);
+          onSwitchToText();
+        });
+      }
+
+      return intervalId;
     }
 
     function detectImageGenRequest(text) {
       if (!text || typeof text !== "string") return false;
+      if (typeof window !== "undefined" && window._forceTextResponse) return false;
       const clean = text.trim();
       if (!clean) return false;
 
-      // 1. Direct slash commands or pollinations prefix
+      // 1. Strict Negative Guards (NEVER generate an image if asking questions, explanations, codes, advice, or issues)
+      const bnNegativeGuard = /(কীভাবে|কিভাবে|কেমন করে|পদ্ধতি|নিয়ম|টিপস|উপায়|কৌশল|শেখাও|শেখা|শেখার|ব্যাখ্যা|অর্থ|সম্পর্কে|ইতিহাস|টিউটোরিয়াল|কোড|সফটওয়্যার|অ্যাপ|কেন|কি\?|কী\?|হবে কি|হয় কি|লাগবে না|চাই না|বানাবো না|আঁকবো না|বলুন|বলো|জানাও|জানান|দেখাচ্ছেনা|আসছে না|লোড হচ্ছে না|সমস্যা|কাটব|সরানো|রিমুভ|ডিলিট|ডাউনলোড|আপলোড|সাইজ|রিসাইজ|ক্রপ)/i;
+      if (bnNegativeGuard.test(clean)) return false;
+
+      const enNegativeGuard = /\b(how\s+to|how\s+can|how\s+do|what\s+is|what\s+are|why\s+is|why\s+does|explain|tutorial|tips|guide|difference|meaning|history|tell\s+me|info|information|tag|code|script|css|html|python|javascript|react|don'?t|do\s+not|learn|not\s+working|cannot\s+see|issue|problem|broken)\b/i;
+      if (enNegativeGuard.test(clean)) return false;
+
+      // 2. Direct slash commands or pollinations prefix
       if (/^\/(image|draw|img|photo|picture|pollinations)\b/i.test(clean)) return true;
       if (/^(pollinations|পোলিনেশন)\s*[:：\-]/i.test(clean)) return true;
 
-      // 2. English image generation triggers (including modify, edit, variation)
-      const enPatterns = [
-        /\b(modify|edit|change|update|transform|redraw|regenerate|enhance|remix|generate|create|draw|paint|sketch|make|render|show|give|produce)\b[\s\S]*?\b(image|picture|photo|photograph|art|wallpaper|logo|illustration|drawing|painting|avatar|portrait|banner|thumbnail)\b/i,
-        /\b(image|picture|photo|art|wallpaper|logo|illustration|drawing)\s+of\b/i,
-        /^\s*(draw|paint|sketch|generate|create|render)\s+/i,
-        /^\s*(another|next|more)\s+(image|picture|photo|one)\b/i
+      // 3. Strict Positive Bengali image generation triggers
+      const bnStrictPatterns = [
+        /(একটি|একটা|সুন্দর|নতুন|আরেকটি|আরেকটা)?\s*(ছবি|ইমেজ|ফটো|চিত্র|পেইন্টিং)\s*(এঁকে দাও|এঁকে দিন|আঁকো|আঁকুন|বানিয়ে দাও|বানিয়ে দিন|বানাও|বানান|তৈরি করো|তৈরি করুন|জেনারেট করো|জেনারেট করুন)/i,
+        /^(ছবি|ইমেজ|ফটো|চিত্র|পেইন্টিং)\s*(বানাও|আঁকো|তৈরি করো|জেনারেট করো)\s*[:：\-]?\s+/i,
+        /^(আমাকে|আমারে|আমাদের)?\s*(একটি|একটা|সুন্দর)?\s*(ছবি|ইমেজ|ফটো|চিত্র|পেইন্টিং)\s*(এঁকে|বানিয়ে|তৈরি করে|জেনারেট করে)\s*(দাও|দিন)/i,
+        /^(আরেকটা|আরেকটি|নতুন একটি|নতুন একটা)\s*(ছবি|ইমেজ|ফটো|চিত্র)\s*(বানাও|আঁকো|দাও|দিন|তৈরি করো)?$/i
       ];
-      if (enPatterns.some((p) => p.test(clean))) return true;
+      if (bnStrictPatterns.some((p) => p.test(clean))) return true;
 
-      // 3. Bengali image generation triggers (comprehensive)
-      const bnPatterns = [
-        /(ছবি|ইমেজ|ফটো|পিকচার|আর্ট|ওয়ালপেপার|লোগো|আইকন|পোস্টার|চিত্র|পেইন্টিং|অঙ্কন)\s*(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|করো|দিন|দাও|দেখাও|পাঠাও|এডিট|পরিবর্তন|বদল|আরেকটা|অন্য|নতুন)/i,
-        /(তৈরি|বানা|আঁক|জেনারেট|ড্র|বানাও|আঁকো|এঁকে|এডিট|পরিবর্তন)\s*(করে|করা)?\s*(দাও|দিন|করো)?\s*[\s\S]*?\b(ছবি|ইমেজ|ফটো|পিকচার|চিত্র|পেইন্টিং)/i,
-        /(একটি|একটা|কিছু|আমাকে|আমারে|আমার জন্য)?\s*(ছবি|ইমেজ|ফটো|পিকচার|চিত্র|পেইন্টিং)\s*(আঁকো|বানাও|দাও|দিন|দেখাও|পাঠাও|তৈরি)/i,
-        /^(আরেকটা|আরেকটি|অন্য একটা|নতুন একটা|পরেরটা|পরের ছবি|আরেকটা ছবি|আরেকটা ফটো)\s*(দাও|দিন|করো|দেখাও|বানাও)?$/i,
-        /(ছবি|ফটো|ইমেজ|পিকচার)\s*(আঁকো|বানাও|দাও|দেখাও|হবে|চাই)/i
+      // 4. Strict Positive English image generation triggers
+      const enStrictPatterns = [
+        /^\s*(generate|create|draw|paint|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|drawing|painting)\s+of\b/i,
+        /^\s*(draw|paint|sketch)\s+(me\s+)?(an?\s+)?/i,
+        /^\s*(an?\s+)?(image|picture|photo|artwork)\s+of\b/i,
+        /^(generate|create)\s+image\s*[:：\-]?\s+/i,
+        /^\s*(another|next)\s+(image|picture|photo)\b/i
       ];
-      if (bnPatterns.some((p) => p.test(clean))) return true;
+      if (enStrictPatterns.some((p) => p.test(clean))) return true;
 
       return false;
+    }
+
+    function updateImageModeIndicator() {
+      const bar = document.getElementById("imageModeIndicatorBar");
+      if (!bar || !userInput) return;
+
+      if (window._forceTextResponse) {
+        bar.style.display = "none";
+        return;
+      }
+
+      const text = userInput.value.trim();
+      const isImageMode = isImageGenEnabled || detectImageGenRequest(text);
+
+      if (isImageMode && text.length > 0) {
+        const previewEl = document.getElementById("imageModePromptPreview");
+        if (previewEl) {
+          const cleanPrompt = text
+            .replace(/^\/(image|draw|img|photo|picture|pollinations)\s*/i, "")
+            .replace(/(একটি|একটা)?\s*(ছবি|ইমেজ|ফটো)\s*(আঁকো|বানাও|দাও|তৈরি করো|এঁকে দাও)?/i, "")
+            .trim();
+          previewEl.textContent = cleanPrompt ? `"${cleanPrompt.slice(0, 45)}${cleanPrompt.length > 45 ? '...' : ''}"` : (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "AI image will be generated" : "AI ছবি তৈরি করা হবে");
+        }
+        bar.style.display = "flex";
+      } else {
+        bar.style.display = "none";
+      }
+    }
+
+    // Bind Image Mode Indicator cancel button
+    const initImageModeCancelBtn = () => {
+      const cancelBtn = document.getElementById("imageModeCancelBtn");
+      if (cancelBtn && !cancelBtn._bound) {
+        cancelBtn._bound = true;
+        cancelBtn.addEventListener("click", () => {
+          window._forceTextResponse = true;
+          isImageGenEnabled = false;
+          updateAttachBtnActiveState();
+          const bar = document.getElementById("imageModeIndicatorBar");
+          if (bar) bar.style.display = "none";
+          showToast(typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Switched to standard text answer" : "সাধারণ টেক্সট উত্তরে পরিবর্তন করা হয়েছে", "info");
+        });
+      }
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initImageModeCancelBtn);
+    } else {
+      initImageModeCancelBtn();
     }
 
     async function generateImageViaServer(prompt, options = {}) {
@@ -12782,11 +13193,14 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       if (options.model) payload.model = options.model;
       if (options.enhance !== undefined) payload.enhance = options.enhance;
 
-      const res = await fetchWithTimeout(`${API_BASE}/chat/image`, {
+      const fetchOpts = {
         method: "POST",
         headers,
         body: JSON.stringify(payload)
-      }, 60000);
+      };
+      if (options.signal) fetchOpts.signal = options.signal;
+
+      const res = await fetchWithTimeout(`${API_BASE}/chat/image`, fetchOpts, 60000);
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
@@ -12795,12 +13209,12 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       return data.url;
     }
 
-    async function generateImageVyceai(prompt) {
-      return await generateImageViaServer(prompt);
+    async function generateImageVyceai(prompt, options = {}) {
+      return await generateImageViaServer(prompt, options);
     }
 
-    async function generateImageForVyceaiModel(prompt) {
-      return await generateImageViaServer(prompt);
+    async function generateImageForVyceaiModel(prompt, options = {}) {
+      return await generateImageViaServer(prompt, options);
     }
 
     async function downloadGeneratedImage(imageUrl) {
@@ -12827,62 +13241,118 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       aiTextElement.classList.remove("streaming", "no-children");
       aiTextElement.innerHTML = "";
 
-      const wrap = document.createElement("div");
-      wrap.className = "generated-image-wrap";
+      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+      const cleanPrompt = (prompt || "ছবি").trim();
+
+      const card = document.createElement("div");
+      card.className = "chat-image-result-card";
+
+      // Header with prompt tag & HD badge
+      const header = document.createElement("div");
+      header.className = "chat-image-result-header";
+      header.innerHTML = `
+        <span class="chat-image-prompt-tag" title="${escapeHtml(cleanPrompt)}">🎨 ${escapeHtml(cleanPrompt)}</span>
+        <span style="font-size:0.7rem; font-weight:700; color:#ec4899; background:rgba(236,72,153,0.12); padding:2px 7px; border-radius:6px; flex-shrink:0;">HD 1024px</span>
+      `;
+
+      // Image container
+      const imgWrap = document.createElement("div");
+      imgWrap.className = "chat-image-result-img-wrap";
+      imgWrap.title = isEn ? "Click to view full image" : "বড় করে দেখতে ক্লিক করুন";
 
       const img = document.createElement("img");
       img.src = imageUrl;
-      img.alt = prompt || "ছবি";
-      img.className = "generated-image";
-      img.style.cursor = "zoom-in";
+      img.alt = cleanPrompt;
+      img.className = "chat-image-result-img";
+      img.loading = "lazy";
       img.addEventListener("click", () => {
         if (typeof openLibraryViewer === "function") {
-          openLibraryViewer({ url: imageUrl, prompt: prompt || "ছবি", createdAt: Date.now() });
+          openLibraryViewer({ url: imageUrl, prompt: cleanPrompt, createdAt: Date.now() });
         }
       });
+
       if (typeof addImageToLibrary === "function") {
-        addImageToLibrary(imageUrl, prompt, typeof currentSessionId !== "undefined" ? currentSessionId : null);
+        addImageToLibrary(imageUrl, cleanPrompt, typeof currentSessionId !== "undefined" ? currentSessionId : null);
       }
+
       img.onerror = function() {
         this.style.display = "none";
         const errBox = document.createElement("div");
-        errBox.style.cssText = "padding:20px;text-align:center;color:var(--text-sub);font-size:0.9rem;border:1px dashed rgba(255,255,255,0.15);border-radius:12px;background:rgba(255,255,255,0.03);";
-        errBox.innerHTML = '<div style="font-size:1.5rem;margin-bottom:8px;">🖼️</div>' +
-          '<div>ছবি লোড করা যায়নি</div>' +
-          '<button type="button" onclick="this.parentElement.previousElementSibling.style.display=\'block\';this.parentElement.previousElementSibling.src=\'' + imageUrl + '&retry=' + Date.now() + '\';this.parentElement.remove();" ' +
-          'style="margin-top:10px;padding:6px 16px;background:var(--accent-primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;">আবার চেষ্টা করুন</button>';
-        wrap.appendChild(errBox);
+        errBox.style.cssText = "padding:24px 16px;text-align:center;color:var(--text-sub);font-size:0.88rem;background:rgba(255,255,255,0.02);";
+        errBox.innerHTML = '<div style="font-size:2rem;margin-bottom:8px;">🖼️</div>' +
+          '<div>' + (isEn ? "Failed to load image" : "ছবি লোড করা যায়নি") + '</div>' +
+          '<button type="button" class="btn btn-primary" onclick="this.parentElement.previousElementSibling.style.display=\'block\';this.parentElement.previousElementSibling.src=\'' + imageUrl + '&retry=' + Date.now() + '\';this.parentElement.remove();" ' +
+          'style="margin-top:12px;padding:6px 16px;border-radius:8px;font-size:0.82rem;">' + (isEn ? "Retry" : "আবার চেষ্টা করুন") + '</button>';
+        imgWrap.appendChild(errBox);
       };
 
-      const editBtn = document.createElement("button");
-      editBtn.type = "button";
-      editBtn.className = "image-overlay-btn btn-edit";
-      editBtn.title = "Edit Image";
-      editBtn.setAttribute("aria-label", "Edit Image");
-      editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
-      editBtn.addEventListener("click", () => {
-        triggerHaptic("light");
-        if (userInput) {
-          userInput.value = `Modify image: ${prompt || ""}`;
-          userInput.focus();
-        }
-      });
+      imgWrap.appendChild(img);
 
+      // Action toolbar (Download HD, Full View, Modify / Variation, Copy Link)
+      const toolbar = document.createElement("div");
+      toolbar.className = "chat-image-toolbar";
+
+      // Download HD button
       const dlBtn = document.createElement("button");
       dlBtn.type = "button";
-      dlBtn.className = "image-overlay-btn btn-download";
-      dlBtn.title = "Download Image";
-      dlBtn.setAttribute("aria-label", "Download Image");
-      dlBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+      dlBtn.className = "chat-image-tool-btn primary";
+      dlBtn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>${isEn ? "Download HD" : "ডাউনলোড"}</span>`;
       dlBtn.addEventListener("click", () => {
         triggerHaptic("light");
         downloadGeneratedImage(imageUrl);
       });
 
-      wrap.appendChild(img);
-      wrap.appendChild(editBtn);
-      wrap.appendChild(dlBtn);
-      aiTextElement.appendChild(wrap);
+      // View Fullscreen button
+      const viewBtn = document.createElement("button");
+      viewBtn.type = "button";
+      viewBtn.className = "chat-image-tool-btn";
+      viewBtn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>${isEn ? "Full View" : "ফুল ভিউ"}</span>`;
+      viewBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        if (typeof openLibraryViewer === "function") {
+          openLibraryViewer({ url: imageUrl, prompt: cleanPrompt, createdAt: Date.now() });
+        }
+      });
+
+      // Modify / Variations button
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "chat-image-tool-btn";
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>${isEn ? "Modify" : "পরিবর্তন"}</span>`;
+      editBtn.addEventListener("click", () => {
+        triggerHaptic("light");
+        if (userInput) {
+          userInput.value = isEn ? `Modify image: ${cleanPrompt}` : `ছবিটি পরিবর্তন করুন: ${cleanPrompt}`;
+          userInput.focus();
+          updateSendAvailability();
+          updateImageModeIndicator();
+        }
+      });
+
+      // Copy link button
+      const copyLinkBtn = document.createElement("button");
+      copyLinkBtn.type = "button";
+      copyLinkBtn.className = "chat-image-tool-btn";
+      copyLinkBtn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>${isEn ? "Copy Link" : "লিংক"}</span>`;
+      copyLinkBtn.addEventListener("click", async () => {
+        triggerHaptic("light");
+        try {
+          await navigator.clipboard.writeText(imageUrl);
+          showToast(isEn ? "Image link copied!" : "ছবির লিংক কপি করা হয়েছে!", "success");
+        } catch(e) {
+          showToast(imageUrl, "info");
+        }
+      });
+
+      toolbar.appendChild(dlBtn);
+      toolbar.appendChild(viewBtn);
+      toolbar.appendChild(editBtn);
+      toolbar.appendChild(copyLinkBtn);
+
+      card.appendChild(header);
+      card.appendChild(imgWrap);
+      card.appendChild(toolbar);
+      aiTextElement.appendChild(card);
     }
 
     async function generateAIReply() {
@@ -12981,37 +13451,62 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         const lastUserMsg = [...messagesHistory].reverse().find((m) => m.role === "user");
 
         // Image Generation Logic based on Button or Text
-        const wantImage = isImageGenEnabled || (lastUserMsg && detectImageGenRequest(lastUserMsg.content));
-        
-        if (wantImage && lastUserMsg) {
+        const wantImage = !window._forceTextResponse && (isImageGenEnabled || (lastUserMsg && detectImageGenRequest(lastUserMsg.content)));
+        let shouldGenerateImage = wantImage && Boolean(lastUserMsg);
+
+        if (shouldGenerateImage) {
           // Check image generation limit for current plan
           if (!hasImageCredit()) {
-            const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-            const { limit, hours } = getImagePlanLimit();
-            const planName = currentPlan || "Free";
-            const limitMsg = isEnNow
-              ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for the reset or upgrade your plan.`
-              : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
-            aiTextElement.classList.remove("streaming", "no-children");
-            aiTextElement.innerHTML = `<div class="ai-error-box" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
-              <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span style="font-weight:600;font-size:0.92rem;color:var(--text-main);">${escapeHtml(limitMsg)}</span></div>
-              <button type="button" class="btn btn-primary" onclick="openAccountModal()" style="align-self:flex-start;margin-top:4px;">${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}</button>
-            </div>`;
-            scrollToBottom(); resolve(); return;
+            if (!isImageGenEnabled) {
+              // User did NOT explicitly toggle image mode, just typed text.
+              // Gracefully fall back to answering with text!
+              shouldGenerateImage = false;
+              window._forceTextResponse = true;
+            } else {
+              const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+              const { limit, hours } = getImagePlanLimit();
+              const planName = currentPlan || "Free";
+              const limitMsg = isEnNow
+                ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for the reset or upgrade your plan.`
+                : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
+              aiTextElement.classList.remove("streaming", "no-children");
+              aiTextElement.innerHTML = `<div class="ai-error-box" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
+                <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span style="font-weight:600;font-size:0.92rem;color:var(--text-main);">${escapeHtml(limitMsg)}</span></div>
+                <button type="button" class="btn btn-primary" onclick="openAccountModal()" style="align-self:flex-start;margin-top:4px;">${isEnNow ? "Upgrade Plan" : "প্ল্যান আপগ্রেড করুন"}</button>
+              </div>`;
+              scrollToBottom(); resolve(); return;
+            }
           }
+        }
 
-          setBubbleGeneratingImage(aiTextElement);
-          
+        if (shouldGenerateImage) {
           // Auto turn off toggle
           const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           isImageGenEnabled = false; 
           updateAttachBtnActiveState();
-          imageGenText.textContent = isEnNow ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
-          attachImageGenOption.style.color = "var(--text-main)"; 
-          attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
-          attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
-          
+          if (imageGenText) imageGenText.textContent = isEnNow ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
+          if (attachImageGenOption) {
+            attachImageGenOption.style.color = "var(--text-main)"; 
+            const span = attachImageGenOption.querySelector("span");
+            if (span) span.style.color = "var(--text-sub)"; 
+            const svg = attachImageGenOption.querySelector('svg');
+            if (svg) svg.style.stroke = "var(--text-sub)";
+          }
+
+          let isImageCancelled = false;
+          const imageAbortController = new AbortController();
+
+          const cancelToText = () => {
+            if (isImageCancelled) return;
+            isImageCancelled = true;
+            try { imageAbortController.abort("user_switched_to_text"); } catch(e){}
+            window._forceTextResponse = true;
+            showToast(typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Switched to text answer" : "টেক্সট উত্তরে পরিবর্তন করা হয়েছে", "info");
+          };
+
+          const imageTimerId = setBubbleGeneratingImage(aiTextElement, lastUserMsg.content, cancelToText);
+
           try {
             let rawUserText = (lastUserMsg.rawPrompt || lastUserMsg.content || "").replace(/\[অনুস্মারক[\s\S]*?\]/g, "").trim();
             let imgPrompt = rawUserText;
@@ -13020,7 +13515,6 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
             imgPrompt = imgPrompt.replace(/^(modify|edit|change|update|transform|redesign|redo)\s+(image|photo|picture|img)\s*[:：\-]?\s*/i, "").trim();
             imgPrompt = imgPrompt.replace(/^(ছবি|ইমেজ|ফটো|পিকচার)\s*(পরিবর্তন|এডিট|পাল্টাও|বদলাও|তৈরি করো|বানাও|আঁকো|দাও|দেখাও)\s*[:：\-]?\s*/i, "").trim();
 
-            // If prompt is just "another one" / "আরেকটা" / "পরেরটা", inherit from previous prompt
             const isFollowUp = /^(আরেকটা|আরেকটি|অন্য একটা|পরেরটা|পরের ছবি|আরেকটা দাও|another one|another|more|next)\s*(দাও|দিন|করো|দেখাও|বানাও|please)?$/i.test(imgPrompt.trim());
             if (isFollowUp) {
               for (let i = messagesHistory.length - 2; i >= 0; i--) {
@@ -13039,38 +13533,66 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
             }
 
             if (!imgPrompt) imgPrompt = "একটি সুন্দর এবং আকর্ষণীয় ছবি";
-            const imageUrl = await generateImageForVyceaiModel(imgPrompt);
-            renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);
-            copyBtn.style.display = "none";
-            regenBtn.style.display = "inline-flex";
-            messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });
-            addImageUsage(selectedModelId);
-            recordImageWindowUsage();
-            persistCurrentSession();
-            scrollToBottom(); resolve();
-          } catch (err) {
-            soundEngine.playError();
-            triggerHaptic("error");
-            aiTextElement.classList.remove("streaming", "no-children");
-            const isLimit = err.message && (err.message.includes("সীমা শেষ") || err.message.includes("429") || err.message.includes("limit"));
-            const errorMsg = err.message || (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Failed to generate image. Please try again." : "ছবি তৈরি করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
-            aiTextElement.innerHTML = `
-              <div class="ai-error-box" style="display:flex; flex-direction:column; gap:8px; padding:14px 16px; border-radius:12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span style="font-weight:600; font-size:0.92rem; color:var(--text-main);">${escapeHtml(errorMsg)}</span>
-                </div>
-                ${isLimit ? `<button type="button" class="btn btn-primary" onclick="openAccountModal('settingsLimitsView');" style="align-self:flex-start; margin-top:6px; padding:6px 14px; font-size:0.82rem; background:var(--accent-primary); color:#fff; border-radius:8px; border:none; cursor:pointer; touch-action:manipulation;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
-              </div>
-            `;
-            if (!isLimit) {
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>${typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Retry" : "আবার চেষ্টা করুন"}</span>`;
-              regenBtn.classList.add("regen-btn-highlight");
+            const imageUrl = await generateImageForVyceaiModel(imgPrompt, { signal: imageAbortController.signal });
+
+            if (imageTimerId) clearInterval(imageTimerId);
+
+            if (isImageCancelled || imageAbortController.signal.aborted) {
+              // User pressed Switch to Text while image was rendering! Clear bubble and proceed with text streaming!
+              aiTextElement.innerHTML = "";
+            } else {
+              renderGeneratedImageBubble(aiTextElement, imageUrl, imgPrompt);
+              copyBtn.style.display = "none";
               regenBtn.style.display = "inline-flex";
+              messagesHistory.push({ role: "assistant", content: `[ছবি তৈরি করা হয়েছে: ${imageUrl}]` });
+              addImageUsage(selectedModelId);
+              recordImageWindowUsage();
+              persistCurrentSession();
+              scrollToBottom(); resolve();
+              return;
             }
-            scrollToBottom(); resolve();
+          } catch (err) {
+            if (imageTimerId) clearInterval(imageTimerId);
+
+            if (isImageCancelled || imageAbortController.signal.aborted) {
+              // Cancelled cleanly into text mode!
+              aiTextElement.innerHTML = "";
+              // Fall through to text streaming below!
+            } else {
+              soundEngine.playError();
+              triggerHaptic("error");
+              aiTextElement.classList.remove("streaming", "no-children");
+              const isLimit = err.message && (err.message.includes("সীমা শেষ") || err.message.includes("429") || err.message.includes("limit"));
+              const errorMsg = err.message || (typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Failed to generate image. Please try again." : "ছবি তৈরি করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
+              aiTextElement.innerHTML = `
+                <div class="ai-error-box" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span style="font-weight: 600; font-size: 0.92rem; color: var(--text-main);">${escapeHtml(errorMsg)}</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
+                    ${isLimit ? `<button type="button" class="btn btn-primary" onclick="openAccountModal('settingsLimitsView');" style="padding: 6px 14px; font-size: 0.82rem; border-radius: 8px; cursor: pointer;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'View Quota & Upgrade' : 'কোটা দেখুন ও আপগ্রেড করুন'}</button>` : ''}
+                    <button type="button" id="errSwitchTextBtn" style="padding: 6px 14px; font-size: 0.82rem; border-radius: 8px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); cursor: pointer;">${typeof currentLanguage !== "undefined" && currentLanguage === 'en' ? 'Answer with Text' : 'টেক্সট উত্তর নিন'}</button>
+                  </div>
+                </div>
+              `;
+              const errSwitchTextBtn = aiTextElement.querySelector("#errSwitchTextBtn");
+              if (errSwitchTextBtn) {
+                errSwitchTextBtn.addEventListener("click", () => {
+                  window._forceTextResponse = true;
+                  aiTextElement.innerHTML = "";
+                  generateAIReply();
+                });
+              }
+              if (!isLimit) {
+                regenBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>${typeof currentLanguage !== "undefined" && currentLanguage === "en" ? "Retry" : "আবার চেষ্টা করুন"}</span>`;
+                regenBtn.classList.add("regen-btn-highlight");
+                regenBtn.style.display = "inline-flex";
+              }
+              scrollToBottom(); resolve();
+              return;
+            }
           }
-          return;
         }
 
         let searchContext = "";
@@ -13648,21 +14170,30 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       }
 
       const text = userInput.value.trim();
-      const isImgReq = isImageGenEnabled || detectImageGenRequest(text);
+      let isImgReq = !window._forceTextResponse && (isImageGenEnabled || detectImageGenRequest(text));
 
       if (isImgReq) {
         if (!hasImageCredit()) {
-          const { limit, hours } = getImagePlanLimit();
-          const planName = currentPlan || "Free";
-          const limitMsg = isEn
-            ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for reset or upgrade.`
-            : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
-          showToast(limitMsg, "warning");
-          openAccountModal("limits");
-          chatForm._isSubmitting = false;
-          return;
+          if (!isImageGenEnabled) {
+            // User did NOT explicitly toggle image mode, just typed conversational text.
+            // Do NOT block them with quota warning! Smoothly answer with text instead!
+            isImgReq = false;
+            window._forceTextResponse = true;
+          } else {
+            const { limit, hours } = getImagePlanLimit();
+            const planName = currentPlan || "Free";
+            const limitMsg = isEn
+              ? `Image generation limit reached! Your ${planName} plan allows ${limit} images per ${hours} hour(s). Please wait for reset or upgrade.`
+              : `ছবি তৈরির সীমা শেষ! আপনার ${planName} প্ল্যানে ${hours} ঘণ্টায় ${limit}টি ছবি তৈরি করা যায়। অনুগ্রহ করে অপেক্ষা করুন অথবা আপগ্রেড করুন।`;
+            showToast(limitMsg, "warning");
+            openAccountModal("limits");
+            chatForm._isSubmitting = false;
+            return;
+          }
         }
-      } else {
+      }
+
+      if (!isImgReq) {
         if (!hasCredit()) {
           showToast(isEn ? "Message limit reached! Please upgrade your plan or wait for reset." : "আপনার প্ল্যানের বার্তা সীমা শেষ হয়েছে! দয়া করে আপগ্রেড করুন।", "warning");
           openAccountModal("limits");
@@ -13701,6 +14232,8 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       pendingImages = []; pendingFiles = [];
       renderImagePreviews(); renderFilePreviews();
       userInput.value = ""; userInput.style.height = "auto";
+      const imageModeBar = document.getElementById("imageModeIndicatorBar");
+      if (imageModeBar) imageModeBar.style.display = "none";
       updateTokenCounter();
 
       try {
@@ -13710,6 +14243,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       } finally {
         chatForm._isSubmitting = false;
         isGenerating = false;
+        window._forceTextResponse = false;
         updateSendAvailability();
         updateTokenCounter();
         if (typeof syncUserProfileFromServer === "function") syncUserProfileFromServer();
