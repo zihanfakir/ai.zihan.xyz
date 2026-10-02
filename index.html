@@ -5162,6 +5162,29 @@
     // Global App Language (Initialized early)
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
 
+    // --- Auth Enforcement on App Open (Requires Login / Signup) ---
+    (function enforceAuthOnLaunch() {
+      try {
+        if (window.AloAndroid && typeof window.AloAndroid.getAuthToken === "function") {
+          const nativeTok = window.AloAndroid.getAuthToken();
+          if (nativeTok && !localStorage.getItem("alokpoth_token")) {
+            localStorage.setItem("alokpoth_token", nativeTok);
+            const nName = window.AloAndroid.getUserName ? window.AloAndroid.getUserName() : "";
+            const nEmail = window.AloAndroid.getUserEmail ? window.AloAndroid.getUserEmail() : "";
+            const nPlan = window.AloAndroid.getUserPlan ? window.AloAndroid.getUserPlan() : "Free";
+            if (nName) localStorage.setItem("alokpoth_account_name", nName);
+            if (nEmail) localStorage.setItem("alokpoth_email", nEmail);
+            if (nPlan) localStorage.setItem("alokpoth_current_plan", nPlan);
+          }
+        }
+      } catch(e) {}
+
+      const token = localStorage.getItem("alokpoth_token");
+      if (!token) {
+        window.location.replace("login.html");
+      }
+    })();
+
     // Global Feature Toggles (Initialized early to eliminate Temporal Dead Zone ReferenceErrors)
     var isThinkingEnabled = (localStorage.getItem("alokpoth_thinking_enabled") === "true");
     var isWebSearchEnabled = false;

@@ -225,8 +225,32 @@ class WebAppInterface(private val activity: MainActivity) : TextToSpeech.OnInitL
     }
 
     @JavascriptInterface
+    fun getAuthToken(): String? {
+        val prefs = activity.getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("auth_token", null)
+    }
+
+    @JavascriptInterface
+    fun getUserName(): String? {
+        val prefs = activity.getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("user_name", null)
+    }
+
+    @JavascriptInterface
+    fun getUserEmail(): String? {
+        val prefs = activity.getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("user_email", null)
+    }
+
+    @JavascriptInterface
+    fun getUserPlan(): String? {
+        val prefs = activity.getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("user_plan", "Free")
+    }
+
+    @JavascriptInterface
     fun isNativeApp(): Boolean = true
 
     @JavascriptInterface
-    fun getAppVersion(): String = "1.1.0"
+    fun getAppVersion(): String = "1.2.1"
 }

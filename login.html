@@ -939,6 +939,24 @@
     // Check if user is already logged in with anti-cache verification
     async function checkLoggedInState() {
       const d = I18N_LOGIN[currentLanguage] || I18N_LOGIN.bn;
+      const backBtn = document.getElementById("backToChatBtn");
+
+      // Sync from native Android bridge if available
+      try {
+        if (window.AloAndroid && typeof window.AloAndroid.getAuthToken === "function") {
+          const nativeTok = window.AloAndroid.getAuthToken();
+          if (nativeTok && !localStorage.getItem("alokpoth_token")) {
+            localStorage.setItem("alokpoth_token", nativeTok);
+            const nName = window.AloAndroid.getUserName ? window.AloAndroid.getUserName() : "";
+            const nEmail = window.AloAndroid.getUserEmail ? window.AloAndroid.getUserEmail() : "";
+            const nPlan = window.AloAndroid.getUserPlan ? window.AloAndroid.getUserPlan() : "Free";
+            if (nName) localStorage.setItem("alokpoth_account_name", nName);
+            if (nEmail) localStorage.setItem("alokpoth_email", nEmail);
+            if (nPlan) localStorage.setItem("alokpoth_current_plan", nPlan);
+          }
+        }
+      } catch(e) {}
+
       const token = localStorage.getItem("alokpoth_token");
       const userStr = localStorage.getItem("alokpoth_user");
       if (token && userStr) {
@@ -947,6 +965,7 @@
           if (user && user.email) {
             authFormContainer.style.display = "none";
             loggedInBox.style.display = "block";
+            if (backBtn) backBtn.style.display = "inline-flex";
             cardTitle.textContent = d.loggedInTitle;
             cardSubtitle.textContent = d.loggedInSub;
             loggedName.textContent = user.name || d.defaultUser;
@@ -963,6 +982,7 @@
                 purgeLocalUserData();
                 authFormContainer.style.display = "block";
                 loggedInBox.style.display = "none";
+                if (backBtn) backBtn.style.display = "none";
                 setMode("login");
                 return false;
               }
@@ -974,6 +994,7 @@
       }
       authFormContainer.style.display = "block";
       loggedInBox.style.display = "none";
+      if (backBtn) backBtn.style.display = "none";
       return false;
     }
 

@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "AloAI"
         const val APP_URL = "https://ai.zihan.xyz/"
+        const val AUTH_URL = "https://ai.zihan.xyz/login.html"
         private const val BACK_PRESS_INTERVAL = 2000L
     }
 
@@ -124,7 +125,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
-        webView.loadUrl(APP_URL)
+        val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("auth_token", null)
+        val initialUrl = if (token.isNullOrEmpty()) AUTH_URL else APP_URL
+        webView.loadUrl(initialUrl)
     }
 
     private fun enableHighRefreshRate() {
@@ -175,7 +179,7 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 offscreenPreRaster = true
             }
-            userAgentString = "$userAgentString AloAI-Android/1.1.0"
+            userAgentString = "$userAgentString AloAI-Android/1.2.1"
         }
 
         CookieManager.getInstance().apply {
@@ -458,7 +462,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
-        webView.loadUrl(APP_URL)
+        val prefs = getSharedPreferences("AloAiPrefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("auth_token", null)
+        val targetUrl = if (token.isNullOrEmpty()) AUTH_URL else APP_URL
+        webView.loadUrl(targetUrl)
     }
 
     private fun showOfflineView(show: Boolean) {
@@ -612,7 +619,7 @@ class MainActivity : AppCompatActivity() {
             CookieManager.getInstance().flush()
 
             webView.post {
-                webView.loadUrl("https://ai.zihan.xyz/login.html")
+                webView.loadUrl(AUTH_URL)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error logging out", e)
