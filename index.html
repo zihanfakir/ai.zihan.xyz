@@ -4447,7 +4447,7 @@
               </div>
               <div class="settings-row-right"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
             </button>
-            <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href="plans"">
+            <button class="settings-row" type="button" id="setMenuPlan" onclick="window.location.href='plans'">
               <div class="settings-row-left">
                 <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
@@ -4894,7 +4894,7 @@
             </div>
           </div>
           
-          <button class="settings-btn-primary" type="button" onclick="window.location.href="plans"" style="margin-top: 16px;">
+          <button class="settings-btn-primary" type="button" onclick="window.location.href='plans'" style="margin-top: 16px;">
              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
              <span data-i18n="planAndUpgrade">প্ল্যান ও আপগ্রেড</span>
           </button>
@@ -12132,6 +12132,42 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
             content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true)
           });
         }
+
+        // ── Smart context trimming ──────────────────────────────────────────
+        // Keep full conversation memory on device (localStorage), but trim what
+        // we send to the API so we stay within model context windows.
+        // Strategy: always keep [system] + last 20 turn-pairs + fill budget.
+        const CONTEXT_TOKEN_BUDGET = 28000; // safe limit for all models
+        const ALWAYS_KEEP_RECENT = 20;      // always send last 20 messages regardless
+        (() => {
+          const sysMsg = activeHistory.find(m => m.role === "system");
+          const nonSys = activeHistory.filter(m => m.role !== "system");
+          if (nonSys.length <= ALWAYS_KEEP_RECENT) return; // nothing to trim
+
+          // Always keep the last ALWAYS_KEEP_RECENT messages
+          const mustKeep = nonSys.slice(-ALWAYS_KEEP_RECENT);
+          const olderMsgs = nonSys.slice(0, -ALWAYS_KEEP_RECENT);
+
+          // Fill remaining budget with older messages (newest-first)
+          const sysTokens = sysMsg ? estimateTokens(sysMsg.content || "") : 0;
+          const recentTokens = mustKeep.reduce((s, m) => s + estimateTokens(typeof m.content === "string" ? m.content : ""), 0);
+          let remainingBudget = CONTEXT_TOKEN_BUDGET - sysTokens - recentTokens;
+
+          const olderToAdd = [];
+          for (let i = olderMsgs.length - 1; i >= 0; i--) {
+            const t = estimateTokens(typeof olderMsgs[i].content === "string" ? olderMsgs[i].content : "");
+            if (remainingBudget - t < 0) break;
+            remainingBudget -= t;
+            olderToAdd.unshift(olderMsgs[i]);
+          }
+
+          activeHistory = [
+            ...(sysMsg ? [sysMsg] : []),
+            ...olderToAdd,
+            ...mustKeep
+          ];
+        })();
+        // ────────────────────────────────────────────────────────────────────
 
         const inputTokensForThisCall = activeHistory.reduce((sum, m) => sum + estimateTokens(m.content || ""), 0);
 

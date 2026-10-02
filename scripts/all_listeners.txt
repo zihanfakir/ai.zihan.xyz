@@ -1,0 +1,288 @@
+
+=================== account.html ===================
+L1307: overlay.addEventListener("click", (e) => {
+L1313: btn.addEventListener("click", () => {
+L1320: document.getElementById("rowEditProfile")?.addEventListener("click", () => { window.location.href = "profile"; });
+L1321: document.getElementById("rowAccount")?.addEventListener("click", () => { window.location.href = "security"; });
+L1322: document.getElementById("rowSubscription")?.addEventListener("click", () => { window.location.href = "subscription"; });
+L1323: document.getElementById("rowUsage")?.addEventListener("click", () => { window.location.href = "usage"; });
+L1324: document.getElementById("rowUpgrade")?.addEventListener("click", () => { window.location.href = "plans"; });
+L1325: document.getElementById("rowTheme")?.addEventListener("click", () => { window.location.href = "theme"; });
+L1326: document.getElementById("rowPersonalization")?.addEventListener("click", () => { window.location.href = "personalization"; });
+L1327: document.getElementById("rowHelp")?.addEventListener("click", () => { window.location.href = "help"; });
+L1328: document.getElementById("rowRedeem")?.addEventListener("click", () => { window.location.href = "redeem"; });
+L1329: document.getElementById("rowDownloadApp")?.addEventListener("click", (e) => {
+L1344: document.getElementById("langToggleBtn")?.addEventListener("click", toggleLanguage);
+L1375: document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
+L1379: el.addEventListener("keydown", (e) => {
+L1773: document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {
+L1822: document.getElementById("claimRedeemBtn")?.addEventListener("click", async () => {
+L1889: document.getElementById("changePassForm")?.addEventListener("submit", async (e) => {
+
+=================== admin.html ===================
+L1560: okBtn.addEventListener("click", onOk);
+L1561: cancelBtn.addEventListener("click", onCancel);
+L1562: overlay.addEventListener("click", onBackdrop);
+L1563: document.addEventListener("keydown", onKey);
+L1607: okBtn.addEventListener("click", onOk);
+L1608: cancelBtn.addEventListener("click", onCancel);
+L1609: overlay.addEventListener("click", onBackdrop);
+L1610: document.addEventListener("keydown", onKey);
+L1770: adminLangBtn.addEventListener("click", () => {
+L1781: adminLoginForm.addEventListener("submit", async (e) => {
+L1819: logoutBtn.addEventListener("click", () => {
+L1827: btn.addEventListener("click", () => {
+L2062: if (modelApiCloseX) modelApiCloseX.addEventListener("click", closeModelApiModal);
+L2064: if (modelApiCancelBtn) modelApiCancelBtn.addEventListener("click", closeModelApiModal);
+L2066: if (modelApiSaveBtn) modelApiSaveBtn.addEventListener("click", saveModelApiConfig);
+L2069: modelApiOverlay.addEventListener("click", (e) => {
+L2142: premCb.addEventListener("change", () => { if (premCb.checked) effCb.checked = false; });
+L2143: effCb.addEventListener("change", () => { if (effCb.checked) premCb.checked = false; });
+L2146: if (saveBtn) saveBtn.addEventListener("click", () => saveModelConfig(mId, saveBtn));
+L2147: if (delBtn) delBtn.addEventListener("click", () => deleteModel(mId, delBtn));
+L2187: if (adminChangePassBtn) adminChangePassBtn.addEventListener("click", openAdminPasswordModal);
+L2188: if (adminPassCancelBtn) adminPassCancelBtn.addEventListener("click", closeAdminPasswordModal);
+L2190: adminPasswordModalOverlay.addEventListener("click", (e) => {
+L2197: input.addEventListener("keydown", (e) => {
+L2209: adminPassSaveBtn.addEventListener("click", async () => {
+L2421: document.getElementById("addModelForm").addEventListener("submit", async (e) => {
+L2501: newModelUrlInput.addEventListener("blur", function() {
+L2511: newModelPrem.addEventListener("change", (e) => {
+L2514: newModelEff.addEventListener("change", (e) => {
+L2567: sel.addEventListener("change", function() {
+L2579: btn.addEventListener("click", function() {
+L2585: btn.addEventListener("click", function() {
+L2620: document.getElementById("userSearchInput")?.addEventListener("input", filterUsers);
+L2821: document.getElementById("generateCodeForm").addEventListener("submit", async (e) => {
+L2856: document.getElementById("customCodeForm").addEventListener("submit", async function(e) {
+L3072: imgPresetSelect.addEventListener("change", () => {
+L3101: searchProviderSelect.addEventListener("change", () => {
+L3111: imageSettingsForm.addEventListener("submit", async (e) => {
+L3146: webSearchSettingsForm.addEventListener("submit", async (e) => {
+L3181: btnTestImageGen.addEventListener("click", async () => {
+L3231: btnTestWebSearch.addEventListener("click", async () => {
+L3270: document.addEventListener("keydown", (e) => {
+
+=================== download.html ===================
+L1237: document.getElementById("langToggleBtn").addEventListener("click", () => {
+L1245: navBackBtn.addEventListener("click", (e) => {
+
+=================== help.html ===================
+L 465: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 473: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+L 481: item.addEventListener("click", () => {
+L 484: item.addEventListener("keydown", (e) => {
+
+=================== index.html ===================
+L5821: micBtn.addEventListener("click", () => {
+L5895: if (customDialogCancelBtn) customDialogCancelBtn.addEventListener("click", () => closeCustomUI(false));
+L5897: customDialogOkBtn.addEventListener("click", () => {
+L5908: customDialogInput.addEventListener("keydown", (e) => {
+L5919: customDialogOverlayEl.addEventListener("click", (e) => {
+L5937: document.addEventListener("click", (e) => {
+L6020: document.addEventListener("keydown", (e) => {
+L6251: okBtn.addEventListener("click", () => { cleanup(); resolve(true); });
+L6252: cancelBtn.addEventListener("click", () => { cleanup(); resolve(false); });
+L6253: overlay.addEventListener("click", (e) => { if (e.target === overlay) { cleanup(); resolve(false); } });
+L6961: window.visualViewport.addEventListener("resize", () => {
+L6968: window.visualViewport.addEventListener("scroll", () => {
+L6980: window.addEventListener("resize", () => setAppHeight());
+L6981: window.addEventListener("orientationchange", () => {
+L6984: window.addEventListener("scroll", () => {
+L6999: document.addEventListener("selectstart", (e) => {
+L7006: document.addEventListener("dragstart", (e) => {
+L7013: document.addEventListener("copy", (e) => {
+L7020: document.addEventListener("contextmenu", (e) => {
+L7368: card.addEventListener("click", () => {
+L7408: window.addEventListener("popstate", () => {
+L7464: document.addEventListener("keydown", (e) => {
+L7540: modelTrigger.addEventListener("click", openModal);
+L7541: modelModalClose.addEventListener("click", () => closeModal());
+L7542: modelModalOverlay.addEventListener("click", (e) => {
+L7576: if (drawerToggleBtn) drawerToggleBtn.addEventListener("click", openSidebarDrawer);
+L7577: if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeSidebarDrawer);
+L7578: if (drawerBackdrop) drawerBackdrop.addEventListener("click", closeSidebarDrawer);
+L7581: drawerNewChatBtn.addEventListener("click", () => {
+L7588: quickNewChatBtn.addEventListener("click", () => {
+L7595: quickNewChatNavBtn.addEventListener("click", startNewChat);
+L7600: drawerEmptyNewChatBtn.addEventListener("click", () => {
+L7607: drawerSearchInput.addEventListener("input", (e) => {
+L7627: drawerUserCard.addEventListener("click", handleDrawerUserCardClick);
+L7628: drawerUserCard.addEventListener("keydown", (e) => {
+L7637: drawerSettingsBtn.addEventListener("click", () => {
+L7644: drawerThemeBtn.addEventListener("click", () => {
+L7651: drawerLimitsBtn.addEventListener("click", () => {
+L7658: navCreditBadge.addEventListener("click", () => {
+L7827: item.addEventListener("click", (e) => {
+L7834: editBtn.addEventListener("click", (e) => {
+L7853: delBtn.addEventListener("click", (e) => {
+L7876: nav.addEventListener("click", (e) => {
+L7901: container.addEventListener("scroll", debounce(() => {
+L7910: btn.addEventListener("click", () => {
+L7924: scrollEl.addEventListener("dragenter", (e) => {
+L7930: scrollEl.addEventListener("dragover", (e) => {
+L7934: scrollEl.addEventListener("dragleave", (e) => {
+L7943: scrollEl.addEventListener("drop", (e) => {
+L7974: pillSearch.addEventListener("click", () => {
+L7987: pillImage.addEventListener("click", () => {
+L8000: userInput.addEventListener("input", () => {
+L8003: clearBtn.addEventListener("click", () => {
+L8024: if (brandMenuBtn) brandMenuBtn.addEventListener("click", openBrandMenu);
+L8025: if (brandMenuClose) brandMenuClose.addEventListener("click", closeBrandMenu);
+L8027: brandMenuOverlay.addEventListener("click", (e) => {
+L8915: if (accountMenuBtn) accountMenuBtn.addEventListener("click", openAccountModal);
+L8918: brandMenuLimitsBtn.addEventListener("click", () => {
+L8923: if (accountModalClose) accountModalClose.addEventListener("click", () => closeAccountModal(false));
+L8925: accountModalOverlay.addEventListener("click", (e) => {
+L8935: accountLimitsToggleBtn.addEventListener("click", (e) => {
+L8995: subAccountSaveBtn.addEventListener("click", async () => {
+L9042: subAccountNameInput.addEventListener("keydown", (e) => {
+L9052: subAccountPassSubmitBtn.addEventListener("click", async () => {
+L9118: el.addEventListener("keydown", (e) => {
+L9129: subRedeemSubmitBtn.addEventListener("click", async () => {
+L9187: subRedeemInput.addEventListener("keydown", (e) => {
+L9197: subFeedbackSubmitBtn.addEventListener("click", () => {
+L9266: accountLogoutBtn.addEventListener("click", performAccountLogout);
+L9271: brandMenuLogoutBtn.addEventListener("click", performAccountLogout);
+L9394: if (authModalClose) authModalClose.addEventListener("click", closeAuthModal);
+L9396: authModalOverlay.addEventListener("click", (e) => {
+L9401: if (authTabLogin) authTabLogin.addEventListener("click", () => setAuthMode("login"));
+L9402: if (authTabRegister) authTabRegister.addEventListener("click", () => setAuthMode("register"));
+L9405: accountAuthBtn.addEventListener("click", () => {
+L9412: brandMenuAuthBtn.addEventListener("click", () => {
+L9419: authForm.addEventListener("submit", async (e) => {
+L9579: heroAppDownloadBanner.addEventListener("click", (e) => {
+L9586: drawerDownloadAppBtn.addEventListener("click", () => {
+L9593: brandMenuDownloadAppBtn.addEventListener("click", () => {
+L9600: appDownloadModalClose.addEventListener("click", closeAppDownloadModal);
+L9604: appDownloadModalOverlay.addEventListener("click", (e) => {
+L9614: window.addEventListener("load", () => {
+L9624: accountResetBtn.addEventListener("click", () => {
+L9806: themeToggleBtn.addEventListener("click", () => cycleTheme(true));
+L9818: if (typeof sysThemeMedia.addEventListener === 'function') {
+L9819: sysThemeMedia.addEventListener('change', onSysThemeChange);
+L9841: window.addEventListener("online", updateOnlineStatus);
+L9842: window.addEventListener("offline", updateOnlineStatus);
+L9975: window.addEventListener("focus", () => {
+L10021: btn.addEventListener("click", () => {
+L10059: docInput.addEventListener("change", async () => {
+L10099: attachBtn.addEventListener("click", (e) => {
+L10104: attachImageOption.addEventListener("click", () => { closeAttachMenu(); imageInput.click(); });
+L10105: attachFileOption.addEventListener("click", () => { closeAttachMenu(); docInput.click(); });
+L10107: attachWebSearchOption.addEventListener("click", () => {
+L10124: attachImageGenOption.addEventListener("click", () => {
+L10159: attachThinkingOption.addEventListener("click", () => {
+L10174: document.addEventListener("click", (e) => { if (!attachMenuWrap.contains(e.target)) closeAttachMenu(); });
+L10238: item.querySelector(".image-preview-remove").addEventListener("click", () => {
+L10270: imageInput.addEventListener("change", async () => {
+L10274: document.addEventListener("paste", async (e) => {
+L10466: heroBanner.addEventListener("click", (e) => {
+L10504: item.querySelector(".chat-history-item-main").addEventListener("click", () => loadSession(session.id));
+L10506: item.querySelector(".chat-history-delete-btn").addEventListener("click", (e) => {
+L10722: newChatBtn.addEventListener("click", startNewChat);
+L10723: chatHistoryBtn.addEventListener("click", openChatHistoryModal);
+L10724: chatHistoryModalClose.addEventListener("click", () => closeChatHistoryModal());
+L10725: chatHistoryModalOverlay.addEventListener("click", (e) => {
+L11000: if (libraryModalClose) libraryModalClose.addEventListener("click", () => closeLibraryModal());
+L11002: libraryModalOverlay.addEventListener("click", (e) => {
+L11007: librarySearchInput.addEventListener("input", (e) => renderLibraryGrid(e.target.value));
+L11010: libraryCreateImageBtn.addEventListener("click", () => {
+L11019: if (libraryViewerClose) libraryViewerClose.addEventListener("click", closeLibraryViewer);
+L11021: libraryViewerOverlay.addEventListener("click", (e) => {
+L11026: window.addEventListener("beforeunload", () => {
+L11055: scrollContainer.addEventListener("scroll", debounce(() => {
+L11061: userInput.addEventListener("input", () => {
+L11067: userInput.addEventListener("keydown", (e) => {
+L11077: userInput.addEventListener("focus", () => {
+L11136: copyBtn.addEventListener("click", () => {
+L11152: ttsBtn.addEventListener("click", () => {
+L11164: likeBtn.addEventListener("click", () => {
+L11177: dislikeBtn.addEventListener("click", () => {
+L11190: shareBtn.addEventListener("click", () => {
+L11205: moreBtn.addEventListener("click", () => {
+L11216: regenBtn.addEventListener("click", () => handleRegenerateFromBtn(regenBtn));
+L11282: copyBtn.addEventListener("click", () => {
+L11298: dlBtn.addEventListener("click", () => {
+L11359: editBtn.addEventListener("click", () => {
+L11819: img.addEventListener("click", () => {
+L11844: editBtn.addEventListener("click", () => {
+L11858: dlBtn.addEventListener("click", () => {
+L12511: cameraBtn.addEventListener("click", () => {
+L12518: navSoundToggleBtn.addEventListener("click", () => {
+L12533: quickNewChatNavBtn.addEventListener("click", () => {
+L12540: drawerSearchToggleBtn.addEventListener("click", () => {
+L12565: document.addEventListener("visibilitychange", () => {
+L12569: window.addEventListener("online", () => syncModelStatuses({ silent: true }));
+L12571: chatForm.addEventListener("submit", async (e) => {
+
+=================== language.html ===================
+L 481: card.addEventListener("click", () => {
+L 485: card.addEventListener("keydown", (e) => {
+L 494: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 502: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+
+=================== login.html ===================
+L 835: langToggleBtn.addEventListener("click", () => {
+L 876: themeToggleBtn.addEventListener("click", () => {
+L1002: logoutBtn.addEventListener("click", () => {
+L1039: tabLoginBtn.addEventListener("click", () => setMode("login"));
+L1040: tabRegisterBtn.addEventListener("click", () => setMode("register"));
+L1044: passToggleBtn.addEventListener("click", () => {
+L1060: authForm.addEventListener("submit", async (e) => {
+
+=================== personalization.html ===================
+L 473: customInstructions.addEventListener("input", updateCounter);
+L 495: chip.addEventListener("click", () => {
+L 584: document.getElementById("savePersonalizationBtn")?.addEventListener("click", () => {
+L 591: document.getElementById("clearPromptBtn")?.addEventListener("click", () => {
+L 600: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 608: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+
+=================== plans.html ===================
+L1274: langToggleBtn.addEventListener("click", () => {
+L1318: themeToggleBtn.addEventListener("click", () => {
+L1414: document.getElementById("claimBtn").addEventListener("click", async () => {
+
+=================== profile.html ===================
+L 718: btn.addEventListener("click", () => {
+L 815: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 823: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+L 831: document.getElementById("editNameInput")?.addEventListener("input", (e) => {
+L 842: document.getElementById("profileUpdateForm")?.addEventListener("submit", async (e) => {
+
+=================== redeem.html ===================
+L 528: inputEl?.addEventListener("input", (e) => {
+L 533: document.getElementById("redeemForm")?.addEventListener("submit", async (e) => {
+L 601: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 609: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+L 623: ri.addEventListener('input', () => rc.textContent = ri.value.length + '/12');
+
+=================== security.html ===================
+L 633: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 641: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+L 649: document.getElementById("changePassForm")?.addEventListener("submit", async (e) => {
+L 707: btn.addEventListener("click", () => {
+
+=================== sound.html ===================
+L 580: card.addEventListener("click", () => {
+L 584: card.addEventListener("keydown", (e) => {
+L 714: document.getElementById("soundToggle")?.addEventListener("change", (e) => {
+L 720: document.getElementById("chimeToggle")?.addEventListener("change", (e) => {
+L 725: document.getElementById("testSoundBtn")?.addEventListener("click", () => {
+L 731: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 739: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+
+=================== subscription.html ===================
+L 656: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 664: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+
+=================== theme.html ===================
+L 504: item.addEventListener("click", () => {
+L 518: window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+L 526: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 534: document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+
+=================== usage.html ===================
+L 790: document.getElementById("refreshQuotaBtn")?.addEventListener("click", async () => {
+L 803: document.getElementById("backBtn")?.addEventListener("click", (e) => {
+L 811: document.getElementById("langToggleBtn")?.addEventListener("click", () => {

@@ -249,10 +249,12 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
             contents: geminiContents,
             ...(systemInstructionText ? { systemInstruction: { parts: [{ text: systemInstructionText }] } } : {}),
             generationConfig: {
-              temperature: 0.75,
+              temperature: 0.90,
               topP: 0.95,
-              topK: 40,
+              topK: 64,
               maxOutputTokens: 8192,
+              frequencyPenalty: 0.3,
+              presencePenalty: 0.2,
               ...(req.body.thinking === false ? { thinkingConfig: { thinkingBudget: 0 } } : {})
             }
           };
@@ -285,8 +287,10 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
             model: modName,
             messages: safeMessagesWithIdentity,
             stream: true,
-            temperature: 0.75,
-            top_p: 0.95
+            temperature: 0.90,
+            top_p: 0.95,
+            frequency_penalty: 0.3,
+            presence_penalty: 0.2
           };
           if (req.body.thinking === false) {
             p.reasoning_effort = 'none';

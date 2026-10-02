@@ -7,11 +7,22 @@ const { JWT_SECRET } = require('../config/jwtSecret');
 const { getCachedUser, setCachedUser, invalidateCachedUser } = require('../config/dbCache');
 
 function extractToken(req) {
-  const authHeader = req.headers.authorization;
+  if (!req || !req.headers) return null;
+  const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader || typeof authHeader !== 'string') return null;
   const parts = authHeader.trim().split(/\s+/);
   if (parts.length >= 2 && parts[0].toLowerCase() === 'bearer' && parts[1]) {
-    return parts[1];
+    const t = parts[1].trim();
+    if (t && t !== 'null' && t !== 'undefined' && t !== '[object Object]') {
+      return t;
+    }
+  }
+  // Support raw token if Bearer prefix is missing but valid JWT structure (3 parts separated by dots)
+  if (parts.length === 1 && parts[0]) {
+    const raw = parts[0].trim();
+    if (raw && raw.split('.').length === 3 && raw !== 'null' && raw !== 'undefined') {
+      return raw;
+    }
   }
   return null;
 }
@@ -20,11 +31,28 @@ const protect = async (req, res, next) => {
   const token = extractToken(req);
 
   if (!token) {
-    return res.status(401).json({ success: false, error: 'অননুমোদিত এক্সেস! অনুগ্রহ করে লগইন করুন।' });
+    return res.status(401).json({ success: false, error: 'অননুমোদিত এক্সেস! অনুগ্রহ করে লগইন করুন।', code: 'UNAUTHORIZED' });
+  }
+
+  if (!JWT_SECRET) {
+    console.error('[Auth Middleware] Missing JWT_SECRET configuration');
+    return res.status(500).json({ success: false, error: 'সার্ভার কনফিগারেশন ত্রুটি। অনুগ্রহ করে পরে চেষ্টা করুন।' });
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, error: 'টোকেনের মেয়াদ শেষ হয়ে গেছে! অনুগ্রহ করে পুনরায় লগইন করুন।', code: 'TOKEN_EXPIRED' });
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, error: 'অকার্যকর টোকেন! পুনরায় লগইন করুন।', code: 'INVALID_TOKEN' });
+    }
+    return res.status(401).json({ success: false, error: 'অনুমোদন যাচাই ব্যর্থ হয়েছে! পুনরায় লগইন করুন।', code: 'AUTH_FAILED' });
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
     const userId = decoded.id || decoded._id || decoded.userId;
 
@@ -130,20 +158,28 @@ const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, error: 'অকার্যকর টোকেন! পুনরায় লগইন করুন।' });
+    console.error('[Auth Middleware User Resolution Error]:', error.message);
+    return res.status(500).json({ success: false, error: 'ইউজার তথ্য যাচাই করতে সার্ভারে ত্রুটি হয়েছে।' });
   }
 };
 
 const optionalProtect = async (req, res, next) => {
   const token = extractToken(req);
 
-  if (!token) {
+  if (!token || !JWT_SECRET) {
+    req.user = null;
+    return next();
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
+  } catch (err) {
     req.user = null;
     return next();
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], clockTolerance: 5 });
     
     const userId = decoded.id || decoded._id || decoded.userId;
 

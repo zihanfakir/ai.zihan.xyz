@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const User = require('../models/User');
 const Plan = require('../models/Plan');
 const UsageLog = require('../models/UsageLog');
 const AiModel = require('../models/AiModel');
@@ -171,7 +173,7 @@ const checkRateLimit = async (req, res, next) => {
     }
 
     // 4. Model Access Permission Check (for text chat - Microsecond In-Memory Cache)
-    const model_id = req.body.model || 'openrouter/free';
+    const model_id = (req.body && typeof req.body === 'object' && req.body.model) ? String(req.body.model).trim() : 'openrouter/free';
     
     let aiModel = getCachedModel(model_id);
     if (!aiModel) {
