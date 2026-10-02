@@ -5162,6 +5162,11 @@
     // Global App Language (Initialized early)
     let currentLanguage = localStorage.getItem("alokpoth_lang") || "en";
 
+    // Global Feature Toggles (Initialized early to eliminate Temporal Dead Zone ReferenceErrors)
+    var isThinkingEnabled = (localStorage.getItem("alokpoth_thinking_enabled") === "true");
+    var isWebSearchEnabled = false;
+    var isImageGenEnabled = false;
+
     // Core Chat Elements (Initialized early to prevent Temporal Dead Zone ReferenceErrors)
     const chatStream = document.getElementById("chatStream");
     const scrollContainer = document.getElementById("scrollContainer");
@@ -5311,9 +5316,6 @@ Capabilities & Code Generation Instructions (CRITICAL):
       if (typeof updateSendAvailability === "function") updateSendAvailability();
     }
 
-    let isWebSearchEnabled = false;
-    let isImageGenEnabled = false;
-    let isThinkingEnabled = localStorage.getItem("alokpoth_thinking_enabled") === "true";
     let currentAbortController = null;
 
     function escapeHtml(str) {

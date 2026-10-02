@@ -1,5 +1,5 @@
-/* Alora AI - Progressive Web App Service Worker (v1.5.1) */
-const CACHE_NAME = 'alora-ai-v1.5.1';
+/* Alora AI - Progressive Web App Service Worker (v1.5.2) */
+const CACHE_NAME = 'alora-ai-v1.5.2';
 const CORE_ASSETS = [
   '/',
   '/index.html',
