@@ -952,10 +952,8 @@
       flex-direction: column;
       position: relative;
       background: var(--bg-main);
-      contain: layout paint;
-      /* Force GPU Compositing for smooth 144fps/60fps on all devices */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
       min-width: 0;
       min-height: 0;
     }
@@ -1150,6 +1148,8 @@
       gap: 16px;
       width: 100%;
       min-width: 0;
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 70px;
     }
 
     .message-row.user {
@@ -4754,6 +4754,33 @@
       padding: 0 !important;
       pointer-events: none !important;
     }
+
+    /* Mobile Thermal & Performance Optimization */
+    @media (max-width: 768px) {
+      .modal-overlay {
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+      }
+      .sheen-surface {
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+      }
+      .account-quota-card {
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+      }
+      .user-bubble {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
@@ -6389,10 +6416,15 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       } catch(e) { console.error('[Alokpoth]', e); }
     }
 
-    function safeMarkdown(md) {
+    function safeMarkdown(md, isFinal = false) {
       try {
         const raw = marked.parse(md || "");
-        let html = (typeof DOMPurify !== "undefined") ? DOMPurify.sanitize(raw) : raw;
+        // Thermal optimization: Only run heavy DOMPurify virtual-tree sanitation on final completed output or non-streaming calls.
+        // During fast live token streaming, bypassing DOMPurify eliminates thousands of virtual DOM allocations and prevents mobile CPU overheating.
+        let html = raw;
+        if ((isFinal || !isGenerating) && typeof DOMPurify !== "undefined") {
+          html = DOMPurify.sanitize(raw);
+        }
         // Deep Optimization: Lazy load images
         html = html.replace(/<img /g, '<img loading="lazy" ');
         return html;
@@ -7425,7 +7457,9 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
     function startQuotaCountdownTimer() {
       if (quotaCountdownTimer) clearInterval(quotaCountdownTimer);
       quotaCountdownTimer = setInterval(() => {
-        updateQuotaCountdownDisplay();
+        if (!document.hidden) {
+          updateQuotaCountdownDisplay();
+        }
       }, 1000);
       updateQuotaCountdownDisplay();
     }
@@ -7935,12 +7969,6 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         if (window.scrollY !== 0 || window.scrollX !== 0) {
           window.scrollTo(0, 0);
         }
-        if (document.documentElement.scrollTop !== 0) {
-          document.documentElement.scrollTop = 0;
-        }
-        if (document.body.scrollTop !== 0) {
-          document.body.scrollTop = 0;
-        }
       }, { passive: true });
     }
     window.addEventListener("resize", () => setAppHeight());
@@ -7950,12 +7978,6 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
     window.addEventListener("scroll", () => {
       if (window.scrollY !== 0 || window.scrollX !== 0) {
         window.scrollTo(0, 0);
-      }
-      if (document.documentElement.scrollTop !== 0) {
-        document.documentElement.scrollTop = 0;
-      }
-      if (document.body.scrollTop !== 0) {
-        document.body.scrollTop = 0;
       }
     }, { passive: true });
 
@@ -13849,7 +13871,8 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         let thinkStartTime = Date.now();
         
         let lastRenderTime = 0;
-        const RENDER_THROTTLE = 30;
+        // On mobile / touch devices, throttle rendering to 65ms (15fps) to save battery and stop phone overheating
+        const RENDER_THROTTLE = (window.innerWidth <= 768 || ('ontouchstart' in window)) ? 65 : 40;
 
         let overallWatchdog = setTimeout(() => {
           if (!apiFinished) {
@@ -13887,7 +13910,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
           return { extractedReasoning: thoughts.join("\n\n"), cleanContent: content };
         };
 
-        const renderCurrentState = () => {
+        const renderCurrentState = (isFinal = false) => {
            let html = "";
            
            const extracted = extractThoughts(renderedContent);
@@ -13905,11 +13928,11 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
                  <span>${thinkTitle}</span>
                  <svg class="thought-chevron" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
                </summary>
-               <div class="thought-content">${safeMarkdown(finalReasoning)}</div>
+               <div class="thought-content">${safeMarkdown(finalReasoning, isFinal)}</div>
              </details>`;
            }
            if (finalContent) {
-             html += `<div class="content-block">${safeMarkdown(finalContent)}</div>`;
+             html += `<div class="content-block">${safeMarkdown(finalContent, isFinal)}</div>`;
            } else if (!apiFinished) {
              html += `<span class="streaming-cursor"></span>`;
            } else if (apiFinished && !finalContent && finalReasoning) {
@@ -13933,72 +13956,84 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
 
           if (streamQueueContent.length > 0 || streamQueueReasoning.length > 0) {
             if (streamQueueReasoning.length > 0) {
-              let takeR = Math.max(12, Math.ceil(streamQueueReasoning.length / 2));
+              let takeR = Math.max(24, Math.ceil(streamQueueReasoning.length * 0.75));
               renderedReasoning += streamQueueReasoning.substring(0, takeR);
               streamQueueReasoning = streamQueueReasoning.substring(takeR);
             }
             if (streamQueueContent.length > 0) {
-              let takeC = Math.max(12, Math.ceil(streamQueueContent.length / 2));
+              let takeC = Math.max(32, Math.ceil(streamQueueContent.length * 0.75));
               renderedContent += streamQueueContent.substring(0, takeC);
               streamQueueContent = streamQueueContent.substring(takeC);
             }
 
             const now = performance.now();
             if (now - lastRenderTime > RENDER_THROTTLE) {
-              renderCurrentState();
+              renderCurrentState(false);
               if (aiTextElement.children.length === 0) aiTextElement.classList.add("no-children");
               else aiTextElement.classList.remove("no-children");
               scrollToBottom();
               lastRenderTime = now;
             }
-            if (queueRafId) cancelAnimationFrame(queueRafId); queueRafId = requestAnimationFrame(processQueue);
-          } else {
-            if (!apiFinished) {
-              // Re-render to update the thinking timer!
-              const now = performance.now();
-              if (renderedReasoning && now - lastRenderTime > 1000) {
-                 renderCurrentState();
-                 lastRenderTime = now;
-              }
-              isQueueActive = false;
-              queueRafId = null;
+
+            if (streamQueueContent.length > 0 || streamQueueReasoning.length > 0) {
+              queueRafId = requestAnimationFrame(processQueue);
             } else {
               isQueueActive = false;
-              queueRafId = null;
-              aiTextElement.classList.remove("streaming", "no-children");
-              renderCurrentState();
-              enhanceCodeBlocks(aiTextElement);
-              
-              const extracted = extractThoughts(renderedContent || "");
-              const combinedReasoning = (renderedReasoning || "") + ((renderedReasoning && extracted.extractedReasoning) ? "\n\n" : "") + (extracted.extractedReasoning || "");
-              let finalSavedContent = extracted.cleanContent || "";
-              if (combinedReasoning) {
-                finalSavedContent = `<think>\n${combinedReasoning}\n</think>\n\n` + finalSavedContent;
+              if (apiFinished) {
+                finalizeRender();
               }
-              if (!finalSavedContent && combinedReasoning) finalSavedContent = `<think>\n${combinedReasoning}\n</think>`;
-              
-              copyBtn.dataset.text = extracted.cleanContent || finalSavedContent;
-              copyBtn.style.display = "inline-flex";
-              if (ttsBtn) ttsBtn.style.display = "inline-flex";
-              if (likeBtn) likeBtn.style.display = "inline-flex";
-              if (dislikeBtn) dislikeBtn.style.display = "inline-flex";
-              if (shareBtn) shareBtn.style.display = "inline-flex";
-              if (moreBtn) moreBtn.style.display = "inline-flex";
-              regenBtn.classList.remove("regen-btn-highlight");
-              regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`;
-              regenBtn.style.display = "inline-flex";
-              
-              messagesHistory.push({ role: "assistant", content: finalSavedContent });
-              addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
-                isCodeGen: countCodeBlocks(finalSavedContent) > 0
-              });
-              soundEngine.playReceive();
-              triggerHaptic("light");
-              updateNavbarCreditBadge();
-              scrollToBottom();
-              finishUp();
+            }
+          } else {
+            isQueueActive = false;
+            queueRafId = null;
+            if (!apiFinished) {
+              // Re-render to update the thinking timer if needed
+              const now = performance.now();
+              if (renderedReasoning && now - lastRenderTime > 1000) {
+                 renderCurrentState(false);
+                 lastRenderTime = now;
+              }
+            } else {
+              finalizeRender();
             }
           }
+        };
+
+        const finalizeRender = () => {
+          isQueueActive = false;
+          queueRafId = null;
+          aiTextElement.classList.remove("streaming", "no-children");
+          renderCurrentState(true);
+          enhanceCodeBlocks(aiTextElement);
+          
+          const extracted = extractThoughts(renderedContent || "");
+          const combinedReasoning = (renderedReasoning || "") + ((renderedReasoning && extracted.extractedReasoning) ? "\n\n" : "") + (extracted.extractedReasoning || "");
+          let finalSavedContent = extracted.cleanContent || "";
+          if (combinedReasoning) {
+            finalSavedContent = `<think>\n${combinedReasoning}\n</think>\n\n` + finalSavedContent;
+          }
+          if (!finalSavedContent && combinedReasoning) finalSavedContent = `<think>\n${combinedReasoning}\n</think>`;
+          
+          copyBtn.dataset.text = extracted.cleanContent || finalSavedContent;
+          copyBtn.style.display = "inline-flex";
+          if (ttsBtn) ttsBtn.style.display = "inline-flex";
+          if (likeBtn) likeBtn.style.display = "inline-flex";
+          if (dislikeBtn) dislikeBtn.style.display = "inline-flex";
+          if (shareBtn) shareBtn.style.display = "inline-flex";
+          if (moreBtn) moreBtn.style.display = "inline-flex";
+          regenBtn.classList.remove("regen-btn-highlight");
+          regenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`;
+          regenBtn.style.display = "inline-flex";
+          
+          messagesHistory.push({ role: "assistant", content: finalSavedContent });
+          addUsage(selectedModelId, inputTokensForThisCall, estimateTokens(finalSavedContent), {
+            isCodeGen: countCodeBlocks(finalSavedContent) > 0
+          });
+          soundEngine.playReceive();
+          triggerHaptic("light");
+          updateNavbarCreditBadge();
+          scrollToBottom();
+          finishUp();
         };
 
         const handleToken = (deltaContent, deltaReasoning, fullContent, fullReasoning) => {
@@ -14017,7 +14052,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
           if (!isQueueActive) {
             isQueueActive = true;
             if (!queueRafId) {
-              if (queueRafId) cancelAnimationFrame(queueRafId); queueRafId = requestAnimationFrame(processQueue);
+              queueRafId = requestAnimationFrame(processQueue);
             }
           }
         };
@@ -14025,6 +14060,9 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         try {
           await streamServerCompletions(selectedModelId, activeHistory, handleToken);
           apiFinished = true;
+          if (!isQueueActive) {
+            processQueue();
+          }
           const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
           if (!started) {
             refundCredit();
@@ -14259,7 +14297,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
 
     syncModelStatuses();
     setInterval(() => {
-      if (navigator.onLine) syncModelStatuses({ silent: true });
+      if (navigator.onLine && !document.hidden) syncModelStatuses({ silent: true });
     }, PING_INTERVAL_MS);
 
     document.addEventListener("visibilitychange", () => {
