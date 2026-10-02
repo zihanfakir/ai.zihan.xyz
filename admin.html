@@ -2905,10 +2905,33 @@
     }
 
     async function copyToClipboard(text, msg) {
+      if (!text) return;
+      let ok = false;
       try {
-        await navigator.clipboard.writeText(text);
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        }
+      } catch (e) {}
+
+      if (!ok) {
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.top = "-9999px";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (e) {}
+      }
+
+      if (ok) {
         showToast(msg || `কপি হয়েছে: ${text}`, "success");
-      } catch (e) {
+      } else {
         showToast("কপি করা যায়নি", "error");
       }
     }
@@ -3216,7 +3239,7 @@
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <img src="${escapeHtml(data.url)}" alt="Test Image" style="max-width:240px;max-height:240px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 15px rgba(0,0,0,0.4);">
                   <span style="font-size:0.75rem;color:#34d399;">✓ মডেল: ${escapeHtml(data.model || payload.model)}</span>
-                  <a href="${escapeHtml(data.url)}" target="_blank" style="font-size:0.78rem;color:#60a5fa;text-decoration:underline;">নতুন ট্যাবে বড় করে দেখুন</a>
+                  <a href="${escapeHtml(data.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.78rem;color:#60a5fa;text-decoration:underline;">নতুন ট্যাবে বড় করে দেখুন</a>
                 </div>
               `;
             }

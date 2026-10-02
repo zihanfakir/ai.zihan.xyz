@@ -131,9 +131,13 @@ app.use('/api/redeem', redeemLimiter, redeemRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', server: 'Alora AI Backend Running', time: new Date() });
-});
+const serverHealthHandler = (req, res) => {
+  res.json({ success: true, status: 'ok', server: 'Alora AI Backend Running', time: new Date() });
+};
+app.get('/api/health', serverHealthHandler);
+app.head('/api/health', (req, res) => res.status(200).end());
+app.get('/', serverHealthHandler);
+app.head('/', (req, res) => res.status(200).end());
 
 // Public plans and limits info
 app.get('/api/plans', async (req, res) => {

@@ -1435,14 +1435,17 @@
       document.getElementById("info2Desc").textContent = d.info2Desc;
     }
 
-    document.getElementById("langToggleBtn").addEventListener("click", () => {
-      const nextLang = (currentLang === "en" ? "bn" : "en");
-      applyLanguage(nextLang);
-    });
+    const langToggleBtn = document.getElementById("langToggleBtn");
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener("click", () => {
+        const nextLang = (currentLang === "en" ? "bn" : "en");
+        applyLanguage(nextLang);
+      });
+    }
 
     // Check back navigation source
     const navBackBtn = document.getElementById("navBackBtn");
-    if (document.referrer && (document.referrer.includes("index.html") || document.referrer.includes("account.html"))) {
+    if (navBackBtn && document.referrer && (document.referrer.includes("index.html") || document.referrer.includes("account.html"))) {
       navBackBtn.addEventListener("click", (e) => {
         e.preventDefault();
         window.history.back();

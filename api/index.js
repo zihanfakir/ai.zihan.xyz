@@ -88,9 +88,13 @@ const healthHandler = (req, res) => {
   });
 };
 app.get('/api/health', healthHandler);
+app.head('/api/health', (req, res) => res.status(200).end());
 app.get('/health', healthHandler);
+app.head('/health', (req, res) => res.status(200).end());
 app.get('/api', healthHandler);
+app.head('/api', (req, res) => res.status(200).end());
 app.get('/', healthHandler);
+app.head('/', (req, res) => res.status(200).end());
 
 app.get('/api/debug-models', async (req, res) => {
   try {

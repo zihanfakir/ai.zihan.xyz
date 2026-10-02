@@ -4741,7 +4741,7 @@
             <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);" data-i18n="feedbackDirectContact">সরাসরি যোগাযোগ:</div>
             <div style="font-size: 0.88rem; color: var(--text-sub); display: flex; flex-direction: column; gap: 8px;">
               <div>📧 <span data-i18n="feedbackEmailLabel">ইমেইল:</span> <a href="mailto:x@zihan.uk" style="color: var(--accent-color); text-decoration: none;">x@zihan.uk</a></div>
-              <div>🌐 <span data-i18n="feedbackWebsiteLabel">ওয়েবসাইট:</span> <a href="https://alora.zihan.xyz" target="_blank" style="color: var(--accent-color); text-decoration: none;">alora.zihan.xyz</a></div>
+              <div>🌐 <span data-i18n="feedbackWebsiteLabel">ওয়েবসাইট:</span> <a href="https://alora.zihan.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;">alora.zihan.xyz</a></div>
             </div>
           </div>
         </div>
@@ -5150,6 +5150,13 @@
       ? window.location.origin
       : (window.location.origin.includes('vercel.app') ? window.location.origin : RENDER_BACKEND);
     const API_BASE = BACKEND_URL + "/api";
+
+    // Multi-tab logout & auth synchronization
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'alokpoth_token' && !e.newValue) {
+        window.location.href = 'login';
+      }
+    });
 
     // ── Utility: debounce ──────────────────────────────────────────────────────
     function debounce(fn, delay) {
@@ -9661,7 +9668,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         : (type === "info"
           ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`
           : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`);
-      toast.innerHTML = `${icon}<span>${message}</span>`;
+      toast.innerHTML = `${icon}<span>${escapeHtml(String(message || ''))}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
         toast.classList.add("fade-out");
