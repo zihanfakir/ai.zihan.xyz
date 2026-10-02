@@ -80,11 +80,40 @@ app.get(['/api/debug-route', '/debug-route'], (req, res) => {
 
 // Health check
 const healthHandler = (req, res) => {
-  res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    success: true,
+    status: 'ok',
+    mongo: getIsMongoConnected(),
+    timestamp: new Date().toISOString()
+  });
 };
 app.get('/api/health', healthHandler);
 app.get('/health', healthHandler);
 app.get('/api', healthHandler);
+
+app.get('/api/debug-models', async (req, res) => {
+  try {
+    const { getPersistedModels, getDeletedModelIds } = require('../utils/getModelConfig');
+    const AiModel = require('../server/models/AiModel');
+    const isMongo = getIsMongoConnected();
+    const deleted = Array.from(await getDeletedModelIds());
+    const persisted = await getPersistedModels();
+    let mongoList = [];
+    if (isMongo) {
+      mongoList = await AiModel.find().lean().catch(e => ({ error: e.message }));
+    }
+    res.json({
+      success: true,
+      isMongo,
+      deleted,
+      persistedCount: Array.isArray(persisted) ? persisted.length : 0,
+      mongoCount: Array.isArray(mongoList) ? mongoList.length : 0,
+      mongoList
+    });
+  } catch(e) {
+    res.status(500).json({ error: e.message, stack: e.stack });
+  }
+});
 
 // Public plans endpoint
 const plansHandler = async (req, res) => {
