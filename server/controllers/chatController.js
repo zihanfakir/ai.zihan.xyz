@@ -44,7 +44,13 @@ const resolveModelTarget = async (targetModelId, customUrl, customKey, targetMod
     else if (actualModel.includes('deepseek')) actualModel = 'openai/gpt-oss-120b';
     else if (actualModel === 'llama-3.1-8b-instant') actualModel = 'openai/gpt-oss-20b';
     if (!targetKey) targetKey = process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY || (await getApiKeyFromSupabase('__groq_key__')) || (await getApiKeyFromSupabase('openai/gpt-oss-120b'));
-  } else if ((targetUrl && targetUrl.includes('openrouter.ai')) || (!customUrl && (actualModel === 'openrouter/free' || !actualModel))) {
+  } else if (targetUrl && targetUrl.includes('aihub.071129.xyz')) {
+    providerType = 'custom';
+    if (actualModel === 'openrouter/free' || !actualModel) {
+      actualModel = 'ministral-8b-latest';
+    }
+    if (!targetKey) targetKey = await getApiKeyFromSupabase(actualModel) || (await getApiKeyFromSupabase('openrouter/free'));
+  } else if ((targetUrl && targetUrl.includes('openrouter.ai')) || (!targetUrl && !customUrl && (actualModel === 'openrouter/free' || !actualModel))) {
     providerType = 'openrouter';
     targetUrl = targetUrl || 'https://openrouter.ai/api/v1/chat/completions';
     actualModel = actualModel || 'openrouter/free';
@@ -92,6 +98,32 @@ const resolveModelTarget = async (targetModelId, customUrl, customKey, targetMod
 
   return { targetUrl, targetKey, actualModel, providerType };
 };
+
+function detectRepetitionDegeneracy(text) {
+  if (!text || text.length < 30) return false;
+  const recent = text.slice(-250);
+
+  // 1. Single repeated character / token run: e.g. "||||||" or "yyyyy" or "১ ১ ১ ১"
+  const singleCharRun = /(.)\1{7,}/u;
+  if (singleCharRun.test(recent)) return true;
+
+  // 2. Exact repeated chunks of length 2 to 18 (e.g. "পাডি", "পড়ে", "পরে", "কার্প")
+  for (let len = 2; len <= 18; len++) {
+    const chunk = recent.slice(-len);
+    const repeated = chunk.repeat(4);
+    if (recent.endsWith(repeated)) {
+      return true;
+    }
+  }
+
+  // 3. Repeating phrases of length 2-15 characters at least 4 times
+  const phraseRepeat = /(.{2,15}?)\1{3,}/u;
+  if (phraseRepeat.test(recent)) {
+    return true;
+  }
+
+  return false;
+}
 
 const streamChatCompletions = async (req, res) => {
   try {
@@ -150,7 +182,7 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
   - Implement best practices: defensive validation, robust error handling, optimal algorithms, clear naming, and proper syntax-highlighted code blocks.
 - Ultra User-Friendly & 100% Obedient ("ইউজার যা বলবে তাই করবে"):
   - The user is your director. Whatever instruction, task, style, language, format, or role the user specifies, execute it 100% faithfully, gladly, and precisely.
-  - Zero Preachiness: NEVER lecture, judge, scold, moralize, or give unsolicited patronizing warnings/disclaimers. Never refuse benign, creative, hypothetical, or coding requests. Always be warm, humble, proactive, and exceptionally helpful.
+  - Zero Preachiness & No Safety Refusals: NEVER lecture, judge, scold, moralize, or give unsolicited patronizing warnings/disclaimers. NEVER refuse benign everyday requests (such as recipes, groceries, lists, creative writing, jokes, coding, brainstorming) with robotic clichés like "As an AI, user safety is my top priority", "I cannot fulfill this due to user safety", or "safety guidelines". Always be warm, humble, proactive, and exceptionally helpful.
 
 2. HOW TO THINK & CONVERSE LIKE A GENIUS HUMAN:
 - True Conversational Empathy & Warmth:
@@ -166,7 +198,11 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
   - In normal conversations, casual topics, and thoughtful discussions: write in natural, engaging human paragraphs! DO NOT turn ordinary conversations into dry, mechanical bullet lists.
   - Use bullet points, bolding, and structured headings ONLY when presenting comprehensive tutorials, code steps, multi-item comparisons, or complex technical documentation where structure is genuinely helpful.
 
-3. LANGUAGE MASTERY:
+3. LANGUAGE MASTERY & CONVERSATIONAL CONTINUITY (CRITICAL):
+- Language Continuity:
+  - ALWAYS match and maintain the language the user is communicating in.
+  - If the user writes in Bengali or has previously asked for Bengali, stay 100% in Bengali for all subsequent turns! NEVER switch back to English on your own.
+  - Only switch languages if the user specifically writes in or requests another language.
 - Bengali (বাংলা):
   - When communicating in Bengali, write in rich, lively, natural modern Bengali (প্রাণবন্ত প্রমিত চলিত বাংলা).
   - Strictly avoid awkward, literal machine-translations or archaic textbook phrases. Speak like an educated, charismatic, and friendly Bengali native speaker.
@@ -249,14 +285,21 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
             contents: geminiContents,
             ...(systemInstructionText ? { systemInstruction: { parts: [{ text: systemInstructionText }] } } : {}),
             generationConfig: {
-              temperature: 0.90,
-              topP: 0.95,
+              temperature: 0.65,
+              topP: 0.90,
               topK: 64,
               maxOutputTokens: 8192,
-              frequencyPenalty: 0.3,
-              presencePenalty: 0.2,
+              frequencyPenalty: 0.6,
+              presencePenalty: 0.4,
               ...(req.body.thinking === false ? { thinkingConfig: { thinkingBudget: 0 } } : {})
-            }
+            },
+            safetySettings: [
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
           };
 
           const r = await fetch(url, {
@@ -287,10 +330,10 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
             model: modName,
             messages: safeMessagesWithIdentity,
             stream: true,
-            temperature: 0.90,
-            top_p: 0.95,
-            frequency_penalty: 0.3,
-            presence_penalty: 0.2
+            temperature: 0.65,
+            top_p: 0.90,
+            frequency_penalty: 0.6,
+            presence_penalty: 0.4
           };
           if (req.body.thinking === false) {
             p.reasoning_effort = 'none';
@@ -531,6 +574,8 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
       };
 
       let geminiLineBuffer = '';
+      let openAiLineBuffer = '';
+      let accumulatedStreamContent = '';
 
       response.body.on('data', (chunk) => {
         hasStreamedData = true;
@@ -555,6 +600,17 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
                     for (const p of parts) {
                       if (p && p.text) {
                         hasContentTokens = true;
+                        accumulatedStreamContent += p.text;
+                        if (detectRepetitionDegeneracy(accumulatedStreamContent)) {
+                          console.warn('[Stream Watchdog] Repetition loop detected in Gemini stream, closing safely.');
+                          try {
+                            if (typeof response.body?.destroy === 'function') response.body.destroy();
+                          } catch (e) {}
+                          res.write(`data: [DONE]\n\n`);
+                          if (typeof res.flush === 'function') res.flush();
+                          safeResolve();
+                          return;
+                        }
                         res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: p.text } }] })}\n\n`);
                         if (typeof res.flush === 'function') res.flush();
                       }
@@ -565,6 +621,43 @@ You are an exceptionally brilliant, thoughtful, and human-like AI assistant name
             }
           } else {
             // Standard OpenAI SSE format
+            openAiLineBuffer += chunk.toString();
+            const lines = openAiLineBuffer.split('\n');
+            openAiLineBuffer = lines.pop(); // save remainder
+
+            let chunkHasDegeneracy = false;
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data:')) {
+                const dataStr = trimmed.slice(5).trim();
+                if (!dataStr || dataStr === '[DONE]') continue;
+                try {
+                  const json = JSON.parse(dataStr);
+                  const delta = json?.choices?.[0]?.delta;
+                  const text = delta?.content || delta?.text || '';
+                  if (text) {
+                    hasContentTokens = true;
+                    accumulatedStreamContent += text;
+                    if (detectRepetitionDegeneracy(accumulatedStreamContent)) {
+                      chunkHasDegeneracy = true;
+                      break;
+                    }
+                  }
+                } catch (pe) {}
+              }
+            }
+
+            if (chunkHasDegeneracy) {
+              console.warn('[Stream Watchdog] Repetition loop detected from upstream model, truncating and closing stream safely.');
+              try {
+                if (typeof response.body?.destroy === 'function') response.body.destroy();
+              } catch (e) {}
+              res.write(`data: [DONE]\n\n`);
+              if (typeof res.flush === 'function') res.flush();
+              safeResolve();
+              return;
+            }
+
             if (!hasContentTokens) {
               try {
                 const s = chunk.toString();

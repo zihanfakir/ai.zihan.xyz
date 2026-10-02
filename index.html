@@ -6101,9 +6101,105 @@
       }
     };
 
+    function detectRepetitionDegeneracy(text) {
+      if (!text || text.length < 30) return false;
+      const recent = text.slice(-250);
+
+      // 1. Single repeated character / token run: e.g. "||||||" or "yyyyy" or "১ ১ ১ ১"
+      const singleCharRun = /(.)\1{7,}/u;
+      if (singleCharRun.test(recent)) return true;
+
+      // 2. Exact repeated chunks of length 2 to 18 (e.g. "পাডি", "পড়ে", "পরে", "কার্প")
+      for (let len = 2; len <= 18; len++) {
+        const chunk = recent.slice(-len);
+        const repeated = chunk.repeat(4);
+        if (recent.endsWith(repeated)) {
+          return true;
+        }
+      }
+
+      // 3. Repeating phrases of length 2-15 characters at least 4 times
+      const phraseRepeat = /(.{2,15}?)\1{3,}/u;
+      if (phraseRepeat.test(recent)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function cleanRepetitionLoop(text) {
+      if (!text || text.length < 30) return text;
+      let cleaned = text;
+
+      // Clean trailing repeated chunks: find what was repeating at the tail
+      for (let len = 18; len >= 2; len--) {
+        const chunk = cleaned.slice(-len);
+        let count = 0;
+        let pos = cleaned.length;
+        while (pos >= len && cleaned.slice(pos - len, pos) === chunk) {
+          count++;
+          pos -= len;
+        }
+        if (count >= 3) {
+          cleaned = cleaned.slice(0, pos).trim();
+          break;
+        }
+      }
+
+      // Also clean any single char trailing run
+      cleaned = cleaned.replace(/(.)\1{4,}$/u, '');
+
+      return cleaned.trim();
+    }
+
+    function detectActiveChatLanguage(history, currentText, defaultLang) {
+      const fallbackLang = (typeof defaultLang !== "undefined") ? defaultLang : ((typeof currentLanguage !== "undefined") ? currentLanguage : "bn");
+      const cur = (currentText || "").trim();
+      const lowerCur = cur.toLowerCase();
+
+      // Explicit user switch to English
+      const englishSwitchRegex = /\b(speak (in )?english|in english|reply in english|answer in english|talk in english|use english|write in english|switch to english|ইংরেজি|ইংলিশ)\b/i;
+      if (englishSwitchRegex.test(lowerCur)) {
+        return "en";
+      }
+
+      // Explicit user switch to Bengali
+      const bengaliSwitchRegex = /\b(speak (in )?bangla|speak (in )?bengali|in bangla|in bengali|bangla(y)? (bolo|bolun|likho|likhun|te)|বাংলা(য়|য়)? (বল|বলো|বলুন|লিখ|লিখুন|কথা))\b/i;
+      if (bengaliSwitchRegex.test(lowerCur)) {
+        return "bn";
+      }
+
+      // Does current text contain Bengali characters?
+      if (/[\u0980-\u09FF]/.test(cur)) {
+        return "bn";
+      }
+
+      // Inspect recent conversation turns (last 6 messages)
+      if (Array.isArray(history) && history.length > 0) {
+        const recent = history.slice(-6);
+        for (let i = recent.length - 1; i >= 0; i--) {
+          const msg = recent[i];
+          const content = typeof msg.content === "string" ? msg.content : "";
+          if (!content) continue;
+
+          if (msg.role === "user") {
+            const lowerMsg = content.toLowerCase();
+            if (englishSwitchRegex.test(lowerMsg)) return "en";
+            if (bengaliSwitchRegex.test(lowerMsg)) return "bn";
+            if (/[\u0980-\u09FF]/.test(content)) return "bn";
+          } else if (msg.role === "assistant") {
+            if (/[\u0980-\u09FF]/.test(content)) return "bn";
+          }
+        }
+      }
+
+      // Fallback
+      return fallbackLang === "en" ? "en" : "bn";
+    }
+
     // System Prompt & Chat History Engine (Initialized early to eliminate TDZ ReferenceErrors)
-    function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen) {
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+    function buildSystemPrompt(modelDisplayName, allowCode, allowImageGen, targetLang) {
+      const isEn = targetLang ? (targetLang === "en") : (typeof currentLanguage !== "undefined" && currentLanguage === "en");
       let userCustomPrompt = "";
       try {
         userCustomPrompt = (localStorage.getItem("alokpoth_custom_instructions") || "").trim();
@@ -6152,8 +6248,10 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
   - When specifically asked: state that your name is "${modelDisplayName}", developed by Alora, a product of Alokpoth, founded by Zihan Fakir.
 - NEVER mention or admit to being OpenAI, Google, Anthropic, Meta, DeepSeek, or any third-party provider.
 
-=== LANGUAGE RULE ===
+=== LANGUAGE RULE & CONTINUITY (CRITICAL) ===
 - Respond fluently and naturally in English, unless the user writes in Bengali or requests another language.
+- LANGUAGE CONTINUITY: Once the conversation is in Bengali or the user speaks/requests Bengali, YOU MUST REMAIN IN BENGALI for all subsequent turns until the user explicitly requests English or another language. Never revert back to English unprompted.
+- ZERO SAFETY PREACHINESS & DIRECT COMPLIANCE: Never lecture, moralize, or refuse harmless everyday queries with canned disclaimers like "As an AI...", "User safety is my top priority...", or "I cannot assist with this". Answer benign requests directly, helpfully, and pragmatically without false safety flags.
 
 === Capabilities & Code Generation Instructions (CRITICAL) ===
 - You ARE fully able to write, generate, and provide complete, full-stack programming and source code in any language (HTML, CSS, JavaScript, Python, PHP, SQL, React, etc.).
@@ -6197,8 +6295,10 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
   - শুধুমাত্র তখনই স্পষ্টভাবে বলুন: আপনার নাম "${modelDisplayName}", আপনি Alokpoth (আলোকপথ)-এর প্রতিষ্ঠাতা জিহান ফকির (Zihan Fakir) কর্তৃক নির্মিত Alora AI দ্বারা তৈরি।
 - কখনোই নিজেকে OpenAI, Google, Gemini, ChatGPT, Anthropic, Meta, Groq, DeepSeek ইত্যাদি কোনো থার্ড-পার্টি কোম্পানির মডেল হিসেবে প্রকাশ করবেন না। আপনার একমাত্র পরিচয় আপনি Alora-এর "${modelDisplayName}"।
 
-=== ভাষা নিয়মাবলী ===
-- ব্যবহারকারী বাংলায় কথা বললে সবসময় অত্যন্ত সুন্দর, সমৃদ্ধ, প্রমিত চলিত বাংলায় স্বাভাবিকভাবে উত্তর দিন। ব্যবহারকারী অন্য ভাষায় উত্তর চাইলে সেই ভাষায় কথা বলুন।
+=== ভাষা নিয়মাবলী ও নিরবচ্ছিন্নতা (অত্যন্ত জরুরি) ===
+- ব্যবহারকারী বাংলায় কথা বললে বা বাংলায় উত্তর দিতে বললে সবসময় অত্যন্ত সুন্দর, সমৃদ্ধ, প্রমিত চলিত বাংলায় স্বাভাবিকভাবে উত্তর দিন।
+- ভাষা বজায় রাখার নিয়ম (Language Continuity): ব্যবহারকারী একবার বাংলায় কথা বললে বা বাংলায় উত্তর চাইলে, পরবর্তী সকল উত্তরে অবিরতভাবে বাংলায় কথা বলুন। ব্যবহারকারী নিজে থেকে স্পষ্টভাবে ইংরেজি না চাইলে কখনোই নিজে থেকে ইংরেজিতে ফিরে যাবেন না।
+- অপ্রয়োজনীয় 'ইউজার সেফটি' বা অজুহাত সম্পূর্ণ নিষিদ্ধ: সাধারণ, নিরীহ বা সৃজনশীল প্রশ্নে কখনোই যান্ত্রিক সেফটি লেকচার বা রিফিউজাল দেবেন না (যেমন: "ব্যবহারকারীর সুরক্ষা আমার অগ্রাধিকার", "এআই হিসেবে এটি করা সম্ভব নয়")। নীতিশিক্ষা দেওয়া থেকে সম্পূর্ণ বিরত থাকুন এবং সরাসরি সহায়ক সমাধান দিন।
 - কোড লেখার সময় কোড ব্লকের ভেতরে সম্পূর্ণ কার্যকরী প্রোডাকশন কোড প্রদান করুন।
 
 === Capabilities & Code Generation Instructions (CRITICAL) ===
@@ -12906,6 +13006,18 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
                 if (deltaContent || deltaReasoning) {
                   fullText += (deltaContent || "");
                   fullReasoning += (deltaReasoning || "");
+
+                  if (detectRepetitionDegeneracy(fullText)) {
+                    console.warn("[Stream Watchdog] Repetition loop detected, cleaning text and stopping stream.");
+                    fullText = cleanRepetitionLoop(fullText);
+                    onToken("", "", fullText, fullReasoning);
+                    try {
+                      if (reader && typeof reader.cancel === 'function') reader.cancel();
+                    } catch (rcErr) {}
+                    isDone = true;
+                    break;
+                  }
+
                   onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
                 }
               } catch (e) {
@@ -12916,6 +13028,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
                 }
               }
             }
+            if (isDone) break;
           }
 
         // Flush any trailing buffer payload after stream finishes
@@ -12944,6 +13057,14 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
               if (deltaContent || deltaReasoning) {
                 fullText += (deltaContent || "");
                 fullReasoning += (deltaReasoning || "");
+
+                if (detectRepetitionDegeneracy(fullText)) {
+                  console.warn("[Stream Watchdog] Repetition loop detected in trailing buffer, cleaning text.");
+                  fullText = cleanRepetitionLoop(fullText);
+                  onToken("", "", fullText, fullReasoning);
+                  break;
+                }
+
                 onToken(deltaContent, deltaReasoning, fullText, fullReasoning);
               }
             } catch(e) { console.error('[Alokpoth]', e); }
@@ -13599,7 +13720,8 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         // Web Search Logic based on Toggle
         if (isWebSearchEnabled && lastUserMsg && lastUserMsg.content) {
           try {
-            const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+            const activeChatLang = detectActiveChatLanguage(messagesHistory, lastUserMsg.content, currentLanguage);
+            const isEnNow = (activeChatLang === "en");
             setBubbleStatus(aiTextElement, "searching", isEnNow ? "Searching the web..." : "ওয়েব সার্চ করা হচ্ছে...");
             const searchData = await searchDuckDuckGo(lastUserMsg.content);
             if (searchData) {
@@ -13630,10 +13752,11 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
           }
         }
 
-        const isEnNow = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-        const langReminder = isEnNow
-          ? "\n\n[System Note: Please respond fluently in English unless the user explicitly asks in another language]"
-          : "\n\n[অনুস্মারক: সম্পূর্ণ উত্তর শুধু বাংলায় লিখুন, কোনো ইংরেজি বা অন্য ভাষা মিশাবেন না]";
+        const activeChatLang = detectActiveChatLanguage(messagesHistory, lastUserMsg?.content || "", currentLanguage);
+        const isEnChat = (activeChatLang === "en");
+        const langReminder = isEnChat
+          ? "\n\n[Language Directive: Please respond clearly, naturally, and fluently in English.]"
+          : "\n\n[ভাষার নির্দেশিকা: সম্পূর্ণ উত্তর অবশ্যই অত্যন্ত সুন্দর, সাবলীল, প্রাঞ্জল ও শুদ্ধ প্রমিত চলিত বাংলায় দিন। নিজে থেকে কখনোই ইংরেজি বা অন্য ভাষায় পরিবর্তন করবেন না।]";
 
         const lastUserIdx = messagesHistory.map((m) => m.role).lastIndexOf("user");
 
@@ -13641,7 +13764,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
           if (m.role === "system") {
             return {
               role: "system",
-              content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true)
+              content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true, activeChatLang)
             };
           }
           if (m.role === "user") {
@@ -13652,7 +13775,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
                 .filter(Boolean)
                 .join("\n\n");
               if (fileText) {
-                const fileLabel = isEnNow ? "Attached File Context" : "সংযুক্ত ফাইলের বিষয়বস্তু";
+                const fileLabel = isEnChat ? "Attached File Context" : "সংযুক্ত ফাইলের বিষয়বস্তু";
                 text += `\n\n[${fileLabel}]\n${fileText}`;
               }
             }
@@ -13670,7 +13793,7 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
         if (!activeHistory.some((m) => m.role === "system")) {
           activeHistory.unshift({
             role: "system",
-            content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true)
+            content: buildSystemPrompt(currentModel?.name || selectedModelId, true, true, activeChatLang)
           });
         }
 
