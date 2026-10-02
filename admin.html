@@ -2418,7 +2418,9 @@
       }
     }
 
-    document.getElementById("addModelForm").addEventListener("submit", async (e) => {
+    const addModelFormEl = document.getElementById("addModelForm");
+    if (addModelFormEl) {
+      addModelFormEl.addEventListener("submit", async (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector("button[type='submit']");
       const model_id = document.getElementById("newModelId").value.trim();
@@ -2495,6 +2497,7 @@
         }
       }
     });
+  }
 
     const newModelUrlInput = document.getElementById("newModelUrl");
     if (newModelUrlInput) {
@@ -2818,82 +2821,88 @@
       }
     }
 
-    document.getElementById("generateCodeForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const submitBtn = e.target.querySelector("button[type='submit']");
-      const plan_name = document.getElementById("codePlan").value;
-      const duration_days = document.getElementById("codeDuration").value;
-      const count = document.getElementById("codeCount").value;
+    const generateCodeFormEl = document.getElementById("generateCodeForm");
+    if (generateCodeFormEl) {
+      generateCodeFormEl.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector("button[type='submit']");
+        const plan_name = document.getElementById("codePlan").value;
+        const duration_days = document.getElementById("codeDuration").value;
+        const count = document.getElementById("codeCount").value;
 
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "কোড তৈরি হচ্ছে...";
-      }
-
-      try {
-        const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {
-          method: "POST",
-          body: JSON.stringify({ plan_name, duration_days, count })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(data.message || "রিডিম কোড জেনারেট হয়েছে!", "success");
-          loadRedeemCodes();
-          loadStats();
-        } else {
-          showToast(data.error || "কোড জেনারেট করতে সমস্যা হয়েছে", "error");
-        }
-      } catch (err) {
-        showToast("সার্ভারে সমস্যা হয়েছে", "error");
-      } finally {
         if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "কোড জেনারেট করুন";
+          submitBtn.disabled = true;
+          submitBtn.textContent = "কোড তৈরি হচ্ছে...";
         }
-      }
-    });
 
-    document.getElementById("customCodeForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const submitBtn = e.target.querySelector("button[type='submit']");
-      const custom_code = document.getElementById("customCodeWord").value;
-      const plan_name = document.getElementById("customCodePlan").value;
-      const duration_days = document.getElementById("customCodeDuration").value;
-      const max_uses = document.getElementById("customMaxUses").value;
-
-      if (!custom_code || !custom_code.trim()) {
-        showToast("কাস্টম কোড লিখুন", "error");
-        return;
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "কোড তৈরি হচ্ছে...";
-      }
-
-      try {
-        const res = await authFetch(`${API_BASE}/admin/redeem/custom`, {
-          method: "POST",
-          body: JSON.stringify({ custom_code, plan_name, duration_days, max_uses })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(data.message || "কাস্টম রিডিম কোড তৈরি হয়েছে!", "success");
-          document.getElementById("customCodeWord").value = "";
-          loadRedeemCodes();
-          loadStats();
-        } else {
-          showToast(data.error || "কাস্টম কোড তৈরি করতে সমস্যা হয়েছে", "error");
+        try {
+          const res = await authFetch(`${API_BASE}/admin/redeem/generate`, {
+            method: "POST",
+            body: JSON.stringify({ plan_name, duration_days, count })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(data.message || "রিডিম কোড জেনারেট হয়েছে!", "success");
+            loadRedeemCodes();
+            loadStats();
+          } else {
+            showToast(data.error || "কোড জেনারেট করতে সমস্যা হয়েছে", "error");
+          }
+        } catch (err) {
+          showToast("সার্ভারে সমস্যা হয়েছে", "error");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "কোড জেনারেট করুন";
+          }
         }
-      } catch (err) {
-        showToast("সার্ভারে সমস্যা হয়েছে", "error");
-      } finally {
+      });
+    }
+
+    const customCodeFormEl = document.getElementById("customCodeForm");
+    if (customCodeFormEl) {
+      customCodeFormEl.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector("button[type='submit']");
+        const custom_code = document.getElementById("customCodeWord").value;
+        const plan_name = document.getElementById("customCodePlan").value;
+        const duration_days = document.getElementById("customCodeDuration").value;
+        const max_uses = document.getElementById("customMaxUses").value;
+
+        if (!custom_code || !custom_code.trim()) {
+          showToast("কাস্টম কোড লিখুন", "error");
+          return;
+        }
+
         if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "কাস্টম কোড তৈরি করুন";
+          submitBtn.disabled = true;
+          submitBtn.textContent = "কোড তৈরি হচ্ছে...";
         }
-      }
-    });
+
+        try {
+          const res = await authFetch(`${API_BASE}/admin/redeem/custom`, {
+            method: "POST",
+            body: JSON.stringify({ custom_code, plan_name, duration_days, max_uses })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(data.message || "কাস্টম রিডিম কোড তৈরি হয়েছে!", "success");
+            document.getElementById("customCodeWord").value = "";
+            loadRedeemCodes();
+            loadStats();
+          } else {
+            showToast(data.error || "কাস্টম কোড তৈরি করতে সমস্যা হয়েছে", "error");
+          }
+        } catch (err) {
+          showToast("সার্ভারে সমস্যা হয়েছে", "error");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "কাস্টম কোড তৈরি করুন";
+          }
+        }
+      });
+    }
 
     async function copyToClipboard(text, msg) {
       try {

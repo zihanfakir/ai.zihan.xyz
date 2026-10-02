@@ -1411,7 +1411,9 @@
     }
 
     // Claim handler
-    document.getElementById("claimBtn").addEventListener("click", async () => {
+    const claimBtnEl = document.getElementById("claimBtn");
+    if (claimBtnEl) {
+      claimBtnEl.addEventListener("click", async () => {
       const d = I18N_PLANS[currentLanguage] || I18N_PLANS.bn;
       const token = localStorage.getItem("alokpoth_token");
       if (!token) {
@@ -1487,6 +1489,7 @@
         btn.textContent = d.claimBtn;
       }
     });
+  }
 
     // Dynamic Plan Limits & User Sync
     const dynamicPlanData = {

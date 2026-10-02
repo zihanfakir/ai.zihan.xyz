@@ -10097,47 +10097,57 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
 
     function closeAttachMenu() { attachMenu.classList.remove("open"); }
     
-    attachBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      updateAttachImageQuotaBadge();
-      attachMenu.classList.toggle("open");
-    });
-    attachImageOption.addEventListener("click", () => { closeAttachMenu(); imageInput.click(); });
-    attachFileOption.addEventListener("click", () => { closeAttachMenu(); docInput.click(); });
+    if (attachBtn) {
+      attachBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAttachImageQuotaBadge();
+        if (attachMenu) attachMenu.classList.toggle("open");
+      });
+    }
+    if (attachImageOption) attachImageOption.addEventListener("click", () => { closeAttachMenu(); if (imageInput) imageInput.click(); });
+    if (attachFileOption) attachFileOption.addEventListener("click", () => { closeAttachMenu(); if (docInput) docInput.click(); });
 
-    attachWebSearchOption.addEventListener("click", () => {
-      isWebSearchEnabled = !isWebSearchEnabled;
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      if (isWebSearchEnabled) {
-        isImageGenEnabled = false; 
-        imageGenText.textContent = isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
-        attachImageGenOption.style.color = "var(--text-main)"; 
-        attachImageGenOption.querySelector("span").style.color = "var(--text-sub)"; 
-        attachImageGenOption.querySelector('svg').style.stroke = "var(--text-sub)";
-      }
-      webSearchText.textContent = isWebSearchEnabled ? (isEn ? "Web Search: On" : "ওয়েব সার্চ: চালু") : (isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ");
-      attachWebSearchOption.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-main)";
-      webSearchText.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
-      attachWebSearchOption.querySelector('svg').style.stroke = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
-      updateAttachBtnActiveState(); closeAttachMenu();
-    });
+    if (attachWebSearchOption) {
+      attachWebSearchOption.addEventListener("click", () => {
+        isWebSearchEnabled = !isWebSearchEnabled;
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        if (isWebSearchEnabled) {
+          isImageGenEnabled = false; 
+          if (imageGenText) imageGenText.textContent = isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ"; 
+          if (attachImageGenOption) {
+            attachImageGenOption.style.color = "var(--text-main)"; 
+            const s = attachImageGenOption.querySelector("span"); if (s) s.style.color = "var(--text-sub)"; 
+            const svg = attachImageGenOption.querySelector('svg'); if (svg) svg.style.stroke = "var(--text-sub)";
+          }
+        }
+        if (webSearchText) webSearchText.textContent = isWebSearchEnabled ? (isEn ? "Web Search: On" : "ওয়েব সার্চ: চালু") : (isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ");
+        attachWebSearchOption.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-main)";
+        if (webSearchText) webSearchText.style.color = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
+        const svg = attachWebSearchOption.querySelector('svg'); if (svg) svg.style.stroke = isWebSearchEnabled ? "var(--accent-color)" : "var(--text-sub)";
+        updateAttachBtnActiveState(); closeAttachMenu();
+      });
+    }
 
-    attachImageGenOption.addEventListener("click", () => {
-      isImageGenEnabled = !isImageGenEnabled;
-      const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
-      if (isImageGenEnabled) {
-        isWebSearchEnabled = false; 
-        webSearchText.textContent = isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ"; 
-        attachWebSearchOption.style.color = "var(--text-main)"; 
-        attachWebSearchOption.querySelector("span").style.color = "var(--text-sub)"; 
-        attachWebSearchOption.querySelector('svg').style.stroke = "var(--text-sub)";
-      }
-      imageGenText.textContent = isImageGenEnabled ? (isEn ? "Image Gen: On" : "ছবি তৈরি: চালু") : (isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ");
-      attachImageGenOption.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-main)";
-      imageGenText.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
-      attachImageGenOption.querySelector('svg').style.stroke = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
-      updateAttachBtnActiveState(); closeAttachMenu();
-    });
+    if (attachImageGenOption) {
+      attachImageGenOption.addEventListener("click", () => {
+        isImageGenEnabled = !isImageGenEnabled;
+        const isEn = (typeof currentLanguage !== "undefined" && currentLanguage === "en");
+        if (isImageGenEnabled) {
+          isWebSearchEnabled = false; 
+          if (webSearchText) webSearchText.textContent = isEn ? "Web Search: Off" : "ওয়েব সার্চ: বন্ধ"; 
+          if (attachWebSearchOption) {
+            attachWebSearchOption.style.color = "var(--text-main)"; 
+            const s = attachWebSearchOption.querySelector("span"); if (s) s.style.color = "var(--text-sub)"; 
+            const svg = attachWebSearchOption.querySelector('svg'); if (svg) svg.style.stroke = "var(--text-sub)";
+          }
+        }
+        if (imageGenText) imageGenText.textContent = isImageGenEnabled ? (isEn ? "Image Gen: On" : "ছবি তৈরি: চালু") : (isEn ? "Image Gen: Off" : "ছবি তৈরি: বন্ধ");
+        attachImageGenOption.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-main)";
+        if (imageGenText) imageGenText.style.color = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
+        const svg = attachImageGenOption.querySelector('svg'); if (svg) svg.style.stroke = isImageGenEnabled ? "var(--accent-color)" : "var(--text-sub)";
+        updateAttachBtnActiveState(); closeAttachMenu();
+      });
+    }
 
     const attachThinkingOption = document.getElementById("attachThinkingOption");
     const thinkingText = document.getElementById("thinkingText");
@@ -10720,9 +10730,9 @@ You must fully embody the persona, tone, rules, constraints, and instructions se
       }
     }
 
-    newChatBtn.addEventListener("click", startNewChat);
-    chatHistoryBtn.addEventListener("click", openChatHistoryModal);
-    chatHistoryModalClose.addEventListener("click", () => closeChatHistoryModal());
+    if (newChatBtn) newChatBtn.addEventListener("click", startNewChat);
+    if (chatHistoryBtn) chatHistoryBtn.addEventListener("click", openChatHistoryModal);
+    if (chatHistoryModalClose) chatHistoryModalClose.addEventListener("click", () => closeChatHistoryModal());
     chatHistoryModalOverlay.addEventListener("click", (e) => {
       if (e.target === chatHistoryModalOverlay) closeChatHistoryModal();
     });
