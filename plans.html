@@ -670,17 +670,18 @@
     .redeem-input {
       flex: 1;
       height: 50px;
-      padding: env(safe-area-inset-top, 0px) 16px 0 16px;
+      padding: 0 16px;
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       color: var(--text-main);
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       outline: none;
       font-family: monospace;
+      box-sizing: border-box;
     }
 
     .redeem-input:focus {
@@ -986,10 +987,10 @@
         </div>
       </div>
       <p class="redeem-desc" id="redeemDesc">
-        আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।
+        আপনার রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম ভাউচার কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।
       </p>
       <div class="redeem-form">
-        <input type="text" class="redeem-input" id="redeemInput" placeholder="কোড লিখুন (যেমন: ALOAI2026 বা ABCD-EFGH-IJKL)" maxlength="50">
+        <input type="text" class="redeem-input" id="redeemInput" placeholder="কোড লিখুন (যেমন: ALO-PRO-XXXXXX বা কোড)" maxlength="50">
         <button type="button" class="btn-claim" id="claimBtn">আপগ্রেড করুন</button>
       </div>
     </div>
@@ -1059,8 +1060,8 @@
         btnMax: "ম্যাক্স কোড রিডিম করুন",
         currentPlanActive: "বর্তমান প্ল্যান (সক্রিয়)",
         redeemTitle: "রিডিম কোড আছে? অবিলম্বে আপগ্রেড করুন!",
-        redeemDesc: "আপনার ১২-অক্ষরের রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।",
-        redeemPlaceholder: "কোড লিখুন (যেমন: ALOAI2026 বা ABCD-EFGH-IJKL)",
+        redeemDesc: "আপনার রিডিম কোড বা অ্যাডমিন কর্তৃক প্রদত্ত কাস্টম ভাউচার কোডটি নিচে পেস্ট করে আপনার অ্যাকাউন্টে Pro বা Max সাবস্ক্রিপশন চালু করে নিন।",
+        redeemPlaceholder: "কোড লিখুন (যেমন: ALO-PRO-XXXXXX বা কোড)",
         claimBtn: "আপগ্রেড করুন",
         claimVerifying: "যাচাই হচ্ছে...",
         faqTitle: "সাধারণ জিজ্ঞাসা (FAQ)",
