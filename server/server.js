@@ -47,11 +47,63 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 const User = require('./models/User');
 
-// Connect DB & Seed Plans
+// Connect DB & Seed Plans/Models
 connectDB().then(async () => {
   if (getIsMongoConnected()) {
-    await Plan.seedDefaultPlans();
-    await AiModel.seedDefaultModels();
+    try {
+      const { getPersistedPlans, getPersistedModels } = require('../utils/getModelConfig');
+      const planCount = await Plan.countDocuments();
+      if (planCount === 0) {
+        const pPlans = await getPersistedPlans();
+        if (pPlans && pPlans.length > 0) {
+          for (const p of pPlans) {
+            await Plan.findOneAndUpdate({ name: p.name }, p, { upsert: true });
+          }
+          console.log(`[Database Seed] Synced ${pPlans.length} plans from Supabase to MongoDB.`);
+        } else {
+          await Plan.seedDefaultPlans();
+        }
+      }
+
+      const modelCount = await AiModel.countDocuments();
+      if (modelCount === 0) {
+        const pModels = await getPersistedModels();
+        if (pModels && pModels.length > 0) {
+          for (const m of pModels) {
+            await AiModel.findOneAndUpdate(
+              { model_id: m.id || m.model_id },
+              {
+                model_id: m.id || m.model_id,
+                name: m.name,
+                provider: m.provider || 'Alora',
+                type: m.type || 'custom',
+                base_url: m.base_url || '',
+                api_key: m.api_key || '',
+                premium: !!m.premium,
+                efficient: !!m.efficient,
+                order: m.order || 0,
+                api_model_1: m.api_model_1 || m.model_id || m.id || '',
+                fallback_url_1: m.fallback_url_1 || '',
+                fallback_key_1: m.fallback_key_1 || '',
+                fallback_model_1: m.fallback_model_1 || '',
+                api_model_2: m.api_model_2 || '',
+                fallback_url_2: m.fallback_url_2 || '',
+                fallback_key_2: m.fallback_key_2 || '',
+                fallback_model_2: m.fallback_model_2 || '',
+                api_model_3: m.api_model_3 || ''
+              },
+              { upsert: true }
+            );
+          }
+          console.log(`[Database Seed] Synced ${pModels.length} models from Supabase to MongoDB.`);
+        } else {
+          await AiModel.seedDefaultModels();
+        }
+      }
+    } catch (syncErr) {
+      console.warn('[Database Seed Warning]:', syncErr.message);
+    }
+
     const adminEmails = ['zihanfakir@gmail.com', 'x@zihan.uk'];
     for (const email of adminEmails) {
       const adminUser = await User.findOne({ email });

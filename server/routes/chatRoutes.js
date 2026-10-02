@@ -51,11 +51,14 @@ router.get('/models', async (req, res) => {
 
     let result = [];
     if (getIsMongoConnected()) {
-      const models = await AiModel.find().sort({ order: 1, createdAt: 1 }).lean();
-      result = models.filter(isNotDeleted).map(sanitizeModel);
+      let models = await AiModel.find().sort({ order: 1, createdAt: 1 }).lean();
+      if (!models || models.length === 0) {
+        models = await getPersistedModels();
+      }
+      result = (models || []).filter(isNotDeleted).map(sanitizeModel);
     } else {
       const models = await getPersistedModels();
-      const sorted = [...models].filter(isNotDeleted).sort((a, b) => (a.order || 0) - (b.order || 0));
+      const sorted = [...(models || [])].filter(isNotDeleted).sort((a, b) => (a.order || 0) - (b.order || 0));
       result = sorted.map(sanitizeModel);
     }
 
