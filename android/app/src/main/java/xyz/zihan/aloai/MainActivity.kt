@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "AloAI"
-        const val APP_URL = "https://ai.zihan.xyz/"
-        const val AUTH_URL = "https://ai.zihan.xyz/login.html"
+        const val APP_URL = "https://alora.zihan.xyz/"
+        const val AUTH_URL = "https://alora.zihan.xyz/login.html"
         private const val BACK_PRESS_INTERVAL = 2000L
     }
 
@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (scheme != null && (scheme.equals("http", ignoreCase = true) || scheme.equals("https", ignoreCase = true))) {
                     val host = uri.host
-                    if (host != null && host.contains("ai.zihan.xyz")) {
+                    if (host != null && (host.contains("alora.zihan.xyz") || host.contains("ai.zihan.xyz"))) {
                         return false
                     }
                 }

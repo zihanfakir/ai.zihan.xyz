@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var loadError: Error?
     @State private var webViewId = UUID()
 
-    private let appUrl = URL(string: "https://ai.zihan.xyz/")!
+    private let appUrl = URL(string: "https://alora.zihan.xyz/")!
 
     var body: some View {
         ZStack {

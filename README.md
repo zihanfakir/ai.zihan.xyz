@@ -1,4 +1,4 @@
-# Alora AI — ai.zihan.xyz
+# Alora AI — alora.zihan.xyz
 
 বাংলাদেশের পূর্ণাঙ্গ, বহু-মডেল সমর্থিত AI চ্যাট অ্যাপ্লিকেশন।
 
@@ -6,9 +6,9 @@
 
 Alora এখন অ্যান্ড্রয়েডে সরাসরি হাই-পারফরম্যান্স নেটিভ অ্যাপ আকারে ব্যবহার করা যাবে!
 
-- 📥 **সরাসরি ডাউনলোড:** [**Alora.apk (Direct Download v1.2.0)**](https://ai.zihan.xyz/Alora.apk)
-- 🌐 **ডাউনলোড পেজ:** [**ai.zihan.xyz/download**](https://ai.zihan.xyz/download)
-- ⚡ **ফিচারসমূহ (v1.2.0):** ডিপ থিঙ্কিং অন/অফ টগল, সুপারফাস্ট 120Hz স্ক্রলিং ও টাচ রেসপন্স, পিউর AMOLED ডার্ক মোড, অফলাইন চ্যাট ক্যাশিং এবং আল্ট্রা-স্মুথ নেটিভ ইন্টারফেস।
+- 📥 **সরাসরি ডাউনলোড:** [**Alora.apk (Direct Download v1.2.1)**](https://alora.zihan.xyz/Alora.apk)
+- 🌐 **ডাউনলোড পেজ:** [**alora.zihan.xyz/download**](https://alora.zihan.xyz/download)
+- ⚡ **ফিচারসমূহ (v1.2.1):** ইনস্ট্যান্ট লগইন/সাইনআপ এনফোর্সমেন্ট, ডিপ থিঙ্কিং অন/অফ টগল, সুপারফাস্ট 120Hz স্ক্রলিং ও টাচ রেসপন্স, পিউর AMOLED ডার্ক মোড, অফলাইন চ্যাট ক্যাশিং এবং আল্ট্রা-স্মুথ নেটিভ ইন্টারফেস।
 
 ## Features
 
@@ -35,12 +35,12 @@ Alora এখন অ্যান্ড্রয়েডে সরাসরি �
 ## Quick Start
 
 ```bash
-git clone https://github.com/ZihanFakir/ai.zihan.xyz.git
-cd ai.zihan.xyz/server
+git clone https://github.com/ZihanFakir/alora.git
+cd alora/server
 npm install
 node server.js
 ```
 
 ## Live
 
-**[ai.zihan.xyz](https://ai.zihan.xyz)** | Made with ❤️ by [Zihan Fakir](https://github.com/ZihanFakir)
+**[alora.zihan.xyz](https://alora.zihan.xyz)** | Made with ❤️ by [Zihan Fakir](https://github.com/ZihanFakir)
